@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
+import QtQuick.Dialogs 1.2
 
 ApplicationWindow {
     id: window
@@ -30,6 +31,65 @@ ApplicationWindow {
         }
     }
 
+    Page1Form {
+        id: graphicsPage
+    }
+
+    Page2Form {
+        id: helpPage
+    }
+
+    HomeForm {
+        id: homePage
+
+        btnOpen  {
+            onClicked:  {
+                console.log("open")
+                fileDialog.open()
+            }
+        }
+
+        btnRun {
+            onClicked: {
+                console.log("run")
+            }
+        }
+
+        btnGraphics {
+            onClicked: {
+                console.log("graphics")
+                stackView.push(graphicsPage)
+            }
+        }
+
+        btnExit {
+            onClicked: {
+                onClicked: Qt.quit()
+            }
+        }
+    }
+
+    FileDialog {
+        id: fileDialog
+        visible: false
+        modality: Qt.WindowModal
+        title: "Choose a file"
+        selectExisting: true
+        selectMultiple: false
+        selectFolder: false
+        nameFilters: ["Image files (*.png *.jpg)", "All files (*)"]
+        selectedNameFilter: "All files (*)"
+        sidebarVisible: false
+        onAccepted: {
+              console.log("Accepted: " + fileUrls)
+              homePage.textArea.text = "Hello World !"
+              if (fileDialogOpenFiles.checked)
+                  for (var i = 0; i < fileUrls.length; ++i)
+                      Qt.openUrlExternally(fileUrls[i])
+        }
+        onRejected: { console.log("Rejected") }
+    }
+
     Drawer {
         id: drawer
         width: window.width * 0.66
@@ -39,18 +99,18 @@ ApplicationWindow {
             anchors.fill: parent
 
             ItemDelegate {
-                text: qsTr("Page 1")
+                text: qsTr("Graphics")
                 width: parent.width
                 onClicked: {
-                    stackView.push("Page1Form.ui.qml")
+                    stackView.push(graphicsPage)
                     drawer.close()
                 }
             }
             ItemDelegate {
-                text: qsTr("Page 2")
+                text: qsTr("Help")
                 width: parent.width
                 onClicked: {
-                    stackView.push("Page2Form.ui.qml")
+                    stackView.push(helpPage)
                     drawer.close()
                 }
             }
@@ -59,7 +119,9 @@ ApplicationWindow {
 
     StackView {
         id: stackView
-        initialItem: "HomeForm.ui.qml"
+        initialItem: homePage
         anchors.fill: parent
+        width: parent.width
+        height: parent.height
     }
 }
