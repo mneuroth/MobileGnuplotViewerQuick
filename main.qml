@@ -2,8 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 
+import de.mneuroth.gnuplotinvoker 1.0
+
 ApplicationWindow {
     id: window
+    objectName: "window"
     visible: true
     width: 640
     height: 480
@@ -33,14 +36,26 @@ ApplicationWindow {
 
     Page1Form {
         id: graphicsPage
+        objectName: "graphicsPage"
+            imageMouseArea {
+                onWheel: {
+                    if (wheel.modifiers & Qt.ControlModifier) {
+                        image.scale /= 1.5
+                    } else {
+                        image.scale *= 1.5
+                    }
+                }
+        }
     }
 
     Page2Form {
         id: helpPage
+        objectName: "helpPage"
     }
 
     HomeForm {
         id: homePage
+        objectName: "homePage"
 
         btnOpen  {
             onClicked:  {
@@ -52,6 +67,10 @@ ApplicationWindow {
         btnRun {
             onClicked: {
                 console.log("run")
+                var s = gnuplotInvoker.run(homePage.textArea.text)
+                //homePage.textArea.text = s
+                graphicsPage.image.source = "data:image/svg+xml;utf8," + s
+                stackView.push(graphicsPage)
             }
         }
 
@@ -115,6 +134,10 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    GnuplotInvoker {
+        id: gnuplotInvoker
     }
 
     StackView {
