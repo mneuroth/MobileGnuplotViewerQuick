@@ -8,8 +8,6 @@ GnuplotInvoker::GnuplotInvoker()
 
 QString GnuplotInvoker::run(const QString & sCmd)
 {
-    //return QString("gnuplot result...");
-    QString result("running...");
     runGnuplot(sCmd);
     m_aGnuplotProcess.waitForFinished();
     return m_aLastGnuplotResult;

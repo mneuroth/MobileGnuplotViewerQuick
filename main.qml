@@ -38,6 +38,14 @@ ApplicationWindow {
         id: graphicsPage
         objectName: "graphicsPage"
             imageMouseArea {
+                onClicked: {
+                    if(mouse.modifiers & Qt.ControlModifier) {
+                        image.scale /= 1.25
+                    }
+                    else {
+                        image.scale *= 1.25
+                    }
+                }
                 onWheel: {
                     if (wheel.modifiers & Qt.ControlModifier) {
                         image.scale /= 1.5
@@ -101,7 +109,7 @@ ApplicationWindow {
         sidebarVisible: false
         onAccepted: {
               console.log("Accepted: " + fileUrls)
-              homePage.textArea.text = "Hello World !"
+              homePage.textArea.text = "# Hello World !\nplot sin(x)"
               if (fileDialogOpenFiles.checked)
                   for (var i = 0; i < fileUrls.length; ++i)
                       Qt.openUrlExternally(fileUrls[i])
