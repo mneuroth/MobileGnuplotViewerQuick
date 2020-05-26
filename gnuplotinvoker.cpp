@@ -1,4 +1,7 @@
 #include "gnuplotinvoker.h"
+#include "androidtasks.h"
+
+#include <QDir>
 
 GnuplotInvoker::GnuplotInvoker()
 {
@@ -8,9 +11,12 @@ GnuplotInvoker::GnuplotInvoker()
 
 QString GnuplotInvoker::run(const QString & sCmd)
 {
+    m_aLastGnuplotError = "";
+    m_aLastGnuplotResult = "";
     runGnuplot(sCmd);
     m_aGnuplotProcess.waitForFinished();
-    return m_aLastGnuplotResult;
+
+    return m_aLastGnuplotResult /*+ m_aLastGnuplotError*/;
 }
 
 void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus)
@@ -19,23 +25,24 @@ void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitS
     {
         // produce graphical output from returned svg graphics
         m_aLastGnuplotResult = m_aGnuplotProcess.readAll();
+        m_aLastGnuplotError = m_aGnuplotProcess.readAllStandardError();
         // has the returned result a valid svg format ?
         if( QString(m_aLastGnuplotResult).startsWith(QString("<?xml")) )
         {
 //            ui->svgGnuplotOutput->load(m_aLastGnuplotResult);
             emit sigResultReady(m_aLastGnuplotResult);
 
-            QString errText = m_aGnuplotProcess.readAllStandardError();
-            if( errText.length()==0 )
-            {
+            //QString errText = m_aGnuplotProcess.readAllStandardError();
+            //if( errText.length()==0 )
+            //{
 //                errText = tr("running ")+ui->lblSaveName->text()+" "+tr("ok")+"\n";
-            }
+            //}
 //            ui->txtErrors->setPlainText(ui->txtErrors->toPlainText()+errText);
 //            ui->txtErrors->moveCursor(QTextCursor::End);
         }
         else
         {
-            sltErrorText(m_aLastGnuplotResult);
+            sltErrorText(m_aLastGnuplotError);
             handleGnuplotError(exitCode);
         }
     }
@@ -130,7 +137,8 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
 //    QString sInput = QString("set term svg size %1,%2 fsize 16 dynamic\n").arg(ui->svgGnuplotOutput->width()/2).arg(ui->svgGnuplotOutput->height()/2)
 //    QString sInput = QString("set term svg size %1,%2 dynamic font \"courier,16\"\n").arg(512).arg(512)
-    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono\"\n").arg(512).arg(512)
+    //QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono\"\n").arg(1024).arg(1024)
+    QString sInput = QString("set term svg dynamic font \"Mono\"\n").arg(1024).arg(1024)
                         + sScript
                         + QString("\nexit\n");
 

@@ -27,6 +27,7 @@ private:
     void runGnuplot(const QString & sScript);
 
     QString   m_aLastGnuplotResult;
+    QString   m_aLastGnuplotError;
     QProcess  m_aGnuplotProcess;
 };
 

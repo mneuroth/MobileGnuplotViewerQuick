@@ -44,6 +44,8 @@ ApplicationWindow {
                     }
                     else {
                         image.scale *= 1.25
+                        image.width *= 1.25
+                        image.height *= 1.25
                     }
                 }
                 onWheel: {
@@ -68,7 +70,9 @@ ApplicationWindow {
         btnOpen  {
             onClicked:  {
                 console.log("open")
-                fileDialog.open()
+                //fileDialog.open()
+                //mobileFileDialog.open()
+                stackView.push(mobileFileDialog)
             }
         }
 
@@ -76,7 +80,7 @@ ApplicationWindow {
             onClicked: {
                 console.log("run")
                 var s = gnuplotInvoker.run(homePage.textArea.text)
-                //homePage.textArea.text = s
+                homePage.textArea.text = s
                 graphicsPage.image.source = "data:image/svg+xml;utf8," + s
                 stackView.push(graphicsPage)
             }
@@ -85,6 +89,8 @@ ApplicationWindow {
         btnGraphics {
             onClicked: {
                 console.log("graphics")
+                console.log(graphicsPage.image.width)
+                console.log(graphicsPage.image.height)
                 stackView.push(graphicsPage)
             }
         }
@@ -93,6 +99,14 @@ ApplicationWindow {
             onClicked: {
                 onClicked: Qt.quit()
             }
+        }
+    }
+
+    MobileFileDialog {
+        id: mobileFileDialog
+
+        btnCancel {
+            onClicked: stackView.pop()
         }
     }
 

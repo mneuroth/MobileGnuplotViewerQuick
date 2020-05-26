@@ -6,5 +6,7 @@
         <file>Page2Form.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file alias="spaceship.svg">spaceship.svg</file>
+        <file>DSC_4945.JPG</file>
+        <file>MobileFileDialog.ui.qml</file>
     </qresource>
 </RCC>
