@@ -5,6 +5,7 @@
 
 #include "gnuplotinvoker.h"
 #include "gnuplotsyntaxhighlighter.h"
+#include "androidtasks.h"
 
 #include <QDebug>
 #include <QtGlobal>
@@ -38,6 +39,9 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<GnuplotInvoker>("de.mneuroth.gnuplotinvoker", 1, 0, "GnuplotInvoker");
+
+    AndroidTasks aAndroidTasks;
+    aAndroidTasks.Init();
 
     // TODOs (QML):
     // - Hilfe Seite anlegen
