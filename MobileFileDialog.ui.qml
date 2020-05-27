@@ -158,55 +158,66 @@ Page {
         height: 15
         text: qsTr("Any input")
         anchors.top: listView.bottom
-        anchors.topMargin: 8
+        anchors.topMargin: 5
         horizontalAlignment: Text.AlignLeft
         font.pixelSize: 12
     }
 
     TextInput {
         id: txtMFDInput
-        y: 323
         height: 20
         text: qsTr("Text Input")
+        anchors.top: listView.bottom
+        anchors.topMargin: 5
         anchors.right: parent.right
         anchors.rightMargin: 16
         anchors.left: lblMFDInput.right
-        anchors.leftMargin: 6
+        anchors.leftMargin: 5
         font.pixelSize: 12
     }
 
-    Button {
-        id: btnOpen
-        x: 16
-        width: 206
-        height: 40
-        text: qsTr("Open")
+    Grid {
+        id: grid
+        x: 0
+        width: 400
+        height: 48
         anchors.top: lblMFDInput.bottom
-        anchors.topMargin: 11
-    }
+        anchors.topMargin: 5
 
-    Button {
-        id: btnNew
-        y: 351
-        text: qsTr("New")
-        anchors.left: btnOpen.right
-        anchors.leftMargin: 6
-    }
+        Button {
+            id: btnOpen
+            width: 206
+            height: 40
+            text: qsTr("Open")
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: parent.top
+            anchors.topMargin: 5
+        }
 
-    Button {
-        id: btnCancel
-        y: 351
-        text: qsTr("Cancel")
-        anchors.right: parent.right
-        anchors.rightMargin: 16
-        anchors.left: btnNew.right
-        anchors.leftMargin: 6
+        Button {
+            id: btnNew
+            text: qsTr("New")
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.left: btnOpen.right
+            anchors.leftMargin: 5
+        }
+
+        Button {
+            id: btnCancel
+            text: qsTr("Cancel")
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.left: btnNew.right
+            anchors.leftMargin: 5
+        }
     }
 } //}
 
 /*##^##
 Designer {
-    D{i:1;anchors_width:450}D{i:7;anchors_width:418;anchors_x:16}
+    D{i:12;anchors_y:323}
 }
 ##^##*/
 

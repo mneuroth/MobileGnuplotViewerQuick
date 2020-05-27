@@ -105,8 +105,30 @@ ApplicationWindow {
     MobileFileDialog {
         id: mobileFileDialog
 
+        listView {
+            // https://stackoverflow.com/questions/9400002/qml-listview-selected-item-highlight-on-click
+            currentIndex: 0
+            focus: true
+            onCurrentIndexChanged: {
+                console.log("current changed ! "+currentIndex)
+            }
+        }
+
         btnCancel {
             onClicked: stackView.pop()
+        }
+
+        btnUp {
+            onClicked: {
+                listView.model.folder += "/.."
+            }
+        }
+
+        btnHome {
+            onClicked: {
+                console.log("-->"+listView.model.folder)
+                listView.model.folder = "file:///c:/tmp"
+            }
         }
     }
 
