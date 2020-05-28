@@ -74,6 +74,9 @@
 
 class UnpackFilesThread;
 
+bool HasAccessToSDCardPath();
+bool GrantAccessToSDCardPath(QObject * parent);
+
 class AndroidTasks : public QObject
 {
     Q_OBJECT

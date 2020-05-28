@@ -95,16 +95,17 @@ Page {
         }
     }
 
-    Text {
+    Label {
         id: lblDirectoryName
         x: 16
         width: 418
-        height: 15
+        height: 40
         text: qsTr("Show current directory here")
         anchors.top: columnLayout.bottom
         anchors.topMargin: 5
         horizontalAlignment: Text.AlignLeft
-        font.pixelSize: 12
+        verticalAlignment: Text.AlignVCenter
+        //font.pixelSize: 12
     }
 
     ListView {
@@ -176,23 +177,24 @@ Page {
         delegate: fileDelegate
     }
 
-    Text {
+    Label {
         id: lblMFDInput
         width: 221
-        height: 20
+        height: 40
         text: qsTr("Any input")
         anchors.left: parent.left
         anchors.leftMargin: 5
         anchors.bottom: gridLayout.top
         anchors.bottomMargin: 5
         horizontalAlignment: Text.AlignLeft
-        font.pixelSize: 12
+        verticalAlignment: Text.AlignVCenter
+        //font.pixelSize: 12
     }
 
     TextInput {
         id: txtMFDInput
         y: 323
-        height: 20
+        height: 40
         text: qsTr("Text Input")
         anchors.bottom: gridLayout.top
         anchors.bottomMargin: 5
@@ -200,7 +202,9 @@ Page {
         anchors.rightMargin: 5
         anchors.left: lblMFDInput.right
         anchors.leftMargin: 5
-        font.pixelSize: 12
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        //font.pixelSize: 12
     }
 
     GridLayout {
@@ -219,14 +223,15 @@ Page {
 
         Button {
             id: btnOpen
+            width: 213
             text: qsTr("Open")
+            Layout.fillWidth: true
             Layout.column: 0
             Layout.fillHeight: true
-            Layout.preferredWidth: parent.width / parent.columns * 2
             //Layout.fillWidth: true
             Layout.columnSpan: 2
         }
-
+/*
         Rectangle {
             id: newRect
             color: "blue"
@@ -235,22 +240,24 @@ Page {
             Layout.fillHeight: true
             Layout.preferredWidth: parent.width / parent.columns
         }
-
+*/
         Button {
             id: btnNew
+            width: 106
             text: qsTr("New")
+            Layout.fillWidth: true
             Layout.column: 2
             Layout.fillHeight: true
-            Layout.preferredWidth: parent.width / parent.columns
             //Layout.fillWidth: true
         }
 
         Button {
             id: btnCancel
+            width: 106
             text: qsTr("Cancel")
+            Layout.fillWidth: true
             Layout.column: 3
             Layout.fillHeight: true
-            Layout.preferredWidth: parent.width / parent.columns
             //Layout.fillWidth: true
         }
     }

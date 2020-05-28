@@ -29,10 +29,18 @@ QString ApplicationData::normalizePath(const QString & path) const
 QString ApplicationData::readFileContent(const QString & fileName) const
 {
     QUrl url(fileName);
-    QFile file(url.toLocalFile());
+    QString translatedFileName(url.toLocalFile());
+    if( fileName.startsWith("content:/") )
+    {
+        // handle android storage urls --> forward content://... to QFile directly
+        translatedFileName = fileName;
+    }
+    QFile file(translatedFileName);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return QString();
+    {
+        return QString(tr("Error reading ") + fileName);
+    }
 
     QTextStream stream(&file);
     auto text = stream.readAll();
@@ -40,6 +48,16 @@ QString ApplicationData::readFileContent(const QString & fileName) const
     file.close();
 
     return text;
+}
+
+bool ApplicationData::HasAccessToSDCardPath() const
+{
+    return ::HasAccessToSDCardPath();
+}
+
+bool ApplicationData::GrantAccessToSDCardPath(QObject * parent)
+{
+    return ::GrantAccessToSDCardPath(parent);
 }
 
 QString ApplicationData::getHomePath() const
@@ -62,4 +80,11 @@ QString ApplicationData::getSDCardPath() const
 #else
     return "/sdcard";
 #endif
+}
+
+QString ApplicationData::dumpDirectoryContent(const QString & path) const
+{
+    QDir aDir(path);
+    QStringList aList = aDir.entryList();
+    return path + " --> \n" +aList.join(";\n") + "\n";
 }

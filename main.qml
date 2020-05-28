@@ -86,8 +86,8 @@ ApplicationWindow {
                 {
                     mobileFileDialog.currentDirectory = applicationData.homePath
                 }
-mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-//                homePage.textArea.text += mobileFileDialog.currentDirectory + "\n"
+                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                //homePage.textArea.text += "INIT:" + mobileFileDialog.currentDirectory + "\n"
                 stackView.push(mobileFileDialog)
             }
         }
@@ -95,7 +95,6 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
         btnRun {
             onClicked: {
                 var s = gnuplotInvoker.run(homePage.textArea.text)
-                homePage.textArea.text = s
                 graphicsPage.image.source = "data:image/svg+xml;utf8," + s
                 stackView.push(graphicsPage)
             }
@@ -126,6 +125,8 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
     MobileFileDialog {
         id: mobileFileDialog
 
+        property string urlPrefix: "file://"
+
         listView {
             // https://stackoverflow.com/questions/9400002/qml-listview-selected-item-highlight-on-click
             currentIndex: -1
@@ -133,17 +134,29 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
             onCurrentIndexChanged: {
                 console.log("current changed ! ")
                 console.log(listView.currentIndex)
-                mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
+                if( listView.currentItem ) {
+// TODO --> nur bei files nicht bei directories !
+                    mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
+                }
             }
         }
 
         function setDirectory(newPath) {
             newPath = applicationData.normalizePath(newPath)
-            listView.model.folder = "file:///" + newPath
+            listView.model.folder = buildValidUrl(newPath)
             listView.currentIndex = -1
             listView.focus = true
             lblDirectoryName.text = newPath
             currentDirectory = newPath
+
+            //homePage.textArea.text += "count= " + listView.model.count + "\n"
+            //homePage.textArea.text += "root= " + listView.model.rootFolder + "\n"
+            //homePage.textArea.text += "folder= " + listView.model.folder + "\n"
+            //homePage.textArea.text += "parentFolder= " + listView.model.parentFolder + "\n"
+            //homePage.textArea.text += "showFiles= " + listView.model.showFiles + "\n"
+            //homePage.textArea.text += "status= " + listView.model.status
+            //homePage.textArea.text += applicationData.dumpDirectoryContent(newPath)
+
         }
 
         function setCurrentName(name) {
@@ -151,9 +164,16 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
             currentFileName = name
         }
 
+        function buildValidUrl(path) {
+            var sAdd = path.startsWith("/") ? "" : "/"
+            var s = urlPrefix + sAdd + path
+            console.log("URL=" + s)
+            return s
+        }
+
         function openCurrentFileNow() {
-            var fn = "file:///" + currentDirectory + "/" + currentFileName
-            homePage.textArea.text += applicationData.readFileContent(fn)
+            var path = currentDirectory + "/" + currentFileName
+            homePage.textArea.text = applicationData.readFileContent(buildValidUrl(path))
             homePage.lblFileName.text = currentFileName
             stackView.pop()
         }
@@ -162,7 +182,7 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
             id: fileDelegate
             Rectangle {
                 property string currentFileName: fileName
-                height: 20
+                height: 40
                 color: "transparent"
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -184,7 +204,8 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
                 }
                 Label {
                     anchors.fill: parent
-                    text: (fileIsDir ? "DIR" : "FILE") + /*filePath +*/ " / " + fileName
+                    verticalAlignment: Text.AlignVCenter
+                    text: (fileIsDir ? "DIR_" : "FILE") + /*filePath +*/ " | " + fileName
                 }
                 MouseArea {
                     anchors.fill: parent;
@@ -228,15 +249,23 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
             onClicked: {
                 mobileFileDialog.setDirectory(applicationData.homePath)
                 mobileFileDialog.setCurrentName("")
-                homePage.textArea.text += applicationData.homePath + "\n"
+                //homePage.textArea.text += applicationData.homePath + "\n"
             }
         }
 
         btnSDCard {
             onClicked: {
-                mobileFileDialog.setDirectory(applicationData.sdCardPath)
-                mobileFileDialog.setCurrentName("")
-                homePage.textArea.text += applicationData.sdCardPath + "\n"
+                if( !applicationData.HasAccessToSDCardPath() )
+                {
+                    applicationData.GrantAccessToSDCardPath(window)
+                }
+
+                if( applicationData.HasAccessToSDCardPath() )
+                {
+                    mobileFileDialog.setDirectory(applicationData.sdCardPath)
+                    mobileFileDialog.setCurrentName("")
+                    //homePage.textArea.text += applicationData.sdCardPath + "\n"
+                }
             }
         }
 
@@ -252,7 +281,7 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
         visible: false
         modality: Qt.WindowModal
         title: qsTr("Choose a file")
-        folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) //"c:\sr"
+        folder: "." //StandardPaths.writableLocation(StandardPaths.DocumentsLocation) //"c:\sr"
         selectExisting: true
         selectMultiple: false
         selectFolder: false
@@ -263,8 +292,10 @@ mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
               console.log("Accepted: " + fileUrls)
               //homePage.textArea.text = "# Hello World !\nplot sin(x)"
 
-              //homePage.textArea.text = applicationData.readFileContent(fileUrls[0])
-              homePage.textArea.text = fileUrls[0]
+// TODO: https://www.volkerkrause.eu/2019/02/16/qt-open-files-on-android.html
+// https://stackoverflow.com/questions/58715547/how-to-open-a-file-in-android-with-qt-having-the-content-uri
+
+              homePage.textArea.text = applicationData.readFileContent(fileUrls[0])
               homePage.lblFileName.text = fileUrls[0]
               stackView.pop()
 

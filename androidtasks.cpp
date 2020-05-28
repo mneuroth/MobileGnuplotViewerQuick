@@ -13,12 +13,41 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDateTime>
+#if defined(Q_OS_ANDROID)
+#include <QtAndroid>
+#include <QMessageBox>
+#endif
 
 #include "androidtasks.h"
 
 QDateTime g_aCurrentReleaseDate( QDate(2015,12,31), QTime(17,00,00) );
 
 //*************************************************************************
+
+bool HasAccessToSDCardPath()
+{
+#if defined(Q_OS_ANDROID)
+    QtAndroid::PermissionResult result = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+    return result == QtAndroid::PermissionResult::Granted;
+#else
+    return true;
+#endif
+}
+
+bool GrantAccessToSDCardPath(QObject * parent)
+{
+#if defined(Q_OS_ANDROID)
+    QStringList permissions;
+    permissions.append("android.permission.WRITE_EXTERNAL_STORAGE");
+    QtAndroid::PermissionResultMap result = QtAndroid::requestPermissionsSync(permissions);
+    if( result.count()!=1 && result["android.permission.WRITE_EXTERNAL_STORAGE"]!=QtAndroid::PermissionResult::Granted )
+    {
+       // QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
+        return false;
+    }
+#endif
+    return true;
+}
 
 bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFileName, bool bExecuteFlags, QDateTime * pDateForReplace = 0)
 {
