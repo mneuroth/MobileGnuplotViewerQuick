@@ -105,7 +105,6 @@ Page {
         anchors.topMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
-        //font.pixelSize: 12
     }
 
     ListView {
@@ -188,7 +187,6 @@ Page {
         anchors.bottomMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
-        //font.pixelSize: 12
     }
 
     TextInput {
@@ -204,7 +202,6 @@ Page {
         anchors.leftMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
-        //font.pixelSize: 12
     }
 
     GridLayout {

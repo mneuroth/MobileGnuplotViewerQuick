@@ -77,6 +77,8 @@ ApplicationWindow {
         id: homePage
         objectName: "homePage"
 
+        property string currentFileUrl: ""
+
         btnOpen  {
             onClicked:  {
                 //fileDialog.open()
@@ -89,6 +91,12 @@ ApplicationWindow {
                 mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
                 //homePage.textArea.text += "INIT:" + mobileFileDialog.currentDirectory + "\n"
                 stackView.push(mobileFileDialog)
+            }
+        }
+
+        btnSave {
+            onClicked: {
+                applicationData.writeFileContent(homePage.currentFileUrl, homePage.textArea.text)
             }
         }
 
@@ -172,8 +180,9 @@ ApplicationWindow {
         }
 
         function openCurrentFileNow() {
-            var path = currentDirectory + "/" + currentFileName
-            homePage.textArea.text = applicationData.readFileContent(buildValidUrl(path))
+            var fullPath = currentDirectory + "/" + currentFileName
+            homePage.currentFileUrl = buildValidUrl(fullPath)
+            homePage.textArea.text = applicationData.readFileContent(buildValidUrl(fullPath))
             homePage.lblFileName.text = currentFileName
             stackView.pop()
         }
@@ -295,6 +304,7 @@ ApplicationWindow {
 // TODO: https://www.volkerkrause.eu/2019/02/16/qt-open-files-on-android.html
 // https://stackoverflow.com/questions/58715547/how-to-open-a-file-in-android-with-qt-having-the-content-uri
 
+              homePage.currentFileUrl = fileUrls[0]
               homePage.textArea.text = applicationData.readFileContent(fileUrls[0])
               homePage.lblFileName.text = fileUrls[0]
               stackView.pop()

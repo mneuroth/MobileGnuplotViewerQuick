@@ -26,7 +26,7 @@ QString ApplicationData::normalizePath(const QString & path) const
     return aInfo.canonicalPath();
 }
 
-QString ApplicationData::readFileContent(const QString & fileName) const
+QString GetTranslatedFileName(const QString & fileName)
 {
     QUrl url(fileName);
     QString translatedFileName(url.toLocalFile());
@@ -35,7 +35,12 @@ QString ApplicationData::readFileContent(const QString & fileName) const
         // handle android storage urls --> forward content://... to QFile directly
         translatedFileName = fileName;
     }
-    QFile file(translatedFileName);
+    return translatedFileName;
+}
+
+QString ApplicationData::readFileContent(const QString & fileName) const
+{
+    QFile file(GetTranslatedFileName(fileName));
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -48,6 +53,23 @@ QString ApplicationData::readFileContent(const QString & fileName) const
     file.close();
 
     return text;
+}
+
+bool ApplicationData::writeFileContent(const QString & fileName, const QString & content)
+{
+    QFile file(GetTranslatedFileName(fileName));
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream << content;
+
+    file.close();
+
+    return true;
 }
 
 bool ApplicationData::HasAccessToSDCardPath() const

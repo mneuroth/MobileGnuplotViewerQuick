@@ -12,6 +12,9 @@ Page {
     property alias btnGraphics: btnGraphics
     property alias lblFileName: lblFileName
     property alias btnClear: btnClear
+    property alias btnNew: btnNew
+    property alias btnSave: btnSave
+    property alias btnSaveAs: btnSaveAs
 
     title: qsTr("Gnuplot")
 
@@ -56,8 +59,8 @@ Page {
     Button {
         id: btnRun
         text: qsTr("Run")
-        anchors.left: btnOpen.right
-        anchors.leftMargin: 5
+        anchors.left: btnNew.right
+        anchors.leftMargin: 6
         anchors.top: scrollView.bottom
         anchors.topMargin: 6
     }
@@ -91,6 +94,33 @@ Page {
         anchors.top: scrollView.bottom
         anchors.topMargin: 5
     }
+
+    Button {
+        id: btnNew
+        text: qsTr("New")
+        anchors.top: scrollView.bottom
+        anchors.topMargin: 6
+        anchors.left: btnOpen.right
+        anchors.leftMargin: 6
+    }
+
+    Button {
+        id: btnSave
+        text: qsTr("Save")
+        anchors.left: btnGraphics.right
+        anchors.leftMargin: 7
+        anchors.top: btnRun.bottom
+        anchors.topMargin: 6
+    }
+
+    Button {
+        id: btnSaveAs
+        text: qsTr("Save as")
+        anchors.left: btnSave.right
+        anchors.leftMargin: 6
+        anchors.top: btnClear.bottom
+        anchors.topMargin: 6
+    }
 }
 
 /*##^##
@@ -99,6 +129,7 @@ Designer {
 D{i:1;anchors_height:200;anchors_width:200;anchors_x:0;anchors_y:0}D{i:3;anchors_y:300}
 D{i:4;anchors_y:355}D{i:5;anchors_x:111;anchors_y:311}D{i:6;anchors_x:110;anchors_y:436}
 D{i:7;anchors_width:605;anchors_x:21;anchors_y:16}D{i:8;anchors_x:216;anchors_y:390}
+D{i:9;anchors_x:111;anchors_y:390}D{i:10;anchors_x:217;anchors_y:436}D{i:11;anchors_x:323;anchors_y:435}
 }
 ##^##*/
 
