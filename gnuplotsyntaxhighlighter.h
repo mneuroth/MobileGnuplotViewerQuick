@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
+ *
+ * Copyright (C) 2020 by Michael Neuroth
+ *
+ * License: GPL
+ *
+ ***************************************************************************/
+
 #ifndef GNUPLOTSYNTAXHIGHLIGHTER_H
 #define GNUPLOTSYNTAXHIGHLIGHTER_H
 

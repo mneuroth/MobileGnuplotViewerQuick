@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
+ *
+ * Copyright (C) 2020 by Michael Neuroth
+ *
+ * License: GPL
+ *
+ ***************************************************************************/
+
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
@@ -69,16 +79,21 @@ ApplicationWindow {
 
         btnOpen  {
             onClicked:  {
-                console.log("open")
                 //fileDialog.open()
                 //mobileFileDialog.open()
+                mobileFileDialog.btnNew.visible = true
+                if( mobileFileDialog.currentDirectory == "" )
+                {
+                    mobileFileDialog.currentDirectory = applicationData.homePath
+                }
+mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+//                homePage.textArea.text += mobileFileDialog.currentDirectory + "\n"
                 stackView.push(mobileFileDialog)
             }
         }
 
         btnRun {
             onClicked: {
-                console.log("run")
                 var s = gnuplotInvoker.run(homePage.textArea.text)
                 homePage.textArea.text = s
                 graphicsPage.image.source = "data:image/svg+xml;utf8," + s
@@ -88,7 +103,7 @@ ApplicationWindow {
 
         btnGraphics {
             onClicked: {
-                console.log("graphics")
+                console.log("graphics size:")
                 console.log(graphicsPage.image.width)
                 console.log(graphicsPage.image.height)
                 stackView.push(graphicsPage)
@@ -100,6 +115,12 @@ ApplicationWindow {
                 onClicked: Qt.quit()
             }
         }
+
+        btnClear {
+            onClicked: {
+                homePage.textArea.text = ""
+            }
+        }
     }
 
     MobileFileDialog {
@@ -107,10 +128,88 @@ ApplicationWindow {
 
         listView {
             // https://stackoverflow.com/questions/9400002/qml-listview-selected-item-highlight-on-click
-            currentIndex: 0
+            currentIndex: -1
             focus: true
             onCurrentIndexChanged: {
-                console.log("current changed ! "+currentIndex)
+                console.log("current changed ! ")
+                console.log(listView.currentIndex)
+                mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
+            }
+        }
+
+        function setDirectory(newPath) {
+            newPath = applicationData.normalizePath(newPath)
+            listView.model.folder = "file:///" + newPath
+            listView.currentIndex = -1
+            listView.focus = true
+            lblDirectoryName.text = newPath
+            currentDirectory = newPath
+        }
+
+        function setCurrentName(name) {
+            txtMFDInput.text = name
+            currentFileName = name
+        }
+
+        function openCurrentFileNow() {
+            var fn = "file:///" + currentDirectory + "/" + currentFileName
+            homePage.textArea.text += applicationData.readFileContent(fn)
+            homePage.lblFileName.text = currentFileName
+            stackView.pop()
+        }
+
+        Component {
+            id: fileDelegate
+            Rectangle {
+                property string currentFileName: fileName
+                height: 20
+                color: "transparent"
+                anchors.left: parent.left
+                anchors.right: parent.right
+                Keys.onPressed: {
+                     if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                        console.log("ENTER PRESSED "+filePath+" "+parent+" "+parent.parent+" "+parent.parent.parent)
+                        if( fileIsDir )
+                        {
+                            mobileFileDialog.setDirectory(filePath)
+                            mobileFileDialog.setCurrentName(fileName)
+                            event.accepted = true
+                        }
+                        else
+                        {
+                            mobileFileDialog.openCurrentFileNow()
+                            event.accepted = true
+                        }
+                     }
+                }
+                Label {
+                    anchors.fill: parent
+                    text: (fileIsDir ? "DIR" : "FILE") + /*filePath +*/ " / " + fileName
+                }
+                MouseArea {
+                    anchors.fill: parent;
+                    onClicked: {
+                        mobileFileDialog.listView.currentIndex = index
+                        if( fileIsDir )
+                        {
+                            mobileFileDialog.setDirectory(filePath)
+                            mobileFileDialog.setCurrentName(fileName)
+                        }
+                    }
+                    onDoubleClicked: {
+                        mobileFileDialog.listView.currentIndex = index
+                        if( !fileIsDir )
+                        {
+                            mobileFileDialog.openCurrentFileNow()
+                        }
+                    }
+                }
+            }
+        }
+
+        btnOpen  {
+            onClicked: {
+                openCurrentFileNow()
             }
         }
 
@@ -120,14 +219,30 @@ ApplicationWindow {
 
         btnUp {
             onClicked: {
-                listView.model.folder += "/.."
+                mobileFileDialog.setDirectory(currentDirectory + "/..")
+                mobileFileDialog.setCurrentName("")
             }
         }
 
         btnHome {
             onClicked: {
-                console.log("-->"+listView.model.folder)
-                listView.model.folder = "file:///c:/tmp"
+                mobileFileDialog.setDirectory(applicationData.homePath)
+                mobileFileDialog.setCurrentName("")
+                homePage.textArea.text += applicationData.homePath + "\n"
+            }
+        }
+
+        btnSDCard {
+            onClicked: {
+                mobileFileDialog.setDirectory(applicationData.sdCardPath)
+                mobileFileDialog.setCurrentName("")
+                homePage.textArea.text += applicationData.sdCardPath + "\n"
+            }
+        }
+
+        btnStorage {
+            onClicked: {
+                fileDialog.open()
             }
         }
     }
@@ -136,19 +251,26 @@ ApplicationWindow {
         id: fileDialog
         visible: false
         modality: Qt.WindowModal
-        title: "Choose a file"
+        title: qsTr("Choose a file")
+        folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) //"c:\sr"
         selectExisting: true
         selectMultiple: false
         selectFolder: false
-        nameFilters: ["Image files (*.png *.jpg)", "All files (*)"]
-        selectedNameFilter: "All files (*)"
+        //nameFilters: ["Image files (*.png *.jpg)", "All files (*)"]
+        //selectedNameFilter: "All files (*)"
         sidebarVisible: false
         onAccepted: {
               console.log("Accepted: " + fileUrls)
-              homePage.textArea.text = "# Hello World !\nplot sin(x)"
-              if (fileDialogOpenFiles.checked)
-                  for (var i = 0; i < fileUrls.length; ++i)
-                      Qt.openUrlExternally(fileUrls[i])
+              //homePage.textArea.text = "# Hello World !\nplot sin(x)"
+
+              //homePage.textArea.text = applicationData.readFileContent(fileUrls[0])
+              homePage.textArea.text = fileUrls[0]
+              homePage.lblFileName.text = fileUrls[0]
+              stackView.pop()
+
+              //if (fileDialogOpenFiles.checked)
+              //    for (var i = 0; i < fileUrls.length; ++i)
+              //        Qt.openUrlExternally(fileUrls[i])
         }
         onRejected: { console.log("Rejected") }
     }

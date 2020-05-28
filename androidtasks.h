@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
+ *
+ * Copyright (C) 2020 by Michael Neuroth
+ *
+ * License: GPL
+ *
+ ***************************************************************************/
+
 #ifndef ANDROIDTASKS_H
 #define ANDROIDTASKS_H
 

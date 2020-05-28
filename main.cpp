@@ -1,10 +1,22 @@
+/***************************************************************************
+ *
+ * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
+ *
+ * Copyright (C) 2020 by Michael Neuroth
+ *
+ * License: GPL
+ *
+ ***************************************************************************/
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
 #include <QQuickTextDocument>
+#include <QQmlContext>
 
 #include "gnuplotinvoker.h"
 #include "gnuplotsyntaxhighlighter.h"
+#include "applicationdata.h"
 #include "androidtasks.h"
 
 #include <QDebug>
@@ -37,6 +49,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
+    app.setOrganizationName("mneuroth.de");     // Computer/HKEY_CURRENT_USER/Software/mneuroth.de
+    app.setOrganizationDomain("mneuroth.de");
+    app.setApplicationName("MobileGnuplotViewer");
 
     qmlRegisterType<GnuplotInvoker>("de.mneuroth.gnuplotinvoker", 1, 0, "GnuplotInvoker");
 
@@ -71,6 +86,9 @@ int main(int argc, char *argv[])
         qDebug() << obj->objectName() << endl;
     }
 */
+
+    ApplicationData data;
+    engine.rootContext()->setContextProperty("applicationData", &data);
 
     GnuplotSyntaxHighlighter * pHighlighter = 0;
     QQuickTextDocument* doc = childObject<QQuickTextDocument*>(engine, "textArea", "textDocument");

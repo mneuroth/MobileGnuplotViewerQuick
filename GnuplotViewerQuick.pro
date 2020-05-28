@@ -15,6 +15,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         androidtasks.cpp \
+        applicationdata.cpp \
         gnuplotinvoker.cpp \
         gnuplotsyntaxhighlighter.cpp \
         main.cpp
@@ -37,6 +38,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     androidtasks.h \
+    applicationdata.h \
     gnuplotinvoker.h \
     gnuplotsyntaxhighlighter.h
 

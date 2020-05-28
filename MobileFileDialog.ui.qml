@@ -1,12 +1,21 @@
+
+
+/***************************************************************************
+ *
+ * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
+ *
+ * Copyright (C) 2020 by Michael Neuroth
+ *
+ * License: GPL
+ *
+ ***************************************************************************/
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 import Qt.labs.folderlistmodel 2.12
+import QtQuick.Layouts 1.3
 
-//Page {
 Page {
-    width: 450
-    height: 400
     property alias btnCancel: btnCancel
     property alias btnNew: btnNew
     property alias btnOpen: btnOpen
@@ -18,54 +27,71 @@ Page {
     property alias btnSDCard: btnSDCard
     property alias btnHome: btnHome
     property alias btnUp: btnUp
+
+    property string currentDirectory: ""
+    property string currentFileName: ""
+
+    width: 450
+    height: 400
     id: page
     anchors.fill: parent
 
-    Column {
-        id: column
-        height: 62
-        padding: 0
+    RowLayout {
+        id: columnLayout
+        width: 440
+        height: 40
         anchors.right: parent.right
-        anchors.rightMargin: 0
+        anchors.rightMargin: 5
         anchors.left: parent.left
-        anchors.leftMargin: 0
+        anchors.leftMargin: 5
         anchors.top: parent.top
-        anchors.topMargin: 0
+        anchors.topMargin: 5
 
         Button {
-            id: btnStorage
-            text: qsTr("Storage")
-            anchors.top: parent.top
-            anchors.topMargin: 15
-            anchors.left: btnSDCard.right
-            anchors.leftMargin: 6
-        }
-
-        Button {
-            id: btnSDCard
-            text: qsTr("SD Card")
-            anchors.top: parent.top
-            anchors.topMargin: 15
-            anchors.left: btnHome.right
-            anchors.leftMargin: 6
+            id: btnUp
+            height: 40
+            text: qsTr("↑")
+            Layout.rightMargin: 0
+            Layout.leftMargin: 0
+            Layout.bottomMargin: 0
+            Layout.topMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
         }
 
         Button {
             id: btnHome
             text: qsTr("⌂")
-            anchors.top: parent.top
-            anchors.topMargin: 15
-            anchors.left: btnUp.right
-            anchors.leftMargin: 6
+            Layout.rightMargin: 0
+            Layout.leftMargin: 0
+            Layout.bottomMargin: 0
+            Layout.topMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
         }
 
         Button {
-            id: btnUp
-            text: qsTr("↑")
-            anchors.left: parent.left
-            anchors.leftMargin: 16
-            anchors.top: parent.top
-            anchors.topMargin: 15
+            id: btnSDCard
+            text: qsTr("SD Card")
+            Layout.rowSpan: 1
+            Layout.columnSpan: 1
+            Layout.rightMargin: 0
+            Layout.leftMargin: 0
+            Layout.bottomMargin: 0
+            Layout.topMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+
+        Button {
+            id: btnStorage
+            text: qsTr("Storage")
+            Layout.rightMargin: 0
+            Layout.leftMargin: 0
+            Layout.bottomMargin: 0
+            Layout.topMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
         }
     }
 
@@ -75,21 +101,22 @@ Page {
         width: 418
         height: 15
         text: qsTr("Show current directory here")
-        anchors.top: column.bottom
+        anchors.top: columnLayout.bottom
         anchors.topMargin: 5
-        horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: Text.AlignLeft
         font.pixelSize: 12
     }
 
     ListView {
         id: listView
-        height: 235
+        anchors.bottom: lblMFDInput.top
+        anchors.bottomMargin: 6
         anchors.left: parent.left
-        anchors.leftMargin: 16
+        anchors.leftMargin: 10
         anchors.right: parent.right
-        anchors.rightMargin: 16
+        anchors.rightMargin: 10
         anchors.top: lblDirectoryName.bottom
-        anchors.topMargin: 6
+        anchors.topMargin: 5
 
 
         /*
@@ -137,87 +164,103 @@ Page {
         */
         FolderListModel {
             id: folderModel
-            nameFilters: ["*.*"]
+            nameFilters: ["*"]
         }
 
-        /*Component*/ Item {
-            id: fileDelegate
-            Text {
-                text: filePath + " / " + fileName
-            }
+        highlight: Rectangle {
+            color: "lightsteelblue"
+            radius: 3
         }
-
+        focus: true
         model: folderModel
         delegate: fileDelegate
     }
 
     Text {
         id: lblMFDInput
-        x: 16
-        width: 206
-        height: 15
+        width: 221
+        height: 20
         text: qsTr("Any input")
-        anchors.top: listView.bottom
-        anchors.topMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 5
+        anchors.bottom: gridLayout.top
+        anchors.bottomMargin: 5
         horizontalAlignment: Text.AlignLeft
         font.pixelSize: 12
     }
 
     TextInput {
         id: txtMFDInput
+        y: 323
         height: 20
         text: qsTr("Text Input")
-        anchors.top: listView.bottom
-        anchors.topMargin: 5
+        anchors.bottom: gridLayout.top
+        anchors.bottomMargin: 5
         anchors.right: parent.right
-        anchors.rightMargin: 16
+        anchors.rightMargin: 5
         anchors.left: lblMFDInput.right
         anchors.leftMargin: 5
         font.pixelSize: 12
     }
 
-    Grid {
-        id: grid
-        x: 0
-        width: 400
-        height: 48
-        anchors.top: lblMFDInput.bottom
-        anchors.topMargin: 5
+    GridLayout {
+        id: gridLayout
+        height: 40
+        rows: 1
+        columns: 4
+        columnSpacing: 5
+        rowSpacing: 5
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
+        anchors.right: parent.right
+        anchors.rightMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 5
 
         Button {
             id: btnOpen
-            width: 206
-            height: 40
             text: qsTr("Open")
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
+            Layout.column: 0
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width / parent.columns * 2
+            //Layout.fillWidth: true
+            Layout.columnSpan: 2
+        }
+
+        Rectangle {
+            id: newRect
+            color: "blue"
+            visible: !btnNew.visible
+            Layout.column: 2
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width / parent.columns
         }
 
         Button {
             id: btnNew
             text: qsTr("New")
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.left: btnOpen.right
-            anchors.leftMargin: 5
+            Layout.column: 2
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width / parent.columns
+            //Layout.fillWidth: true
         }
 
         Button {
             id: btnCancel
             text: qsTr("Cancel")
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.left: btnNew.right
-            anchors.leftMargin: 5
+            Layout.column: 3
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width / parent.columns
+            //Layout.fillWidth: true
         }
     }
-} //}
+}
 
 /*##^##
 Designer {
-    D{i:12;anchors_y:323}
+    D{i:0;formeditorZoom:0.8999999761581421}D{i:1;anchors_width:450}D{i:7;anchors_height:284}
+D{i:10;anchors_x:16}D{i:11;anchors_height:15}D{i:13;anchors_height:37;anchors_width:100}
+D{i:12;anchors_y:323}
 }
 ##^##*/
 
