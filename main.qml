@@ -47,24 +47,22 @@ ApplicationWindow {
     Page1Form {
         id: graphicsPage
         objectName: "graphicsPage"
-            imageMouseArea {
-                onClicked: {
-                    if(mouse.modifiers & Qt.ControlModifier) {
-                        image.scale /= 1.25
-                    }
-                    else {
-                        image.scale *= 1.25
-                        image.width *= 1.25
-                        image.height *= 1.25
-                    }
+
+        imageMouseArea {
+            // see: photosurface.qml
+            onWheel: {
+                if (wheel.modifiers & Qt.ControlModifier) {
+                    image.rotation += wheel.angleDelta.y / 120 * 5;
+                    if (Math.abs(photoFrame.rotation) < 4)
+                        image.rotation = 0;
+                } else {
+                    image.rotation += wheel.angleDelta.x / 120;
+                    if (Math.abs(image.rotation) < 0.6)
+                        image.rotation = 0;
+                    var scaleBefore = image.scale;
+                    image.scale += image.scale * wheel.angleDelta.y / 120 / 10;
                 }
-                onWheel: {
-                    if (wheel.modifiers & Qt.ControlModifier) {
-                        image.scale /= 1.5
-                    } else {
-                        image.scale *= 1.5
-                    }
-                }
+            }
         }
     }
 
@@ -103,6 +101,7 @@ ApplicationWindow {
         btnRun {
             onClicked: {
                 var s = gnuplotInvoker.run(homePage.textArea.text)
+                // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
                 graphicsPage.image.source = "data:image/svg+xml;utf8," + s
                 stackView.push(graphicsPage)
             }
