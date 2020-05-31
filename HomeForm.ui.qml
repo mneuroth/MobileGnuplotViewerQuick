@@ -31,10 +31,10 @@ Page {
 
         TextArea {
             id: textArea
-            anchors.fill: parent
+            //anchors.fill: parent
             objectName: "textArea"
-            anchors.bottom: btnOpen.top
-            placeholderText: qsTr("Text Area")
+            //anchors.bottom: btnOpen.top
+            placeholderText: qsTr("Enter gnuplot script here...")
         }
     }
 
@@ -77,7 +77,7 @@ Page {
     Label {
         id: lblFileName
         height: 14
-        text: qsTr("Label")
+        text: qsTr("unknown")
         anchors.right: parent.right
         anchors.rightMargin: 5
         anchors.left: parent.left

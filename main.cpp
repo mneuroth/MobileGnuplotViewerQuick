@@ -13,10 +13,17 @@
 // ok: - Gnuplot Invoker implementieren
 //
 // Implement
-// - Zoom/Pitch für Grafik Seite implementieren
+// ok: - Zoom/Pitch für Grafik Seite implementieren
+// Storage funktioniert nicht mehr --> Java Klasse schuld? --> ja
+// Teilen Empfangen funktioniert nicht mehr --> ok, aber Probleme, siehe unten
+// Teilen arbeitet nicht gut zusammen mit eingebautem Storage Framework Support bei QFileDialog
+// Teilen Problem: App offen, Umschalten mit O Button und Aufruf von eier anderen App --> App wird nicht korrekt angezeigt und blockiert
+//   --> ok, wenn App vorher geschlossen wird (mit Back-Button)
+// Bei SD Karten sowohl intern als auch extern anzeigen
 // - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
-// - reload der zuletzt geöffneten Datei implementieren
-// - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
+// ok: - reload der zuletzt geöffneten Datei implementieren
+// ok: - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
+// - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
 // - Save As
 // - About Dialog
 // - Hilfe Seite anlegen
@@ -41,38 +48,68 @@
 #include <QQuickTextDocument>
 #include <QQmlContext>
 
+#include <QDateTime>
+
 #include "gnuplotinvoker.h"
 #include "gnuplotsyntaxhighlighter.h"
 #include "applicationdata.h"
+#include "storageaccess.h"
 #include "androidtasks.h"
+#include "applicationui.hpp"
 
-#include <QDebug>
 #include <QtGlobal>
 
-// see: https://stackoverflow.com/questions/14791360/qt5-syntax-highlighting-in-qml
-template <class T> T childObject(QQmlApplicationEngine& engine,
-                                 const QString& objectName,
-                                 const QString& propertyName)
+#define _WITH_QDEBUG_REDIRECT
+
+static qint64 g_iLastTimeStamp = 0;
+
+void AddToLog(const QString & msg)
 {
-    QList<QObject*> rootObjects = engine.rootObjects();
-    foreach (QObject* object, rootObjects)
+    QString sFileName("/sdcard/Texte/mgv_qdebug.log");
+    if( !QFile::exists(sFileName) )
     {
-        QObject* child = object->findChild<QObject*>(objectName);
-        if (child != 0)
-        {
-            std::string s = propertyName.toStdString();
-            QObject* object = child->property(s.c_str()).value<QObject*>();
-            Q_ASSERT(object != 0);
-            T prop = dynamic_cast<T>(object);
-            Q_ASSERT(prop != 0);
-            return prop;
-        }
+        sFileName = "mgv_qdebug.log";
     }
-    return (T) 0;
+    QFile outFile(sFileName);
+    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream ts(&outFile);
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    qint64 delta = now - g_iLastTimeStamp;
+    g_iLastTimeStamp = now;
+    ts << delta << " ";
+    ts << msg << endl;
+    qDebug() << delta << " " << msg << endl;
 }
+
+#ifdef _WITH_QDEBUG_REDIRECT
+#include <QDebug>
+void PrivateMessageHandler(QtMsgType type, const QMessageLogContext & context, const QString & msg)
+{
+    QString txt;
+    switch (type) {
+    case QtDebugMsg:
+        txt = QString("Debug: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
+        break;
+    case QtWarningMsg:
+        txt = QString("Warning: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
+        break;
+    case QtCriticalMsg:
+        txt = QString("Critical: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
+        break;
+    case QtFatalMsg:
+        txt = QString("Fatal: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
+        break;
+    case QtInfoMsg:
+        txt = QString("Info: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
+        break;
+    }
+    AddToLog(txt);
+}
+#endif
 
 int main(int argc, char *argv[])
 {
+AddToLog(QString("###> RESTART main()"));
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
@@ -80,7 +117,20 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain("mneuroth.de");
     app.setApplicationName("MobileGnuplotViewerQuick");
 
+    AddToLog("Starting APP");
+
+#ifdef _WITH_QDEBUG_REDIRECT
+    qInstallMessageHandler(PrivateMessageHandler);
+#endif
+
+#if defined(Q_OS_ANDROID)
+    AddToLog("Starting ApplicationUI");
+
+    ApplicationUI appui;
+#endif
+
     qmlRegisterType<GnuplotInvoker>("de.mneuroth.gnuplotinvoker", 1, 0, "GnuplotInvoker");
+    qmlRegisterType<StorageAccess>("de.mneuroth.storageaccess", 1, 0, "StorageAccess");
 
     AndroidTasks aAndroidTasks;
     aAndroidTasks.Init();
@@ -92,11 +142,20 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
-    engine.load(url);
+#if defined(Q_OS_ANDROID)
+    QObject::connect(&app, SIGNAL(applicationStateChanged(Qt::ApplicationState)), &appui, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    QObject::connect(&app, SIGNAL(saveStateRequest(QSessionManager &)), &appui, SLOT(onSaveStateRequest(QSessionManager &)), Qt::DirectConnection);
+    QObject::connect(&appui, SIGNAL(requestApplicationQuit()), &app, SLOT(quit())/* , Qt::QueuedConnection*/);
+#endif
 
-
-    ApplicationData data;
+#if defined(Q_OS_ANDROID)
+    ApplicationData data(0, appui.GetShareUtils(), engine);
+#else
+    ApplicationData data(0, new ShareUtils(), engine);
+#endif
     engine.rootContext()->setContextProperty("applicationData", &data);
+
+    engine.load(url);
 
     GnuplotSyntaxHighlighter * pHighlighter = 0;
     QQuickTextDocument* doc = childObject<QQuickTextDocument*>(engine, "textArea", "textDocument");
@@ -112,5 +171,6 @@ int main(int argc, char *argv[])
         delete pHighlighter;
     }
 
+AddToLog(QString("###> SHUTDOWN result=%1").arg(result));
     return result;
 }

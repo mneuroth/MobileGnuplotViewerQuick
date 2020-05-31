@@ -42,7 +42,7 @@ bool GrantAccessToSDCardPath(QObject * parent)
     QtAndroid::PermissionResultMap result = QtAndroid::requestPermissionsSync(permissions);
     if( result.count()!=1 && result["android.permission.WRITE_EXTERNAL_STORAGE"]!=QtAndroid::PermissionResult::Granted )
     {
-       // QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
+        //QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
         return false;
     }
 #endif
@@ -52,7 +52,7 @@ bool GrantAccessToSDCardPath(QObject * parent)
 bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFileName, bool bExecuteFlags, QDateTime * pDateForReplace = 0)
 {
     bool bForce = true; //false;
-    /*
+
     if( pDateForReplace!=0 )
     {
         if( QFile::exists(sOutputFileName) )
@@ -62,8 +62,7 @@ bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFil
             // force replace of file if last modification date of existing file is older than the given date
             bForce = aOutputFile.lastModified() < *pDateForReplace;
         }
-    }
-    */
+    }    
     if( bForce || !QFile::exists(sOutputFileName) )
     {
         QFile aFile(sAssetFileName);

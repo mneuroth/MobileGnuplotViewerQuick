@@ -147,8 +147,8 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
 //    QString sInput = QString("set term svg size %1,%2 fsize 16 dynamic\n").arg(ui->svgGnuplotOutput->width()/2).arg(ui->svgGnuplotOutput->height()/2)
 //    QString sInput = QString("set term svg size %1,%2 dynamic font \"courier,16\"\n").arg(512).arg(512)
-    //QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono\"\n").arg(1024).arg(1024)
-    QString sInput = QString("set term svg dynamic font \"Mono\"\n").arg(1024).arg(1024)
+    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,28\"\n").arg(1024).arg(1024)
+    //QString sInput = QString("set term svg dynamic font \"Mono\"\n").arg(1024).arg(1024)
                         + sScript
                         + QString("\nexit\n");
 

@@ -16,9 +16,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         androidtasks.cpp \
         applicationdata.cpp \
+        applicationui.cpp \
         gnuplotinvoker.cpp \
         gnuplotsyntaxhighlighter.cpp \
-        main.cpp
+        main.cpp \
+        shareutils.cpp \
+        storageaccess.cpp
 
 RESOURCES += qml.qrc
 
@@ -39,13 +42,16 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     androidtasks.h \
     applicationdata.h \
+    applicationui.hpp \
     gnuplotinvoker.h \
-    gnuplotsyntaxhighlighter.h
+    gnuplotsyntaxhighlighter.h \
+    shareutils.hpp \
+    storageaccess.h
 
 android {
-#SOURCES += android/androidshareutils.cpp
+    SOURCES += android/androidshareutils.cpp
 
-#HEADERS += android/androidshareutils.hpp
+    HEADERS += android/androidshareutils.hpp
 
     # see: http://qt-project.org/forums/viewthread/16781
     # see: http://community.kde.org/Necessitas/Assets
@@ -137,6 +143,11 @@ DISTFILES += \
     android/gradle/wrapper/gradle-wrapper.properties \
     android/gradlew \
     android/gradlew.bat \
-    android/res/values/libs.xml
+    android/res/values/libs.xml \
+    android/res/xml/filepaths.xml \
+    android/src/de/mneuroth/activity/sharex/QShareActivity.java \
+    android/src/de/mneuroth/utils/QSharePathResolver.java \
+    android/src/de/mneuroth/utils/QShareUtils.java \
+    android/src/de/mneuroth/utils/QStorageAccess.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
