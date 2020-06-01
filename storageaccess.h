@@ -12,14 +12,14 @@ public:
 
     static StorageAccess * getInstance();
 
-    void onFileOpenActivityResult(int resultCode, const QString & fileUri, const QByteArray & fileContent);
-    void onFileCreateActivityResult(int resultCode, const QString & fileUri);
+    void onFileOpenActivityResult(int resultCode, const QString & fileUri, const QString & decodedFileUri, const QByteArray & fileContent);
+    void onFileCreateActivityResult(int resultCode, const QString & fileUri, const QString & decodedFileUri);
 
 signals:
     void openFileError(const QString & message);
     void openFileCanceled();
-    void openFileContentReceived(const QString & fileUri, const QByteArray & content);
-    void createFileReceived(const QString & fileUri);
+    void openFileContentReceived(const QString & fileUri, const QString & decodedFileUri, const QByteArray & content);
+    void createFileReceived(const QString & fileUri, const QString & decodedFileUri);
 
 public slots:
 
@@ -32,6 +32,7 @@ public:
     // *** sync methods ***
     Q_INVOKABLE bool updateFile(const QString & fileUri, const QByteArray & fileContent);
     Q_INVOKABLE bool deleteFile(const QString & fileUri);
+    Q_INVOKABLE bool readFile(const QString & fileUri, QByteArray & fileContent);
 
 private:
     static StorageAccess * m_pInstance;

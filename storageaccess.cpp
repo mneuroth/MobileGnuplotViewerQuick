@@ -26,11 +26,11 @@ StorageAccess * StorageAccess::getInstance()
     return m_pInstance;
 }
 
-void StorageAccess::onFileOpenActivityResult(int resultCode, const QString & fileUri, const QByteArray & fileContent)
+void StorageAccess::onFileOpenActivityResult(int resultCode, const QString & fileUri, const QString & decodedFileUri, const QByteArray & fileContent)
 {
     if(resultCode == RESULT_OK)
     {
-        emit openFileContentReceived(fileUri, fileContent);
+        emit openFileContentReceived(fileUri, decodedFileUri, fileContent);
     }
     else if(resultCode == RESULT_CANCELED)
     {
@@ -42,11 +42,11 @@ void StorageAccess::onFileOpenActivityResult(int resultCode, const QString & fil
     }
 }
 
-void StorageAccess::onFileCreateActivityResult(int resultCode, const QString & fileUri)
+void StorageAccess::onFileCreateActivityResult(int resultCode, const QString & fileUri, const QString & decodedFileUri)
 {
     if(resultCode == RESULT_OK)
     {
-        emit createFileReceived(fileUri);
+        emit createFileReceived(fileUri, decodedFileUri);
     }
     else if(resultCode == RESULT_CANCELED)
     {
@@ -131,6 +131,45 @@ bool StorageAccess::deleteFile(const QString & fileUri)
     return false;
 }
 
+bool StorageAccess::readFile(const QString & fileUri, QByteArray & fileContent)
+{
+#if defined(Q_OS_ANDROID)
+    QAndroidJniObject jniFileUri = QAndroidJniObject::fromString(fileUri);
+
+    // see: https://forum.qt.io/topic/42497/solved-android-how-to-get-a-byte-array-from-java/4
+
+    QAndroidJniObject content = QAndroidJniObject::callStaticObjectMethod("de/mneuroth/utils/QStorageAccess",
+                                              "readFile",
+                                              "(Ljava/lang/String;)[B",
+                                              jniFileUri.object<jstring>());
+
+    jbyteArray contentArray = content.object<jbyteArray>();
+ /*
+    if (!contentArray) {
+        qDebug() << Q_FUNC_INFO << "No icon data";
+
+        return false;
+    }
+
+    jsize iconSize = env->GetArrayLength(contentArray);
+
+    if (iconSize > 0) {
+        jbyte *icon = env->GetByteArrayElements(iconDataArray, false);
+        image = QImage(QImage::fromData((uchar*) icon, iconSize,"PNG"));
+        env->ReleaseByteArrayElements(iconDataArray, icon, JNI_ABORT);
+    }
+*/
+    QByteArray qContent = jbyteArray2QByteArray(contentArray);
+    fileContent = qContent;
+//    env->ReleaseByteArrayElements(contentArray, icon, JNI_ABORT);
+    return qContent.length()>0;
+
+    //return false;
+#else
+    return false;
+#endif
+}
+
 void StorageAccess::createFile(const QString & fileName, const QString & mimeType)
 {
 #if defined(Q_OS_ANDROID)
@@ -159,9 +198,11 @@ JNIEXPORT void JNICALL
                                         jobject obj,
                                         jint resultCode,
                                         jstring url,
+                                        jstring decodedUrl,
                                         jbyteArray fileContent)
 {
     const char *urlStr = env->GetStringUTFChars(url, NULL);
+    const char *urlDecodedStr = env->GetStringUTFChars(decodedUrl, NULL);
     jsize contentSize = env->GetArrayLength(fileContent);
     QByteArray * pArray = 0;
     if( contentSize > 0 )
@@ -176,8 +217,9 @@ JNIEXPORT void JNICALL
         pArray = new QByteArray();
     }
     Q_UNUSED (obj)
-    StorageAccess::getInstance()->onFileOpenActivityResult(resultCode, urlStr, *pArray);
+    StorageAccess::getInstance()->onFileOpenActivityResult(resultCode, urlStr, urlDecodedStr, *pArray);
     env->ReleaseStringUTFChars(url, urlStr);
+    env->ReleaseStringUTFChars(url, urlDecodedStr);
     delete pArray;
     return;
 }
@@ -186,12 +228,15 @@ JNIEXPORT void JNICALL
   Java_de_mneuroth_activity_sharex_QShareActivity_fireFileCreateActivityResult(JNIEnv *env,
                                         jobject obj,
                                         jint resultCode,
-                                        jstring url)
+                                        jstring url,
+                                        jstring decodedUrl)
 {
     const char *urlStr = env->GetStringUTFChars(url, NULL);
+    const char *urlDecodedStr = env->GetStringUTFChars(decodedUrl, NULL);
     Q_UNUSED (obj)
-    StorageAccess::getInstance()->onFileCreateActivityResult(resultCode, urlStr);
+    StorageAccess::getInstance()->onFileCreateActivityResult(resultCode, urlStr, urlDecodedStr);
     env->ReleaseStringUTFChars(url, urlStr);
+    env->ReleaseStringUTFChars(url, urlDecodedStr);
     return;
 }
 

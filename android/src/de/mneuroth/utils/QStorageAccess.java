@@ -12,6 +12,7 @@
 
 package de.mneuroth.utils;
 
+//import de.mneuroth.activity.sharex.QShareActivity;
 import org.qtproject.qt5.android.QtNative;
 
 import java.lang.String;
@@ -27,6 +28,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import java.util.List;
 import android.content.pm.ResolveInfo;
@@ -74,6 +78,27 @@ public static boolean openFile() {
     QtNative.activity().startActivityForResult(openIntent, REQUEST_ID_OPEN_FILE);
 
     return true;
+}
+
+public static byte[] readFile(String fileUri) {
+    if (QtNative.activity() == null)
+        return new byte[0];
+
+    try {
+        ParcelFileDescriptor pfd = QtNative.activity().getContentResolver().openFileDescriptor(Uri.parse(fileUri), "r");
+        FileInputStream fileInputStream = new FileInputStream(pfd.getFileDescriptor());
+        byte[] content = new byte[fileInputStream.available()];
+        fileInputStream.read(content);
+        // Let the document provider know you're done by closing the stream.
+        fileInputStream.close();
+        pfd.close();
+        return content;
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return new byte[0];
 }
 
 private static boolean alterDocument(Uri uri, byte[] content) {

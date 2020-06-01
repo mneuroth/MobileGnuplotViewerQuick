@@ -11,6 +11,7 @@
 #include "applicationdata.h"
 #include "androidtasks.h"
 #include "shareutils.hpp"
+#include "storageaccess.h"
 
 #if defined(Q_OS_ANDROID)
 #include "android/androidshareutils.hpp"
@@ -22,25 +23,20 @@
 #include <QTextStream>
 #include <QStandardPaths>
 
-ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, QQmlApplicationEngine & aEngine)
+ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
+      m_aStorageAccess(aStorageAccess),
       m_aEngine(aEngine)
 {
     m_pShareUtils = pShareUtils; //new ShareUtils(this);
 #if defined(Q_OS_ANDROID)
-AddToLog(QString("### pShareUtills %1").arg((unsigned long)m_pShareUtils));
     QMetaObject::Connection result;
     result = connect(m_pShareUtils, SIGNAL(fileUrlReceived(QString)), this, SLOT(sltFileUrlReceived(QString)));
-//AddToLog(QString("-> sltFileUrlReceived %1").arg((bool)result));
     result = connect(m_pShareUtils, SIGNAL(fileReceivedAndSaved(QString)), this, SLOT(sltFileReceivedAndSaved(QString)));
-//AddToLog(QString("-> sltFileReceivedAndSaved %1").arg((bool)result));
     result = connect(m_pShareUtils, SIGNAL(shareError(int, QString)), this, SLOT(sltShareError(int, QString)));
-//AddToLog(QString("-> sltShareError %1").arg((bool)result));
     connect(m_pShareUtils, SIGNAL(shareFinished(int)), this, SLOT(sltShareFinished(int)));
     connect(m_pShareUtils, SIGNAL(shareEditDone(int, QString)), this, SLOT(sltShareEditDone(int, QString)));
     connect(m_pShareUtils, SIGNAL(shareNoAppAvailable(int)), this, SLOT(sltShareNoAppAvailable(int)));
-
-//    m_pStorageAccess = new StorageAccess(this);
 #endif
 }
 
@@ -48,7 +44,6 @@ ApplicationData::~ApplicationData()
 {
 #if defined(Q_OS_ANDROID)
     //delete m_pShareUtils;
-//    delete m_pStorageAccess;
 #endif
 }
 
@@ -59,11 +54,16 @@ QString ApplicationData::normalizePath(const QString & path) const
     return aInfo.canonicalPath();
 }
 
+bool IsAndroidStorageFileUrl(const QString & url)
+{
+    return url.startsWith("content:/");
+}
+
 QString GetTranslatedFileName(const QString & fileName)
 {
     QUrl url(fileName);
     QString translatedFileName(url.toLocalFile());
-    if( fileName.startsWith("content:/") )
+    if( IsAndroidStorageFileUrl(fileName) )
     {
         // handle android storage urls --> forward content://... to QFile directly
         translatedFileName = fileName;
@@ -73,36 +73,64 @@ QString GetTranslatedFileName(const QString & fileName)
 
 QString ApplicationData::readFileContent(const QString & fileName) const
 {
-    QFile file(GetTranslatedFileName(fileName));
+    QString translatedFileName = GetTranslatedFileName(fileName);
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if( IsAndroidStorageFileUrl(translatedFileName) )
     {
-        return QString(tr("Error reading ") + fileName);
+        QByteArray data;
+        bool ok = m_aStorageAccess.readFile(translatedFileName, data);
+        if( ok )
+        {
+            return QString(data);
+        }
+        else
+        {
+            return QString(tr("Error reading ") + fileName);
+        }
     }
+    else
+    {
+        QFile file(translatedFileName);
 
-    QTextStream stream(&file);
-    auto text = stream.readAll();
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            return QString(tr("Error reading ") + fileName);
+        }
 
-    file.close();
+        QTextStream stream(&file);
+        auto text = stream.readAll();
 
-    return text;
+        file.close();
+
+        return text;
+    }
 }
 
 bool ApplicationData::writeFileContent(const QString & fileName, const QString & content)
 {
-    QFile file(GetTranslatedFileName(fileName));
+    QString translatedFileName = GetTranslatedFileName(fileName);
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    if( IsAndroidStorageFileUrl(translatedFileName) )
     {
-        return false;
+        bool ok = m_aStorageAccess.updateFile(translatedFileName, content.toUtf8());
+        return ok;
     }
+    else
+    {
+        QFile file(translatedFileName);
 
-    QTextStream stream(&file);
-    stream << content;
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            return false;
+        }
 
-    file.close();
+        QTextStream stream(&file);
+        stream << content;
 
-    return true;
+        file.close();
+
+        return true;
+    }
 }
 
 bool ApplicationData::hasAccessToSDCardPath() const
@@ -230,7 +258,6 @@ void ApplicationData::sltFileUrlReceived(const QString & sUrl)
     // /data/user/0/de.mneuroth.gnuplotviewerquick/files
     // /storage/emulated/0/Android/data/de.mneuroth.gnuplotviewerquick/files
 
-AddToLog("*** sltFileUrlReceived "+sUrl);
     sltErrorText("URL received "+sUrl);
 
     bool ok = loadAndShowFileContent(sUrl);
@@ -241,7 +268,6 @@ void ApplicationData::sltFileReceivedAndSaved(const QString & sUrl)
     // <== share from google documents
     // --> /data/user/0/de.mneuroth.gnuplotviewerquick/files/gnuplotviewer_shared_files/Test.txt.txt
 
-AddToLog("*** sltFileReceivedAndSaved "+sUrl);
     sltErrorText("URL file received "+sUrl);
 
     bool ok = loadAndShowFileContent(sUrl);
@@ -252,7 +278,6 @@ void ApplicationData::sltShareError(int requestCode, const QString & message)
     Q_UNUSED(requestCode);
     Q_UNUSED(message);
 
-AddToLog("*** sltShareError "+message);
     sltErrorText("Error sharing received "+message);
 
     removeAllFilesForShare();
@@ -310,7 +335,9 @@ bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
         }
         else
         {
+// TODO hier ggf. direkt signale an QML senden !!!
             setScriptText(sScript);
+            setScriptName(sFileName);
 //            ui->txtGnuplotInput->setPlainText(sScript);
 
             // update last used directory
@@ -371,5 +398,16 @@ void ApplicationData::setScriptText(const QString & sScript)
         QMetaObject::invokeMethod(homePage, "setScriptText",
                 QGenericReturnArgument(),
                 Q_ARG(QString, sScript));
+    }
+}
+
+void ApplicationData::setScriptName(const QString & sName)
+{
+    QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");
+    if( homePage!=0 )
+    {
+        QMetaObject::invokeMethod(homePage, "setScriptName",
+                QGenericReturnArgument(),
+                Q_ARG(QString, sName));
     }
 }

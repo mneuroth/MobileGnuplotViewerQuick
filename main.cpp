@@ -21,6 +21,8 @@
 //   --> ok, wenn App vorher geschlossen wird (mit Back-Button)
 // Bei SD Karten sowohl intern als auch extern anzeigen
 // - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
+// - Save auf Android Storage Framework --> wie geht das mit eingebautem Support QFileDialog ?
+// - Save auf Android Storage Framework funktioniert auch nicht bei alten Apps --> visiscript ok, mobilegnuplotviewer ERROR
 // ok: - reload der zuletzt geöffneten Datei implementieren
 // ok: - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
@@ -58,6 +60,8 @@
 #include "applicationui.hpp"
 
 #include <QtGlobal>
+#include <QDir>
+#include <QFile>
 
 #define _WITH_QDEBUG_REDIRECT
 
@@ -66,7 +70,7 @@ static qint64 g_iLastTimeStamp = 0;
 void AddToLog(const QString & msg)
 {
     QString sFileName("/sdcard/Texte/mgv_qdebug.log");
-    if( !QFile::exists(sFileName) )
+    if( !QDir("/sdcard/Texte").exists() )
     {
         sFileName = "mgv_qdebug.log";
     }
@@ -130,10 +134,12 @@ AddToLog(QString("###> RESTART main()"));
 #endif
 
     qmlRegisterType<GnuplotInvoker>("de.mneuroth.gnuplotinvoker", 1, 0, "GnuplotInvoker");
-    qmlRegisterType<StorageAccess>("de.mneuroth.storageaccess", 1, 0, "StorageAccess");
+    //qmlRegisterType<StorageAccess>("de.mneuroth.storageaccess", 1, 0, "StorageAccess");
 
     AndroidTasks aAndroidTasks;
     aAndroidTasks.Init();
+
+    StorageAccess aStorageAccess;
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
@@ -149,11 +155,12 @@ AddToLog(QString("###> RESTART main()"));
 #endif
 
 #if defined(Q_OS_ANDROID)
-    ApplicationData data(0, appui.GetShareUtils(), engine);
+    ApplicationData data(0, appui.GetShareUtils(), aStorageAccess, engine);
 #else
-    ApplicationData data(0, new ShareUtils(), engine);
+    ApplicationData data(0, new ShareUtils(), aStorageAccess, engine);
 #endif
     engine.rootContext()->setContextProperty("applicationData", &data);
+    engine.rootContext()->setContextProperty("storageAccess", &aStorageAccess);
 
     engine.load(url);
 

@@ -14,7 +14,7 @@ import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
 
 import de.mneuroth.gnuplotinvoker 1.0
-import de.mneuroth.storageaccess 1.0
+//import de.mneuroth.storageaccess 1.0
 
 ApplicationWindow {
     id: window
@@ -36,8 +36,12 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        applicationData.logText("### OnCompleted reading: "+settings.currentFile)
         homePage.currentFileUrl = settings.currentFile
-        readCurrentDoc(homePage.currentFileUrl)
+        if(homePage.currentFileUrl.length>0)
+        {
+            readCurrentDoc(homePage.currentFileUrl)
+        }
     }
 
     function checkForModified() {
@@ -66,7 +70,12 @@ ApplicationWindow {
     }
 
     function saveCurrentDoc() {
-        applicationData.writeFileContent(homePage.currentFileUrl, homePage.textArea.text)
+        applicationData.logText("SAVE "+homePage.currentFileUrl)
+        var ok = applicationData.writeFileContent(homePage.currentFileUrl, homePage.textArea.text)
+        if(!ok)
+        {
+            applicationData.logText("Error writing file... "+homePage.currentFileUrl)
+        }
         homePage.textArea.textDocument.modified = false
     }
 
@@ -140,7 +149,14 @@ ApplicationWindow {
 
     function setScriptText(script: string)
     {
-        homePage.textArea.text += script
+        homePage.textArea.text = script
+        homePage.textArea.textDocument.modified = false
+    }
+
+    function setScriptName(name: string)
+    {
+        homePage.currentFileUrl = name
+        homePage.lblFileName.text = name
     }
 
     HomeForm {
@@ -180,11 +196,11 @@ ApplicationWindow {
             onClicked: {
                 if( !applicationData.shareText(homePage.textArea.text) )
                 {
-                    homePage.textArea.text += "SHARE result = false\n"
+                    homePage.textArea.text = "SHARE result = false\n"
                 }
                 else
                 {
-                    homePage.textArea.text += "SHARE result = TRUE\n"
+                    homePage.textArea.text = "SHARE result = TRUE\n"
                 }
             }
         }
@@ -412,9 +428,9 @@ ApplicationWindow {
         id: gnuplotInvoker
     }
 
-    StorageAccess {
-        id: storageAccess
-    }
+//    StorageAccess {
+//        id: storageAccess
+//    }
 
     Connections {
         target: applicationData
@@ -428,10 +444,10 @@ ApplicationWindow {
         target: storageAccess
 
         onOpenFileContentReceived: {
-            applicationData.logText("==> onOpenFileContentReceived "+fileUri)
-// TODO does not work (improve!):            window.readCurrentDoc(filUri)
+            applicationData.logText("==> onOpenFileContentReceived "+fileUri+" "+decodedFileUri)
+// TODO does not work (improve!):            window.readCurrentDoc(fileUri)
             homePage.currentFileUrl = fileUri
-            homePage.textArea.text = content
+            homePage.textArea.text = content // window.readCurrentDoc(fileUri)  //content
             homePage.textArea.textDocument.modified = false
             homePage.lblFileName.text = fileUri
             stackView.pop()

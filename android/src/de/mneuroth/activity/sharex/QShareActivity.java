@@ -49,9 +49,9 @@ public class QShareActivity extends QtActivity
     //
     public static native void fireActivityResult(int requestCode, int resultCode, String uriTxt);
     //
-    public static native void fireFileOpenActivityResult(int resultCode, String fileUri, byte[] fileContent);
+    public static native void fireFileOpenActivityResult(int resultCode, String fileUri, String decodedFileUri, byte[] fileContent);
     //
-    public static native void fireFileCreateActivityResult(int resultCode, String fileUri);
+    public static native void fireFileCreateActivityResult(int resultCode, String fileUri, String decodedFileUri);
     //
     public static native boolean checkFileExits(String url);
 
@@ -122,7 +122,6 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
     // this method here - otherwise you'll get wrong request or result codes
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if(requestCode == de.mneuroth.utils.QShareUtils.REQUEST_ID_OPEN_FILE)
         {
             if(resultCode == RESULT_OK)
@@ -130,6 +129,11 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
                 String uri = data.getData().toString();
                 String decodedUri = Uri.decode(data.getData().toString());
                 // returns something like: "content://com.android.externalstorage.documents/document/0000.0000:Texte/datei.txt"
+                // !decode something like: "content://com.android.externalstorage.documents/document/0000.0000%3ATexte%2Fdatei.txt" (sd-card)
+                // !decode something like: "content://com.google.android.apps.docs.sotrage/document/acc%D1%3Bdoc%3Dencoded%3DOr...." (google-drive)
+                // see: https://stackoverflow.com/questions/25171246/open-a-google-drive-file-content-uri-after-using-kitkat-storage-access-framework
+                // for readable file name ?
+                // see: https://github.com/googlesamples/android-DirectorySelection
                 byte[] content = null;
                 try
                 {
@@ -139,11 +143,11 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
                 {
                     content = new byte[0];
                 }
-                fireFileOpenActivityResult(resultCode, decodedUri/*uri*/, content);
+                fireFileOpenActivityResult(resultCode, uri, decodedUri, content);
             }
             else
             {
-                fireFileOpenActivityResult(resultCode, new String(), new byte[0]);
+                fireFileOpenActivityResult(resultCode, new String(), new String(), new byte[0]);
             }
         }
         else if(requestCode == de.mneuroth.utils.QShareUtils.REQUEST_ID_CREATE_FILE)
@@ -152,11 +156,11 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
             {
                 String uri = data.getData().toString();
                 String decodedUri = Uri.decode(data.getData().toString());
-                fireFileCreateActivityResult(resultCode, decodedUri/*uri*/);
+                fireFileCreateActivityResult(resultCode, uri, decodedUri);
             }
             else
             {
-                fireFileCreateActivityResult(resultCode, new String());
+                fireFileCreateActivityResult(resultCode, new String(), new String());
             }
         }
         else

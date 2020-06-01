@@ -59,7 +59,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(QString sdCardPath READ getSDCardPath)
 
 public:
-    explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, QQmlApplicationEngine & aEngine);
+    explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
     ~ApplicationData();
 
     Q_INVOKABLE QString normalizePath(const QString & path) const;
@@ -81,6 +81,7 @@ public:
     QString getSDCardPath() const;
 
     void setScriptText(const QString & sScript);
+    void setScriptName(const QString & sName);
 
 signals:
     void sendDummyData(const QString & txt, int value);
@@ -105,7 +106,7 @@ private:
 #if defined(Q_OS_ANDROID)
     QStringList                 m_aSharedFilesList;
 #endif
-    //StorageAccess *             m_pStorageAccess;
+    StorageAccess &             m_aStorageAccess;
     ShareUtils *                m_pShareUtils;
 
     QQmlApplicationEngine &     m_aEngine;  // not an owner !
