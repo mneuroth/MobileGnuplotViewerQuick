@@ -22,7 +22,7 @@ ApplicationWindow {
     visible: true
     width: 640
     height: 480
-    title: qsTr("Stack")
+    title: qsTr("MobileGnuplotViewerQuick")
 
     property string urlPrefix: "file://"
 
@@ -36,7 +36,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        applicationData.logText("### OnCompleted reading: "+settings.currentFile)
+//        applicationData.logText("### OnCompleted reading: "+settings.currentFile)
         homePage.currentFileUrl = settings.currentFile
         if(homePage.currentFileUrl.length>0)
         {
@@ -70,10 +70,10 @@ ApplicationWindow {
     }
 
     function saveCurrentDoc() {
-        applicationData.logText("SAVE "+homePage.currentFileUrl)
         var ok = applicationData.writeFileContent(homePage.currentFileUrl, homePage.textArea.text)
         if(!ok)
         {
+// TODO --> error handling --> user output?
             applicationData.logText("Error writing file... "+homePage.currentFileUrl)
         }
         homePage.textArea.textDocument.modified = false
@@ -186,22 +186,10 @@ ApplicationWindow {
             }
         }
 
-        btnSave {
+        btnNew {
             onClicked: {
-                saveCurrentDoc()
-            }
-        }
-
-        btnSaveAs {
-            onClicked: {
-                if( !applicationData.shareText(homePage.textArea.text) )
-                {
-                    homePage.textArea.text = "SHARE result = false\n"
-                }
-                else
-                {
-                    homePage.textArea.text = "SHARE result = TRUE\n"
-                }
+                homePage.textArea.text = ""
+                homePage.lblFileName.text = "unknown"
             }
         }
 
@@ -214,25 +202,44 @@ ApplicationWindow {
             }
         }
 
+        btnShare {
+            onClicked: {
+                if( !applicationData.shareText(homePage.textArea.text) )
+                {
+                    homePage.textArea.text = "SHARE result = false\n"
+                }
+                else
+                {
+                    homePage.textArea.text = "SHARE result = TRUE\n"
+                }
+            }
+        }
+
+        btnSave {
+            onClicked: {
+                saveCurrentDoc()
+            }
+        }
+
+        btnSaveAs {
+            onClicked: {
+                saveCurrentDoc()
+            }
+        }
+
         btnGraphics {
             onClicked: {
                 stackView.push(graphicsPage)
             }
         }
-
+/*
         btnExit {
             onClicked: {
                 //onClicked: window.close() //Qt.quit()
                 applicationData.test()
             }
         }
-
-        btnClear {
-            onClicked: {
-                homePage.textArea.text = ""
-                homePage.lblFileName.text = "unknown"
-            }
-        }
+*/
     }
 
     MobileFileDialog {
@@ -243,8 +250,6 @@ ApplicationWindow {
             currentIndex: -1
             focus: true
             onCurrentIndexChanged: {
-                console.log("current changed ! ")
-                console.log(listView.currentIndex)
                 if( listView.currentItem ) {
 // TODO --> nur bei files nicht bei directories !
                     mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
@@ -445,7 +450,7 @@ ApplicationWindow {
 
         onOpenFileContentReceived: {
             applicationData.logText("==> onOpenFileContentReceived "+fileUri+" "+decodedFileUri)
-// TODO does not work (improve!):            window.readCurrentDoc(fileUri)
+// TODO does not work (improve!):            window.readCurrentDoc(fileUri) --> stackView.pop() not working
             homePage.currentFileUrl = fileUri
             homePage.textArea.text = content // window.readCurrentDoc(fileUri)  //content
             homePage.textArea.textDocument.modified = false
@@ -453,17 +458,17 @@ ApplicationWindow {
             stackView.pop()
         }
         onOpenFileCanceled: {
-            applicationData.logText("==> onOpenFileCanceled")
+//            applicationData.logText("==> onOpenFileCanceled")
             stackView.pop()
         }
         onOpenFileError: {
-            applicationData.logText("==> onOpenFileError "+message)
+//            applicationData.logText("==> onOpenFileError "+message)
 // TODO
             homePage.textArea.text = message
             stackView.pop()
         }
         onCreateFileReceived: {
-            applicationData.logText("==> onCreateFileReceived "+fileUri)
+//            applicationData.logText("==> onCreateFileReceived "+fileUri)
 // TODO
             homePage.textArea.text += "\ncreated: "+fileUri+"\n"
             homePage.lblFileName.text = fileUri
