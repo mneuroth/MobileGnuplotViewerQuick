@@ -12,7 +12,11 @@ Page {
 
     Image {
         id: image
-        anchors.fill: parent
+        x: 5
+        y: 5
+        width: parent.width-10
+        height: parent.height-10
+        //anchors.fill: parent
         objectName: "imageArea"
         // TODO: see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
         source: "DSC_4945.JPG" // "spaceship.svg"
