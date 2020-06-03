@@ -29,6 +29,11 @@ QString GnuplotInvoker::run(const QString & sCmd)
     return m_aLastGnuplotResult /*+ m_aLastGnuplotError*/;
 }
 
+QString GnuplotInvoker::getLastError() const
+{
+    return m_aLastGnuplotError;
+}
+
 void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if( exitStatus==QProcess::NormalExit)

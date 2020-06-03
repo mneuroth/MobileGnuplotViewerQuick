@@ -17,10 +17,14 @@
 class GnuplotInvoker : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString lastError READ getLastError)
+
 public:
     GnuplotInvoker();
 
     Q_INVOKABLE QString run(const QString & sCmd);
+
+    QString getLastError() const;
 
 signals:
     void sigResultReady(const QString & svgData);

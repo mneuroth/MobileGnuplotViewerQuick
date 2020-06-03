@@ -8,6 +8,6 @@
         <file alias="spaceship.svg">spaceship.svg</file>
         <file>DSC_4945.JPG</file>
         <file>MobileFileDialog.ui.qml</file>
-        <file>PageOutputForm.qml</file>
+        <file>PageOutputForm.ui.qml</file>
     </qresource>
 </RCC>

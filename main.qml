@@ -74,9 +74,18 @@ ApplicationWindow {
         if(!ok)
         {
 // TODO --> error handling --> user output?
-            applicationData.logText("Error writing file... "+homePage.currentFileUrl)
+            var sErr = "Error writing file... "+homePage.currentFileUrl
+            applicationData.logText(sErr)
+            outputPage.txtOutput.text = sErr
         }
         homePage.textArea.textDocument.modified = false
+    }
+
+    function saveAsCurrentDoc(fullName) {
+        console.log("SAVE AS "+fullName)
+        homePage.currentFileUrl = fullName
+        homePage.lblFileName.text = fullName
+        saveCurrentDoc()
     }
 
     function readCurrentDoc(url) {
@@ -94,6 +103,30 @@ ApplicationWindow {
 
     header: ToolBar {
         contentHeight: toolButton.implicitHeight
+
+        Button {
+            id: fileButton
+            text: "File"
+            onClicked: menu.open()
+
+            Menu {
+                id: menu
+                y: fileButton.height
+
+                MenuItem {
+                    text: "New..."
+                    onTriggered: console.log("new...")
+                }
+                MenuItem {
+                    text: "Open..."
+                    onTriggered: console.log("open...")
+                }
+                MenuItem {
+                    text: "Save"
+                    onTriggered: console.log("save...")
+                }
+            }
+        }
 
         ToolButton {
             id: toolButton
@@ -181,6 +214,7 @@ ApplicationWindow {
             onClicked:  {
                 //fileDialog.open()
                 //mobileFileDialog.open()
+                mobileFileDialog.setOpenModus()
                 mobileFileDialog.btnNew.visible = true
                 if( mobileFileDialog.currentDirectory == "" )
                 {
@@ -201,9 +235,18 @@ ApplicationWindow {
         btnRun {
             onClicked: {
                 var sData = gnuplotInvoker.run(homePage.textArea.text)
+                outputPage.txtOutput.text += gnuplotInvoker.lastError
                 // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
-                graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
-                stackView.push(graphicsPage)
+                if( sData.length > 0 )
+                {
+                    graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
+                    stackView.push(graphicsPage)
+                }
+                else
+                {
+// TODO --> graphics page mit error Image fuellen
+                    stackView.push(outputPage)
+                }
             }
         }
 
@@ -228,7 +271,9 @@ ApplicationWindow {
 
         btnSaveAs {
             onClicked: {
-                saveCurrentDoc()
+                mobileFileDialog.setSaveAsModus()
+                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                stackView.push(mobileFileDialog)
             }
         }
 
@@ -262,6 +307,8 @@ ApplicationWindow {
     MobileFileDialog {
         id: mobileFileDialog
 
+        property bool isSaveAsModus: false
+
         listView {
             // https://stackoverflow.com/questions/9400002/qml-listview-selected-item-highlight-on-click
             currentIndex: -1
@@ -272,6 +319,21 @@ ApplicationWindow {
                     mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
                 }
             }
+        }
+
+        function setSaveAsModus() {
+            mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
+            mobileFileDialog.txtMFDInput.text = "unknown.gpt"
+            mobileFileDialog.txtMFDInput.readOnly = false
+            mobileFileDialog.btnOpen.text = qsTr("Save as")
+            mobileFileDialog.isSaveAsModus = true
+        }
+
+        function setOpenModus() {
+            mobileFileDialog.lblMFDInput.text = qsTr("open name:")
+            mobileFileDialog.txtMFDInput.readOnly = true
+            mobileFileDialog.btnOpen.text = qsTr("Open")
+            mobileFileDialog.isSaveAsModus = false
         }
 
         function setDirectory(newPath) {
@@ -291,6 +353,12 @@ ApplicationWindow {
         function openCurrentFileNow() {
             var fullPath = currentDirectory + "/" + currentFileName
             window.readCurrentDoc(buildValidUrl(fullPath))
+            stackView.pop()
+        }
+
+        function saveAsCurrentFileNow() {
+            var fullPath = currentDirectory + "/" + txtMFDInput.text
+            window.saveAsCurrentDoc(buildValidUrl(fullPath))
             stackView.pop()
         }
 
@@ -345,7 +413,14 @@ ApplicationWindow {
 
         btnOpen  {
             onClicked: {
-                openCurrentFileNow()
+                if( mobileFileDialog.isSaveAsModus )
+                {
+                    mobileFileDialog.saveAsCurrentFileNow()
+                }
+                else
+                {
+                    mobileFileDialog.openCurrentFileNow()
+                }
             }
         }
 
@@ -432,6 +507,14 @@ ApplicationWindow {
                 width: parent.width
                 onClicked: {
                     stackView.push(graphicsPage)
+                    drawer.close()
+                }
+            }
+            ItemDelegate {
+                text: qsTr("Output")
+                width: parent.width
+                onClicked: {
+                    stackView.push(outputPage)
                     drawer.close()
                 }
             }

@@ -2,17 +2,15 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 
 Page {
-    id: page
-
     width: 600
     height: 400
-    property alias txtHelp: txtHelp
+    property alias txtOutput: txtOutput
     anchors.fill: parent
-    title: qsTr("Help")
+    title: qsTr("Output")
 
     Label {
-        id: lblHelp
-        text: qsTr("Help")
+        id: lblOutput
+        text: qsTr("Output")
         anchors.right: parent.right
         anchors.rightMargin: 5
         anchors.left: parent.left
@@ -22,22 +20,16 @@ Page {
     }
 
     TextArea {
-        id: txtHelp
+        id: txtOutput
         anchors.right: parent.right
         anchors.rightMargin: 5
         anchors.left: parent.left
         anchors.leftMargin: 5
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
-        anchors.top: lblHelp.bottom
+        anchors.top: lblOutput.bottom
         anchors.topMargin: 5
         placeholderText: qsTr("Text Area")
+        readOnly: true
     }
 }
-
-/*##^##
-Designer {
-    D{i:2;anchors_x:41;anchors_y:61}
-}
-##^##*/
-
