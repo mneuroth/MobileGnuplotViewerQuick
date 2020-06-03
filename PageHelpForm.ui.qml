@@ -3,12 +3,13 @@ import QtQuick.Controls 2.5
 
 Page {
 
-    //width: 600
-    //height: 400
+    width: 600
+    height: 400
+    anchors.fill: parent
     title: qsTr("Help")
 
     Label {
-        text: qsTr("You are on Page 2.")
+        text: qsTr("You are on Help Page.")
         anchors.centerIn: parent
     }
 }

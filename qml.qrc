@@ -2,11 +2,12 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>HomeForm.ui.qml</file>
-        <file>Page1Form.ui.qml</file>
-        <file>Page2Form.ui.qml</file>
+        <file>PageGraphicsForm.ui.qml</file>
+        <file>PageHelpForm.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file alias="spaceship.svg">spaceship.svg</file>
         <file>DSC_4945.JPG</file>
         <file>MobileFileDialog.ui.qml</file>
+        <file>PageOutputForm.qml</file>
     </qresource>
 </RCC>

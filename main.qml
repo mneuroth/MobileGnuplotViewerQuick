@@ -114,7 +114,7 @@ ApplicationWindow {
         }
     }
 
-    Page1Form {
+    PageGraphicsForm {
         id: graphicsPage
         objectName: "graphicsPage"
 
@@ -142,9 +142,14 @@ ApplicationWindow {
         }
     }
 
-    Page2Form {
+    PageHelpForm {
         id: helpPage
         objectName: "helpPage"
+    }
+
+    PageOutputForm {
+        id: outputPage
+        objectName: "outputPage"
     }
 
     function setScriptText(script: string)
@@ -230,6 +235,18 @@ ApplicationWindow {
         btnGraphics {
             onClicked: {
                 stackView.push(graphicsPage)
+            }
+        }
+
+        btnOutput {
+            onClicked: {
+                stackView.push(outputPage)
+            }
+        }
+
+        btnHelp {
+            onClicked: {
+                stackView.push(helpPage)
             }
         }
 /*

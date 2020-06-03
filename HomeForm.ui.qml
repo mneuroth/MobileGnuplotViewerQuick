@@ -43,8 +43,8 @@ Page {
         anchors.left: parent.left
         anchors.rightMargin: 5
         anchors.leftMargin: 5
-        anchors.topMargin: 0
-        anchors.bottomMargin: 0
+        anchors.topMargin: 5
+        anchors.bottomMargin: 5
 
         TextArea {
             id: textArea
@@ -59,6 +59,9 @@ Page {
         x: 44
         y: 5
         height: 135
+        anchors.rightMargin: 5
+        anchors.leftMargin: 5
+        anchors.bottomMargin: 5
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
