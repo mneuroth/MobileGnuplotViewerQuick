@@ -55,6 +55,7 @@ template <class T> T childObject(QQmlApplicationEngine& engine,
 class ApplicationData : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString filesPath READ getFilesPath)
     Q_PROPERTY(QString homePath READ getHomePath)
     Q_PROPERTY(QString sdCardPath READ getSDCardPath)
 
@@ -77,6 +78,7 @@ public:
 
     Q_INVOKABLE void test();
 
+    QString getFilesPath() const;
     QString getHomePath() const;
     QString getSDCardPath() const;
 

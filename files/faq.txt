@@ -1,0 +1,15 @@
+FAQ
+===
+
+* interactive commands of gnuplot are
+  not supported, the script is always
+  executed as whole.   
+* do not use "set term" command because 
+  otherwise the plot output does not work,
+  the plot output window uses svg output
+  of the gnuplot program.
+* to scroll the content of the text field
+  use two fingers instead of one finger.
+
+see this link for more informations:
+http://www.mneuroth.de/projects/gnuplotviewer_faq.html

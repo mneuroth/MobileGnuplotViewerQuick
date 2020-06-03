@@ -9,5 +9,6 @@
         <file>DSC_4945.JPG</file>
         <file>MobileFileDialog.ui.qml</file>
         <file>PageOutputForm.ui.qml</file>
+        <file alias="empty.svg">files/empty.svg</file>
     </qresource>
 </RCC>

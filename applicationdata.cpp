@@ -143,6 +143,17 @@ bool ApplicationData::grantAccessToSDCardPath(QObject * parent)
     return ::GrantAccessToSDCardPath(parent);
 }
 
+QString ApplicationData::getFilesPath() const
+{
+#if defined(Q_OS_ANDROID)
+    return FILES_DIR;
+#elif defined(Q_OS_WINDOWS)
+    return FILES_DIR;
+#else
+    return ".";
+#endif
+}
+
 QString ApplicationData::getHomePath() const
 {
 #if defined(Q_OS_ANDROID)

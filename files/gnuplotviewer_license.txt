@@ -1,0 +1,11 @@
+THIS SOFTWARE AND THE ACCOMPANYING FILES ARE SOLD \"AS IS\" AND WITHOUT
+WARRANTIES AS TO PERFORMANCE OR MERCHANTABILITY OR ANY OTHER WARRANTIES
+WHETHER EXPRESSED OR IMPLIED. Because of the various hardware and
+software environments in which this software may be used,
+NO WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE IS OFFERED.
+
+Good data processing procedure dictates that any program should
+be thoroughly tested with non-critical data before relying on it.
+The user must assume the entire risk of using the program.
+ANY LIABILITY OF THE SELLER WILL BE LIMITED EXCLUSIVELY TO PRODUCT
+REPLACEMENT OR REFUND OF PURCHASE PRICE.

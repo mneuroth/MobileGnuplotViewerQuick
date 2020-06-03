@@ -19,7 +19,7 @@ Page {
         //anchors.fill: parent
         objectName: "imageArea"
         // TODO: see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
-        source: "DSC_4945.JPG" // "spaceship.svg"
+        source: "empty.svg" //"DSC_4945.JPG" // "spaceship.svg"
         fillMode: Image.PreserveAspectFit
         // TODO: https://forum.qt.io/topic/112192/zooming-an-svg-image
     }

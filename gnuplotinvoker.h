@@ -18,6 +18,7 @@ class GnuplotInvoker : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString lastError READ getLastError)
+    Q_PROPERTY(bool useBeta READ getUseBeta WRITE setUseBeta)
 
 public:
     GnuplotInvoker();
@@ -25,6 +26,8 @@ public:
     Q_INVOKABLE QString run(const QString & sCmd);
 
     QString getLastError() const;
+    bool getUseBeta() const;
+    void setUseBeta(bool value);
 
 signals:
     void sigResultReady(const QString & svgData);
@@ -42,6 +45,7 @@ private:
 
     QString   m_aLastGnuplotResult;
     QString   m_aLastGnuplotError;
+    bool      m_bUseBeta;
     QProcess  m_aGnuplotProcess;
 };
 

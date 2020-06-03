@@ -22,32 +22,20 @@
 #define LAST_HELP_INPUT             "LAST_HELP_INPUT"
 #define LAST_RELEASE_DATE           "LAST_RELEASE_DATE"
 #if defined(Q_OS_ANDROID)
-#ifdef COMMERCIAL
-#define DEFAULT_DIRECTORY           "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts"
-    //scripts"
-#define FILES_DIR                   "/data/data/de.mneuroth.gnuplotviewerquick/files/"
-#define SCRIPTS_DIR                 "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts/"
-#else
 #define DEFAULT_DIRECTORY           "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts"
 #define FILES_DIR                   "/data/data/de.mneuroth.gnuplotviewerquick/files/"
 #define SCRIPTS_DIR                 "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts/"
-#endif
 #define SDCARD_DIRECTORY            "/sdcard"
 #elif defined(Q_OS_WIN)
-#define DEFAULT_DIRECTORY           "C:\\usr\\neurothmi\\Android\\gnuplotviewer"
+#define DEFAULT_DIRECTORY           "C:\\usr\\neurothmi\\Android\\gnuplotviewerquick"
 #define SDCARD_DIRECTORY            "c:\\tmp"
-#define FILES_DIR                   "C:\\usr\\neurothmi\\Android\\gnuplotviewer\\files\\"
-#define SCRIPTS_DIR                 "C:\\usr\\neurothmi\\Android\\gnuplotviewer\\files\\scripts\\"
+#define FILES_DIR                   "C:\\Users\\micha\\Documents\\git_projects\\GnuplotViewerQuick\\files\\"
+#define SCRIPTS_DIR                 "C:\\usr\\neurothmi\\Android\\gnuplotviewerquick\\files\\scripts\\"
 #else
 #define DEFAULT_DIRECTORY           "/Users/min/Documents/home"
 #define SDCARD_DIRECTORY            "/Users/min"
-#ifdef COMMERCIAL
-#define FILES_DIR                   "/Users/min/Documents/home/Entwicklung/projects/gnuplotviewer/files/"
-#define SCRIPTS_DIR                 "/Users/min/Documents/home/Entwicklung/projects/gnuplotviewer/files/scripts/"
-#else
-#define FILES_DIR                   "/Users/min/Documents/home/Entwicklung/projects/gnuplotviewerfree/files/"
-#define SCRIPTS_DIR                 "/Users/min/Documents/home/Entwicklung/projects/gnuplotviewerfree/files/scripts/"
-#endif
+#define FILES_DIR                   "/Users/min/Documents/home/Entwicklung/projects/gnuplotviewerquick/files/"
+#define SCRIPTS_DIR                 "/Users/min/Documents/home/Entwicklung/projects/gnuplotviewerquick/files/scripts/"
 #endif
 
 #define DEFAULT_SCRIPT              QObject::tr("# This is a graphical frontend app for gnuplot.\n#\n# Enter gnuplot commands in this field and\n# execute script by activating the run button below.\n# Type help and hit run button for gnuplot help.\n#\n# See http://www.gnuplot.info/ for more information.\n#\n# example:\n\nplot sin(x), cos(x)\n")

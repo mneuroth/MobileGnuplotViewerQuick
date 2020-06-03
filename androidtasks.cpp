@@ -127,12 +127,10 @@ void UnpackFiles(QObject * /*pProgress*/)
     sAsset = QString(ASSETS_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_EXE);
     sOutput = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_EXE);
     /*bool ok =*/ extractAssetFile(sAsset,sOutput,true,&aUpdateTimeStamp);
-//#ifdef COMMERCIAL
     // unpack beta version only for commerical version...
     sAsset = QString(ASSETS_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_BETA_EXE);
     sOutput = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_BETA_EXE);
     /*bool ok =*/ extractAssetFile(sAsset,sOutput,true,&aUpdateTimeStamp);
-//#endif
     sAsset = QString(ASSETS_DIR)+QString(GNUPLOT_GIH);
     sOutput = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);

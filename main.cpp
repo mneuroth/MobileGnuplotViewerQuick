@@ -14,7 +14,7 @@
 //
 // Implement
 // ok: - Zoom/Pitch für Grafik Seite implementieren
-// Storage funktioniert nicht mehr --> Java Klasse schuld? --> ja
+// ok: Storage funktioniert nicht mehr --> Java Klasse schuld? --> ja
 // Teilen Empfangen funktioniert nicht mehr --> ok, aber Probleme, siehe unten
 // Teilen arbeitet nicht gut zusammen mit eingebautem Storage Framework Support bei QFileDialog
 // Teilen Problem: App offen, Umschalten mit O Button und Aufruf von eier anderen App --> App wird nicht korrekt angezeigt und blockiert
@@ -26,7 +26,7 @@
 // ok: - reload der zuletzt geöffneten Datei implementieren
 // ok: - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
-// - Save As
+// ok: - Save As
 // - About Dialog
 // - Hilfe Seite anlegen
 // - Ausgabe Seite anlegen

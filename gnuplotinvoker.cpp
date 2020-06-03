@@ -23,6 +23,7 @@ QString GnuplotInvoker::run(const QString & sCmd)
 {
     m_aLastGnuplotError = "";
     m_aLastGnuplotResult = "";
+    m_bUseBeta = false;
     runGnuplot(sCmd);
     m_aGnuplotProcess.waitForFinished();
 
@@ -32,6 +33,16 @@ QString GnuplotInvoker::run(const QString & sCmd)
 QString GnuplotInvoker::getLastError() const
 {
     return m_aLastGnuplotError;
+}
+
+bool GnuplotInvoker::getUseBeta() const
+{
+    return m_bUseBeta;
+}
+
+void GnuplotInvoker::setUseBeta(bool value)
+{
+    m_bUseBeta = value;
 }
 
 void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus)
@@ -111,14 +122,14 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 //    {
 //        ui->txtErrors->clear();
 //    }
-    bool useVersionBeta = true; //ui->actionGnuplot_UseGnuplotBeta->isChecked();
-#if defined(Q_OS_ANDROID)
-    // ggf. GNUTERM setzen...
+    bool useVersionBeta = m_bUseBeta; //ui->actionGnuplot_UseGnuplotBeta->isChecked();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     env.insert("GNUHELP",sHelpFile);
     m_aGnuplotProcess.setProcessEnvironment(env);
 
+#if defined(Q_OS_ANDROID)
+    // ggf. GNUTERM setzen...
     // start gnuplot process
     QString sCpuArchitecture(QSysInfo::buildCpuArchitecture());
     QString sGnuplotFile = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(useVersionBeta ? GNUPLOT_BETA_EXE : GNUPLOT_EXE);

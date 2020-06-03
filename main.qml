@@ -96,6 +96,13 @@ ApplicationWindow {
         homePage.lblFileName.text = urlFileName
     }
 
+    function showFileContentInOutput(sOnlyFileName) {
+        var sFileName = applicationData.filesPath + sOnlyFileName
+        var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
+        outputPage.txtOutput.text = sContent
+        stackView.push(outputPage)
+    }
+
     onClosing: {
         checkForModified()
         //close.accepted = true
@@ -104,26 +111,73 @@ ApplicationWindow {
     header: ToolBar {
         contentHeight: toolButton.implicitHeight
 
-        Button {
-            id: fileButton
-            text: "File"
+        ToolButton {
+            id: menuButton
+            text: "\u22EE"
+            font.pixelSize: Qt.application.font.pixelSize * 2.6
+            anchors.right: parent.right
+            anchors.leftMargin: 5
             onClicked: menu.open()
 
             Menu {
                 id: menu
-                y: fileButton.height
+                y: menuButton.height
 
                 MenuItem {
-                    text: "New..."
-                    onTriggered: console.log("new...")
+                    text: qsTr("Settings")
+                    onTriggered: console.log("Settings...")
                 }
                 MenuItem {
-                    text: "Open..."
-                    onTriggered: console.log("open...")
+                    text: qsTr("Delete files")
+                    onTriggered: console.log("Delete...")
                 }
                 MenuItem {
-                    text: "Save"
-                    onTriggered: console.log("save...")
+                    text: qsTr("FAQ")
+                    onTriggered: {
+                        showFileContentInOutput("faq.txt")
+                    }
+                }
+                MenuItem {
+                    text: qsTr("License")
+                    onTriggered: {
+                        showFileContentInOutput("gnuplotviewer_license.txt")
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Gnuplot license")
+                    onTriggered: {
+                        showFileContentInOutput("gnuplot_copyright")
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Gnuplot version")
+                    onTriggered: {
+                        var sContent = gnuplotInvoker.run("show version")
+                        outputPage.txtOutput.text = sContent
+                        outputPage.txtOutput.text += gnuplotInvoker.lastError
+                        stackView.push(outputPage)
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Gnuplot help")
+                    onTriggered: {
+                        var sContent = gnuplotInvoker.run("help")
+                        outputPage.txtOutput.text = sContent
+                        outputPage.txtOutput.text += gnuplotInvoker.lastError
+                        stackView.push(outputPage)
+                    }
+                }
+                MenuItem {
+                    id: gnuplotBeta
+                    text: qsTr("Gnuplot beta")
+                    checkable: true
+                    onTriggered: {
+                        gnuplotInvoker.useBeta = gnuplotBeta.checked
+                    }
+                }
+                MenuItem {
+                    text: qsTr("About")
+                    onTriggered: console.log("About...")
                 }
             }
         }
@@ -245,6 +299,7 @@ ApplicationWindow {
                 else
                 {
 // TODO --> graphics page mit error Image fuellen
+                    graphicsPage.image.source = ":/empty.svg"
                     stackView.push(outputPage)
                 }
             }
@@ -254,11 +309,11 @@ ApplicationWindow {
             onClicked: {
                 if( !applicationData.shareText(homePage.textArea.text) )
                 {
-                    homePage.textArea.text = "SHARE result = false\n"
+                    outputPage.txtOutput.text += "SHARE result = false\n"
                 }
                 else
                 {
-                    homePage.textArea.text = "SHARE result = TRUE\n"
+                    outputPage.txtOutput.text += "SHARE result = TRUE\n"
                 }
             }
         }
