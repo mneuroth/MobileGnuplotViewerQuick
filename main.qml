@@ -44,6 +44,11 @@ ApplicationWindow {
         }
     }
 
+    function getFontName() {
+        return "Droid Sans Mono"
+        //return "Courier"
+    }
+
     function checkForModified() {
         if( homePage.textArea.textDocument.modified )
         {
@@ -82,7 +87,6 @@ ApplicationWindow {
     }
 
     function saveAsCurrentDoc(fullName) {
-        console.log("SAVE AS "+fullName)
         homePage.currentFileUrl = fullName
         homePage.lblFileName.text = fullName
         saveCurrentDoc()
@@ -114,7 +118,7 @@ ApplicationWindow {
         ToolButton {
             id: menuButton
             text: "\u22EE"
-            font.pixelSize: Qt.application.font.pixelSize * 2.6
+            font.pixelSize: Qt.application.font.pixelSize * 1.6
             anchors.right: parent.right
             anchors.leftMargin: 5
             onClicked: menu.open()
@@ -130,6 +134,12 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Delete files")
                     onTriggered: console.log("Delete...")
+                }
+                MenuItem {
+                    text: qsTr("Send text")
+                    onTriggered: {
+                        applicationData.shareText(homePage.textArea.text);
+                    }
                 }
                 MenuItem {
                     text: qsTr("FAQ")
@@ -232,11 +242,94 @@ ApplicationWindow {
     PageHelpForm {
         id: helpPage
         objectName: "helpPage"
+
+        fontName: getFontName()
+
+        btnShare {
+            onClicked: {
+ // TODO share as text --> file name angeben ?
+                applicationData.shareText(helpPage.txtHelp.text)
+            }
+        }
+
+        btnClear {
+            onClicked: {
+                helpPage.txtHelp.text = ""
+            }
+        }
+
+        btnRunHelp {
+            onClicked: {
+                var s = gnuplotInvoker.run(helpPage.txtHelp.text)
+                outputPage.txtOutput.text = s
+                outputPage.txtOutput.text += gnuplotInvoker.lastError
+                stackView.push(outputPage)
+            }
+        }
+
+        btnGraphics {
+            onClicked: {
+                stackView.push(graphicsPage)
+            }
+        }
+
+        btnOutput {
+            onClicked: {
+                stackView.push(outputPage)
+            }
+        }
+
+        btnInput {
+            onClicked: {
+                //stackView.push(homePage)
+                stackView.pop()
+            }
+        }
     }
 
     PageOutputForm {
         id: outputPage
         objectName: "outputPage"
+
+        fontName: getFontName()
+
+        btnShare {
+            onClicked: {
+// TODO share as text --> file name angeben ?
+                applicationData.shareText(outputPage.txtOutput.text)
+            }
+        }
+
+        btnClear {
+            onClicked: {
+                outputPage.txtOutput.text = ""
+            }
+        }
+
+        btnSaveAs {
+            onClicked: {
+                // TODO
+            }
+        }
+
+        btnGraphics {
+            onClicked: {
+                stackView.push(graphicsPage)
+            }
+        }
+
+        btnInput {
+            onClicked: {
+                //stackView.push(homePage)
+                stackView.pop()
+            }
+        }
+
+        btnHelp {
+            onClicked: {
+                stackView.push(helpPage)
+            }
+        }
     }
 
     function setScriptText(script: string)
@@ -254,6 +347,8 @@ ApplicationWindow {
     HomeForm {
         id: homePage
         objectName: "homePage"
+
+        fontName: getFontName()
 
         property string currentFileUrl: window.currentFile
 
@@ -307,14 +402,7 @@ ApplicationWindow {
 
         btnShare {
             onClicked: {
-                if( !applicationData.shareText(homePage.textArea.text) )
-                {
-                    outputPage.txtOutput.text += "SHARE result = false\n"
-                }
-                else
-                {
-                    outputPage.txtOutput.text += "SHARE result = TRUE\n"
-                }
+                applicationData.shareText(homePage.textArea.text)
             }
         }
 

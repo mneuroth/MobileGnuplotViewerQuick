@@ -21,6 +21,8 @@ Page {
     property alias btnOutput: btnOutput
     property alias gridButtons: gridButtons
 
+    property string fontName: "Courier"
+
     title: qsTr("Gnuplot")
 
     Label {
@@ -48,6 +50,7 @@ Page {
 
         TextArea {
             id: textArea
+            font.family: fontName
             anchors.fill: parent
             objectName: "textArea"
             placeholderText: qsTr("Enter gnuplot script here...")

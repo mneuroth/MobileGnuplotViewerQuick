@@ -27,20 +27,21 @@
 // ok: - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
 // ok: - Save As
+// - Back Button soll nicht direkt Anwendung schliessen
 // - About Dialog
-// - Hilfe Seite anlegen
-// - Ausgabe Seite anlegen
-// - Android Share/Teilen
+// ok: - Hilfe Seite anlegen
+// ok: - Ausgabe Seite anlegen
+// ok: - Android Share/Teilen
 // - Google Play Spenden/Bezahloptionen einbauen
 // - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
 // - Pay Features ok, falls alter kommerzieller MobileGnuplotViewer vorhanden
 // - ggf. Zeichensatz aenderbar
 // - ggf. Einstellungen Aussehen aenderbar
 // - ggf. Dateien loeschen
-// - ggf. FAQs, Lizenz, gnuplot version, gnuplot hilfe, gnuplot copyright
+// ok: - ggf. FAQs, Lizenz, gnuplot version, gnuplot hilfe, gnuplot copyright
 // - ggf. Bearbeiten Menu (copy/paste) --> nicht notwendig, da via context moeglich
-// - ggf. Senden
-// - ggf. verwende gnuplot beta
+// ok: - ggf. Senden
+// ok: - ggf. verwende gnuplot beta
 //
 // - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
 
