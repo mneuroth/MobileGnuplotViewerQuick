@@ -77,6 +77,9 @@ public:
     Q_INVOKABLE bool shareImage(const QImage & image);
     Q_INVOKABLE bool shareSvgData(const QVariant & data);
     Q_INVOKABLE bool shareViewSvgData(const QVariant & data);
+    Q_INVOKABLE bool shareTextAsPdf(const QString & text, bool bSendFile);
+
+    Q_INVOKABLE void print(const QString & text);
 
     Q_INVOKABLE void logText(const QString & text);
 

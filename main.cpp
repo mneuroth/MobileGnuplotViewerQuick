@@ -11,40 +11,47 @@
 // TODOs (QML):
 // ok: - Gnuplot Syntax highlighter implementiern --> https://stackoverflow.com/questions/14791360/qt5-syntax-highlighting-in-qml
 // ok: - Gnuplot Invoker implementieren
-//
-// Implement
 // ok: - Zoom/Pitch für Grafik Seite implementieren
 // ok: Storage funktioniert nicht mehr --> Java Klasse schuld? --> ja
+// OK: - Save auf Android Storage Framework --> wie geht das mit eingebautem Support QFileDialog ?
+// OK: - Save auf Android Storage Framework funktioniert auch nicht bei alten Apps --> visiscript ok, mobilegnuplotviewer ERROR
+// ok: - reload der zuletzt geöffneten Datei implementieren
+// ok: - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
+// ok: - Save As
+// ok: - Back Button soll nicht direkt Anwendung schliessen
+// ok: - Hilfe Seite anlegen
+// ok: - Ausgabe Seite anlegen
+// ok: - Android Share/Teilen
+// ok: - ggf. FAQs, Lizenz, gnuplot version, gnuplot hilfe, gnuplot copyright
+// ok: - ggf. Senden
+// ok: - ggf. verwende gnuplot beta
+
+// BUG:
 // Teilen Empfangen funktioniert nicht mehr --> ok, aber Probleme, siehe unten
 // Teilen arbeitet nicht gut zusammen mit eingebautem Storage Framework Support bei QFileDialog
 // Teilen Problem: App offen, Umschalten mit O Button und Aufruf von eier anderen App --> App wird nicht korrekt angezeigt und blockiert
 //   --> ok, wenn App vorher geschlossen wird (mit Back-Button)
-// Bei SD Karten sowohl intern als auch extern anzeigen
+
+// TODOs:
 // - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
-// - Save auf Android Storage Framework --> wie geht das mit eingebautem Support QFileDialog ?
-// - Save auf Android Storage Framework funktioniert auch nicht bei alten Apps --> visiscript ok, mobilegnuplotviewer ERROR
-// ok: - reload der zuletzt geöffneten Datei implementieren
-// ok: - demo Skripte werden bei jedem Neustart der App überschrieben (da wieder ausgepackt)
+// - Bei SD Karten sowohl intern als auch extern anzeigen
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
-// ok: - Save As
-// - Back Button soll nicht direkt Anwendung schliessen
+// - ggf. Zeichensatz aenderbar
+// - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
+// - alte MobileGnuplotViewer Apps bauen, mit Dialog auf Obsolet App und Link auf neue verbesserte App --> Touch Version
 // - Drucken ?
+// - ggf. Text als PDF exportieren --> damit ist text druckbar ! --> #include <QPdfWriter> --> https://stackoverrun.com/de/q/9274733
+// - ggf. Dateien loeschen
+// - Source Code cleanup
+// - QML Source Code besser strukturieren
 // - About Dialog
-// ok: - Hilfe Seite anlegen
-// ok: - Ausgabe Seite anlegen
-// ok: - Android Share/Teilen
 // - Google Play Spenden/Bezahloptionen einbauen
 // - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
 // - Pay Features ok, falls alter kommerzieller MobileGnuplotViewer vorhanden
-// - ggf. Zeichensatz aenderbar
-// - ggf. Einstellungen Aussehen aenderbar
-// - ggf. Dateien loeschen
-// ok: - ggf. FAQs, Lizenz, gnuplot version, gnuplot hilfe, gnuplot copyright
-// - ggf. Bearbeiten Menu (copy/paste) --> nicht notwendig, da via context moeglich
-// ok: - ggf. Senden
-// ok: - ggf. verwende gnuplot beta
 //
-// - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
+// - ggf. Einstellungen Aussehen aenderbar
+// - ggf. Bearbeiten Menu (copy/paste) --> nicht notwendig, da via context moeglich
+//
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>

@@ -1,4 +1,4 @@
-QT += quick quickcontrols2 svg
+QT += quick quickcontrols2 svg printsupport
 
 CONFIG += c++11
 

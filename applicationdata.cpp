@@ -228,9 +228,62 @@ bool ApplicationData::shareViewSvgData(const QVariant & data)
 {
     return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [data](QString name) -> bool
     {
-        QByteArray arrData =  qvariant_cast<QByteArray>(data);
+        QByteArray arrData = qvariant_cast<QByteArray>(data);
         return SaveDataAsSvgImage(arrData, name);
     }, false);
+}
+
+//#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrinter>
+//#include <QFileDialog>
+#include <QPdfWriter>
+#include <QTextDocument>
+#include <QTextCursor>
+
+// https://stackoverflow.com/questions/33654060/create-pdf-document-for-printing-in-qt-from-template
+void pdf(const QString & filename, const QString & text)
+{
+    QPrinter printer(QPrinter::PrinterResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setPaperSize(QPrinter::A4);
+    printer.setOutputFileName(filename);
+    printer.setPageMargins(QMarginsF(30, 30, 30, 30));
+
+//    QString sFont("Arial");   // "Times New Roman"
+    QString sFont("Courier");
+    QFont headerFont(sFont, 8);
+    QFont titleFont(sFont, 14, QFont::Bold);
+
+    QTextCharFormat txtformat = QTextCharFormat();
+
+    QTextDocument doc;
+    doc.setPageSize(printer.pageRect().size());
+
+    QTextCursor* cursor = new QTextCursor(&doc);
+
+    txtformat.setFont(headerFont);
+    cursor->insertText(text, txtformat);
+
+    //cursor->movePosition(QTextCursor::Right /*&& QTextCursor::EndOfLine*/, QTextCursor::KeepAnchor, 1000);
+    //cursor->insertText("currDate()", txtformat);
+
+    doc.print(&printer);
+}
+
+void ApplicationData::print(const QString & text)
+{
+//    QPdfWriter aPdfWriter("gnuplot_print.pdf");
+
+    pdf("gnuplot_print.pdf", text);
+}
+
+bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)
+{
+    return writeAndSendSharedFile("gnuplot_text.pdf", "", "application/pdf", [text](QString name) -> bool
+    {
+        pdf(name, text);
+        return true;
+    }, bSendFile);
 }
 
 void ApplicationData::logText(const QString & text)

@@ -114,6 +114,23 @@ ApplicationWindow {
         showInOutput(sContent)
     }
 
+    function getCurrentText(currentPage) {
+        var s = ""
+        if(currentPage === homePage)
+        {
+            s = homePage.textArea.text
+        }
+        else if(currentPage === outputPage)
+        {
+            s = outputPage.txtOutput.text
+        }
+        else if(currentPage === helpPage)
+        {
+            s = helpPage.txtHelp.text
+        }
+        return s
+    }
+
     onClosing: {
         // handle navigation back to home page if some other page is visible and back button is activated
         if( stackView.currentItem !== homePage )
@@ -149,25 +166,28 @@ ApplicationWindow {
                     onTriggered: console.log("Settings...")
                 }
                 MenuItem {
+                    text: qsTr("Print")
+                    onTriggered: {
+                        var s = getCurrentText(stackView.currentItem)
+                        applicationData.shareTextAsPdf(s, true)
+                        //applicationData.print(s)
+                    }
+                }
+                MenuItem {
+                    text: qsTr("View")
+                    onTriggered: {
+                        var s = getCurrentText(stackView.currentItem)
+                        applicationData.shareTextAsPdf(s, false)
+                    }
+                }
+                MenuItem {
                     text: qsTr("Delete files")
                     onTriggered: console.log("Delete...")
                 }
                 MenuItem {
                     text: qsTr("Send text")
                     onTriggered: {
-                        var s = ""
-                        if(stackView.currentItem == homePage)
-                        {
-                            s = homePage.textArea.text
-                        }
-                        else if(stackView.currentItem == outputPage)
-                        {
-                            s = outputPage.txtOutput.text
-                        }
-                        else if(stackView.currentItem == helpPage)
-                        {
-                            s = helpPage.txtHelp.text
-                        }
+                        var s = getCurrentText(stackView.currentItem)
                         applicationData.shareSimpleText(s);
                     }
                 }
