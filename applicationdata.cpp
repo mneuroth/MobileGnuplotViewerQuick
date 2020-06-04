@@ -23,6 +23,8 @@
 #include <QTextStream>
 #include <QStandardPaths>
 #include <QImage>
+#include <QSvgRenderer>
+#include <QPainter>
 
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
@@ -191,9 +193,34 @@ bool ApplicationData::shareText(const QString & text, const QString & fileName)
 
 bool ApplicationData::shareImage(const QImage & image)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", ".png", "image/png", [image](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [image](QString name) -> bool
     {
         return image.save(name);
+    });
+}
+
+bool SaveDataAsSvgImage(const QByteArray & data, const QString & sFileName)
+{
+    QSvgRenderer aRenderer(data);
+    QImage aImg(1024,1024, QImage::Format_ARGB32);
+
+    //aImg.fill(0xaaA08080);  // partly transparent red-ish background
+    aImg.fill(0xFFFFFFFF);  // partly transparent red-ish background
+
+    // Get QPainter that paints to the image
+    QPainter painter(&aImg);
+    aRenderer.render(&painter);
+
+    // Save, image format based on file extension
+    return aImg.save(sFileName);
+}
+
+bool ApplicationData::shareSvgData(const QVariant & data)
+{
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [data](QString name) -> bool
+    {
+        QByteArray arrData =  qvariant_cast<QByteArray>(data);
+        return SaveDataAsSvgImage(arrData, name);
     });
 }
 
@@ -284,7 +311,7 @@ void ApplicationData::sltFileUrlReceived(const QString & sUrl)
     // /data/user/0/de.mneuroth.gnuplotviewerquick/files
     // /storage/emulated/0/Android/data/de.mneuroth.gnuplotviewerquick/files
 
-    sltErrorText("URL received "+sUrl);
+//TODO:    sltErrorText("URL received "+sUrl);
 
     bool ok = loadAndShowFileContent(sUrl);
 }
@@ -294,7 +321,7 @@ void ApplicationData::sltFileReceivedAndSaved(const QString & sUrl)
     // <== share from google documents
     // --> /data/user/0/de.mneuroth.gnuplotviewerquick/files/gnuplotviewer_shared_files/Test.txt.txt
 
-    sltErrorText("URL file received "+sUrl);
+//TODO:    sltErrorText("URL file received "+sUrl);
 
     bool ok = loadAndShowFileContent(sUrl);
 }
@@ -323,8 +350,6 @@ void ApplicationData::sltShareEditDone(int requestCode, const QString & urlTxt)
     Q_UNUSED(requestCode);
     Q_UNUSED(urlTxt);
 
-    sltErrorText("share edit done");
-
     removeAllFilesForShare();
 }
 
@@ -332,14 +357,12 @@ void ApplicationData::sltShareFinished(int requestCode)
 {
     Q_UNUSED(requestCode);
 
-    sltErrorText("share finished done");
-
     removeAllFilesForShare();
 }
 
 void ApplicationData::sltErrorText(const QString & msg)
 {
-    setScriptText(msg);
+    setOutputText(msg);
 }
 
 bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
@@ -435,5 +458,16 @@ void ApplicationData::setScriptName(const QString & sName)
         QMetaObject::invokeMethod(homePage, "setScriptName",
                 QGenericReturnArgument(),
                 Q_ARG(QString, sName));
+    }
+}
+
+void ApplicationData::setOutputText(const QString & sText)
+{
+    QObject* homePage = childObject<QObject*>(m_aEngine, "outputPage", "");
+    if( homePage!=0 )
+    {
+        QMetaObject::invokeMethod(homePage, "setOutputText",
+                QGenericReturnArgument(),
+                Q_ARG(QString, sText));
     }
 }

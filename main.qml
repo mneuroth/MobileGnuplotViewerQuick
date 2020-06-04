@@ -103,16 +103,27 @@ ApplicationWindow {
         homePage.lblFileName.text = urlFileName
     }
 
-    function showFileContentInOutput(sOnlyFileName) {
-        var sFileName = applicationData.filesPath + sOnlyFileName
-        var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
+    function showInOutput(sContent) {
         outputPage.txtOutput.text = sContent
+        stackView.pop()
         stackView.push(outputPage)
     }
 
+    function showFileContentInOutput(sOnlyFileName) {
+        var sFileName = applicationData.filesPath + sOnlyFileName
+        var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
+        showInOutput(sContent)
+    }
+
     onClosing: {
+        if( !stackView.empty )
+        {
+            stackView.pop()
+            close.accepted = false
+        }
+
         checkForModified()
-        //close.accepted = true
+        close.accepted = true
     }
 
     header: ToolBar {
@@ -181,6 +192,7 @@ ApplicationWindow {
                         var sContent = gnuplotInvoker.run("show version")
                         outputPage.txtOutput.text = sContent
                         outputPage.txtOutput.text += gnuplotInvoker.lastError
+                        stackView.pop()
                         stackView.push(outputPage)
                     }
                 }
@@ -190,6 +202,7 @@ ApplicationWindow {
                         var sContent = gnuplotInvoker.run("help")
                         outputPage.txtOutput.text = sContent
                         outputPage.txtOutput.text += gnuplotInvoker.lastError
+                        stackView.pop()
                         stackView.push(outputPage)
                     }
                 }
@@ -231,6 +244,8 @@ ApplicationWindow {
         id: graphicsPage
         objectName: "graphicsPage"
 
+        property string svgdata: ""
+
         imageMouseArea {
             // see: photosurface.qml
             onWheel: {
@@ -256,7 +271,18 @@ ApplicationWindow {
 
         btnShare {
             onClicked: {
-                applicationData.shareImage(graphicsPage.image)
+/*                graphicsPage.image.grabToImage( function(result)
+                {
+                    console.log("GRAB img --> "+result)
+                    result.saveToFile("test.png")
+                } )
+*/
+                //var ok = applicationData.shareImage(graphicsPage.image)
+                var ok = applicationData.shareSvgData(graphicsPage.svgdata)
+                if( !ok )
+                {
+                    window.showInOutput(qsTr("can not share image"))
+                }
             }
         }
 
@@ -402,6 +428,13 @@ ApplicationWindow {
         homePage.lblFileName.text = name
     }
 
+    function setOutputText(txt: string)
+    {
+        outputPage.txtOutput.text = txt
+        stackView.pop()
+        stackView.push(outputPage)
+    }
+
     HomeForm {
         id: homePage
         objectName: "homePage"
@@ -428,6 +461,7 @@ ApplicationWindow {
                     mobileFileDialog.currentDirectory = applicationData.homePath
                 }
                 mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                stackView.pop()
                 stackView.push(mobileFileDialog)
             }
         }
@@ -447,12 +481,15 @@ ApplicationWindow {
                 if( sData.length > 0 )
                 {
                     graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
+                    graphicsPage.svgdata = sData
+                    stackView.pop()
                     stackView.push(graphicsPage)
                 }
                 else
                 {
 // TODO --> graphics page mit error Image fuellen
                     graphicsPage.image.source = ":/empty.svg"
+                    stackView.pop()
                     stackView.push(outputPage)
                 }
             }
@@ -474,6 +511,7 @@ ApplicationWindow {
             onClicked: {
                 mobileFileDialog.setSaveAsModus()
                 mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                stackView.pop()
                 stackView.push(mobileFileDialog)
             }
         }
@@ -710,6 +748,7 @@ ApplicationWindow {
                 text: qsTr("Graphics")
                 width: parent.width
                 onClicked: {
+                    stackView.pop()
                     stackView.push(graphicsPage)
                     drawer.close()
                 }
@@ -718,6 +757,7 @@ ApplicationWindow {
                 text: qsTr("Output")
                 width: parent.width
                 onClicked: {
+                    stackView.pop()
                     stackView.push(outputPage)
                     drawer.close()
                 }
@@ -726,6 +766,7 @@ ApplicationWindow {
                 text: qsTr("Help")
                 width: parent.width
                 onClicked: {
+                    stackView.pop()
                     stackView.push(helpPage)
                     drawer.close()
                 }

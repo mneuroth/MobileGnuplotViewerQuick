@@ -75,6 +75,7 @@ public:
     Q_INVOKABLE bool shareSimpleText(const QString & text);
     Q_INVOKABLE bool shareText(const QString & text, const QString & fileName = "");
     Q_INVOKABLE bool shareImage(const QImage & image);
+    Q_INVOKABLE bool shareSvgData(const QVariant & data);
 
     Q_INVOKABLE void logText(const QString & text);
 
@@ -86,6 +87,7 @@ public:
 
     void setScriptText(const QString & sScript);
     void setScriptName(const QString & sName);
+    void setOutputText(const QString & sText);
 
 signals:
     void sendDummyData(const QString & txt, int value);
