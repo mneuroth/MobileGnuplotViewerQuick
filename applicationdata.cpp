@@ -224,6 +224,15 @@ bool ApplicationData::shareSvgData(const QVariant & data)
     });
 }
 
+bool ApplicationData::shareViewSvgData(const QVariant & data)
+{
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [data](QString name) -> bool
+    {
+        QByteArray arrData =  qvariant_cast<QByteArray>(data);
+        return SaveDataAsSvgImage(arrData, name);
+    }, false);
+}
+
 void ApplicationData::logText(const QString & text)
 {
     AddToLog(text);
@@ -241,7 +250,7 @@ QString ApplicationData::dumpDirectoryContent(const QString & path) const
     return path + " --> \n" +aList.join(";\n") + "\n";
 }
 
-bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc)
+bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc, bool bSendFile)
 {
 #if defined(Q_OS_ANDROID)
     QString fileNameIn = fileName;
@@ -280,7 +289,14 @@ bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QSt
     /*bool permissionsSet =*/ QFile(tempTargetX).setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
     int requestId = 24;
     bool altImpl = false;
-    m_pShareUtils->sendFile(tempTargetX, tr("Send file"), fileMimeType, requestId, altImpl);
+    if( bSendFile )
+    {
+        m_pShareUtils->sendFile(tempTargetX, tr("Send file"), fileMimeType, requestId, altImpl);
+    }
+    else
+    {
+        m_pShareUtils->viewFile(tempTargetX, tr("View file"), fileMimeType, requestId, altImpl);
+    }
 
     // remark: remove temporary files in slot:  sltShareFinished() / sltShareError()
 #endif

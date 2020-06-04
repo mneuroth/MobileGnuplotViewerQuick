@@ -297,6 +297,11 @@ ApplicationWindow {
         btnExport {
             onClicked: {
                 // TODO
+                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata)
+                if( !ok )
+                {
+                    window.showInOutput(qsTr("can not view image"))
+                }
             }
         }
 

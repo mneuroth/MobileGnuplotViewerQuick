@@ -23,7 +23,6 @@ QString GnuplotInvoker::run(const QString & sCmd)
 {
     m_aLastGnuplotError = "";
     m_aLastGnuplotResult = "";
-    m_bUseBeta = false;
     runGnuplot(sCmd);
     m_aGnuplotProcess.waitForFinished();
 
@@ -114,7 +113,6 @@ void GnuplotInvoker::handleGnuplotError(int exitCode)
     sltErrorText(sError+QString(error));
 }
 
-
 void GnuplotInvoker::runGnuplot(const QString & sScript)
 {
     // handle automatical clear of output (if selected)
@@ -122,7 +120,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 //    {
 //        ui->txtErrors->clear();
 //    }
-    bool useVersionBeta = m_bUseBeta; //ui->actionGnuplot_UseGnuplotBeta->isChecked();
+    bool useVersionBeta = getUseBeta(); //ui->actionGnuplot_UseGnuplotBeta->isChecked();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     env.insert("GNUHELP",sHelpFile);

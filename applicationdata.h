@@ -76,6 +76,7 @@ public:
     Q_INVOKABLE bool shareText(const QString & text, const QString & fileName = "");
     Q_INVOKABLE bool shareImage(const QImage & image);
     Q_INVOKABLE bool shareSvgData(const QVariant & data);
+    Q_INVOKABLE bool shareViewSvgData(const QVariant & data);
 
     Q_INVOKABLE void logText(const QString & text);
 
@@ -103,7 +104,7 @@ public slots:
     void sltErrorText(const QString & msg);
 
 private:
-    bool writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc);
+    bool writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc, bool bSendFile = true);
     void removeAllFilesForShare();
     bool loadAndShowFileContent(const QString & sFileName);
     bool loadTextFile(const QString & sFileName, QString & sText);
