@@ -274,12 +274,14 @@ ApplicationWindow {
 
         btnOutput {
             onClicked: {
+                stackView.pop()
                 stackView.push(outputPage)
             }
         }
 
         btnHelp {
             onClicked: {
+                stackView.pop()
                 stackView.push(helpPage)
             }
         }
@@ -300,8 +302,7 @@ ApplicationWindow {
 
         btnShare {
             onClicked: {
- // TODO share as text --> file name angeben ?
-                applicationData.shareText(helpPage.txtHelp.text)
+                applicationData.shareText(helpPage.txtHelp.text, "help.txt")
             }
         }
 
@@ -316,18 +317,21 @@ ApplicationWindow {
                 var s = gnuplotInvoker.run(helpPage.txtHelp.text)
                 outputPage.txtOutput.text = s
                 outputPage.txtOutput.text += gnuplotInvoker.lastError
+                stackView.pop()
                 stackView.push(outputPage)
             }
         }
 
         btnGraphics {
             onClicked: {
+                stackView.pop()
                 stackView.push(graphicsPage)
             }
         }
 
         btnOutput {
             onClicked: {
+                stackView.pop()
                 stackView.push(outputPage)
             }
         }
@@ -348,8 +352,7 @@ ApplicationWindow {
 
         btnShare {
             onClicked: {
-// TODO share as text --> file name angeben ?
-                applicationData.shareText(outputPage.txtOutput.text)
+                applicationData.shareText(outputPage.txtOutput.text, "output.txt")
             }
         }
 
@@ -367,6 +370,7 @@ ApplicationWindow {
 
         btnGraphics {
             onClicked: {
+                stackView.pop()
                 stackView.push(graphicsPage)
             }
         }
@@ -380,6 +384,7 @@ ApplicationWindow {
 
         btnHelp {
             onClicked: {
+                stackView.pop()
                 stackView.push(helpPage)
             }
         }
@@ -455,7 +460,7 @@ ApplicationWindow {
 
         btnShare {
             onClicked: {
-                applicationData.shareText(homePage.textArea.text)
+                applicationData.shareText(homePage.textArea.text, "gnuplot.gpt")
             }
         }
 
@@ -475,18 +480,21 @@ ApplicationWindow {
 
         btnGraphics {
             onClicked: {
+                stackView.pop()
                 stackView.push(graphicsPage)
             }
         }
 
         btnOutput {
             onClicked: {
+                stackView.pop()
                 stackView.push(outputPage)
             }
         }
 
         btnHelp {
             onClicked: {
+                stackView.pop()
                 stackView.push(helpPage)
             }
         }

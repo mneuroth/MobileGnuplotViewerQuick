@@ -73,7 +73,7 @@ public:
     Q_INVOKABLE QString dumpDirectoryContent(const QString & path) const;
 
     Q_INVOKABLE bool shareSimpleText(const QString & text);
-    Q_INVOKABLE bool shareText(const QString & text);
+    Q_INVOKABLE bool shareText(const QString & text, const QString & fileName = "");
     Q_INVOKABLE bool shareImage(const QImage & image);
 
     Q_INVOKABLE void logText(const QString & text);

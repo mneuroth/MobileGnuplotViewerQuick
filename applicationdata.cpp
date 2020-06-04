@@ -184,14 +184,14 @@ bool ApplicationData::shareSimpleText(const QString & text)
     return true;
 }
 
-bool ApplicationData::shareText(const QString & text)
+bool ApplicationData::shareText(const QString & text, const QString & fileName)
 {
-    return writeAndSendSharedFile("", "", "text/plain", [this, text](QString name) -> bool { return this->saveTextFile(name, text); });
+    return writeAndSendSharedFile(fileName, "", "text/plain", [this, text](QString name) -> bool { return this->saveTextFile(name, text); });
 }
 
 bool ApplicationData::shareImage(const QImage & image)
 {
-    return writeAndSendSharedFile("", ".png", "image/png", [this, image](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_image.png", ".png", "image/png", [image](QString name) -> bool
     {
         return image.save(name);
     });
