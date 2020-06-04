@@ -36,7 +36,6 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-//        applicationData.logText("### OnCompleted reading: "+settings.currentFile)
         homePage.currentFileUrl = settings.currentFile
         if(homePage.currentFileUrl.length>0)
         {
@@ -116,14 +115,18 @@ ApplicationWindow {
     }
 
     onClosing: {
-        if( !stackView.empty )
+        // handle navigation back to home page if some other page is visible and back button is activated
+        if( stackView.currentItem !== homePage )
         {
             stackView.pop()
             close.accepted = false
-        }
 
-        checkForModified()
-        close.accepted = true
+        }
+        else
+        {
+            checkForModified()
+            close.accepted = true
+        }
     }
 
     header: ToolBar {
@@ -277,7 +280,6 @@ ApplicationWindow {
                     result.saveToFile("test.png")
                 } )
 */
-                //var ok = applicationData.shareImage(graphicsPage.image)
                 var ok = applicationData.shareSvgData(graphicsPage.svgdata)
                 if( !ok )
                 {
