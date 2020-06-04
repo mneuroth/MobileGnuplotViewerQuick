@@ -45,8 +45,11 @@ ApplicationWindow {
     }
 
     function getFontName() {
-        return "Droid Sans Mono"
-        //return "Courier"
+        if( Qt.platform.os === "android" )
+        {
+            return "Droid Sans Mono"
+        }
+        return "Courier"
     }
 
     function checkForModified() {
@@ -138,7 +141,20 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Send text")
                     onTriggered: {
-                        applicationData.shareText(homePage.textArea.text);
+                        var s = ""
+                        if(stackView.currentItem == homePage)
+                        {
+                            s = homePage.textArea.text
+                        }
+                        else if(stackView.currentItem == outputPage)
+                        {
+                            s = outputPage.txtOutput.text
+                        }
+                        else if(stackView.currentItem == helpPage)
+                        {
+                            s = helpPage.txtHelp.text
+                        }
+                        applicationData.shareSimpleText(s);
                     }
                 }
                 MenuItem {
@@ -235,6 +251,43 @@ ApplicationWindow {
                 image.scale = 1.0
                 image.x = 0
                 image.y = 0
+            }
+        }
+
+        btnShare {
+            onClicked: {
+                applicationData.shareImage(graphicsPage.image)
+            }
+        }
+
+        btnClear {
+            onClicked: {
+                graphicsPage.image.source = "empty.svg"
+            }
+        }
+
+        btnExport {
+            onClicked: {
+                // TODO
+            }
+        }
+
+        btnOutput {
+            onClicked: {
+                stackView.push(outputPage)
+            }
+        }
+
+        btnHelp {
+            onClicked: {
+                stackView.push(helpPage)
+            }
+        }
+
+        btnInput {
+            onClicked: {
+                //stackView.push(homePage)
+                stackView.pop()
             }
         }
     }

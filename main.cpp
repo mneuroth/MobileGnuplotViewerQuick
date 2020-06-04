@@ -28,6 +28,7 @@
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
 // ok: - Save As
 // - Back Button soll nicht direkt Anwendung schliessen
+// - Drucken ?
 // - About Dialog
 // ok: - Hilfe Seite anlegen
 // ok: - Ausgabe Seite anlegen

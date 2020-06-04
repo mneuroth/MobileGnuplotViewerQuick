@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStandardPaths>
+#include <QImage>
 
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
@@ -177,9 +178,23 @@ QString ApplicationData::getSDCardPath() const
 #endif
 }
 
+bool ApplicationData::shareSimpleText(const QString & text)
+{
+    m_pShareUtils->share(text, QUrl());
+    return true;
+}
+
 bool ApplicationData::shareText(const QString & text)
 {
     return writeAndSendSharedFile("", "", "text/plain", [this, text](QString name) -> bool { return this->saveTextFile(name, text); });
+}
+
+bool ApplicationData::shareImage(const QImage & image)
+{
+    return writeAndSendSharedFile("", ".png", "image/png", [this, image](QString name) -> bool
+    {
+        return image.save(name);
+    });
 }
 
 void ApplicationData::logText(const QString & text)
