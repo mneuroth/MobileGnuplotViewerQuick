@@ -15,6 +15,7 @@
 
 #if defined(Q_OS_ANDROID)
 #include "android/androidshareutils.hpp"
+#include <QtAndroidExtras>
 #endif
 
 #include <QDir>
@@ -180,6 +181,137 @@ QString ApplicationData::getSDCardPath() const
 #endif
 }
 
+#if defined(Q_OS_ANDROID)
+static inline QString GetAbsolutePath(const QAndroidJniObject &file)
+{
+    QAndroidJniObject path = file.callObjectMethod("getAbsolutePath",
+                                                   "()Ljava/lang/String;");
+    if (!path.isValid())
+        return QString();
+
+    return path.toString();
+}
+#endif
+
+static QStringList GetOriginalExternalFilesDirs(/*const char *directoryField = 0*/)
+{
+    QStringList result;
+
+#if defined(Q_OS_ANDROID)
+    QAndroidJniObject appCtx = QtAndroid::androidContext();
+    if (!appCtx.isValid())
+        return QStringList();
+
+    QAndroidJniObject dirField = QAndroidJniObject::fromString(QLatin1String(""));
+/*
+    if (directoryField) {
+        dirField = QJNIObjectPrivate::getStaticObjectField("android/os/Environment",
+                                                           directoryField,
+                                                           "Ljava/lang/String;");
+        if (!dirField.isValid())
+            return QStringList();
+    }
+*/
+    QAndroidJniObject files = appCtx.callObjectMethod("getExternalFilesDirs",
+                                                     "(Ljava/lang/String;)[Ljava/io/File;",
+                                                     dirField.object());
+
+    if (!files.isValid())
+        return QStringList();
+
+    QAndroidJniEnvironment env;
+
+    // Converts the QAndroidJniObject into a jobjectArray
+    jobjectArray arr = files.object<jobjectArray>();
+    int size = env->GetArrayLength(arr);
+
+    /* Loop that converts all the elements in the jobjectArray
+     * into QStrings and puts them in a QStringList*/
+    for (int i = 0; i < size; i++)
+    {
+        jobject file = env->GetObjectArrayElement(arr, i);
+
+        QAndroidJniObject afile(file);
+        result.append(GetAbsolutePath(afile));
+
+        env->DeleteLocalRef(file);
+    }
+
+    //env->DeleteLocalRef(arr);
+#else
+    // nothing to do...
+#endif
+
+    return result;
+}
+
+static QString RemoveAppPath(const QString & item)
+{
+    int iFound = item.indexOf("/Android/data");
+    if(iFound>=0)
+    {
+        return item.left(iFound);
+    }
+    return item;
+}
+
+static QStringList GetExternalFilesDirs(/*const char *directoryField = 0*/)
+{
+    QStringList result = GetOriginalExternalFilesDirs();
+    QStringList newResult;
+
+    foreach(const QString & item, result)
+    {
+        newResult.append(RemoveAppPath(item));
+    }
+
+    return newResult;
+}
+
+static QString GetSDCardPathOrg()
+{
+#if defined(Q_OS_ANDROID)
+    // TODO --> this code does not work for sd cards on Android 6.0 and above, waiting for Qt 5.8 or 5.9
+    // see: https://qt-project.org/forums/viewthread/35519
+    QAndroidJniObject aMediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
+        // maybe better: getExternalFilesDir(s)() or getExternalCacheDirs()
+    QAndroidJniObject aMediaPath = aMediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
+    QString sSdCardAbsPath = aMediaPath.toString();
+    QAndroidJniEnvironment env;
+    if (env->ExceptionCheck())
+    {
+        // Handle exception here.
+        env->ExceptionClear();
+        sSdCardAbsPath = SDCARD_DIRECTORY;
+    }
+    // other option may be: getenv("EXTERNAL_STORAGE")
+    return sSdCardAbsPath;
+#else
+    return SDCARD_DIRECTORY;
+#endif
+}
+
+QStringList ApplicationData::getSDCardPaths() const
+{
+    QStringList allPaths;
+    allPaths.append(SDCARD_DIRECTORY);
+    allPaths.append(GetExternalFilesDirs());
+#if defined(Q_OS_WIN)
+    allPaths.append("c:\\usr");
+#endif
+    QString path = GetSDCardPathOrg();
+    if(!allPaths.contains(path))
+    {
+        allPaths.append(path);
+    }
+    return allPaths;
+}
+
+QString ApplicationData::getDefaultScript() const
+{
+    return DEFAULT_SCRIPT;
+}
+
 bool ApplicationData::shareSimpleText(const QString & text)
 {
     m_pShareUtils->share(text, QUrl());
@@ -241,7 +373,7 @@ bool ApplicationData::shareViewSvgData(const QVariant & data)
 #include <QTextCursor>
 
 // https://stackoverflow.com/questions/33654060/create-pdf-document-for-printing-in-qt-from-template
-void pdf(const QString & filename, const QString & text)
+void writePdfFile(const QString & filename, const QString & text)
 {
     QPrinter printer(QPrinter::PrinterResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -250,7 +382,12 @@ void pdf(const QString & filename, const QString & text)
     printer.setPageMargins(QMarginsF(30, 30, 30, 30));
 
 //    QString sFont("Arial");   // "Times New Roman"
+#if defined(Q_OS_ANDROID)
+    QString sFont("Droid Sans Mono");
+#else
     QString sFont("Courier");
+#endif
+
     QFont headerFont(sFont, 8);
     QFont titleFont(sFont, 14, QFont::Bold);
 
@@ -272,16 +409,16 @@ void pdf(const QString & filename, const QString & text)
 
 void ApplicationData::print(const QString & text)
 {
-//    QPdfWriter aPdfWriter("gnuplot_print.pdf");
+    //other possibility: QPdfWriter aPdfWriter("gnuplot_print.pdf");
 
-    pdf("gnuplot_print.pdf", text);
+    writePdfFile("gnuplot_print.pdf", text);
 }
 
 bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)
 {
     return writeAndSendSharedFile("gnuplot_text.pdf", "", "application/pdf", [text](QString name) -> bool
     {
-        pdf(name, text);
+        writePdfFile(name, text);
         return true;
     }, bSendFile);
 }

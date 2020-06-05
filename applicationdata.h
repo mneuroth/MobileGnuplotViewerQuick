@@ -58,6 +58,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(QString filesPath READ getFilesPath)
     Q_PROPERTY(QString homePath READ getHomePath)
     Q_PROPERTY(QString sdCardPath READ getSDCardPath)
+    Q_PROPERTY(QString defaultScript READ getDefaultScript)
 
 public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
@@ -88,6 +89,9 @@ public:
     QString getFilesPath() const;
     QString getHomePath() const;
     QString getSDCardPath() const;
+    Q_INVOKABLE QStringList getSDCardPaths() const;
+
+    QString getDefaultScript() const;
 
     void setScriptText(const QString & sScript);
     void setScriptName(const QString & sName);
