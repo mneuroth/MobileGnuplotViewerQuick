@@ -42,10 +42,10 @@ Page {
 
         TextArea {
             id: txtOutput
+            placeholderText: "Outputs from gnuplot commands are shown here"
             anchors.fill: parent
             font.family: fontName
             anchors.top: lblOutput.bottom
-            placeholderText: qsTr("Text Area")
             readOnly: true
         }
     }
