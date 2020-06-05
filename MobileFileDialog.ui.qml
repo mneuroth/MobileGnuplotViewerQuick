@@ -221,6 +221,7 @@ Page {
         Button {
             id: btnOpen
             width: 213
+            enabled: false
             text: qsTr("Open")
             Layout.fillWidth: true
             Layout.column: 0
@@ -240,6 +241,7 @@ Page {
 */
         Button {
             id: btnNew
+            enabled: false
             width: 106
             text: qsTr("New")
             Layout.fillWidth: true
