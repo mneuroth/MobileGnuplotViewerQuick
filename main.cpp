@@ -34,7 +34,7 @@
 
 // TODOs:
 // - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
-// - Bei SD Karten sowohl intern als auch extern anzeigen
+// ok: - Bei SD Karten sowohl intern als auch extern anzeigen
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
 // - ggf. Zeichensatz aenderbar
 // - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
@@ -44,7 +44,7 @@
 // - ggf. Dateien loeschen
 // - Source Code cleanup
 // - QML Source Code besser strukturieren
-// - About Dialog
+// ok: - About Dialog
 // - Google Play Spenden/Bezahloptionen einbauen
 // - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
 // - Pay Features ok, falls alter kommerzieller MobileGnuplotViewer vorhanden

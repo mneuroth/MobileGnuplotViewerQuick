@@ -1,5 +1,3 @@
-
-
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
@@ -193,7 +191,7 @@ Page {
         id: txtMFDInput
         y: 323
         height: 40
-        text: qsTr("Text Input")
+        text: ""
         anchors.bottom: gridLayout.top
         anchors.bottomMargin: 5
         anchors.right: parent.right

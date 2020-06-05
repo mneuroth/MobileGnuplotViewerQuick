@@ -12,6 +12,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
+import QtQuick.Layouts 1.3
 
 import de.mneuroth.gnuplotinvoker 1.0
 //import de.mneuroth.storageaccess 1.0
@@ -29,6 +30,7 @@ ApplicationWindow {
     Settings {
         id: settings
         property string currentFile: ""
+        property bool isFirstRun: true
     }
 
     Component.onDestruction: {
@@ -80,17 +82,20 @@ ApplicationWindow {
         var ok = applicationData.writeFileContent(homePage.currentFileUrl, homePage.textArea.text)
         if(!ok)
         {
-// TODO --> error handling --> user output?
-            var sErr = "Error writing file... "+homePage.currentFileUrl
+            var sErr = qsTr("Error writing file: "+homePage.currentFileUrl+"\n")
             applicationData.logText(sErr)
             outputPage.txtOutput.text = sErr
+            stackView.push(outputPage)
         }
-        homePage.textArea.textDocument.modified = false
+        else
+        {
+            homePage.textArea.textDocument.modified = false
+        }
     }
 
     function saveAsCurrentDoc(fullName) {
         homePage.currentFileUrl = fullName
-        homePage.lblFileName.text = fullName
+        homePage.lblFileName.text = applicationData.getOnlyFileName(fullName)
         saveCurrentDoc()
     }
 
@@ -99,7 +104,7 @@ ApplicationWindow {
         homePage.currentFileUrl = urlFileName
         homePage.textArea.text = applicationData.readFileContent(urlFileName)
         homePage.textArea.textDocument.modified = false
-        homePage.lblFileName.text = urlFileName
+        homePage.lblFileName.text = applicationData.getOnlyFileName(urlFileName)
     }
 
     function showInOutput(sContent) {
@@ -114,21 +119,34 @@ ApplicationWindow {
         showInOutput(sContent)
     }
 
-    function getCurrentText(currentPage) {
-        var s = ""
+    function getCurrentTextRef(currentPage) {
         if(currentPage === homePage)
         {
-            s = homePage.textArea.text
+            return homePage.textArea
         }
         else if(currentPage === outputPage)
         {
-            s = outputPage.txtOutput.text
+            return outputPage.txtOutput
         }
         else if(currentPage === helpPage)
         {
-            s = helpPage.txtHelp.text
+            return helpPage.txtHelp
+        }
+        return null
+    }
+
+    function getCurrentText(currentPage) {
+        var s = ""
+        var textControl = getCurrentTextRef(currentPage)
+        if( textControl !== null )
+        {
+            s = textControl.text
         }
         return s
+    }
+
+    function isGraphicsPage(currentPage) {
+        return currentPage === graphicsPage
     }
 
     onClosing: {
@@ -166,30 +184,75 @@ ApplicationWindow {
                     onTriggered: console.log("Settings...")
                 }
                 MenuItem {
-                    text: qsTr("Print")
+                    text: qsTr("Send as text")
+                    icon.source: "share.svg"
+                    enabled: stackView.currentItem !== graphicsPage
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
-                        applicationData.shareTextAsPdf(s, true)
-                        //applicationData.print(s)
+                        console.log("SEND text <"+s+">")
+                        applicationData.shareSimpleText(s);
                     }
                 }
                 MenuItem {
-                    text: qsTr("View")
+                    text: qsTr("Send as PDF/PNG")
+                    icon.source: "share.svg"
                     onTriggered: {
+                        if( isGraphicsPage(stackView.currentItem) )
+                        {
+                            applicationData.shareSvgData(graphicsPage.svgdata)
+                        }
+                        else
+                        {
+                            var s = getCurrentText(stackView.currentItem)
+                            console.log("SEND <"+s+">")
+                            if( s.length > 0 )
+                            {
+                                applicationData.shareTextAsPdf(s, true)
+                            }
+                        }
+                    }
+                }
+                MenuItem {
+                    text: qsTr("View as PDF/PNG")
+                    icon.source: "share.svg"
+                    onTriggered: {
+                        if( isGraphicsPage(stackView.currentItem) )
+                        {
+                            applicationData.shareViewSvgData(graphicsPage.svgdata)
+                        }
+                        else
+                        {
+                            var s = getCurrentText(stackView.currentItem)
+                            console.log("VIEW <"+s+">")
+                            if( s.length > 0 )
+                            {
+                                applicationData.shareTextAsPdf(s, false)
+                            }
+                        }
                         var s = getCurrentText(stackView.currentItem)
                         applicationData.shareTextAsPdf(s, false)
                     }
                 }
                 MenuItem {
-                    text: qsTr("Delete files")
-                    onTriggered: console.log("Delete...")
+                    text: qsTr("Clear")
+                    onTriggered: {
+                        if( isGraphicsPage(stackView.currentItem) )
+                        {
+                            graphicsPage.image.source = "empty.svg"
+                        }
+                        else
+                        {
+                            var textControl = getCurrentTextRef(stackView.currentItem)
+                            if( textControl !== null)
+                            {
+                                textControl.text = ""
+                            }
+                        }
+                    }
                 }
                 MenuItem {
-                    text: qsTr("Send text")
-                    onTriggered: {
-                        var s = getCurrentText(stackView.currentItem)
-                        applicationData.shareSimpleText(s);
-                    }
+                    text: qsTr("Delete files")
+                    onTriggered: console.log("Delete...")
                 }
                 MenuItem {
                     text: qsTr("FAQ")
@@ -239,7 +302,10 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("About")
-                    onTriggered: console.log("About...")
+                    onTriggered: {
+                        stackView.pop()
+                        stackView.push(aboutDialog)
+                    }
                 }
             }
         }
@@ -368,8 +434,9 @@ ApplicationWindow {
         btnRunHelp {
             onClicked: {
                 var s = gnuplotInvoker.run(helpPage.txtHelp.text)
+                var sErrorText = gnuplotInvoker.lastError
                 outputPage.txtOutput.text = s
-                outputPage.txtOutput.text += gnuplotInvoker.lastError
+                outputPage.txtOutput.text += sErrorText
                 stackView.pop()
                 stackView.push(outputPage)
             }
@@ -452,7 +519,7 @@ ApplicationWindow {
     function setScriptName(name: string)
     {
         homePage.currentFileUrl = name
-        homePage.lblFileName.text = name
+        homePage.lblFileName.text = applicationData.getOnlyFileName(name)
     }
 
     function setOutputText(txt: string)
@@ -470,7 +537,17 @@ ApplicationWindow {
 
         property string currentFileUrl: window.currentFile
 
+        Component.onCompleted: {
+            if( settings.isFirstRun )
+            {
+                textArea.text = applicationData.defaultScript
+                homePage.currentFileUrl = "file:///data/data/de.mneuroth.gnuplotviewerquick/files/default.gpt"
+            }
+            settings.isFirstRun = false
+        }
+
         textArea {
+            //placeholderText: applicationData.defaultScript
             onTextChanged: {
                 // set modified flag for autosave of document
                 textArea.textDocument.modified = true
@@ -496,14 +573,24 @@ ApplicationWindow {
         btnNew {
             onClicked: {
                 homePage.textArea.text = ""
-                homePage.lblFileName.text = "unknown"
+                setScriptName(buildValidUrl(mobileFileDialog.currentDirectory+"/"+qsTr("unknown.gpt")))
             }
         }
 
         btnRun {
             onClicked: {
+                outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
                 var sData = gnuplotInvoker.run(homePage.textArea.text)
-                outputPage.txtOutput.text += gnuplotInvoker.lastError
+                var sErrorText = gnuplotInvoker.lastError
+                outputPage.txtOutput.text += sErrorText
+                if( sErrorText.length>0 )
+                {
+                    graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
+                }
+                else
+                {
+                    graphicsPage.lblShowGraphicsInfo.text = ""
+                }
                 // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
                 if( sData.length > 0 )
                 {
@@ -573,6 +660,20 @@ ApplicationWindow {
 */
     }
 
+    AboutForm {
+        id: aboutDialog
+
+        lblAppInfos {
+            text: applicationData.appInfos
+        }
+
+        btnClose {
+            onClicked:  {
+                stackView.pop()
+            }
+        }
+    }
+
     MobileFileDialog {
         id: mobileFileDialog
 
@@ -583,18 +684,27 @@ ApplicationWindow {
             currentIndex: -1
             focus: true
             onCurrentIndexChanged: {
-                if( listView.currentItem ) {
-// TODO --> nur bei files nicht bei directories !
+                if( listView.currentItem !== null && listView.currentItem.isFile )
+                {
+                    mobileFileDialog.txtMFDInput.text = listView.currentItem.currentFileName
                     mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
                 }
+                else
+                {
+                    mobileFileDialog.txtMFDInput.text = ""
+                    listView.currentItem.currentFileName("")
+                }
+
+                mobileFileDialog.btnOpen.enabled = listView.currentItem === null || listView.currentItem.isFile
             }
         }
 
         function setSaveAsModus() {
             mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
-            mobileFileDialog.txtMFDInput.text = "unknown.gpt"
+            mobileFileDialog.txtMFDInput.text = qsTr("unknown.gpt")
             mobileFileDialog.txtMFDInput.readOnly = false
             mobileFileDialog.btnOpen.text = qsTr("Save as")
+            mobileFileDialog.btnOpen.enabled = true
             mobileFileDialog.isSaveAsModus = true
         }
 
@@ -602,6 +712,7 @@ ApplicationWindow {
             mobileFileDialog.lblMFDInput.text = qsTr("open name:")
             mobileFileDialog.txtMFDInput.readOnly = true
             mobileFileDialog.btnOpen.text = qsTr("Open")
+            mobileFileDialog.btnOpen.enabled = false
             mobileFileDialog.isSaveAsModus = false
         }
 
@@ -615,7 +726,6 @@ ApplicationWindow {
         }
 
         function setCurrentName(name) {
-            txtMFDInput.text = name
             currentFileName = name
         }
 
@@ -631,10 +741,24 @@ ApplicationWindow {
             stackView.pop()
         }
 
+        function navigateToDirectory(sdCardPath) {
+            if( !applicationData.hasAccessToSDCardPath() )
+            {
+                applicationData.grantAccessToSDCardPath(window)
+            }
+
+            if( applicationData.hasAccessToSDCardPath() )
+            {
+                mobileFileDialog.setDirectory(sdCardPath)
+                mobileFileDialog.setCurrentName("")
+            }
+        }
+
         Component {
             id: fileDelegate
             Rectangle {
                 property string currentFileName: fileName
+                property bool isFile: !fileIsDir
                 height: 40
                 color: "transparent"
                 anchors.left: parent.left
@@ -654,10 +778,24 @@ ApplicationWindow {
                         }
                      }
                 }
-                Label {
+                Row {
                     anchors.fill: parent
-                    verticalAlignment: Text.AlignVCenter
-                    text: (fileIsDir ? "DIR_" : "FILE") + /*filePath +*/ " | " + fileName
+                    spacing: 5
+
+                    Image {
+                        id: itemIcon
+                        anchors.left: parent.Left
+                        height: itemLabel.height
+                        width: itemLabel.height
+                        source: fileIsDir ? "directory.svg" : "file.svg"
+                    }
+                    Label {
+                        id: itemLabel
+                        anchors.left: itemIcon.Right
+                        anchors.right: parent.Right
+                        verticalAlignment: Text.AlignVCenter
+                        text: /*(fileIsDir ? "DIR_" : "FILE") + " | " +*/ fileName
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent;
@@ -701,6 +839,7 @@ ApplicationWindow {
             onClicked: {
                 mobileFileDialog.setDirectory(currentDirectory + "/..")
                 mobileFileDialog.setCurrentName("")
+                mobileFileDialog.listView.currentIndex = -1
             }
         }
 
@@ -708,11 +847,30 @@ ApplicationWindow {
             onClicked: {
                 mobileFileDialog.setDirectory(applicationData.homePath)
                 mobileFileDialog.setCurrentName("")
+                mobileFileDialog.listView.currentIndex = -1
+            }
+        }
+
+        Menu {
+            id: menuSDCard
+            Repeater {
+                    model: applicationData.getSDCardPaths()
+                    MenuItem {
+                        text: modelData
+                        onTriggered: {
+                            mobileFileDialog.navigateToDirectory(modelData)
+                        }
+                    }
             }
         }
 
         btnSDCard {
             onClicked: {
+                console.log(applicationData.getSDCardPaths())
+                menuSDCard.x = btnSDCard.x
+                menuSDCard.y = btnSDCard.height
+                menuSDCard.open()
+/*
                 if( !applicationData.hasAccessToSDCardPath() )
                 {
                     applicationData.grantAccessToSDCardPath(window)
@@ -723,6 +881,7 @@ ApplicationWindow {
                     mobileFileDialog.setDirectory(applicationData.sdCardPath)
                     mobileFileDialog.setCurrentName("")
                 }
+*/
             }
         }
 
@@ -826,7 +985,7 @@ ApplicationWindow {
             homePage.currentFileUrl = fileUri
             homePage.textArea.text = content // window.readCurrentDoc(fileUri)  //content
             homePage.textArea.textDocument.modified = false
-            homePage.lblFileName.text = fileUri
+            homePage.lblFileName.text = applicationData.getOnlyFileName(fileUri)
             stackView.pop()
         }
         onOpenFileCanceled: {
@@ -842,8 +1001,9 @@ ApplicationWindow {
         onCreateFileReceived: {
 //            applicationData.logText("==> onCreateFileReceived "+fileUri)
 // TODO
+            homePage.currentFileUrl = fileUri
             homePage.textArea.text += "\ncreated: "+fileUri+"\n"
-            homePage.lblFileName.text = fileUri
+            homePage.lblFileName.text = applicationData.getOnlyFileName(fileUri)
             stackView.pop()
         }
     }
