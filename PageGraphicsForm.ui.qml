@@ -3,11 +3,13 @@ import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 Page {
+    id: page
     property alias image: image
     property alias imageMouseArea: imageMouseArea
 
     width: 600
     height: 400
+    property alias lblShowGraphicsInfo: lblShowGraphicsInfo
     property alias btnHelp: btnHelp
     property alias btnOutput: btnOutput
     property alias btnInput: btnInput
@@ -19,10 +21,14 @@ Page {
 
     Image {
         id: image
-        x: 5
-        y: 5
-        width: parent.width - 10
-        height: parent.height - 10 - gridButtons.height
+        anchors.right: parent.right
+        anchors.rightMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 5
+        anchors.bottom: lblShowGraphicsInfo.top
+        anchors.bottomMargin: 5
+        anchors.top: parent.top
+        anchors.topMargin: 5
         //anchors.fill: parent
         objectName: "imageArea"
         // TODO: see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
@@ -50,8 +56,23 @@ Page {
             hoverEnabled: true
             anchors.fill: parent
             drag.target: image
-            scrollGestureEnabled: false // 2-finger-flick gesture should pass through to the Flickable
+            scrollGestureEnabled: false
+
+            // 2-finger-flick gesture should pass through to the Flickable
         }
+    }
+
+    Label {
+        id: lblShowGraphicsInfo
+        y: 276
+        height: 14
+        text: qsTr("Infos...")
+        anchors.left: parent.left
+        anchors.leftMargin: 5
+        anchors.right: parent.right
+        anchors.rightMargin: 5
+        anchors.bottom: gridButtons.top
+        anchors.bottomMargin: 5
     }
 
     GridLayout {
@@ -114,7 +135,8 @@ Page {
 
 /*##^##
 Designer {
-    D{i:1;anchors_height:400;anchors_width:600;anchors_x:5;anchors_y:5}D{i:2;anchors_x:5;anchors_y:5}
+    D{i:1;anchors_height:290;anchors_width:590;anchors_x:5;anchors_y:5}D{i:2;anchors_x:5;anchors_y:5}
+D{i:4;anchors_width:587;anchors_x:8}
 }
 ##^##*/
 
