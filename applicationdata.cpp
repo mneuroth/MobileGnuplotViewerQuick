@@ -51,6 +51,12 @@ ApplicationData::~ApplicationData()
 #endif
 }
 
+QString ApplicationData::getOnlyFileName(const QString & url) const
+{
+    QUrl aUrl(url);
+    QString name = aUrl.fileName();
+    return name;
+}
 
 QString ApplicationData::normalizePath(const QString & path) const
 {
@@ -305,6 +311,11 @@ QStringList ApplicationData::getSDCardPaths() const
         allPaths.append(path);
     }
     return allPaths;
+}
+
+QString ApplicationData::getAppInfos() const
+{
+    return QString("Qt_")+qVersion()+" Platform: "+QSysInfo::buildAbi();
 }
 
 QString ApplicationData::getDefaultScript() const

@@ -13,5 +13,7 @@
         <file alias="share.svg">files/share.svg</file>
         <file alias="directory.svg">files/file96.svg</file>
         <file alias="file.svg">files/new104.svg</file>
+        <file>AboutForm.ui.qml</file>
+        <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
     </qresource>
 </RCC>
