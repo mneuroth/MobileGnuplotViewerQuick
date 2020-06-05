@@ -90,8 +90,8 @@ deployment2.path=/assets/files
 deployment3.files=files/arm/gnuplot_copyright
 deployment3.path=/assets/files
 
-deployment4.files=files/empty.svg
-deployment4.path=/assets/files
+#deployment4.files=files/empty.svg
+#deployment4.path=/assets/files
 
 deployment5.files=files/faq.txt
 deployment5.path=/assets/files
@@ -124,7 +124,7 @@ data2.path=/assets/files/scripts
 INSTALLS += deployment1
 INSTALLS += deployment2
 INSTALLS += deployment3
-INSTALLS += deployment4
+#INSTALLS += deployment4
 INSTALLS += deployment5
 INSTALLS += deployment6
 INSTALLS += deployment7

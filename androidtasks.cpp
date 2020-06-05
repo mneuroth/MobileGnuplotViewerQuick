@@ -137,9 +137,9 @@ void UnpackFiles(QObject * /*pProgress*/)
     sAsset = QString(ASSETS_DIR)+QString(GNUPLOT_COPYRIGHT);
     sOutput = QString(FILES_DIR)+QString(GNUPLOT_COPYRIGHT);
     extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
-    sAsset = QString(ASSETS_DIR)+QString(EMPTY_SVG);
-    sOutput = QString(FILES_DIR)+QString(EMPTY_SVG);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    //sAsset = QString(ASSETS_DIR)+QString(EMPTY_SVG);
+    //sOutput = QString(FILES_DIR)+QString(EMPTY_SVG);
+    //extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
     sAsset = QString(ASSETS_DIR)+QString(FAQ_TXT);
     sOutput = QString(FILES_DIR)+QString(FAQ_TXT);
     extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
