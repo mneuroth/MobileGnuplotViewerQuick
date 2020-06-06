@@ -1,0 +1,15 @@
+# polar plot example, taken from gnuplot demos (ploar.dem)
+unset border
+set clip
+set polar
+set xtics axis nomirror
+set ytics axis nomirror
+unset rtics
+set samples 160
+set zeroaxis
+set trange [0:12*pi]
+butterfly(x)=exp(cos(x))-2*cos(4*x)+sin(x/12)**5
+set samples 800
+set title "Butterfly"
+unset key
+plot butterfly(t)

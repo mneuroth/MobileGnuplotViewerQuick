@@ -1,0 +1,7 @@
+# This is a simple example to fit experimental data.
+#
+f(x)=m*x+b
+set xrange [0:8]
+set yrange [0:10]
+fit f(x) "./scripts/data.dat" via m,b
+plot "./scripts/data.dat" with errorbars,f(x) 

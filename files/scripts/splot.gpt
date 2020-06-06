@@ -1,0 +1,11 @@
+set hidden3d
+set isosamples 40
+set xrange [-2.5:2.5]
+set yrange [-2.5:2.5]
+set zrange [0.0:5.0]
+set xtics 0.5
+set ytics 1.0
+set ztics 0.5
+set view 40,50,1.0,1.5
+f(x,y)=(x**2+2.5*y**2-y)*exp(1-(x**2+y**2))
+splot f(x,y)

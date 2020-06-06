@@ -1,0 +1,11 @@
+# This is a graphical frontend app for gnuplot.
+#
+# Enter gnuplot commands in this field and
+# execute script by activating the run button below.
+# Type help and hit run button for gnuplot help.
+#
+# See http://www.gnuplot.info/ for more information.
+#
+# example:
+
+plot sin(x), cos(x)

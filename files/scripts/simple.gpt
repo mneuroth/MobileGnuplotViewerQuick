@@ -1,0 +1,4 @@
+# simple function plot
+set title "sinus and cosinus"
+plot sin(x),0.75*cos(x)
+
