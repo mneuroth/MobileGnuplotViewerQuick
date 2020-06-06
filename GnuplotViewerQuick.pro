@@ -117,6 +117,9 @@ script4.path=/assets/files/scripts
 script5.files=files/scripts/butterfly.gpt
 script5.path=/assets/files/scripts
 
+script6.files=files/scripts/default.gpt
+script6.path=/assets/files/scripts
+
 data2.files=files/scripts/data.dat
 data2.path=/assets/files/scripts
 
@@ -133,6 +136,7 @@ INSTALLS += script2
 INSTALLS += script3
 INSTALLS += script4
 INSTALLS += script5
+INSTALLS += script6
 INSTALLS += data2
 }
 

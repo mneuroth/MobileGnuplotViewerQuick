@@ -8,11 +8,8 @@ Page {
     width: 600
     height: 400
     property alias btnOutput: btnOutput
-    property alias btnGraphics: btnGraphics
     property alias btnInput: btnInput
     property alias btnRunHelp: btnRunHelp
-    property alias btnClear: btnClear
-    property alias btnShare: btnShare
     property alias txtHelp: txtHelp
 
     property string fontName: "Courier"
@@ -55,36 +52,15 @@ Page {
         id: gridButtons
         x: 44
         y: 5
-        height: 95
+        height: 50
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.bottomMargin: 5
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        rows: 2
+        rows: 1
         columns: 3
-
-        Button {
-            id: btnShare
-            text: qsTr("Share")
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
-
-        Button {
-            id: btnClear
-            text: qsTr("Clear")
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
-
-        Button {
-            id: btnRunHelp
-            text: qsTr("Run help")
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
 
         Button {
             id: btnInput
@@ -101,8 +77,8 @@ Page {
         }
 
         Button {
-            id: btnGraphics
-            text: qsTr("Graphics")
+            id: btnRunHelp
+            text: qsTr("Run help")
             Layout.fillHeight: true
             Layout.fillWidth: true
         }

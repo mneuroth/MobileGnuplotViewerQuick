@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
@@ -15,7 +16,6 @@ import QtQuick.Layouts 1.3
 
 Page {
     property alias btnCancel: btnCancel
-    property alias btnNew: btnNew
     property alias btnOpen: btnOpen
     property alias txtMFDInput: txtMFDInput
     property alias lblMFDInput: lblMFDInput
@@ -181,7 +181,7 @@ Page {
         text: qsTr("Any input")
         anchors.left: parent.left
         anchors.leftMargin: 5
-        anchors.bottom: gridLayout.top
+        anchors.bottom: btnOpen.top
         anchors.bottomMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
@@ -192,7 +192,7 @@ Page {
         y: 323
         height: 40
         text: ""
-        anchors.bottom: gridLayout.top
+        anchors.bottom: btnCancel.top
         anchors.bottomMargin: 5
         anchors.right: parent.right
         anchors.rightMargin: 5
@@ -202,69 +202,32 @@ Page {
         verticalAlignment: Text.AlignVCenter
     }
 
-    GridLayout {
-        id: gridLayout
-        height: 40
-        rows: 1
-        columns: 4
-        columnSpacing: 5
-        rowSpacing: 5
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 5
-        anchors.right: parent.right
-        anchors.rightMargin: 5
+    Button {
+        id: btnOpen
+        enabled: false
+        text: qsTr("Open")
+        width: btnUp.width
         anchors.left: parent.left
         anchors.leftMargin: 5
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
+    }
 
-        Button {
-            id: btnOpen
-            width: 213
-            enabled: false
-            text: qsTr("Open")
-            Layout.fillWidth: true
-            Layout.column: 0
-            Layout.fillHeight: true
-            //Layout.fillWidth: true
-            Layout.columnSpan: 2
-        }
-/*
-        Rectangle {
-            id: newRect
-            color: "blue"
-            visible: !btnNew.visible
-            Layout.column: 2
-            Layout.fillHeight: true
-            Layout.preferredWidth: parent.width / parent.columns
-        }
-*/
-        Button {
-            id: btnNew
-            enabled: false
-            width: 106
-            text: qsTr("New")
-            Layout.fillWidth: true
-            Layout.column: 2
-            Layout.fillHeight: true
-            //Layout.fillWidth: true
-        }
-
-        Button {
-            id: btnCancel
-            width: 106
-            text: qsTr("Cancel")
-            Layout.fillWidth: true
-            Layout.column: 3
-            Layout.fillHeight: true
-            //Layout.fillWidth: true
-        }
+    Button {
+        id: btnCancel
+        width: btnStorage.width
+        text: qsTr("Cancel")
+        anchors.right: parent.right
+        anchors.rightMargin: 5
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
     }
 }
 
 /*##^##
 Designer {
     D{i:0;formeditorZoom:0.8999999761581421}D{i:1;anchors_width:450}D{i:7;anchors_height:284}
-D{i:10;anchors_x:16}D{i:11;anchors_height:15}D{i:13;anchors_height:37;anchors_width:100}
-D{i:12;anchors_y:323}
+D{i:10;anchors_x:16}D{i:11;anchors_height:15}D{i:12;anchors_y:323}D{i:13;anchors_height:37;anchors_width:100}
 }
 ##^##*/
 

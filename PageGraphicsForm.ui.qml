@@ -13,9 +13,6 @@ Page {
     property alias btnHelp: btnHelp
     property alias btnOutput: btnOutput
     property alias btnInput: btnInput
-    property alias btnExport: btnExport
-    property alias btnClear: btnClear
-    property alias btnShare: btnShare
     anchors.fill: parent
     title: qsTr("Graphics")
 
@@ -79,36 +76,15 @@ Page {
         id: gridButtons
         x: 44
         y: 5
-        height: 95
+        height: 50
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.bottomMargin: 5
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        rows: 2
+        rows: 1
         columns: 3
-
-        Button {
-            id: btnShare
-            text: qsTr("Share")
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
-
-        Button {
-            id: btnClear
-            text: qsTr("Clear")
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
-
-        Button {
-            id: btnExport
-            text: qsTr("Export")
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
 
         Button {
             id: btnInput
@@ -118,15 +94,15 @@ Page {
         }
 
         Button {
-            id: btnOutput
-            text: qsTr("Output")
+            id: btnHelp
+            text: qsTr("Help")
             Layout.fillHeight: true
             Layout.fillWidth: true
         }
 
         Button {
-            id: btnHelp
-            text: qsTr("Help")
+            id: btnOutput
+            text: qsTr("Output")
             Layout.fillHeight: true
             Layout.fillWidth: true
         }
