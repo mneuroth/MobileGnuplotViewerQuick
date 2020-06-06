@@ -29,8 +29,8 @@ ApplicationWindow {
 
     Settings {
         id: settings
-        property string currentFile: ""
-        property bool isFirstRun: true
+        property string currentFile: "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt"
+        //property bool isFirstRun: true
     }
 
     Component.onDestruction: {
@@ -57,7 +57,7 @@ ApplicationWindow {
         if( homePage.textArea.textDocument.modified )
         {
             // auto save document if application is closing
-            saveCurrentDoc()
+            saveCurrentDoc(homePage.textArea)
         }
     }
 
@@ -78,8 +78,8 @@ ApplicationWindow {
         return sUrl
     }
 
-    function saveCurrentDoc() {
-        var ok = applicationData.writeFileContent(homePage.currentFileUrl, homePage.textArea.text)
+    function saveCurrentDoc(textControl) {
+        var ok = applicationData.writeFileContent(homePage.currentFileUrl, textControl.text)
         if(!ok)
         {
             var sErr = qsTr("Error writing file: "+homePage.currentFileUrl+"\n")
@@ -93,10 +93,10 @@ ApplicationWindow {
         }
     }
 
-    function saveAsCurrentDoc(fullName) {
+    function saveAsCurrentDoc(fullName, textControl) {
         homePage.currentFileUrl = fullName
         homePage.lblFileName.text = applicationData.getOnlyFileName(fullName)
-        saveCurrentDoc()
+        saveCurrentDoc(textControl)
     }
 
     function readCurrentDoc(url) {
@@ -180,8 +180,14 @@ ApplicationWindow {
                 y: menuButton.height
 
                 MenuItem {
-                    text: qsTr("Settings")
-                    onTriggered: console.log("Settings...")
+                    text: qsTr("Send")
+                    icon.source: "share.svg"
+                    enabled: stackView.currentItem !== graphicsPage
+                    onTriggered: {
+                        var s = getCurrentText(stackView.currentItem)
+// TODO file name nach page setzen
+                        applicationData.shareText(s, "gnuplot.gpt")
+                    }
                 }
                 MenuItem {
                     text: qsTr("Send as text")
@@ -189,7 +195,6 @@ ApplicationWindow {
                     enabled: stackView.currentItem !== graphicsPage
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
-                        console.log("SEND text <"+s+">")
                         applicationData.shareSimpleText(s);
                     }
                 }
@@ -204,14 +209,13 @@ ApplicationWindow {
                         else
                         {
                             var s = getCurrentText(stackView.currentItem)
-                            console.log("SEND <"+s+">")
                             if( s.length > 0 )
                             {
                                 applicationData.shareTextAsPdf(s, true)
                             }
                         }
                     }
-                }
+                }       
                 MenuItem {
                     text: qsTr("View as PDF/PNG")
                     icon.source: "share.svg"
@@ -223,16 +227,14 @@ ApplicationWindow {
                         else
                         {
                             var s = getCurrentText(stackView.currentItem)
-                            console.log("VIEW <"+s+">")
                             if( s.length > 0 )
                             {
                                 applicationData.shareTextAsPdf(s, false)
                             }
                         }
-                        var s = getCurrentText(stackView.currentItem)
-                        applicationData.shareTextAsPdf(s, false)
                     }
                 }
+                MenuSeparator {}
                 MenuItem {
                     text: qsTr("Clear")
                     onTriggered: {
@@ -247,6 +249,32 @@ ApplicationWindow {
                             {
                                 textControl.text = ""
                             }
+                            if( stackView.currentItem === homePage )
+                            {
+                                setScriptName(buildValidUrl(mobileFileDialog.currentDirectory+"/"+qsTr("unknown.gpt")))
+                            }
+                        }
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Save as")
+                    enabled: stackView.currentItem !== graphicsPage
+                    onTriggered: {
+                        if( isGraphicsPage(stackView.currentItem) )
+                        {
+// TODO --> implement save image
+                        }
+                        else
+                        {
+                            var textControl = getCurrentTextRef(stackView.currentItem)
+                            if( textControl !== null )
+                            {
+                                mobileFileDialog.textControl = textControl
+                                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                                mobileFileDialog.setSaveAsModus()
+                                stackView.pop()
+                                stackView.push(mobileFileDialog)
+                            }
                         }
                     }
                 }
@@ -254,44 +282,54 @@ ApplicationWindow {
                     text: qsTr("Delete files")
                     onTriggered: console.log("Delete...")
                 }
+                MenuSeparator {}
                 MenuItem {
-                    text: qsTr("FAQ")
-                    onTriggered: {
-                        showFileContentInOutput("faq.txt")
+                    text: qsTr("Settings")
+                    onTriggered: console.log("Settings...")
+                }
+                Menu {
+                    title: qsTr("Documentation")
+
+                    MenuItem {
+                        text: qsTr("FAQ")
+                        onTriggered: {
+                            showFileContentInOutput("faq.txt")
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("License")
+                        onTriggered: {
+                            showFileContentInOutput("gnuplotviewer_license.txt")
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("Gnuplot license")
+                        onTriggered: {
+                            showFileContentInOutput("gnuplot_copyright")
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("Gnuplot help")
+                        onTriggered: {
+                            var sContent = gnuplotInvoker.run("help")
+                            outputPage.txtOutput.text = sContent
+                            outputPage.txtOutput.text += gnuplotInvoker.lastError
+                            stackView.pop()
+                            stackView.push(outputPage)
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("Gnuplot version")
+                        onTriggered: {
+                            var sContent = gnuplotInvoker.run("show version")
+                            outputPage.txtOutput.text = sContent
+                            outputPage.txtOutput.text += gnuplotInvoker.lastError
+                            stackView.pop()
+                            stackView.push(outputPage)
+                        }
                     }
                 }
-                MenuItem {
-                    text: qsTr("License")
-                    onTriggered: {
-                        showFileContentInOutput("gnuplotviewer_license.txt")
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Gnuplot license")
-                    onTriggered: {
-                        showFileContentInOutput("gnuplot_copyright")
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Gnuplot version")
-                    onTriggered: {
-                        var sContent = gnuplotInvoker.run("show version")
-                        outputPage.txtOutput.text = sContent
-                        outputPage.txtOutput.text += gnuplotInvoker.lastError
-                        stackView.pop()
-                        stackView.push(outputPage)
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Gnuplot help")
-                    onTriggered: {
-                        var sContent = gnuplotInvoker.run("help")
-                        outputPage.txtOutput.text = sContent
-                        outputPage.txtOutput.text += gnuplotInvoker.lastError
-                        stackView.pop()
-                        stackView.push(outputPage)
-                    }
-                }
+/* --> in settings
                 MenuItem {
                     id: gnuplotBeta
                     text: qsTr("Gnuplot beta")
@@ -300,6 +338,7 @@ ApplicationWindow {
                         gnuplotInvoker.useBeta = gnuplotBeta.checked
                     }
                 }
+*/
                 MenuItem {
                     text: qsTr("About")
                     onTriggered: {
@@ -358,39 +397,6 @@ ApplicationWindow {
             }
         }
 
-        btnShare {
-            onClicked: {
-/*                graphicsPage.image.grabToImage( function(result)
-                {
-                    console.log("GRAB img --> "+result)
-                    result.saveToFile("test.png")
-                } )
-*/
-                var ok = applicationData.shareSvgData(graphicsPage.svgdata)
-                if( !ok )
-                {
-                    window.showInOutput(qsTr("can not share image"))
-                }
-            }
-        }
-
-        btnClear {
-            onClicked: {
-                graphicsPage.image.source = "empty.svg"
-            }
-        }
-
-        btnExport {
-            onClicked: {
-                // TODO
-                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata)
-                if( !ok )
-                {
-                    window.showInOutput(qsTr("can not view image"))
-                }
-            }
-        }
-
         btnOutput {
             onClicked: {
                 stackView.pop()
@@ -419,18 +425,6 @@ ApplicationWindow {
 
         fontName: getFontName()
 
-        btnShare {
-            onClicked: {
-                applicationData.shareText(helpPage.txtHelp.text, "help.txt")
-            }
-        }
-
-        btnClear {
-            onClicked: {
-                helpPage.txtHelp.text = ""
-            }
-        }
-
         btnRunHelp {
             onClicked: {
                 var s = gnuplotInvoker.run(helpPage.txtHelp.text)
@@ -439,13 +433,6 @@ ApplicationWindow {
                 outputPage.txtOutput.text += sErrorText
                 stackView.pop()
                 stackView.push(outputPage)
-            }
-        }
-
-        btnGraphics {
-            onClicked: {
-                stackView.pop()
-                stackView.push(graphicsPage)
             }
         }
 
@@ -469,24 +456,6 @@ ApplicationWindow {
         objectName: "outputPage"
 
         fontName: getFontName()
-
-        btnShare {
-            onClicked: {
-                applicationData.shareText(outputPage.txtOutput.text, "output.txt")
-            }
-        }
-
-        btnClear {
-            onClicked: {
-                outputPage.txtOutput.text = ""
-            }
-        }
-
-        btnSaveAs {
-            onClicked: {
-                // TODO
-            }
-        }
 
         btnGraphics {
             onClicked: {
@@ -536,16 +505,16 @@ ApplicationWindow {
         fontName: getFontName()
 
         property string currentFileUrl: window.currentFile
-
+/*
         Component.onCompleted: {
             if( settings.isFirstRun )
             {
-                textArea.text = applicationData.defaultScript
-                homePage.currentFileUrl = "file:///data/data/de.mneuroth.gnuplotviewerquick/files/default.gpt"
+                //textArea.text = applicationData.defaultScript
+                //homePage.currentFileUrl = "file:///data/data/de.mneuroth.gnuplotviewerquick/files/default.gpt"
             }
             settings.isFirstRun = false
         }
-
+*/
         textArea {
             //placeholderText: applicationData.defaultScript
             onTextChanged: {
@@ -559,7 +528,6 @@ ApplicationWindow {
                 //fileDialog.open()
                 //mobileFileDialog.open()
                 mobileFileDialog.setOpenModus()
-                mobileFileDialog.btnNew.visible = true
                 if( mobileFileDialog.currentDirectory == "" )
                 {
                     mobileFileDialog.currentDirectory = applicationData.homePath
@@ -570,10 +538,9 @@ ApplicationWindow {
             }
         }
 
-        btnNew {
+        btnSave {
             onClicked: {
-                homePage.textArea.text = ""
-                setScriptName(buildValidUrl(mobileFileDialog.currentDirectory+"/"+qsTr("unknown.gpt")))
+                saveCurrentDoc(homePage.textArea)
             }
         }
 
@@ -606,27 +573,6 @@ ApplicationWindow {
                     stackView.pop()
                     stackView.push(outputPage)
                 }
-            }
-        }
-
-        btnShare {
-            onClicked: {
-                applicationData.shareText(homePage.textArea.text, "gnuplot.gpt")
-            }
-        }
-
-        btnSave {
-            onClicked: {
-                saveCurrentDoc()
-            }
-        }
-
-        btnSaveAs {
-            onClicked: {
-                mobileFileDialog.setSaveAsModus()
-                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-                stackView.pop()
-                stackView.push(mobileFileDialog)
             }
         }
 
@@ -678,12 +624,14 @@ ApplicationWindow {
         id: mobileFileDialog
 
         property bool isSaveAsModus: false
+        property var textControl: null
 
         listView {
             // https://stackoverflow.com/questions/9400002/qml-listview-selected-item-highlight-on-click
             currentIndex: -1
             focus: true
             onCurrentIndexChanged: {
+                // update currently selected filename
                 if( listView.currentItem !== null && listView.currentItem.isFile )
                 {
                     mobileFileDialog.txtMFDInput.text = listView.currentItem.currentFileName
@@ -695,25 +643,28 @@ ApplicationWindow {
                     listView.currentItem.currentFileName("")
                 }
 
-                mobileFileDialog.btnOpen.enabled = listView.currentItem === null || listView.currentItem.isFile
+                if( !mobileFileDialog.isSaveAsModus )
+                {
+                    mobileFileDialog.btnOpen.enabled = listView.currentItem === null || listView.currentItem.isFile
+                }
             }
         }
 
         function setSaveAsModus() {
+            mobileFileDialog.isSaveAsModus = true
             mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
             mobileFileDialog.txtMFDInput.text = qsTr("unknown.gpt")
             mobileFileDialog.txtMFDInput.readOnly = false
             mobileFileDialog.btnOpen.text = qsTr("Save as")
             mobileFileDialog.btnOpen.enabled = true
-            mobileFileDialog.isSaveAsModus = true
         }
 
         function setOpenModus() {
+            mobileFileDialog.isSaveAsModus = false
             mobileFileDialog.lblMFDInput.text = qsTr("open name:")
             mobileFileDialog.txtMFDInput.readOnly = true
             mobileFileDialog.btnOpen.text = qsTr("Open")
             mobileFileDialog.btnOpen.enabled = false
-            mobileFileDialog.isSaveAsModus = false
         }
 
         function setDirectory(newPath) {
@@ -737,7 +688,7 @@ ApplicationWindow {
 
         function saveAsCurrentFileNow() {
             var fullPath = currentDirectory + "/" + txtMFDInput.text
-            window.saveAsCurrentDoc(buildValidUrl(fullPath))
+            window.saveAsCurrentDoc(buildValidUrl(fullPath), textControl)
             stackView.pop()
         }
 
