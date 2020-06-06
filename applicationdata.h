@@ -70,6 +70,8 @@ public:
     Q_INVOKABLE QString readFileContent(const QString & fileName) const;
     Q_INVOKABLE bool writeFileContent(const QString & fileName, const QString & content);
 
+    Q_INVOKABLE bool deleteFile(const QString & fileName);
+
     Q_INVOKABLE bool hasAccessToSDCardPath() const;
     Q_INVOKABLE bool grantAccessToSDCardPath(QObject * parent);
 

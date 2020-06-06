@@ -280,7 +280,13 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("Delete files")
-                    onTriggered: console.log("Delete...")
+                    onTriggered: {
+                        mobileFileDialog.textControl = null
+                        mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                        mobileFileDialog.setDeleteModus()
+                        stackView.pop()
+                        stackView.push(mobileFileDialog)
+                    }
                 }
                 MenuSeparator {}
                 MenuItem {
@@ -624,6 +630,7 @@ ApplicationWindow {
         id: mobileFileDialog
 
         property bool isSaveAsModus: false
+        property bool isDeleteModus: false
         property var textControl: null
 
         listView {
@@ -652,6 +659,7 @@ ApplicationWindow {
 
         function setSaveAsModus() {
             mobileFileDialog.isSaveAsModus = true
+            mobileFileDialog.isDeleteModus = false
             mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
             mobileFileDialog.txtMFDInput.text = qsTr("unknown.gpt")
             mobileFileDialog.txtMFDInput.readOnly = false
@@ -661,9 +669,20 @@ ApplicationWindow {
 
         function setOpenModus() {
             mobileFileDialog.isSaveAsModus = false
+            mobileFileDialog.isDeleteModus = false
             mobileFileDialog.lblMFDInput.text = qsTr("open name:")
             mobileFileDialog.txtMFDInput.readOnly = true
             mobileFileDialog.btnOpen.text = qsTr("Open")
+            mobileFileDialog.btnOpen.enabled = false
+        }
+
+        function setDeleteModus() {
+            mobileFileDialog.isSaveAsModus = false
+            mobileFileDialog.isDeleteModus = true
+            mobileFileDialog.lblMFDInput.text = qsTr("current file name:")
+            mobileFileDialog.txtMFDInput.text = ""
+            mobileFileDialog.txtMFDInput.readOnly = true
+            mobileFileDialog.btnOpen.text = qsTr("Delete")
             mobileFileDialog.btnOpen.enabled = false
         }
 
@@ -678,6 +697,17 @@ ApplicationWindow {
 
         function setCurrentName(name) {
             currentFileName = name
+        }
+
+        function deleteCurrentFileNow() {
+            var fullPath = currentDirectory + "/" + currentFileName
+            var ok = applicationData.deleteFile(fullPath)
+            stackView.pop()
+            if( !ok )
+            {
+                outputPage.txtOutput.text += qsTr("can not delete file ") + fullPath
+                stackView.push(outputPage)
+            }
         }
 
         function openCurrentFileNow() {
@@ -715,7 +745,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 Keys.onPressed: {
-                     if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                     if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                         if( fileIsDir )
                         {
                             mobileFileDialog.setDirectory(filePath)
@@ -771,14 +801,22 @@ ApplicationWindow {
 
         btnOpen  {
             onClicked: {
-                if( mobileFileDialog.isSaveAsModus )
+                if( mobileFileDialog.isDeleteModus )
                 {
-                    mobileFileDialog.saveAsCurrentFileNow()
+                    mobileFileDialog.deleteCurrentFileNow()
                 }
                 else
                 {
-                    mobileFileDialog.openCurrentFileNow()
+                    if( mobileFileDialog.isSaveAsModus )
+                    {
+                        mobileFileDialog.saveAsCurrentFileNow()
+                    }
+                    else
+                    {
+                        mobileFileDialog.openCurrentFileNow()
+                    }
                 }
+
             }
         }
 
@@ -821,18 +859,6 @@ ApplicationWindow {
                 menuSDCard.x = btnSDCard.x
                 menuSDCard.y = btnSDCard.height
                 menuSDCard.open()
-/*
-                if( !applicationData.hasAccessToSDCardPath() )
-                {
-                    applicationData.grantAccessToSDCardPath(window)
-                }
-
-                if( applicationData.hasAccessToSDCardPath() )
-                {
-                    mobileFileDialog.setDirectory(applicationData.sdCardPath)
-                    mobileFileDialog.setCurrentName("")
-                }
-*/
             }
         }
 

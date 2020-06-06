@@ -143,6 +143,13 @@ bool ApplicationData::writeFileContent(const QString & fileName, const QString &
     }
 }
 
+bool ApplicationData::deleteFile(const QString & fileName)
+{
+    QFile aDir(fileName);
+    bool ok = aDir.remove();
+    return ok;
+}
+
 bool ApplicationData::hasAccessToSDCardPath() const
 {
     return ::HasAccessToSDCardPath();
