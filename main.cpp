@@ -43,6 +43,7 @@
 // ok: - ggf. save as menu item um fit ergebnisse zu speichern ?
 // ok: - homePage: Buttons fuer: open, save, run, navigation, alle anderen entfernen...
 // ok: - MobileFileDialog: new Button entfernen, wird nicht benoetigt ?
+// ok: - Graphics pitch funktioniert nicht richtig...
 // - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
 // - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
 // - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog

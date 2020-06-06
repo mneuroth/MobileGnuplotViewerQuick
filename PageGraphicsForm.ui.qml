@@ -18,15 +18,10 @@ Page {
 
     Image {
         id: image
-        anchors.right: parent.right
-        anchors.rightMargin: 5
-        anchors.left: parent.left
-        anchors.leftMargin: 5
-        anchors.bottom: lblShowGraphicsInfo.top
-        anchors.bottomMargin: 5
-        anchors.top: parent.top
-        anchors.topMargin: 5
-        //anchors.fill: parent
+        x: 5
+        y: 5
+        width: parent.width - 10
+        height: parent.height - 15 - gridButtons.height - lblShowGraphicsInfo.height
         objectName: "imageArea"
         // TODO: see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
         source: "DSC_4945.JPG" // "spaceship.svg" // "empty.svg"

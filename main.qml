@@ -392,8 +392,8 @@ ApplicationWindow {
             onDoubleClicked: {
                 // set to default with double click
                 image.scale = 1.0
-                image.x = 0
-                image.y = 0
+                image.x = 5
+                image.y = 5
             }
         }
 
