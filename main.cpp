@@ -33,21 +33,29 @@
 //   --> ok, wenn App vorher geschlossen wird (mit Back-Button)
 
 // TODOs:
-// - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
+// ok:? - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
 // ok: - Bei SD Karten sowohl intern als auch extern anzeigen
 // - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
 // - ggf. Zeichensatz aenderbar
-// - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
-// - alte MobileGnuplotViewer Apps bauen, mit Dialog auf Obsolet App und Link auf neue verbesserte App --> Touch Version
-// - Drucken ?
-// - ggf. Text als PDF exportieren --> damit ist text druckbar ! --> #include <QPdfWriter> --> https://stackoverrun.com/de/q/9274733
+// ok: - Drucken ?
+// ok: - ggf. Text als PDF exportieren --> damit ist text druckbar ! --> #include <QPdfWriter> --> https://stackoverrun.com/de/q/9274733
+// ok: - ggf. obsolete buttons fuer share, clear und export entfernen
+// ok: - ggf. save as menu item um fit ergebnisse zu speichern ?
+// ok: - homePage: Buttons fuer: open, save, run, navigation, alle anderen entfernen...
+// ok: - MobileFileDialog: new Button entfernen, wird nicht benoetigt ?
+// - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
+// - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
+// - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog
 // - ggf. Dateien loeschen
 // - Source Code cleanup
 // - QML Source Code besser strukturieren
 // ok: - About Dialog
 // - Google Play Spenden/Bezahloptionen einbauen
-// - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
+//
 // - Pay Features ok, falls alter kommerzieller MobileGnuplotViewer vorhanden
+// - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
+// - alte MobileGnuplotViewer Apps bauen, mit Dialog auf Obsolet App und Link auf neue verbesserte App --> Touch Version
+// - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
 //
 // - ggf. Einstellungen Aussehen aenderbar
 // - ggf. Bearbeiten Menu (copy/paste) --> nicht notwendig, da via context moeglich

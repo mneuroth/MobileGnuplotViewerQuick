@@ -162,6 +162,9 @@ void UnpackFiles(QObject * /*pProgress*/)
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT5_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT5_GPT);
     extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT6_GPT);
+    sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT6_GPT);
+    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(DATA2_DAT);
     sOutput = QString(SCRIPTS_DIR)+QString(DATA2_DAT);
     extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);

@@ -58,6 +58,7 @@
 #define SCRIPT3_GPT                 "splot.gpt"
 #define SCRIPT4_GPT                 "multiplot.gpt"
 #define SCRIPT5_GPT                 "butterfly.gpt"
+#define SCRIPT6_GPT                 "default.gpt"
 #define DATA2_DAT                   "data.dat"
 
 class UnpackFilesThread;
