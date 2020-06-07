@@ -48,7 +48,7 @@ Page {
         TextArea {
             id: textArea
             font.family: fontName
-            anchors.fill: parent
+            //anchors.fill: parent
             objectName: "textArea"
             placeholderText: qsTr("Enter gnuplot script here...")
         }

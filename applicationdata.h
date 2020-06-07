@@ -95,7 +95,7 @@ public:
     QString getSDCardPath() const;
     Q_INVOKABLE QStringList getSDCardPaths() const;
 
-    QString getAppInfos() const;
+    Q_INVOKABLE QString getAppInfos() const;
 
     QString getDefaultScript() const;
 

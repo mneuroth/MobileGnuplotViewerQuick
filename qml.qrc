@@ -14,6 +14,9 @@
         <file alias="file.svg">files/new104.svg</file>
         <file>AboutForm.ui.qml</file>
         <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
-        <file>SettingsForm.ui.qml</file>
+        <file>SettingsDialogForm.ui.qml</file>
+        <file>SettingsDialog.qml</file>
+        <file>DummyPage.qml</file>
+        <file>DummyPageFormular.ui.qml</file>
     </qresource>
 </RCC>

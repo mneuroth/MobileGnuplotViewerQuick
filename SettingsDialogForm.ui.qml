@@ -13,7 +13,7 @@ import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 
 Page {
-    id: settingsDialog
+    //id: settingsDialog
     anchors.fill: parent
 
     width: 400

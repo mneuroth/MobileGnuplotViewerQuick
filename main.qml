@@ -376,6 +376,13 @@ ApplicationWindow {
                         stackView.push(aboutDialog)
                     }
                 }
+                MenuItem {
+                    text: qsTr("Test")
+                    onTriggered: {
+                        stackView.pop()
+                        stackView.push(dummyPage)
+                    }
+                }
             }
         }
 
@@ -396,6 +403,10 @@ ApplicationWindow {
             text: stackView.currentItem.title
             anchors.centerIn: parent
         }
+    }
+
+    DummyPage {
+        id: dummyPage
     }
 
     PageGraphicsForm {
@@ -631,7 +642,7 @@ ApplicationWindow {
         id: aboutDialog
 
         lblAppInfos {
-            text: applicationData.appInfos
+            text: applicationData.getAppInfos()
         }
 
         btnClose {
@@ -641,49 +652,8 @@ ApplicationWindow {
         }
     }
 
-    SettingsForm {
+    SettingsDialog {
         id: settingsDialog
-
-        Component.onCompleted: {
-            settingsDialog.btnSelectFont.visible = false
-            settingsDialog.lblExampleText.visible = false
-        }
-
-        txtGraphicsResolution {
-            validator: IntValidator { bottom: 128; top: 4096 }
-        }
-
-        txtGraphicsFontSize {
-            validator: IntValidator { bottom: 6; top: 64 }
-        }
-
-        btnSelectFont {
-            onClicked: {
-                fontDialog.font = lblExampleText.font
-                fontDialog.currentFont = lblExampleText.font
-                fontDialog.resultFcn = function (val) { lblExampleText.font = val }
-                fontDialog.open()
-            }
-        }
-
-        btnCancel {
-            onClicked:  {
-                stackView.pop()
-            }
-        }
-
-        btnOk {
-            onClicked:  {
-                gnuplotInvoker.resolution = parseInt(txtGraphicsResolution.text)
-                gnuplotInvoker.useBeta = chbUseGnuplotBeta.checked
-                gnuplotInvoker.fontSize = parseInt(txtGraphicsFontSize.text)
-                var aFont = settingsDialog.lblExampleText.font
-                homePage.textArea.font = aFont
-                outputPage.txtOutput.font = aFont
-                helpPage.txtHelp.font = aFont
-                stackView.pop()
-            }
-        }
     }
 
     MobileFileDialog {
