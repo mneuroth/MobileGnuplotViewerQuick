@@ -535,16 +535,7 @@ ApplicationWindow {
         fontName: getFontName()
 
         property string currentFileUrl: window.currentFile
-/*
-        Component.onCompleted: {
-            if( settings.isFirstRun )
-            {
-                //textArea.text = applicationData.defaultScript
-                //homePage.currentFileUrl = "file:///data/data/de.mneuroth.gnuplotviewerquick/files/default.gpt"
-            }
-            settings.isFirstRun = false
-        }
-*/
+
         textArea {
             //placeholderText: applicationData.defaultScript
             onTextChanged: {
@@ -653,6 +644,11 @@ ApplicationWindow {
     SettingsForm {
         id: settingsDialog
 
+        Component.onCompleted: {
+            settingsDialog.btnSelectFont.visible = false
+            settingsDialog.lblExampleText.visible = false
+        }
+
         txtGraphicsResolution {
             validator: IntValidator { bottom: 128; top: 4096 }
         }
@@ -664,6 +660,7 @@ ApplicationWindow {
         btnSelectFont {
             onClicked: {
                 fontDialog.font = lblExampleText.font
+                fontDialog.currentFont = lblExampleText.font
                 fontDialog.resultFcn = function (val) { lblExampleText.font = val }
                 fontDialog.open()
             }
@@ -889,9 +886,13 @@ ApplicationWindow {
 
         btnUp {
             onClicked: {
-                mobileFileDialog.setDirectory(currentDirectory + "/..")
-                mobileFileDialog.setCurrentName("")
-                mobileFileDialog.listView.currentIndex = -1
+                // stop with moving up when home directory is reached
+                if( applicationData.normalizePath(currentDirectory) !== applicationData.normalizePath(applicationData.homePath) )
+                {
+                    mobileFileDialog.setDirectory(currentDirectory + "/..")
+                    mobileFileDialog.setCurrentName("")
+                    mobileFileDialog.listView.currentIndex = -1
+                }
             }
         }
 
@@ -935,6 +936,8 @@ ApplicationWindow {
 
     FontDialog {
         id: fontDialog
+
+        //currentFont.family: "Mono"
 
         property var resultFcn: null
 

@@ -35,8 +35,8 @@
 // TODOs:
 // ok:? - MobileFileDialog verbessern (Label Beschriftungen, Buttons ausblenden)
 // ok: - Bei SD Karten sowohl intern als auch extern anzeigen
-// - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
-// - ggf. Zeichensatz aenderbar
+// ok: - Einstellungen erlauben: Groesse fuer SVG plot und Font Name und Groesse einstellbar machen
+// ok:? - ggf. Zeichensatz aenderbar
 // ok: - Drucken ?
 // ok: - ggf. Text als PDF exportieren --> damit ist text druckbar ! --> #include <QPdfWriter> --> https://stackoverrun.com/de/q/9274733
 // ok: - ggf. obsolete buttons fuer share, clear und export entfernen
@@ -48,7 +48,7 @@
 // - ggf. qml warnings entfernen
 // - ggf. Applicaton Icon auffrischen...
 // - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
-// - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
+// ok: - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
 // ok: - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog
 // ok: - ggf. Dateien loeschen
 // - Source Code cleanup
