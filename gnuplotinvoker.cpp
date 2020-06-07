@@ -14,6 +14,9 @@
 #include <QDir>
 
 GnuplotInvoker::GnuplotInvoker()
+    : m_bUseBeta(false),
+      m_iResolution(1024),
+      m_iFontSize(28)
 {
     connect(&m_aGnuplotProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(sltFinishedGnuplot(int,QProcess::ExitStatus)));
     connect(&m_aGnuplotProcess,SIGNAL(errorOccurred(QProcess::ProcessError)),this,SLOT(sltErrorGnuplot(QProcess::ProcessError)));
@@ -42,6 +45,26 @@ bool GnuplotInvoker::getUseBeta() const
 void GnuplotInvoker::setUseBeta(bool value)
 {
     m_bUseBeta = value;
+}
+
+int GnuplotInvoker::getResolution() const
+{
+    return m_iResolution;
+}
+
+void GnuplotInvoker::setResolution(int value)
+{
+    m_iResolution = value;
+}
+
+int GnuplotInvoker::getFontSize() const
+{
+    return m_iFontSize;
+}
+
+void GnuplotInvoker::setFontSize(int value)
+{
+    m_iFontSize = value;
 }
 
 void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus)
@@ -161,7 +184,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
 //    QString sInput = QString("set term svg size %1,%2 fsize 16 dynamic\n").arg(ui->svgGnuplotOutput->width()/2).arg(ui->svgGnuplotOutput->height()/2)
 //    QString sInput = QString("set term svg size %1,%2 dynamic font \"courier,16\"\n").arg(512).arg(512)
-    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,28\"\n").arg(1024).arg(1024)
+    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
     //QString sInput = QString("set term svg dynamic font \"Mono\"\n").arg(1024).arg(1024)
                         + sScript
                         + QString("\nexit\n");

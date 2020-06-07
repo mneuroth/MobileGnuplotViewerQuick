@@ -19,6 +19,8 @@ class GnuplotInvoker : public QObject
     Q_OBJECT
     Q_PROPERTY(QString lastError READ getLastError)
     Q_PROPERTY(bool useBeta READ getUseBeta WRITE setUseBeta)
+    Q_PROPERTY(int resolution READ getResolution WRITE setResolution)
+    Q_PROPERTY(int fontSize READ getFontSize WRITE setFontSize)
 
 public:
     GnuplotInvoker();
@@ -28,6 +30,10 @@ public:
     QString getLastError() const;
     bool getUseBeta() const;
     void setUseBeta(bool value);
+    int  getResolution() const;
+    void setResolution(int value);
+    int  getFontSize() const;
+    void setFontSize(int value);
 
 signals:
     void sigResultReady(const QString & svgData);
@@ -46,6 +52,8 @@ private:
     QString   m_aLastGnuplotResult;
     QString   m_aLastGnuplotError;
     bool      m_bUseBeta;
+    int       m_iResolution;
+    int       m_iFontSize;
     QProcess  m_aGnuplotProcess;
 };
 

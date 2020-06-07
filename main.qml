@@ -30,15 +30,30 @@ ApplicationWindow {
     Settings {
         id: settings
         property string currentFile: "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt"
+        property bool useGnuplotBeta: false
+        property int graphicsResolution: 1024
+        property int graphicsFontSize: 28
+        property var currentFont: null
         //property bool isFirstRun: true
     }
 
     Component.onDestruction: {
         settings.currentFile = homePage.currentFileUrl
+        settings.useGnuplotBeta = gnuplotInvoker.useBeta
+        settings.graphicsResolution = gnuplotInvoker.resolution
+        settings.graphicsFontSize = gnuplotInvoker.fontSize
+        settings.currentFont = homePage.textArea.font
     }
 
     Component.onCompleted: {
         homePage.currentFileUrl = settings.currentFile
+        if( settings.currentFont !== null )
+        {
+            homePage.textArea.font = settings.currentFont
+            outputPage.txtOutput.font = settings.currentFont
+            helpPage.txtHelp.font = settings.currentFont
+        }
+
         if(homePage.currentFileUrl.length>0)
         {
             readCurrentDoc(homePage.currentFileUrl)
@@ -51,6 +66,10 @@ ApplicationWindow {
             return "Droid Sans Mono"
         }
         return "Courier"
+    }
+
+    function isDialogOpen() {
+        return stackView.currentItem === aboutDialog || stackView.currentItem === mobileFileDialog || stackView.currentItem === settingsDialog
     }
 
     function checkForModified() {
@@ -182,7 +201,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Send")
                     icon.source: "share.svg"
-                    enabled: stackView.currentItem !== graphicsPage
+                    enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
 // TODO file name nach page setzen
@@ -192,7 +211,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Send as text")
                     icon.source: "share.svg"
-                    enabled: stackView.currentItem !== graphicsPage
+                    enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
                         applicationData.shareSimpleText(s);
@@ -201,6 +220,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Send as PDF/PNG")
                     icon.source: "share.svg"
+                    enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
@@ -219,6 +239,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("View as PDF/PNG")
                     icon.source: "share.svg"
+                    enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
@@ -237,6 +258,7 @@ ApplicationWindow {
                 MenuSeparator {}
                 MenuItem {
                     text: qsTr("Clear")
+                    enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
@@ -258,7 +280,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("Save as")
-                    enabled: stackView.currentItem !== graphicsPage
+                    enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
@@ -280,6 +302,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("Delete files")
+                    enabled: !isDialogOpen()
                     onTriggered: {
                         mobileFileDialog.textControl = null
                         mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
@@ -289,12 +312,9 @@ ApplicationWindow {
                     }
                 }
                 MenuSeparator {}
-                MenuItem {
-                    text: qsTr("Settings")
-                    onTriggered: console.log("Settings...")
-                }
                 Menu {
                     title: qsTr("Documentation")
+                    enabled: !isDialogOpen()
 
                     MenuItem {
                         text: qsTr("FAQ")
@@ -335,18 +355,22 @@ ApplicationWindow {
                         }
                     }
                 }
-/* --> in settings
                 MenuItem {
-                    id: gnuplotBeta
-                    text: qsTr("Gnuplot beta")
-                    checkable: true
+                    text: qsTr("Settings")
+                    enabled: !isDialogOpen()
                     onTriggered: {
-                        gnuplotInvoker.useBeta = gnuplotBeta.checked
+                        settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
+                        settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
+                        settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
+                        settingsDialog.lblExampleText.font = homePage.textArea.font
+
+                        stackView.pop()
+                        stackView.push(settingsDialog)
                     }
                 }
-*/
                 MenuItem {
                     text: qsTr("About")
+                    enabled: !isDialogOpen()
                     onTriggered: {
                         stackView.pop()
                         stackView.push(aboutDialog)
@@ -626,6 +650,45 @@ ApplicationWindow {
         }
     }
 
+    SettingsForm {
+        id: settingsDialog
+
+        txtGraphicsResolution {
+            validator: IntValidator { bottom: 128; top: 4096 }
+        }
+
+        txtGraphicsFontSize {
+            validator: IntValidator { bottom: 6; top: 64 }
+        }
+
+        btnSelectFont {
+            onClicked: {
+                fontDialog.font = lblExampleText.font
+                fontDialog.resultFcn = function (val) { lblExampleText.font = val }
+                fontDialog.open()
+            }
+        }
+
+        btnCancel {
+            onClicked:  {
+                stackView.pop()
+            }
+        }
+
+        btnOk {
+            onClicked:  {
+                gnuplotInvoker.resolution = parseInt(txtGraphicsResolution.text)
+                gnuplotInvoker.useBeta = chbUseGnuplotBeta.checked
+                gnuplotInvoker.fontSize = parseInt(txtGraphicsFontSize.text)
+                var aFont = settingsDialog.lblExampleText.font
+                homePage.textArea.font = aFont
+                outputPage.txtOutput.font = aFont
+                helpPage.txtHelp.font = aFont
+                stackView.pop()
+            }
+        }
+    }
+
     MobileFileDialog {
         id: mobileFileDialog
 
@@ -870,6 +933,21 @@ ApplicationWindow {
         }
     }
 
+    FontDialog {
+        id: fontDialog
+
+        property var resultFcn: null
+
+        title: qsTr("Please choose a font")
+
+        onAccepted: {
+            resultFcn(fontDialog.font)
+        }
+        onRejected: {
+            // do nothing
+        }
+    }
+
     FileDialog {
         id: fileDialog
         visible: false
@@ -939,6 +1017,10 @@ ApplicationWindow {
 
     GnuplotInvoker {
         id: gnuplotInvoker
+
+        resolution: settings.graphicsResolution
+        fontSize: settings.graphicsFontSize
+        useBeta: settings.useGnuplotBeta
     }
 
 //    StorageAccess {

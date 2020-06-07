@@ -44,10 +44,13 @@
 // ok: - homePage: Buttons fuer: open, save, run, navigation, alle anderen entfernen...
 // ok: - MobileFileDialog: new Button entfernen, wird nicht benoetigt ?
 // ok: - Graphics pitch funktioniert nicht richtig...
+// - Logging Ausgaben entfernen
+// - ggf. qml warnings entfernen
+// - ggf. Applicaton Icon auffrischen...
 // - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
 // - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
-// - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog
-// - ggf. Dateien loeschen
+// ok: - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog
+// ok: - ggf. Dateien loeschen
 // - Source Code cleanup
 // - QML Source Code besser strukturieren
 // ok: - About Dialog

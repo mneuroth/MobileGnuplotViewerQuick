@@ -5,7 +5,6 @@
         <file>PageGraphicsForm.ui.qml</file>
         <file>PageHelpForm.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file alias="spaceship.svg">spaceship.svg</file>
         <file>DSC_4945.JPG</file>
         <file>MobileFileDialog.ui.qml</file>
         <file>PageOutputForm.ui.qml</file>
@@ -15,5 +14,6 @@
         <file alias="file.svg">files/new104.svg</file>
         <file>AboutForm.ui.qml</file>
         <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
+        <file>SettingsForm.ui.qml</file>
     </qresource>
 </RCC>
