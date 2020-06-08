@@ -59,7 +59,7 @@
 // - Pay Features ok, falls alter kommerzieller MobileGnuplotViewer vorhanden
 // - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung
 // - alte MobileGnuplotViewer Apps bauen, mit Dialog auf Obsolet App und Link auf neue verbesserte App --> Touch Version
-// - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
+// ok:? - Zugriff auf alte MobileGnuplotViewer Files Verzeichnisse gewähren,
 //
 // - ggf. Einstellungen Aussehen aenderbar
 // - ggf. Bearbeiten Menu (copy/paste) --> nicht notwendig, da via context moeglich

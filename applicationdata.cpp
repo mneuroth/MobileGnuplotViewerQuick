@@ -176,7 +176,9 @@ QString ApplicationData::getHomePath() const
 #if defined(Q_OS_ANDROID)
     return SCRIPTS_DIR;
 #elif defined(Q_OS_WINDOWS)
-    return "c:\\tmp";
+    return "..\\gnuplotviewerquick\\files\\scripts";
+#elif defined(Q_OS_MACOS)
+    return "../gnuplotviewerquick/files/scripts";
 #else
     return ".";
 #endif
@@ -310,13 +312,18 @@ QStringList ApplicationData::getSDCardPaths() const
     allPaths.append(SDCARD_DIRECTORY);
     allPaths.append(GetExternalFilesDirs());
 #if defined(Q_OS_WIN)
-    allPaths.append("c:\\usr");
-#endif
+    // for testing...
+    allPaths.append("c:\\tmp");
+#endif    
     QString path = GetSDCardPathOrg();
     if(!allPaths.contains(path))
     {
         allPaths.append(path);
     }
+#if defined(Q_OS_ANDROID)
+    allPaths.append("/data/data/de.mneuroth.gnuplotviewer/files/scripts");
+    allPaths.append("/data/data/de.mneuroth.gnuplotviewerfree/files/scripts");
+#endif
     return allPaths;
 }
 

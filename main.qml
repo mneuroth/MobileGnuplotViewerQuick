@@ -889,7 +889,6 @@ ApplicationWindow {
 
         btnSDCard {
             onClicked: {
-                console.log(applicationData.getSDCardPaths())
                 menuSDCard.x = btnSDCard.x
                 menuSDCard.y = btnSDCard.height
                 menuSDCard.open()
