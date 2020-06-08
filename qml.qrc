@@ -4,7 +4,7 @@
         <file>HomeForm.ui.qml</file>
         <file>PageGraphicsForm.ui.qml</file>
         <file>PageHelpForm.ui.qml</file>
-        <file>MobileFileDialog.ui.qml</file>
+        <file>MobileFileDialogForm.ui.qml</file>
         <file>PageOutputForm.ui.qml</file>
         <file>AboutDialogForm.ui.qml</file>
         <file>AboutDialog.qml</file>
@@ -19,5 +19,6 @@
         <file alias="directory.svg">files/file96.svg</file>
         <file alias="file.svg">files/new104.svg</file>
         <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
+        <file>MobileFileDialog.qml</file>
     </qresource>
 </RCC>
