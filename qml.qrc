@@ -4,19 +4,20 @@
         <file>HomeForm.ui.qml</file>
         <file>PageGraphicsForm.ui.qml</file>
         <file>PageHelpForm.ui.qml</file>
-        <file>qtquickcontrols2.conf</file>
-        <file>DSC_4945.JPG</file>
         <file>MobileFileDialog.ui.qml</file>
         <file>PageOutputForm.ui.qml</file>
-        <file alias="empty.svg">files/empty.svg</file>
-        <file alias="share.svg">files/share.svg</file>
-        <file alias="directory.svg">files/file96.svg</file>
-        <file alias="file.svg">files/new104.svg</file>
-        <file>AboutForm.ui.qml</file>
-        <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
+        <file>AboutDialogForm.ui.qml</file>
+        <file>AboutDialog.qml</file>
         <file>SettingsDialogForm.ui.qml</file>
         <file>SettingsDialog.qml</file>
         <file>DummyPage.qml</file>
         <file>DummyPageFormular.ui.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>DSC_4945.JPG</file>
+        <file alias="empty.svg">files/empty.svg</file>
+        <file alias="share.svg">files/share.svg</file>
+        <file alias="directory.svg">files/file96.svg</file>
+        <file alias="file.svg">files/new104.svg</file>
+        <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
     </qresource>
 </RCC>

@@ -638,18 +638,8 @@ ApplicationWindow {
 */
     }
 
-    AboutForm {
+    AboutDialog {
         id: aboutDialog
-
-        lblAppInfos {
-            text: applicationData.getAppInfos()
-        }
-
-        btnClose {
-            onClicked:  {
-                stackView.pop()
-            }
-        }
     }
 
     SettingsDialog {

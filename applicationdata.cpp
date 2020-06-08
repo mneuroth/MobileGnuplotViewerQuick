@@ -306,6 +306,9 @@ static QString GetSDCardPathOrg()
 #endif
 }
 
+#define OLD_GNUPLOTVIEWER_SCRIPTS_DIR "/data/data/de.mneuroth.gnuplotviewer/files/scripts"
+#define OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR "/data/data/de.mneuroth.gnuplotviewerfree/files/scripts"
+
 QStringList ApplicationData::getSDCardPaths() const
 {
     QStringList allPaths;
@@ -321,8 +324,14 @@ QStringList ApplicationData::getSDCardPaths() const
         allPaths.append(path);
     }
 #if defined(Q_OS_ANDROID)
-    allPaths.append("/data/data/de.mneuroth.gnuplotviewer/files/scripts");
-    allPaths.append("/data/data/de.mneuroth.gnuplotviewerfree/files/scripts");
+    if( QDir(OLD_GNUPLOTVIEWER_SCRIPTS_DIR).exists() )
+    {
+        allPaths.append(OLD_GNUPLOTVIEWER_SCRIPTS_DIR);
+    }
+    if( QDir(OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR).exists() )
+    {
+        allPaths.append(OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR);
+    }
 #endif
     return allPaths;
 }

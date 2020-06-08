@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
@@ -13,7 +12,7 @@ import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 
 Page {
-    id: aboutDialog
+    //id: aboutDialog
     anchors.fill: parent
 
     width: 400
