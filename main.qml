@@ -409,115 +409,21 @@ ApplicationWindow {
         id: dummyPage
     }
 
-    PageGraphicsForm {
+    PageGraphics {
         id: graphicsPage
         objectName: "graphicsPage"
 
         property string svgdata: ""
-
-        imageMouseArea {
-            // see: photosurface.qml
-            onWheel: {
-                if (wheel.modifiers & Qt.ControlModifier) {
-                    image.rotation += wheel.angleDelta.y / 120 * 5;
-                    if (Math.abs(photoFrame.rotation) < 4)
-                        image.rotation = 0;
-                } else {
-                    image.rotation += wheel.angleDelta.x / 120;
-                    if (Math.abs(image.rotation) < 0.6)
-                        image.rotation = 0;
-                    var scaleBefore = image.scale;
-                    image.scale += image.scale * wheel.angleDelta.y / 120 / 10;
-                }
-            }
-            onDoubleClicked: {
-                // set to default with double click
-                image.scale = 1.0
-                image.x = 5
-                image.y = 5
-            }
-        }
-
-        btnOutput {
-            onClicked: {
-                stackView.pop()
-                stackView.push(outputPage)
-            }
-        }
-
-        btnHelp {
-            onClicked: {
-                stackView.pop()
-                stackView.push(helpPage)
-            }
-        }
-
-        btnInput {
-            onClicked: {
-                //stackView.push(homePage)
-                stackView.pop()
-            }
-        }
     }
 
-    PageHelpForm {
+    PageHelp {
         id: helpPage
         objectName: "helpPage"
-
-        fontName: getFontName()
-
-        btnRunHelp {
-            onClicked: {
-                var s = gnuplotInvoker.run(helpPage.txtHelp.text)
-                var sErrorText = gnuplotInvoker.lastError
-                outputPage.txtOutput.text = s
-                outputPage.txtOutput.text += sErrorText
-                stackView.pop()
-                stackView.push(outputPage)
-            }
-        }
-
-        btnOutput {
-            onClicked: {
-                stackView.pop()
-                stackView.push(outputPage)
-            }
-        }
-
-        btnInput {
-            onClicked: {
-                //stackView.push(homePage)
-                stackView.pop()
-            }
-        }
     }
 
-    PageOutputForm {
+    PageOutput {
         id: outputPage
         objectName: "outputPage"
-
-        fontName: getFontName()
-
-        btnGraphics {
-            onClicked: {
-                stackView.pop()
-                stackView.push(graphicsPage)
-            }
-        }
-
-        btnInput {
-            onClicked: {
-                //stackView.push(homePage)
-                stackView.pop()
-            }
-        }
-
-        btnHelp {
-            onClicked: {
-                stackView.pop()
-                stackView.push(helpPage)
-            }
-        }
     }
 
     function setScriptText(script: string)
@@ -539,103 +445,11 @@ ApplicationWindow {
         stackView.push(outputPage)
     }
 
-    HomeForm {
+    Home {
         id: homePage
         objectName: "homePage"
 
-        fontName: getFontName()
-
         property string currentFileUrl: window.currentFile
-
-        textArea {
-            //placeholderText: applicationData.defaultScript
-            onTextChanged: {
-                // set modified flag for autosave of document
-                textArea.textDocument.modified = true
-            }
-        }
-
-        btnOpen  {
-            onClicked:  {
-                //fileDialog.open()
-                //mobileFileDialog.open()
-                mobileFileDialog.setOpenModus()
-                if( mobileFileDialog.currentDirectory == "" )
-                {
-                    mobileFileDialog.currentDirectory = applicationData.homePath
-                }
-                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-                stackView.pop()
-                stackView.push(mobileFileDialog)
-            }
-        }
-
-        btnSave {
-            onClicked: {
-                saveCurrentDoc(homePage.textArea)
-            }
-        }
-
-        btnRun {
-            onClicked: {
-                outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
-                var sData = gnuplotInvoker.run(homePage.textArea.text)
-                var sErrorText = gnuplotInvoker.lastError
-                outputPage.txtOutput.text += sErrorText
-                if( sErrorText.length>0 )
-                {
-                    graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
-                }
-                else
-                {
-                    graphicsPage.lblShowGraphicsInfo.text = ""
-                }
-                // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
-                if( sData.length > 0 )
-                {
-                    graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
-                    graphicsPage.svgdata = sData
-                    stackView.pop()
-                    stackView.push(graphicsPage)
-                }
-                else
-                {
-// TODO --> graphics page mit error Image fuellen
-                    graphicsPage.image.source = ":/empty.svg"
-                    stackView.pop()
-                    stackView.push(outputPage)
-                }
-            }
-        }
-
-        btnGraphics {
-            onClicked: {
-                stackView.pop()
-                stackView.push(graphicsPage)
-            }
-        }
-
-        btnOutput {
-            onClicked: {
-                stackView.pop()
-                stackView.push(outputPage)
-            }
-        }
-
-        btnHelp {
-            onClicked: {
-                stackView.pop()
-                stackView.push(helpPage)
-            }
-        }
-/*
-        btnExit {
-            onClicked: {
-                //onClicked: window.close() //Qt.quit()
-                applicationData.test()
-            }
-        }
-*/
     }
 
     AboutDialog {
