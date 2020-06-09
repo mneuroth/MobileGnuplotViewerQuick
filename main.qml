@@ -27,16 +27,6 @@ ApplicationWindow {
 
     property string urlPrefix: "file://"
 
-    Settings {
-        id: settings
-        property string currentFile: "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt"
-        property bool useGnuplotBeta: false
-        property int graphicsResolution: 1024
-        property int graphicsFontSize: 28
-        property var currentFont: null
-        //property bool isFirstRun: true
-    }
-
     Component.onDestruction: {
         settings.currentFile = homePage.currentFileUrl
         settings.useGnuplotBeta = gnuplotInvoker.useBeta
@@ -60,6 +50,25 @@ ApplicationWindow {
         }
     }
 
+    onClosing: {
+        // handle navigation back to home page if some other page is visible and back button is activated
+        if( stackView.currentItem !== homePage )
+        {
+            stackView.pop()
+            close.accepted = false
+
+        }
+        else
+        {
+            checkForModified()
+            close.accepted = true
+        }
+    }
+
+    // **********************************************************************
+    // *** some helper functions for the application
+    // **********************************************************************
+
     function getFontName() {
         if( Qt.platform.os === "android" )
         {
@@ -69,7 +78,9 @@ ApplicationWindow {
     }
 
     function isDialogOpen() {
-        return stackView.currentItem === aboutDialog || stackView.currentItem === mobileFileDialog || stackView.currentItem === settingsDialog
+        return stackView.currentItem === aboutDialog ||
+               stackView.currentItem === mobileFileDialog ||
+               stackView.currentItem === settingsDialog
     }
 
     function checkForModified() {
@@ -168,20 +179,28 @@ ApplicationWindow {
         return currentPage === graphicsPage
     }
 
-    onClosing: {
-        // handle navigation back to home page if some other page is visible and back button is activated
-        if( stackView.currentItem !== homePage )
-        {
-            stackView.pop()
-            close.accepted = false
-
-        }
-        else
-        {
-            checkForModified()
-            close.accepted = true
-        }
+    function setScriptText(script: string)
+    {
+        homePage.textArea.text = script
+        homePage.textArea.textDocument.modified = false
     }
+
+    function setScriptName(name: string)
+    {
+        homePage.currentFileUrl = name
+        homePage.lblFileName.text = applicationData.getOnlyFileName(name)
+    }
+
+    function setOutputText(txt: string)
+    {
+        outputPage.txtOutput.text = txt
+        stackView.pop()
+        stackView.push(outputPage)
+    }
+
+    // **********************************************************************
+    // *** some gui items for the application
+    // **********************************************************************
 
     header: ToolBar {
         contentHeight: toolButton.implicitHeight
@@ -204,7 +223,7 @@ ApplicationWindow {
                     enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
-// TODO file name nach page setzen
+// TODO file name nach aktiver page setzen: output.txt, help.txt, gnuplot.gpt
                         applicationData.shareText(s, "gnuplot.gpt")
                     }
                 }
@@ -405,111 +424,6 @@ ApplicationWindow {
         }
     }
 
-    DummyPage {
-        id: dummyPage
-    }
-
-    PageGraphics {
-        id: graphicsPage
-        objectName: "graphicsPage"
-
-        property string svgdata: ""
-    }
-
-    PageHelp {
-        id: helpPage
-        objectName: "helpPage"
-    }
-
-    PageOutput {
-        id: outputPage
-        objectName: "outputPage"
-    }
-
-    function setScriptText(script: string)
-    {
-        homePage.textArea.text = script
-        homePage.textArea.textDocument.modified = false
-    }
-
-    function setScriptName(name: string)
-    {
-        homePage.currentFileUrl = name
-        homePage.lblFileName.text = applicationData.getOnlyFileName(name)
-    }
-
-    function setOutputText(txt: string)
-    {
-        outputPage.txtOutput.text = txt
-        stackView.pop()
-        stackView.push(outputPage)
-    }
-
-    Home {
-        id: homePage
-        objectName: "homePage"
-
-        property string currentFileUrl: window.currentFile
-    }
-
-    AboutDialog {
-        id: aboutDialog
-    }
-
-    SettingsDialog {
-        id: settingsDialog
-    }
-
-    MobileFileDialog {
-        id: mobileFileDialog
-    }
-
-    FontDialog {
-        id: fontDialog
-
-        //currentFont.family: "Mono"
-
-        property var resultFcn: null
-
-        title: qsTr("Please choose a font")
-
-        onAccepted: {
-            resultFcn(fontDialog.font)
-        }
-        onRejected: {
-            // do nothing
-        }
-    }
-
-    FileDialog {
-        id: fileDialog
-        visible: false
-        modality: Qt.WindowModal
-        title: qsTr("Choose a file")
-        folder: "." //StandardPaths.writableLocation(StandardPaths.DocumentsLocation) //"c:\sr"
-        selectExisting: true
-        selectMultiple: false
-        selectFolder: false
-        //nameFilters: ["Image files (*.png *.jpg)", "All files (*)"]
-        //selectedNameFilter: "All files (*)"
-        sidebarVisible: false
-        onAccepted: {
-              console.log("Accepted: " + fileUrls)
-              //homePage.textArea.text = "# Hello World !\nplot sin(x)"
-
-// TODO: https://www.volkerkrause.eu/2019/02/16/qt-open-files-on-android.html
-// https://stackoverflow.com/questions/58715547/how-to-open-a-file-in-android-with-qt-having-the-content-uri
-
-              window.readCurrentDoc(fileUrls[0])
-              stackView.pop()
-
-              //if (fileDialogOpenFiles.checked)
-              //    for (var i = 0; i < fileUrls.length; ++i)
-              //        Qt.openUrlExternally(fileUrls[i])
-        }
-        onRejected: { console.log("Rejected") }
-    }
-
     Drawer {
         id: drawer
         width: window.width * 0.66
@@ -548,6 +462,27 @@ ApplicationWindow {
         }
     }
 
+    StackView {
+        id: stackView
+        initialItem: homePage
+        anchors.fill: parent
+        width: parent.width
+        height: parent.height
+    }
+
+    // **********************************************************************
+    // *** some (gui and not gui) components for the application
+    // **********************************************************************
+
+    Settings {
+        id: settings
+        property string currentFile: "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt"
+        property bool useGnuplotBeta: false
+        property int graphicsResolution: 1024
+        property int graphicsFontSize: 28
+        property var currentFont: null
+    }
+
     GnuplotInvoker {
         id: gnuplotInvoker
 
@@ -560,6 +495,110 @@ ApplicationWindow {
 //        id: storageAccess
 //    }
 
+    PageHome {
+        id: homePage
+        objectName: "homePage"
+
+        property string currentFileUrl: window.currentFile
+    }
+
+    PageGraphics {
+        id: graphicsPage
+        objectName: "graphicsPage"
+        visible: false
+
+        property string svgdata: ""
+    }
+
+    PageHelp {
+        id: helpPage
+        objectName: "helpPage"
+        visible: false
+    }
+
+    PageOutput {
+        id: outputPage
+        objectName: "outputPage"
+        visible: false
+    }
+
+    // for testing...
+    DummyPage {
+        id: dummyPage
+        visible: false
+    }
+
+    // **********************************************************************
+    // *** some dialogs for the application
+    // **********************************************************************
+
+    AboutDialog {
+        id: aboutDialog
+        visible: false
+    }
+
+    SettingsDialog {
+        id: settingsDialog
+        visible: false
+    }
+
+    MobileFileDialog {
+        id: mobileFileDialog
+        visible: false
+    }
+
+    FontDialog {
+        id: fontDialog
+        visible: false
+
+        //currentFont.family: "Mono"
+
+        property var resultFcn: null
+
+        title: qsTr("Please choose a font")
+
+        onAccepted: {
+            resultFcn(fontDialog.font)
+        }
+        onRejected: {
+            // do nothing
+        }
+    }
+
+    // only for testing...
+    FileDialog {
+        id: fileDialog
+        visible: false
+        modality: Qt.WindowModal
+        title: qsTr("Choose a file")
+        folder: "." //StandardPaths.writableLocation(StandardPaths.DocumentsLocation) //"c:\sr"
+        selectExisting: true
+        selectMultiple: false
+        selectFolder: false
+        //nameFilters: ["Image files (*.png *.jpg)", "All files (*)"]
+        //selectedNameFilter: "All files (*)"
+        sidebarVisible: false
+        onAccepted: {
+              console.log("Accepted: " + fileUrls)
+              //homePage.textArea.text = "# Hello World !\nplot sin(x)"
+
+// TODO: https://www.volkerkrause.eu/2019/02/16/qt-open-files-on-android.html
+// https://stackoverflow.com/questions/58715547/how-to-open-a-file-in-android-with-qt-having-the-content-uri
+
+              window.readCurrentDoc(fileUrls[0])
+              stackView.pop()
+
+              //if (fileDialogOpenFiles.checked)
+              //    for (var i = 0; i < fileUrls.length; ++i)
+              //        Qt.openUrlExternally(fileUrls[i])
+        }
+        onRejected: { console.log("Rejected") }
+    }
+
+    // **********************************************************************
+    // *** some signal handlers for the application
+    // **********************************************************************
+
     Connections {
         target: applicationData
 
@@ -568,6 +607,7 @@ ApplicationWindow {
         }
     }
 
+/*
     Connections {
         target: storageAccess
 
@@ -581,30 +621,18 @@ ApplicationWindow {
             stackView.pop()
         }
         onOpenFileCanceled: {
-//            applicationData.logText("==> onOpenFileCanceled")
             stackView.pop()
         }
         onOpenFileError: {
-//            applicationData.logText("==> onOpenFileError "+message)
-// TODO
             homePage.textArea.text = message
             stackView.pop()
         }
         onCreateFileReceived: {
-//            applicationData.logText("==> onCreateFileReceived "+fileUri)
-// TODO
             homePage.currentFileUrl = fileUri
             homePage.textArea.text += "\ncreated: "+fileUri+"\n"
             homePage.lblFileName.text = applicationData.getOnlyFileName(fileUri)
             stackView.pop()
         }
     }
-
-    StackView {
-        id: stackView
-        initialItem: homePage
-        anchors.fill: parent
-        width: parent.width
-        height: parent.height
-    }
+*/
 }

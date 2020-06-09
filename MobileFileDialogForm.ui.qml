@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot

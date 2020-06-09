@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>HomeForm.ui.qml</file>
-        <file>Home.qml</file>
+        <file>PageHomeForm.ui.qml</file>
+        <file>PageHome.qml</file>
         <file>PageGraphicsForm.ui.qml</file>
         <file>PageGraphics.qml</file>
         <file>PageHelpForm.ui.qml</file>
