@@ -58,6 +58,14 @@ QString ApplicationData::getOnlyFileName(const QString & url) const
     return name;
 }
 
+QString ApplicationData::getLocalPathWithoutFileName(const QString & url) const
+{
+    QUrl aUrl(url);
+    QString localFile = aUrl.toLocalFile();
+    QFileInfo aInfo(localFile);
+    return aInfo.absolutePath();
+}
+
 QString ApplicationData::normalizePath(const QString & path) const
 {
     QDir aInfo(path);

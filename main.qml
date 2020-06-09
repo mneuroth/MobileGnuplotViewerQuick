@@ -135,6 +135,8 @@ ApplicationWindow {
         homePage.textArea.text = applicationData.readFileContent(urlFileName)
         homePage.textArea.textDocument.modified = false
         homePage.lblFileName.text = applicationData.getOnlyFileName(urlFileName)
+        // update the current directory after starting the application...
+        mobileFileDialog.currentDirectory = applicationData.getLocalPathWithoutFileName(urlFileName)
     }
 
     function showInOutput(sContent) {

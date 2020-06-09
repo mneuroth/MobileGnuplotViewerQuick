@@ -67,6 +67,7 @@ public:
 
     Q_INVOKABLE QString getOnlyFileName(const QString & url) const;
     Q_INVOKABLE QString normalizePath(const QString & path) const;
+    Q_INVOKABLE QString getLocalPathWithoutFileName(const QString & url) const;
     Q_INVOKABLE QString readFileContent(const QString & fileName) const;
     Q_INVOKABLE bool writeFileContent(const QString & fileName, const QString & content);
 
