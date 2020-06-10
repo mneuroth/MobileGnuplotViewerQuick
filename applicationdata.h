@@ -65,9 +65,14 @@ public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
     ~ApplicationData();
 
+    Q_INVOKABLE QString getAppInfos() const;
+
+    Q_INVOKABLE void initDone();
+
     Q_INVOKABLE QString getOnlyFileName(const QString & url) const;
-    Q_INVOKABLE QString normalizePath(const QString & path) const;
+    Q_INVOKABLE QString getNormalizedPath(const QString & path) const;
     Q_INVOKABLE QString getLocalPathWithoutFileName(const QString & url) const;
+
     Q_INVOKABLE QString readFileContent(const QString & fileName) const;
     Q_INVOKABLE bool writeFileContent(const QString & fileName, const QString & content);
 
@@ -76,27 +81,23 @@ public:
     Q_INVOKABLE bool hasAccessToSDCardPath() const;
     Q_INVOKABLE bool grantAccessToSDCardPath(QObject * parent);
 
-    Q_INVOKABLE QString dumpDirectoryContent(const QString & path) const;
-
     Q_INVOKABLE bool shareSimpleText(const QString & text);
-    Q_INVOKABLE bool shareText(const QString & text, const QString & fileName = "");
+    Q_INVOKABLE bool shareText(const QString & tempFileName, const QString & text);
     Q_INVOKABLE bool shareImage(const QImage & image);
     Q_INVOKABLE bool shareSvgData(const QVariant & data);
     Q_INVOKABLE bool shareViewSvgData(const QVariant & data);
     Q_INVOKABLE bool shareTextAsPdf(const QString & text, bool bSendFile);
 
-    Q_INVOKABLE void print(const QString & text);
+    Q_INVOKABLE void writePdfFile(const QString & sFileName, const QString & text);
+    Q_INVOKABLE bool saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data);
 
+    // for debugging only
     Q_INVOKABLE void logText(const QString & text);
 
-    Q_INVOKABLE void test();
-
+    Q_INVOKABLE QStringList getSDCardPaths() const;
+    QString getSDCardPath() const;
     QString getFilesPath() const;
     QString getHomePath() const;
-    QString getSDCardPath() const;
-    Q_INVOKABLE QStringList getSDCardPaths() const;
-
-    Q_INVOKABLE QString getAppInfos() const;
 
     QString getDefaultScript() const;
 
@@ -105,6 +106,7 @@ public:
     void setOutputText(const QString & sText);
 
 signals:
+    // for testing only
     void sendDummyData(const QString & txt, int value);
 
 public slots:
@@ -117,6 +119,10 @@ public slots:
 
     void sltErrorText(const QString & msg);
 
+#if defined(Q_OS_ANDROID)
+     void sltApplicationStateChanged(Qt::ApplicationState applicationState);
+#endif
+
 private:
     bool writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc, bool bSendFile = true);
     void removeAllFilesForShare();
@@ -128,9 +134,9 @@ private:
     QStringList                 m_aSharedFilesList;
 #endif
     StorageAccess &             m_aStorageAccess;
-    ShareUtils *                m_pShareUtils;
+    ShareUtils *                m_pShareUtils;      // not an owner !
 
-    QQmlApplicationEngine &     m_aEngine;  // not an owner !
+    QQmlApplicationEngine &     m_aEngine;          // not an owner !
 };
 
 #endif // APPLICATIONDATA_H

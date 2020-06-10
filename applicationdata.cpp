@@ -26,13 +26,17 @@
 #include <QImage>
 #include <QSvgRenderer>
 #include <QPainter>
+#include <QtPrintSupport/QPrinter>
+#include <QPdfWriter>
+#include <QTextDocument>
+#include <QTextCursor>
 
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
       m_aStorageAccess(aStorageAccess),
       m_aEngine(aEngine)
 {
-    m_pShareUtils = pShareUtils; //new ShareUtils(this);
+    m_pShareUtils = pShareUtils;
 #if defined(Q_OS_ANDROID)
     QMetaObject::Connection result;
     result = connect(m_pShareUtils, SIGNAL(fileUrlReceived(QString)), this, SLOT(sltFileUrlReceived(QString)));
@@ -46,9 +50,20 @@ ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, Stor
 
 ApplicationData::~ApplicationData()
 {
-#if defined(Q_OS_ANDROID)
-    //delete m_pShareUtils;
-#endif
+}
+
+QString ApplicationData::getAppInfos() const
+{
+    return QString("Qt_")+qVersion()+" Platform: "+QSysInfo::buildAbi();
+}
+
+void ApplicationData::initDone()
+{
+    QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");
+    if( homePage!=0 )
+    {
+        QMetaObject::invokeMethod(homePage, "initDone", QGenericReturnArgument());
+    }
 }
 
 QString ApplicationData::getOnlyFileName(const QString & url) const
@@ -66,7 +81,7 @@ QString ApplicationData::getLocalPathWithoutFileName(const QString & url) const
     return aInfo.absolutePath();
 }
 
-QString ApplicationData::normalizePath(const QString & path) const
+QString ApplicationData::getNormalizedPath(const QString & path) const
 {
     QDir aInfo(path);
     return aInfo.canonicalPath();
@@ -314,9 +329,6 @@ static QString GetSDCardPathOrg()
 #endif
 }
 
-#define OLD_GNUPLOTVIEWER_SCRIPTS_DIR "/data/data/de.mneuroth.gnuplotviewer/files/scripts"
-#define OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR "/data/data/de.mneuroth.gnuplotviewerfree/files/scripts"
-
 QStringList ApplicationData::getSDCardPaths() const
 {
     QStringList allPaths;
@@ -344,11 +356,6 @@ QStringList ApplicationData::getSDCardPaths() const
     return allPaths;
 }
 
-QString ApplicationData::getAppInfos() const
-{
-    return QString("Qt_")+qVersion()+" Platform: "+QSysInfo::buildAbi();
-}
-
 QString ApplicationData::getDefaultScript() const
 {
     return DEFAULT_SCRIPT;
@@ -360,9 +367,9 @@ bool ApplicationData::shareSimpleText(const QString & text)
     return true;
 }
 
-bool ApplicationData::shareText(const QString & text, const QString & fileName)
+bool ApplicationData::shareText(const QString & tempFileName, const QString & text)
 {
-    return writeAndSendSharedFile(fileName, "", "text/plain", [this, text](QString name) -> bool { return this->saveTextFile(name, text); });
+    return writeAndSendSharedFile(tempFileName, "", "text/plain", [this, text](QString name) -> bool { return this->saveTextFile(name, text); });
 }
 
 bool ApplicationData::shareImage(const QImage & image)
@@ -373,49 +380,43 @@ bool ApplicationData::shareImage(const QImage & image)
     });
 }
 
-bool SaveDataAsSvgImage(const QByteArray & data, const QString & sFileName)
+bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data)
 {
     QSvgRenderer aRenderer(data);
     QImage aImg(1024,1024, QImage::Format_ARGB32);
 
-    //aImg.fill(0xaaA08080);  // partly transparent red-ish background
-    aImg.fill(0xFFFFFFFF);  // partly transparent red-ish background
+    aImg.fill(0xFFFFFFFF);  // white background
 
     // Get QPainter that paints to the image
     QPainter painter(&aImg);
     aRenderer.render(&painter);
 
     // Save, image format based on file extension
-    return aImg.save(sFileName);
+    QUrl aUrl(sUrlFileName);
+    return aImg.save(aUrl.toLocalFile());
 }
 
 bool ApplicationData::shareSvgData(const QVariant & data)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [data](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data](QString name) -> bool
     {
-        QByteArray arrData =  qvariant_cast<QByteArray>(data);
-        return SaveDataAsSvgImage(arrData, name);
+        QByteArray arrData = qvariant_cast<QByteArray>(data);
+        return saveDataAsPngImage(name, arrData);
     });
 }
 
 bool ApplicationData::shareViewSvgData(const QVariant & data)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [data](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data](QString name) -> bool
     {
         QByteArray arrData = qvariant_cast<QByteArray>(data);
-        return SaveDataAsSvgImage(arrData, name);
+        return saveDataAsPngImage(name, arrData);
     }, false);
 }
 
-//#include <QtPrintSupport/QPrintDialog>
-#include <QtPrintSupport/QPrinter>
-//#include <QFileDialog>
-#include <QPdfWriter>
-#include <QTextDocument>
-#include <QTextCursor>
-
 // https://stackoverflow.com/questions/33654060/create-pdf-document-for-printing-in-qt-from-template
-void writePdfFile(const QString & filename, const QString & text)
+// other possibility: QPdfWriter aPdfWriter("gnuplot_print.pdf");
+void ApplicationData::writePdfFile(const QString & filename, const QString & text)
 {
     QPrinter printer(QPrinter::PrinterResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -449,16 +450,9 @@ void writePdfFile(const QString & filename, const QString & text)
     doc.print(&printer);
 }
 
-void ApplicationData::print(const QString & text)
-{
-    //other possibility: QPdfWriter aPdfWriter("gnuplot_print.pdf");
-
-    writePdfFile("gnuplot_print.pdf", text);
-}
-
 bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)
 {
-    return writeAndSendSharedFile("gnuplot_text.pdf", "", "application/pdf", [text](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_text.pdf", "", "application/pdf", [this, text](QString name) -> bool
     {
         writePdfFile(name, text);
         return true;
@@ -468,18 +462,6 @@ bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)
 void ApplicationData::logText(const QString & text)
 {
     AddToLog(text);
-}
-
-void ApplicationData::test()
-{
-    emit sendDummyData("hallo welt", 42);
-}
-
-QString ApplicationData::dumpDirectoryContent(const QString & path) const
-{
-    QDir aDir(path);
-    QStringList aList = aDir.entryList();
-    return path + " --> \n" +aList.join(";\n") + "\n";
 }
 
 bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc, bool bSendFile)
@@ -531,8 +513,15 @@ bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QSt
     }
 
     // remark: remove temporary files in slot:  sltShareFinished() / sltShareError()
-#endif
     return true;
+#else
+    Q_UNUSED(fileName)
+    Q_UNUSED(fileExtension)
+    Q_UNUSED(fileMimeType)
+    Q_UNUSED(saveFunc)
+    Q_UNUSED(bSendFile)
+    return false;
+#endif
 }
 
 void ApplicationData::removeAllFilesForShare()
@@ -559,9 +548,9 @@ void ApplicationData::sltFileUrlReceived(const QString & sUrl)
     // /data/user/0/de.mneuroth.gnuplotviewerquick/files
     // /storage/emulated/0/Android/data/de.mneuroth.gnuplotviewerquick/files
 
-//TODO:    sltErrorText("URL received "+sUrl);
+//TODO DEBUGGING:    AddToLog("URL received "+sUrl);
 
-    bool ok = loadAndShowFileContent(sUrl);
+    /*bool ok =*/ loadAndShowFileContent(sUrl);
 }
 
 void ApplicationData::sltFileReceivedAndSaved(const QString & sUrl)
@@ -569,9 +558,9 @@ void ApplicationData::sltFileReceivedAndSaved(const QString & sUrl)
     // <== share from google documents
     // --> /data/user/0/de.mneuroth.gnuplotviewerquick/files/gnuplotviewer_shared_files/Test.txt.txt
 
-//TODO:    sltErrorText("URL file received "+sUrl);
+//TODO DEBUGGING:    AddToLog("URL file received "+sUrl);
 
-    bool ok = loadAndShowFileContent(sUrl);
+    /*bool ok =*/ loadAndShowFileContent(sUrl);
 }
 
 void ApplicationData::sltShareError(int requestCode, const QString & message)
@@ -579,7 +568,7 @@ void ApplicationData::sltShareError(int requestCode, const QString & message)
     Q_UNUSED(requestCode);
     Q_UNUSED(message);
 
-    sltErrorText("Error sharing received "+message);
+    sltErrorText("Error sharing: received "+message);
 
     removeAllFilesForShare();
 }
@@ -588,7 +577,7 @@ void ApplicationData::sltShareNoAppAvailable(int requestCode)
 {
     Q_UNUSED(requestCode);
 
-    sltErrorText("share no app");
+    sltErrorText("Error sharing: no app available");
 
     removeAllFilesForShare();
 }
@@ -613,6 +602,20 @@ void ApplicationData::sltErrorText(const QString & msg)
     setOutputText(msg);
 }
 
+#if defined(Q_OS_ANDROID)
+void ApplicationData::sltApplicationStateChanged(Qt::ApplicationState applicationState)
+{
+    if( applicationState == Qt::ApplicationState::ApplicationSuspended )
+    {
+        QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");
+        if( homePage!=0 )
+        {
+            QMetaObject::invokeMethod(homePage, "checkForModified", QGenericReturnArgument());
+        }
+    }
+}
+#endif
+
 bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
 {
     bool ok = false;
@@ -620,7 +623,7 @@ bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
     if( !sFileName.isEmpty() )
     {
         // autosave current file if needed
-//        checkForModified();
+//        checkForModified(); // --> will be done when app is left
 
         // load script and show it
         QFileInfo aFileInfo(sFileName);
@@ -632,16 +635,9 @@ bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
         }
         else
         {
-// TODO hier ggf. direkt signale an QML senden !!!
+// TODO hier ggf. direkt signale an QML senden anstatt JavaScript methode aufrufen !!!???
             setScriptText(sScript);
             setScriptName(sFileName);
-//            ui->txtGnuplotInput->setPlainText(sScript);
-
-            // update last used directory
-//            m_sLastDirectory = aFileInfo.absoluteDir().absolutePath();
-
-            // update save name text field
-//            ui->lblSaveName->setText(aFileInfo.fileName()/*QString::fromUtf8(aFileInfo.fileName().toLatin1())*/);    // workaround
         }
     }
     else
@@ -661,7 +657,6 @@ bool ApplicationData::saveTextFile(const QString & sFileName, const QString & sT
         qint64 iCount = aFile.write(sText.toUtf8());    // write text as utf8 encoded text
         aFile.close();
         ok = iCount>=0;
-//        m_sCurrentFileName = sFileName;
     }
     if( !ok )
     {
@@ -682,7 +677,6 @@ bool ApplicationData::loadTextFile(const QString & sFileName, QString & sText)
         aFile.close();
         sText = QString::fromUtf8(aContent);    // interpret file as utf8 encoded text
         ok = sText.length()>0;
-//        m_sCurrentFileName = sFileName;
     }
     return ok;
 }

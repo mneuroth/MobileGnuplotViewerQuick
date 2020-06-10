@@ -61,6 +61,10 @@
 #define SCRIPT6_GPT                 "default.gpt"
 #define DATA2_DAT                   "data.dat"
 
+// access to old versions of mobile gnuplot viewer
+#define OLD_GNUPLOTVIEWER_SCRIPTS_DIR "/data/data/de.mneuroth.gnuplotviewer/files/scripts"
+#define OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR "/data/data/de.mneuroth.gnuplotviewerfree/files/scripts"
+
 class UnpackFilesThread;
 
 bool HasAccessToSDCardPath();

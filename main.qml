@@ -123,6 +123,14 @@ ApplicationWindow {
         }
     }
 
+    function saveCurrentGraptics(fileName) {
+        applicationData.saveDataAsPngImage(fileName,graphicsPage.svgdata)
+    }
+
+    function saveAsImage(fullName) {
+        saveCurrentGraptics(fullName)
+    }
+
     function saveAsCurrentDoc(fullName, textControl) {
         homePage.currentFileUrl = fullName
         homePage.lblFileName.text = applicationData.getOnlyFileName(fullName)
@@ -131,7 +139,7 @@ ApplicationWindow {
 
     function readCurrentDoc(url) {
         var urlFileName = buildValidUrl(url)
-        homePage.currentFileUrl = urlFileName
+        homePage.currentFileUrl = urlFileName        
         homePage.textArea.text = applicationData.readFileContent(urlFileName)
         homePage.textArea.textDocument.modified = false
         homePage.lblFileName.text = applicationData.getOnlyFileName(urlFileName)
@@ -167,6 +175,22 @@ ApplicationWindow {
         return null
     }
 
+    function getTempFileNameForCurrent(currentPage) {
+        if(currentPage === homePage)
+        {
+            return "gnuplot.gpt"
+        }
+        else if(currentPage === outputPage)
+        {
+            return "output.txt"
+        }
+        else if(currentPage === helpPage)
+        {
+            return "help.txt"
+        }
+        return "unknown.txt"
+    }
+
     function getCurrentText(currentPage) {
         var s = ""
         var textControl = getCurrentTextRef(currentPage)
@@ -179,6 +203,11 @@ ApplicationWindow {
 
     function isGraphicsPage(currentPage) {
         return currentPage === graphicsPage
+    }
+
+    function initDone()
+    {
+        homePage.isInInit = false
     }
 
     function setScriptText(script: string)
@@ -225,8 +254,8 @@ ApplicationWindow {
                     enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
-// TODO file name nach aktiver page setzen: output.txt, help.txt, gnuplot.gpt
-                        applicationData.shareText(s, "gnuplot.gpt")
+                        var tempFileName = getTempFileNameForCurrent(stackView.currentItem)
+                        applicationData.shareText(tempFileName, s)
                     }
                 }
                 MenuItem {
@@ -301,11 +330,14 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("Save as")
-                    enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                    enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
-// TODO --> implement save image
+                            mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                            mobileFileDialog.setSaveAsModus(true)
+                            stackView.pop()
+                            stackView.push(mobileFileDialog)
                         }
                         else
                         {
@@ -314,7 +346,7 @@ ApplicationWindow {
                             {
                                 mobileFileDialog.textControl = textControl
                                 mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-                                mobileFileDialog.setSaveAsModus()
+                                mobileFileDialog.setSaveAsModus(false)
                                 stackView.pop()
                                 stackView.push(mobileFileDialog)
                             }
@@ -548,7 +580,7 @@ ApplicationWindow {
         id: mobileFileDialog
         visible: false
     }
-
+/*
     FontDialog {
         id: fontDialog
         visible: false
@@ -566,7 +598,7 @@ ApplicationWindow {
             // do nothing
         }
     }
-
+*/
     // only for testing...
     FileDialog {
         id: fileDialog
@@ -606,6 +638,14 @@ ApplicationWindow {
 
         onSendDummyData: {
             console.log("========> Dummy Data !!! "+txt+" "+value)
+        }
+    }
+
+    Connections {
+        target: gnuplotInvoker
+
+        onSigShowErrorText: {
+            showInOutput(txt)
         }
     }
 

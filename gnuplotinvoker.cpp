@@ -77,16 +77,7 @@ void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitS
         // has the returned result a valid svg format ?
         if( QString(m_aLastGnuplotResult).startsWith(QString("<?xml")) )
         {
-//            ui->svgGnuplotOutput->load(m_aLastGnuplotResult);
             emit sigResultReady(m_aLastGnuplotResult);
-
-            //QString errText = m_aGnuplotProcess.readAllStandardError();
-            //if( errText.length()==0 )
-            //{
-//                errText = tr("running ")+ui->lblSaveName->text()+" "+tr("ok")+"\n";
-            //}
-//            ui->txtErrors->setPlainText(ui->txtErrors->toPlainText()+errText);
-//            ui->txtErrors->moveCursor(QTextCursor::End);
         }
         else
         {
@@ -106,22 +97,9 @@ void GnuplotInvoker::sltErrorGnuplot(QProcess::ProcessError error)
     sltErrorText(tr("Error: gnuplot exited with error: code=%1 msg=%2 err=%3\ncode=%4 status=%5\nerrorMsg=%6\n").arg(error).arg(QString(errorMsg)).arg(m_aGnuplotProcess.error()).arg(m_aGnuplotProcess.exitCode()).arg(m_aGnuplotProcess.exitStatus()).arg(m_aGnuplotProcess.errorString()));
 }
 
-void GnuplotInvoker::sltRunGnuplot()
-{
-//    sltSwitchToGraphics();  // switch automatically to graphics output
-//    QString sScript = ui->txtGnuplotInput->toPlainText();
-//    runGnuplot(sScript);
-//    if( ui->btnExport )
-//    {
-//        ui->btnExport->setEnabled(true);
-//    }
-}
-
 void GnuplotInvoker::sltErrorText(const QString & sTxt)
 {
-//    ui->txtErrors->setPlainText(ui->txtErrors->toPlainText()+sTxt+"\n");
-//    ui->txtErrors->moveCursor(QTextCursor::End);
-//    sltSwitchToErrors();
+    emit sigShowErrorText(sTxt);
 }
 
 void GnuplotInvoker::handleGnuplotError(int exitCode)
@@ -138,12 +116,7 @@ void GnuplotInvoker::handleGnuplotError(int exitCode)
 
 void GnuplotInvoker::runGnuplot(const QString & sScript)
 {
-    // handle automatical clear of output (if selected)
-//    if( ui->actionClear_output->isChecked() )
-//    {
-//        ui->txtErrors->clear();
-//    }
-    bool useVersionBeta = getUseBeta(); //ui->actionGnuplot_UseGnuplotBeta->isChecked();
+    bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     env.insert("GNUHELP",sHelpFile);
@@ -175,17 +148,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         return;
     }
 
-// TODO --> Aufloesung der Ausgabearea beachten !
-    // create gnuplot script
-    //QWindow * pWindow = windowHandle();
-    //double logRes = pWindow->screen()->logicalDotsPerInch();
-    //double physRes = pWindow->screen()->physicalDotsPerInch();
-    //qDebug() << "RES: " << logRes << " " << physRes << endl;
-
-//    QString sInput = QString("set term svg size %1,%2 fsize 16 dynamic\n").arg(ui->svgGnuplotOutput->width()/2).arg(ui->svgGnuplotOutput->height()/2)
-//    QString sInput = QString("set term svg size %1,%2 dynamic font \"courier,16\"\n").arg(512).arg(512)
     QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
-    //QString sInput = QString("set term svg dynamic font \"Mono\"\n").arg(1024).arg(1024)
                         + sScript
                         + QString("\nexit\n");
 

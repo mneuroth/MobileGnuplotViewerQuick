@@ -13,13 +13,38 @@ import QtQuick.Dialogs 1.2
 
 PageHomeForm {
 
+    property bool isInInit: true
+    property string modifiedFlag: " (*)"
+
     fontName: getFontName()
+
+    function addModifiedFlag() {
+        var name = lblFileName.text
+        if( !name.endsWith(modifiedFlag))
+        {
+            lblFileName.text = name + modifiedFlag
+        }
+    }
+
+    function removeModifiedFlag() {
+        var name = lblFileName.text
+        if( name.endsWith(modifiedFlag))
+        {
+            name = name.substring( 0, name.length-modifiedFlag.length )
+            lblFileName.text = name
+        }
+    }
 
     textArea {
         //placeholderText: applicationData.defaultScript
         onTextChanged: {
-            // set modified flag for autosave of document
-            textArea.textDocument.modified = true
+            if( !isInInit )
+            {
+                // set modified flag for autosave of document
+                textArea.textDocument.modified = true
+                // and mark current file name with modified flag
+                addModifiedFlag()
+            }
         }
     }
 
@@ -41,6 +66,7 @@ PageHomeForm {
     btnSave {
         onClicked: {
             saveCurrentDoc(homePage.textArea)
+            removeModifiedFlag()
         }
     }
 
@@ -96,12 +122,4 @@ PageHomeForm {
             stackView.push(helpPage)
         }
     }
-/*
-    btnExit {
-        onClicked: {
-            //onClicked: window.close() //Qt.quit()
-            applicationData.test()
-        }
-    }
-*/
 }

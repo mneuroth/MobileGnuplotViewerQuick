@@ -14,6 +14,7 @@ import QtQuick.Dialogs 1.2
 MobileFileDialogForm {
     property bool isSaveAsModus: false
     property bool isDeleteModus: false
+    property bool isSaveAsImage: false
     property var textControl: null
 
     listView {
@@ -40,7 +41,8 @@ MobileFileDialogForm {
         }
     }
 
-    function setSaveAsModus() {
+    function setSaveAsModus(bAsImage) {
+        mobileFileDialog.isSaveAsImage = bAsImage
         mobileFileDialog.isSaveAsModus = true
         mobileFileDialog.isDeleteModus = false
         mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
@@ -51,6 +53,7 @@ MobileFileDialogForm {
     }
 
     function setOpenModus() {
+        mobileFileDialog.isSaveAsImage = false
         mobileFileDialog.isSaveAsModus = false
         mobileFileDialog.isDeleteModus = false
         mobileFileDialog.lblMFDInput.text = qsTr("open name:")
@@ -60,6 +63,7 @@ MobileFileDialogForm {
     }
 
     function setDeleteModus() {
+        mobileFileDialog.isSaveAsImage = false
         mobileFileDialog.isSaveAsModus = false
         mobileFileDialog.isDeleteModus = true
         mobileFileDialog.lblMFDInput.text = qsTr("current file name:")
@@ -70,7 +74,7 @@ MobileFileDialogForm {
     }
 
     function setDirectory(newPath) {
-        newPath = applicationData.normalizePath(newPath)
+        newPath = applicationData.getNormalizedPath(newPath)
         listView.model.folder = buildValidUrl(newPath)
         listView.currentIndex = -1
         listView.focus = true
@@ -101,7 +105,14 @@ MobileFileDialogForm {
 
     function saveAsCurrentFileNow() {
         var fullPath = currentDirectory + "/" + txtMFDInput.text
-        window.saveAsCurrentDoc(buildValidUrl(fullPath), textControl)
+        if( mobileFileDialog.isSaveAsImage )
+        {
+            window.saveAsImage(buildValidUrl(fullPath))
+        }
+        else
+        {
+            window.saveAsCurrentDoc(buildValidUrl(fullPath), textControl)
+        }
         stackView.pop()
     }
 
@@ -210,7 +221,7 @@ MobileFileDialogForm {
     btnUp {
         onClicked: {
             // stop with moving up when home directory is reached
-            if( applicationData.normalizePath(currentDirectory) !== applicationData.normalizePath(applicationData.homePath) )
+            if( applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(applicationData.homePath) )
             {
                 mobileFileDialog.setDirectory(currentDirectory + "/..")
                 mobileFileDialog.setCurrentName("")

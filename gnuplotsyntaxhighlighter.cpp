@@ -189,24 +189,4 @@ void GnuplotSyntaxHighlighter::highlightBlock(const QString &sText)
     QTextCharFormat myClassFormat;
     myClassFormat.setFontWeight(QFont::Bold);
     myClassFormat.setForeground(Qt::darkMagenta);
-
-
-// http://astro.berkeley.edu/~mkmcc/software/src/gnuplot.html
-// https://groups.google.com/forum/?fromgroups#!topic/comp.graphics.apps.gnuplot/UufLJwOntCE
-// http://www.vim.org/scripts/script.php?script_id=1737
-// http://lists.kde.org/?l=kwrite-devel&m=108299163904146
-
-// numbers, strings, operators, klammern, constants, variables, functions, commands
-/*
-    QString pattern = "\\bMy[A-Za-z]+\\b";
-    //QString pattern = "\\b[0-9\.,eE+-]+\\b";
-    //QString pattern = "\\b[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)\\b";
-    QRegExp expression(pattern);
-    int index = text.indexOf(expression);
-    while (index >= 0) {
-        int length = expression.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(expression, index + length);
-    }
-*/
 }

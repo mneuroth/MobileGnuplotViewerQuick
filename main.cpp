@@ -45,15 +45,21 @@
 // ok: - MobileFileDialog: new Button entfernen, wird nicht benoetigt ?
 // ok: - Graphics pitch funktioniert nicht richtig...
 // ok: - set directory fuer MobileFildDialog auf Pfad fuer aktuell geladenes skript bei open/save as
+// ok:? - Auto-Save implementieren, Aenderung in Filename anzeigen *
+// - applicationui.* und shareutils.* aufraeumen !
+// - Uebersetzung ins deutsche, etc.
 // - Logging Ausgaben entfernen
+// - DummyPage entfernen
+// - demo Image fuer pincharea entfernen
 // - ggf. qml warnings entfernen
+// - unterstuetzung save as auf android storage access framework
 // - ggf. Applicaton Icon auffrischen...
 // - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
 // ok: - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
 // ok: - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog
 // ok: - ggf. Dateien loeschen
 // - Source Code cleanup
-// - QML Source Code besser strukturieren
+// ok:? - QML Source Code besser strukturieren
 // ok: - About Dialog
 // - Google Play Spenden/Bezahloptionen einbauen
 //
@@ -135,7 +141,7 @@ void PrivateMessageHandler(QtMsgType type, const QMessageLogContext & context, c
 
 int main(int argc, char *argv[])
 {
-AddToLog(QString("###> RESTART main()"));
+// TODO DEBUGGING: AddToLog(QString("###> RESTART main()"));
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
@@ -143,7 +149,7 @@ AddToLog(QString("###> RESTART main()"));
     app.setOrganizationDomain("mneuroth.de");
     app.setApplicationName("MobileGnuplotViewerQuick");
 
-    AddToLog("Starting APP");
+// TODO DEBUGGING: AddToLog("Starting APP");
 
 #ifdef _WITH_QDEBUG_REDIRECT
     qInstallMessageHandler(PrivateMessageHandler);
@@ -178,6 +184,7 @@ AddToLog(QString("###> RESTART main()"));
 
 #if defined(Q_OS_ANDROID)
     ApplicationData data(0, appui.GetShareUtils(), aStorageAccess, engine);
+    QObject::connect(&app, SIGNAL(applicationStateChanged(Qt::ApplicationState)), &data, SLOT(sltApplicationStateChanged(Qt::ApplicationState)));
 #else
     ApplicationData data(0, new ShareUtils(), aStorageAccess, engine);
 #endif
@@ -190,8 +197,12 @@ AddToLog(QString("###> RESTART main()"));
     QQuickTextDocument* doc = childObject<QQuickTextDocument*>(engine, "textArea", "textDocument");
     if( doc!=0 )
     {
+        // this call invokes a onTextChanged for the textArea !
         pHighlighter = new GnuplotSyntaxHighlighter(doc->textDocument());
+        pHighlighter->rehighlight();
     }
+
+    data.initDone();
 
     int result = app.exec();
 
@@ -200,6 +211,7 @@ AddToLog(QString("###> RESTART main()"));
         delete pHighlighter;
     }
 
-AddToLog(QString("###> SHUTDOWN result=%1").arg(result));
+// TODO DEBUGGING: AddToLog(QString("###> SHUTDOWN result=%1").arg(result));
+
     return result;
 }

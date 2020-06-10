@@ -37,6 +37,7 @@ bool HasAccessToSDCardPath()
 bool GrantAccessToSDCardPath(QObject * parent)
 {
 #if defined(Q_OS_ANDROID)
+    Q_UNUSED(parent)
     QStringList permissions;
     permissions.append("android.permission.WRITE_EXTERNAL_STORAGE");
     QtAndroid::PermissionResultMap result = QtAndroid::requestPermissionsSync(permissions);
@@ -45,6 +46,8 @@ bool GrantAccessToSDCardPath(QObject * parent)
         //QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
         return false;
     }
+#else
+    Q_UNUSED(parent)
 #endif
     return true;
 }

@@ -114,6 +114,9 @@ bool StorageAccess::updateFile(const QString & fileUri, const QByteArray & fileC
                                               jniFileUri.object<jstring>(),
                                               QByteArray2jbyteArray(fileContent));
     return ok;
+#else
+    Q_UNUSED(fileUri)
+    Q_UNUSED(fileContent)
 #endif
     return false;
 }
@@ -127,6 +130,8 @@ bool StorageAccess::deleteFile(const QString & fileUri)
                                               "(Ljava/lang/String;)Z",
                                               jniFileUri.object<jstring>());
     return ok;
+#else
+    Q_UNUSED(fileUri)
 #endif
     return false;
 }
@@ -166,6 +171,8 @@ bool StorageAccess::readFile(const QString & fileUri, QByteArray & fileContent)
 
     //return false;
 #else
+    Q_UNUSED(fileUri)
+    Q_UNUSED(fileContent)
     return false;
 #endif
 }
@@ -184,6 +191,9 @@ void StorageAccess::createFile(const QString & fileName, const QString & mimeTyp
     {
         emit openFileError(tr("Error: can not call java method createFile()"));
     }
+#else
+    Q_UNUSED(fileName)
+    Q_UNUSED(mimeType)
 #endif
 }
 

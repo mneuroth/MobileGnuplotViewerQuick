@@ -37,10 +37,9 @@ public:
 
 signals:
     void sigResultReady(const QString & svgData);
+    void sigShowErrorText(const QString & txt);
 
 public slots:
-    void sltRunGnuplot();
-
     void sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus);
     void sltErrorGnuplot(QProcess::ProcessError error);
     void sltErrorText(const QString & sTxt);
