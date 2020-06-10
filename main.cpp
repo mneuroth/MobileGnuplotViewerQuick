@@ -45,12 +45,12 @@
 // ok: - MobileFileDialog: new Button entfernen, wird nicht benoetigt ?
 // ok: - Graphics pitch funktioniert nicht richtig...
 // ok: - set directory fuer MobileFildDialog auf Pfad fuer aktuell geladenes skript bei open/save as
-// ok:? - Auto-Save implementieren, Aenderung in Filename anzeigen *
+// ok: - Auto-Save implementieren, Aenderung in Filename anzeigen *
 // - applicationui.* und shareutils.* aufraeumen !
 // - Uebersetzung ins deutsche, etc.
 // - Logging Ausgaben entfernen
-// - DummyPage entfernen
-// - demo Image fuer pincharea entfernen
+// ok: - DummyPage entfernen
+// ok: - demo Image fuer pincharea entfernen
 // - ggf. qml warnings entfernen
 // - unterstuetzung save as auf android storage access framework
 // - ggf. Applicaton Icon auffrischen...
@@ -90,6 +90,8 @@
 #include <QtGlobal>
 #include <QDir>
 #include <QFile>
+
+#include <QTranslator>
 
 #define _WITH_QDEBUG_REDIRECT
 
@@ -168,6 +170,12 @@ int main(int argc, char *argv[])
     aAndroidTasks.Init();
 
     StorageAccess aStorageAccess;
+
+    QTranslator qtTranslator;
+    QString sLanguage = QLocale::system().name().mid(0,2).toLower();
+    QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
+    bool ok = qtTranslator.load(sResource);
+    app.installTranslator(&qtTranslator);
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));

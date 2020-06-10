@@ -15,14 +15,14 @@
         <file>AboutDialog.qml</file>
         <file>SettingsDialogForm.ui.qml</file>
         <file>SettingsDialog.qml</file>
-        <file>DummyPage.qml</file>
-        <file>DummyPageFormular.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file>DSC_4945.JPG</file>
         <file alias="empty.svg">files/empty.svg</file>
         <file alias="share.svg">files/share.svg</file>
         <file alias="directory.svg">files/file96.svg</file>
         <file alias="file.svg">files/new104.svg</file>
         <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
+    </qresource>
+    <qresource prefix="/translations">
+        <file>GnuplotViewerQuick_de_DE.qm</file>
     </qresource>
 </RCC>

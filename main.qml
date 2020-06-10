@@ -138,6 +138,9 @@ ApplicationWindow {
     }
 
     function readCurrentDoc(url) {
+        // first save possible modified current gnuplot script
+        checkForModified()
+        // then read new document
         var urlFileName = buildValidUrl(url)
         homePage.currentFileUrl = urlFileName        
         homePage.textArea.text = applicationData.readFileContent(urlFileName)
@@ -429,13 +432,6 @@ ApplicationWindow {
                         stackView.push(aboutDialog)
                     }
                 }
-                MenuItem {
-                    text: qsTr("Test")
-                    onTriggered: {
-                        stackView.pop()
-                        stackView.push(dummyPage)
-                    }
-                }
             }
         }
 
@@ -553,12 +549,6 @@ ApplicationWindow {
     PageOutput {
         id: outputPage
         objectName: "outputPage"
-        visible: false
-    }
-
-    // for testing...
-    DummyPage {
-        id: dummyPage
         visible: false
     }
 
