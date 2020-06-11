@@ -214,19 +214,19 @@ ApplicationWindow {
         homePage.isInInit = false
     }
 
-    function setScriptText(script: string)
+    function setScriptText(script/*: string*/)
     {
         homePage.textArea.text = script
         homePage.textArea.textDocument.modified = false
     }
 
-    function setScriptName(name: string)
+    function setScriptName(name/*: string*/)
     {
         homePage.currentFileUrl = name
         homePage.lblFileName.text = applicationData.getOnlyFileName(name)
     }
 
-    function setOutputText(txt: string)
+    function setOutputText(txt/*: string*/)
     {
         outputPage.txtOutput.text = txt
         stackView.pop()

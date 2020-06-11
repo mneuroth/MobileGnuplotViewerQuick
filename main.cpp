@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     QTranslator qtTranslator;
     QString sLanguage = QLocale::system().name().mid(0,2).toLower();
     QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
-    bool ok = qtTranslator.load(sResource);
+    /*bool ok =*/ qtTranslator.load(sResource);
     app.installTranslator(&qtTranslator);
 
     QQmlApplicationEngine engine;

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest package="de.mneuroth.gnuplotviewerquick" xmlns:android="http://schemas.android.com/apk/res/android" android:sharedUserId="de.mneuroth.gnuplotviewer" android:versionName="1.0.0" android:versionCode="100" android:installLocation="auto">
+<manifest package="de.mneuroth.gnuplotviewerquick" xmlns:android="http://schemas.android.com/apk/res/android" android:sharedUserId="de.mneuroth.gnuplotviewer" android:versionName="2.0.0" android:versionCode="200" android:installLocation="auto">
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28"/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.
@@ -106,4 +106,5 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
 </manifest>
