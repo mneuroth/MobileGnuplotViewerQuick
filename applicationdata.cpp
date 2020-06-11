@@ -21,6 +21,8 @@
 #include <QDir>
 #include <QUrl>
 #include <QFile>
+#include <QBuffer>
+#include <QByteArray>
 #include <QTextStream>
 #include <QStandardPaths>
 #include <QImage>
@@ -382,6 +384,8 @@ bool ApplicationData::shareImage(const QImage & image)
 
 bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data)
 {
+    QString translatedFileName = GetTranslatedFileName(sUrlFileName);
+
     QSvgRenderer aRenderer(data);
     QImage aImg(1024,1024, QImage::Format_ARGB32);
 
@@ -391,9 +395,19 @@ bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QBy
     QPainter painter(&aImg);
     aRenderer.render(&painter);
 
-    // Save, image format based on file extension
-    QUrl aUrl(sUrlFileName);
-    return aImg.save(aUrl.toLocalFile());
+    if( IsAndroidStorageFileUrl(translatedFileName) )
+    {
+        QByteArray aArr;
+        QBuffer aBuffer(&aArr);
+        aBuffer.open(QIODevice::WriteOnly);
+        aImg.save(&aBuffer, "PNG");
+        return m_aStorageAccess.updateFile(translatedFileName, aArr);
+    }
+    else
+    {
+        // Save, image format based on file extension
+        return aImg.save(translatedFileName);
+    }
 }
 
 bool ApplicationData::shareSvgData(const QVariant & data)
@@ -605,7 +619,6 @@ void ApplicationData::sltErrorText(const QString & msg)
 #if defined(Q_OS_ANDROID)
 void ApplicationData::sltApplicationStateChanged(Qt::ApplicationState applicationState)
 {
-AddToLog(QString("sltApplicationStateChanged state=%1").arg((int)applicationState));
     if( applicationState == Qt::ApplicationState::ApplicationSuspended )
     {
         QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");

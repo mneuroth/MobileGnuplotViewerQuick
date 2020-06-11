@@ -46,7 +46,7 @@ MobileFileDialogForm {
         mobileFileDialog.isSaveAsModus = true
         mobileFileDialog.isDeleteModus = false
         mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
-        mobileFileDialog.txtMFDInput.text = qsTr("unknown.gpt")
+        mobileFileDialog.txtMFDInput.text = bAsImage ? qsTr("unknown.png") : qsTr("unknown.gpt")
         mobileFileDialog.txtMFDInput.readOnly = false
         mobileFileDialog.btnOpen.text = qsTr("Save as")
         mobileFileDialog.btnOpen.enabled = true
@@ -103,8 +103,7 @@ MobileFileDialogForm {
         stackView.pop()
     }
 
-    function saveAsCurrentFileNow() {
-        var fullPath = currentDirectory + "/" + txtMFDInput.text
+    function saveAsCurrentFileNow(fullPath) {
         if( mobileFileDialog.isSaveAsImage )
         {
             window.saveAsImage(buildValidUrl(fullPath))
@@ -160,14 +159,16 @@ MobileFileDialogForm {
                 Image {
                     id: itemIcon
                     anchors.left: parent.Left
-                    height: itemLabel.height
-                    width: itemLabel.height
+                    height: itemLabel.height - 8
+                    width: itemLabel.height - 8
                     source: fileIsDir ? "directory.svg" : "file.svg"
                 }
                 Label {
                     id: itemLabel
                     anchors.left: itemIcon.Right
                     anchors.right: parent.Right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     verticalAlignment: Text.AlignVCenter
                     text: /*(fileIsDir ? "DIR_" : "FILE") + " | " +*/ fileName
                 }
@@ -203,7 +204,8 @@ MobileFileDialogForm {
             {
                 if( mobileFileDialog.isSaveAsModus )
                 {
-                    mobileFileDialog.saveAsCurrentFileNow()
+                    var fullPath = currentDirectory + "/" + txtMFDInput.text
+                    mobileFileDialog.saveAsCurrentFileNow(fullPath)
                 }
                 else
                 {
@@ -261,8 +263,14 @@ MobileFileDialogForm {
 
     btnStorage {
         onClicked: {
-            //fileDialog.open()
-            storageAccess.openFile()
+            if( mobileFileDialog.isSaveAsModus )
+            {
+                storageAccess.createFile(mobileFileDialog.txtMFDInput.text)
+            }
+            else
+            {
+                storageAccess.openFile()
+            }
         }
     }
 }

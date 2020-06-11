@@ -46,14 +46,14 @@
 // ok: - Graphics pinch funktioniert nicht richtig...
 // ok: - set directory fuer MobileFildDialog auf Pfad fuer aktuell geladenes skript bei open/save as
 // ok: - Auto-Save implementieren, Aenderung in Filename anzeigen *
-// - TEST: application state change --> save modified file
+// ok: - TEST: application state change --> save modified file
 // - Source Code cleanup
 // - applicationui.* und shareutils.* aufraeumen !
-// - Logging Ausgaben entfernen
 // - ggf. qml warnings entfernen
-// - unterstuetzung save as auf android storage access framework
+// ok: - Logging Ausgaben entfernen
+// ok: - unterstuetzung save as auf android storage access framework
 // ok: - ggf. Applicaton Icon auffrischen...
-// - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
+// ok: - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
 // ok: - Uebersetzung ins deutsche, etc.
 // ok: - DummyPage entfernen
 // ok: - demo Image fuer pincharea entfernen
@@ -94,12 +94,14 @@
 
 #include <QTranslator>
 
-#define _WITH_QDEBUG_REDIRECT
+#undef _WITH_QDEBUG_REDIRECT
+#undef _WITH_ADD_TO_LOG
 
 static qint64 g_iLastTimeStamp = 0;
 
 void AddToLog(const QString & msg)
 {
+#ifdef _WITH_ADD_TO_LOG
     QString sFileName("/sdcard/Texte/mgv_qdebug.log");
     if( !QDir("/sdcard/Texte").exists() )
     {
@@ -114,6 +116,9 @@ void AddToLog(const QString & msg)
     ts << delta << " ";
     ts << msg << endl;
     qDebug() << delta << " " << msg << endl;
+#else
+    Q_UNUSED(msg)
+#endif
 }
 
 #ifdef _WITH_QDEBUG_REDIRECT

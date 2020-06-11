@@ -84,12 +84,10 @@ ApplicationWindow {
     }
 
     function checkForModified() {
-        console.log("CHECK_FOR_MODIFIED...")
         if( homePage.textArea.textDocument.modified )
         {
-            console.log("Save Document !")
             // auto save document if application is closing
-            saveCurrentDoc(homePage.textArea)
+            saveCurrentDoc(homePage.textArea)            
         }
     }
 
@@ -122,6 +120,7 @@ ApplicationWindow {
         else
         {
             homePage.textArea.textDocument.modified = false
+            homePage.removeModifiedFlag()
         }
     }
 
@@ -643,12 +642,11 @@ ApplicationWindow {
         }
     }
 
-/*
     Connections {
         target: storageAccess
 
         onOpenFileContentReceived: {
-            applicationData.logText("==> onOpenFileContentReceived "+fileUri+" "+decodedFileUri)
+            //applicationData.logText("==> onOpenFileContentReceived "+fileUri+" "+decodedFileUri)
 // TODO does not work (improve!):            window.readCurrentDoc(fileUri) --> stackView.pop() not working
             homePage.currentFileUrl = fileUri
             homePage.textArea.text = content // window.readCurrentDoc(fileUri)  //content
@@ -664,11 +662,14 @@ ApplicationWindow {
             stackView.pop()
         }
         onCreateFileReceived: {
+            // create file is used for save as handling !
+            //applicationData.logText("onCreateFileReceived "+fileUri)
             homePage.currentFileUrl = fileUri
-            homePage.textArea.text += "\ncreated: "+fileUri+"\n"
+            homePage.textArea.textDocument.modified = false
             homePage.lblFileName.text = applicationData.getOnlyFileName(fileUri)
-            stackView.pop()
+            // fill content into the newly created file...
+            mobileFileDialog.saveAsCurrentFileNow(fileUri)
+            //stackView.pop()   // already done in saveAs... above
         }
     }
-*/
 }

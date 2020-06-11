@@ -66,7 +66,6 @@ PageHomeForm {
     btnSave {
         onClicked: {
             saveCurrentDoc(homePage.textArea)
-            removeModifiedFlag()
         }
     }
 
