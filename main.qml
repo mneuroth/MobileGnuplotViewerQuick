@@ -279,7 +279,7 @@ ApplicationWindow {
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
-                            applicationData.shareSvgData(graphicsPage.svgdata)
+                            var ok = applicationData.shareSvgData(graphicsPage.svgdata)
                         }
                         else
                         {
@@ -298,7 +298,7 @@ ApplicationWindow {
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
-                            applicationData.shareViewSvgData(graphicsPage.svgdata)
+                            var ok = applicationData.shareViewSvgData(graphicsPage.svgdata)
                         }
                         else
                         {

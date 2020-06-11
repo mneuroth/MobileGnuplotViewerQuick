@@ -96,12 +96,19 @@ bool IsAndroidStorageFileUrl(const QString & url)
 
 QString GetTranslatedFileName(const QString & fileName)
 {
-    QUrl url(fileName);
-    QString translatedFileName(url.toLocalFile());
+    QString translatedFileName = fileName;
     if( IsAndroidStorageFileUrl(fileName) )
     {
         // handle android storage urls --> forward content://... to QFile directly
         translatedFileName = fileName;
+    }
+    else
+    {
+        QUrl url(fileName);
+        if(url.isValid() && url.isLocalFile())
+        {
+            translatedFileName = url.toLocalFile();
+        }
     }
     return translatedFileName;
 }
@@ -406,7 +413,13 @@ bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QBy
     else
     {
         // Save, image format based on file extension
-        return aImg.save(translatedFileName);
+        QString sFileName = translatedFileName;
+        // if original file name was no url, than use original file name (used for sharing files)
+        //if( sFileName.isEmpty() )
+        //{
+        //    sFileName = sUrlFileName;
+        //}
+        return aImg.save(sFileName);
     }
 }
 
