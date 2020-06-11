@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
@@ -15,8 +16,11 @@ Page {
     //id: aboutDialog
     anchors.fill: parent
 
+    title: qsTr("About")
+
     width: 400
-    height: 400
+    height: 500
+    property alias lblIconInfos: lblIconInfos
     property alias btnClose: btnClose
     property alias lblAppName: lblAppName
     property alias lblAppVersion: lblAppVersion
@@ -36,8 +40,9 @@ Page {
         Text {
             id: lblAppInfos
             x: 5
-            y: 324
             text: qsTr("App Infos")
+            anchors.top: lblIconInfos.bottom
+            anchors.topMargin: 15
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.rightMargin: 5
@@ -86,6 +91,19 @@ Page {
         }
 
         Text {
+            id: lblIconInfos
+            text: qsTr("Icons designed by <a href='http://www.flaticon.com'>Freepik</a>")
+            anchors.top: lblAppAuthor.bottom
+            anchors.topMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 12
+        }
+
+        Text {
             id: lblAppName
             x: 5
             y: 18
@@ -108,7 +126,7 @@ Page {
             anchors.left: parent.left
             anchors.leftMargin: 90
             fillMode: Image.PreserveAspectFit
-            source: "gnuplotviewer512x512.png"
+            source: "gnuplotviewer_flat_512x512"
         }
 
         Button {
@@ -125,8 +143,8 @@ Page {
 
 /*##^##
 Designer {
-    D{i:2;anchors_x:49}D{i:3;anchors_x:49}D{i:4;anchors_x:49}D{i:5;anchors_x:49}D{i:6;anchors_x:45}
-D{i:8;anchors_x:156}D{i:1;anchors_height:200;anchors_width:200;anchors_x:0;anchors_y:0}
+    D{i:2;anchors_x:49;anchors_y:324}D{i:3;anchors_x:49}D{i:4;anchors_x:49}D{i:5;anchors_x:49}
+D{i:6;anchors_x:45}D{i:1;anchors_height:200;anchors_width:200;anchors_x:0;anchors_y:0}
 }
 ##^##*/
 

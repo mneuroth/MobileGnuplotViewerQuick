@@ -605,6 +605,7 @@ void ApplicationData::sltErrorText(const QString & msg)
 #if defined(Q_OS_ANDROID)
 void ApplicationData::sltApplicationStateChanged(Qt::ApplicationState applicationState)
 {
+AddToLog(QString("sltApplicationStateChanged state=%1").arg((int)applicationState));
     if( applicationState == Qt::ApplicationState::ApplicationSuspended )
     {
         QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");

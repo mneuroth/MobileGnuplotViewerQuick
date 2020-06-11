@@ -8,8 +8,13 @@ FAQ
   otherwise the plot output does not work,
   the plot output window uses svg output
   of the gnuplot program.
-* to scroll the content of the text field
-  use two fingers instead of one finger.
+* sharing to this application does not
+  work if the application is left via
+  home button or task switch button.
+  Please close this application with the
+  back button before using it as target
+  application in a share operation from
+  another application.
 
 see this link for more informations:
 http://www.mneuroth.de/projects/gnuplotviewer_faq.html

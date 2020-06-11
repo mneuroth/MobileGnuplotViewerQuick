@@ -15,6 +15,8 @@ Page {
     //id: settingsDialog
     anchors.fill: parent
 
+    title: qsTr("Gnuplot Settings")
+
     width: 400
     height: 400
     property alias txtGraphicsFontSize: txtGraphicsFontSize

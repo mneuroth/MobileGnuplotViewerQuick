@@ -29,7 +29,7 @@ Page {
 
     property string fontName: "Courier"
 
-    title: qsTr("Gnuplot")
+    title: qsTr("Gnuplot Input")
 
     Label {
         id: lblFileName

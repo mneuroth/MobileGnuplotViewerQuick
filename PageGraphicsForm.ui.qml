@@ -23,7 +23,7 @@ Page {
     property alias btnOutput: btnOutput
     property alias btnInput: btnInput
     anchors.fill: parent
-    title: qsTr("Graphics")
+    title: qsTr("Gnuplot Graphics")
 
     Image {
         id: image

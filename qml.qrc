@@ -18,9 +18,12 @@
         <file>qtquickcontrols2.conf</file>
         <file alias="empty.svg">files/empty.svg</file>
         <file alias="share.svg">files/share.svg</file>
+        <file alias="menu.svg">files/menu.svg</file>
+        <file alias="menu_bars.svg">files/menu_bars.svg</file>
+        <file alias="back.svg">files/back.svg</file>
         <file alias="directory.svg">files/file96.svg</file>
         <file alias="file.svg">files/new104.svg</file>
-        <file alias="gnuplotviewer512x512.png">images/gnuplotviewer512x512.png</file>
+        <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
     </qresource>
     <qresource prefix="/translations">
         <file>GnuplotViewerQuick_de_DE.qm</file>

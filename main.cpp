@@ -43,22 +43,23 @@
 // ok: - ggf. save as menu item um fit ergebnisse zu speichern ?
 // ok: - homePage: Buttons fuer: open, save, run, navigation, alle anderen entfernen...
 // ok: - MobileFileDialog: new Button entfernen, wird nicht benoetigt ?
-// ok: - Graphics pitch funktioniert nicht richtig...
+// ok: - Graphics pinch funktioniert nicht richtig...
 // ok: - set directory fuer MobileFildDialog auf Pfad fuer aktuell geladenes skript bei open/save as
 // ok: - Auto-Save implementieren, Aenderung in Filename anzeigen *
+// - TEST: application state change --> save modified file
+// - Source Code cleanup
 // - applicationui.* und shareutils.* aufraeumen !
-// - Uebersetzung ins deutsche, etc.
 // - Logging Ausgaben entfernen
-// ok: - DummyPage entfernen
-// ok: - demo Image fuer pincharea entfernen
 // - ggf. qml warnings entfernen
 // - unterstuetzung save as auf android storage access framework
-// - ggf. Applicaton Icon auffrischen...
+// ok: - ggf. Applicaton Icon auffrischen...
 // - Menu 3 Points als Icon verwenden, Unicode funktioniert bei Huawei Tablet nicht !
+// ok: - Uebersetzung ins deutsche, etc.
+// ok: - DummyPage entfernen
+// ok: - demo Image fuer pincharea entfernen
 // ok: - MobileFileDialog: Navigation auf scripts Verzeichnis beschraenken
 // ok: - Menu Items ggf. disablen, wenn auf MobileFileDialog, AboutDialog oder SettingsDialog
 // ok: - ggf. Dateien loeschen
-// - Source Code cleanup
 // ok:? - QML Source Code besser strukturieren
 // ok: - About Dialog
 // - Google Play Spenden/Bezahloptionen einbauen

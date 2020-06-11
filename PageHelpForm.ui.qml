@@ -24,7 +24,7 @@ Page {
     property string fontName: "Courier"
 
     anchors.fill: parent
-    title: qsTr("Help")
+    title: qsTr("Gnuplot Help")
 
     Label {
         id: lblHelp

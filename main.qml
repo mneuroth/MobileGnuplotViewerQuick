@@ -84,8 +84,10 @@ ApplicationWindow {
     }
 
     function checkForModified() {
+        console.log("CHECK_FOR_MODIFIED...")
         if( homePage.textArea.textDocument.modified )
         {
+            console.log("Save Document !")
             // auto save document if application is closing
             saveCurrentDoc(homePage.textArea)
         }
@@ -241,7 +243,8 @@ ApplicationWindow {
 
         ToolButton {
             id: menuButton
-            text: "\u22EE"
+            //text: "\u22EE"
+            icon.source: "menu.svg"
             font.pixelSize: Qt.application.font.pixelSize * 1.6
             anchors.right: parent.right
             anchors.leftMargin: 5
@@ -437,7 +440,8 @@ ApplicationWindow {
 
         ToolButton {
             id: toolButton
-            text: stackView.depth > 1 ? "\u25C0" : "\u2261"  // original: "\u2630" for second entry, does not work on Android
+            //text: stackView.depth > 1 ? "\u25C0" : "\u2261"  // original: "\u2630" for second entry, does not work on Android
+            icon.source: stackView.depth > 1 ? "back" : "menu_bars"
             font.pixelSize: Qt.application.font.pixelSize * 1.6
             onClicked: {
                 if (stackView.depth > 1) {

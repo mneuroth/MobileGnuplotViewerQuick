@@ -22,7 +22,7 @@ Page {
     property string fontName: "Courier"
 
     anchors.fill: parent
-    title: qsTr("Output")
+    title: qsTr("Gnuplot Output")
 
     Label {
         id: lblOutput

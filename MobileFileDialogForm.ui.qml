@@ -33,6 +33,8 @@ Page {
     id: page
     anchors.fill: parent
 
+    title: qsTr("Select file")
+
     RowLayout {
         id: columnLayout
         width: 440
