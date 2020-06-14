@@ -98,6 +98,8 @@ PageHomeForm {
                 stackView.pop()
                 stackView.push(outputPage)
             }
+
+            checkForUserNotification()
         }
     }
 

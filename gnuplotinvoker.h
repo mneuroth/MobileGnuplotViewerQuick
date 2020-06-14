@@ -21,6 +21,7 @@ class GnuplotInvoker : public QObject
     Q_PROPERTY(bool useBeta READ getUseBeta WRITE setUseBeta)
     Q_PROPERTY(int resolution READ getResolution WRITE setResolution)
     Q_PROPERTY(int fontSize READ getFontSize WRITE setFontSize)
+    Q_PROPERTY(int invokeCount READ getInvokeCount WRITE setInvokeCount)
 
 public:
     GnuplotInvoker();
@@ -34,6 +35,8 @@ public:
     void setResolution(int value);
     int  getFontSize() const;
     void setFontSize(int value);
+    int  getInvokeCount() const;
+    void setInvokeCount(int value);
 
 signals:
     void sigResultReady(const QString & svgData);
@@ -53,6 +56,7 @@ private:
     bool      m_bUseBeta;
     int       m_iResolution;
     int       m_iFontSize;
+    int       m_iInvokeCount;
     QProcess  m_aGnuplotProcess;
 };
 

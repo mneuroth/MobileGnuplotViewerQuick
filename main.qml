@@ -32,6 +32,7 @@ ApplicationWindow {
         settings.useGnuplotBeta = gnuplotInvoker.useBeta
         settings.graphicsResolution = gnuplotInvoker.resolution
         settings.graphicsFontSize = gnuplotInvoker.fontSize
+        settings.invokeCount = gnuplotInvoker.invokeCount
         settings.currentFont = homePage.textArea.font
     }
 
@@ -88,6 +89,13 @@ ApplicationWindow {
         {
             // auto save document if application is closing
             saveCurrentDoc(homePage.textArea)            
+        }
+    }
+
+    function checkForUserNotification() {
+        if( gnuplotInvoker.invokeCount % 101 === 100 )
+        {
+            myUserNotificationDialog.open()
         }
     }
 
@@ -427,6 +435,14 @@ ApplicationWindow {
                     }
                 }
                 MenuItem {
+                    text: qsTr("Support")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                        stackView.pop()
+                        stackView.push(supportDialog)
+                    }
+                }
+                MenuItem {
                     text: qsTr("About")
                     enabled: !isDialogOpen()
                     onTriggered: {
@@ -442,12 +458,26 @@ ApplicationWindow {
             //text: stackView.depth > 1 ? "\u25C0" : "\u2261"  // original: "\u2630" for second entry, does not work on Android
             icon.source: stackView.depth > 1 ? "back" : "menu_bars"
             font.pixelSize: Qt.application.font.pixelSize * 1.6
+            anchors.left: parent.left
+            anchors.leftMargin: 5
             onClicked: {
                 if (stackView.depth > 1) {
                     stackView.pop()
                 } else {
                     drawer.open()
                 }
+            }
+        }
+
+        Switch {
+            id: readonlySwitch
+            visible: stackView.currentItem === homePage
+            text: qsTr("Readonly")
+            anchors.right: menuButton.left
+            anchors.rightMargin: 5
+
+            onPositionChanged: {
+                homePage.textArea.readOnly = position === 1 ? true : false
             }
         }
 
@@ -514,6 +544,7 @@ ApplicationWindow {
         property int graphicsResolution: 1024
         property int graphicsFontSize: 28
         property var currentFont: null
+        property int invokeCount: 0
     }
 
     GnuplotInvoker {
@@ -522,6 +553,7 @@ ApplicationWindow {
         resolution: settings.graphicsResolution
         fontSize: settings.graphicsFontSize
         useBeta: settings.useGnuplotBeta
+        invokeCount: settings.invokeCount
     }
 
 //    StorageAccess {
@@ -561,6 +593,11 @@ ApplicationWindow {
 
     AboutDialog {
         id: aboutDialog
+        visible: false
+    }
+
+    SupportDialog {
+        id: supportDialog
         visible: false
     }
 
@@ -620,6 +657,21 @@ ApplicationWindow {
               //        Qt.openUrlExternally(fileUrls[i])
         }
         onRejected: { console.log("Rejected") }
+    }
+
+    MessageDialog {
+        id: myUserNotificationDialog
+        visible: false
+        title: qsTr("Request for support")
+        text: qsTr("It seemed you like this app.\nMaybe you would like to support the development of this app with buying a support level?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            stackView.pop()
+            stackView.push(supportDialog)
+        }
+        onNo: {
+            // do nothing
+        }
     }
 
     // **********************************************************************

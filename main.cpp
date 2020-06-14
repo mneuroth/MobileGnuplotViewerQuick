@@ -47,6 +47,12 @@
 // ok: - set directory fuer MobileFildDialog auf Pfad fuer aktuell geladenes skript bei open/save as
 // ok: - Auto-Save implementieren, Aenderung in Filename anzeigen *
 // ok: - TEST: application state change --> save modified file
+// ok: - Webassembly Test... --> ok bis auf gnuplot Aufruf !
+// ok: - Readonly Button bei Input-Bereich realisieren
+// - Copy-Clicpboard fuer (readonly) Output-Bereich unterstuetzen
+// - diesen Bereich aus dem Quellcode entfernen
+// - Google Play Spenden/Bezahloptionen einbauen --> verwendung zaehlen und nach haeufiger verwendung support nachfragen ?
+// - weitere Uebersetzungen angeben --> https://www.icanlocalize.com/site/tutorials/mobile-app-keywords/
 // - Source Code cleanup
 // - applicationui.* und shareutils.* aufraeumen !
 // - ggf. qml warnings entfernen
@@ -62,7 +68,6 @@
 // ok: - ggf. Dateien loeschen
 // ok:? - QML Source Code besser strukturieren
 // ok: - About Dialog
-// - Google Play Spenden/Bezahloptionen einbauen
 //
 // - Pay Features ok, falls alter kommerzieller MobileGnuplotViewer vorhanden
 // - MobileGnuplotViewerFree/Com neu bauen mit Referenz auf neue Quick Implementierung

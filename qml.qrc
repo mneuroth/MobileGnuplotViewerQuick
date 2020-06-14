@@ -24,6 +24,8 @@
         <file alias="directory.svg">files/file96.svg</file>
         <file alias="file.svg">files/new104.svg</file>
         <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
+        <file>SupportDialog.qml</file>
+        <file>SupportDialogForm.ui.qml</file>
     </qresource>
     <qresource prefix="/translations">
         <file>GnuplotViewerQuick_de_DE.qm</file>

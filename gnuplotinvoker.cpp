@@ -16,7 +16,8 @@
 GnuplotInvoker::GnuplotInvoker()
     : m_bUseBeta(false),
       m_iResolution(1024),
-      m_iFontSize(28)
+      m_iFontSize(28),
+      m_iInvokeCount(0)
 {
     connect(&m_aGnuplotProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(sltFinishedGnuplot(int,QProcess::ExitStatus)));
     connect(&m_aGnuplotProcess,SIGNAL(errorOccurred(QProcess::ProcessError)),this,SLOT(sltErrorGnuplot(QProcess::ProcessError)));
@@ -65,6 +66,16 @@ int GnuplotInvoker::getFontSize() const
 void GnuplotInvoker::setFontSize(int value)
 {
     m_iFontSize = value;
+}
+
+int GnuplotInvoker::getInvokeCount() const
+{
+    return m_iInvokeCount;
+}
+
+void GnuplotInvoker::setInvokeCount(int value)
+{
+    m_iInvokeCount = value;
 }
 
 void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus)
@@ -128,6 +139,9 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     QString sCpuArchitecture(QSysInfo::buildCpuArchitecture());
     QString sGnuplotFile = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(useVersionBeta ? GNUPLOT_BETA_EXE : GNUPLOT_EXE);
     m_aGnuplotProcess.start(sGnuplotFile);
+#elif defined(Q_OS_WASM)
+    // TODO
+    m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
 #elif defined(Q_OS_WIN32)
     if( useVersionBeta )
     {
@@ -144,7 +158,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     if (!m_aGnuplotProcess.waitForStarted())
     {
-        sltErrorText(tr("Error: gnuplot not found!"));
+        sltErrorText(QString(tr("Error: gnuplot not found ! path=%1")).arg(m_aGnuplotProcess.program()));
         return;
     }
 
@@ -155,4 +169,6 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     // write script to stdinput for gnuplot process
     m_aGnuplotProcess.write(sInput.toUtf8()/*.toLatin1()*/);
     m_aGnuplotProcess.closeWriteChannel();
+
+    m_iInvokeCount++;
 }
