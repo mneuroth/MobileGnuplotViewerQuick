@@ -742,7 +742,7 @@ ApplicationWindow {
             property bool purchasing: false
 
             onPurchaseSucceeded: {
-                showErrorDialog(qsTr("Purchase successfull."))
+                //showErrorDialog(qsTr("Purchase successfull."))
                 settings.supportLevel = 0
 
                 transaction.finalize()
@@ -760,7 +760,7 @@ ApplicationWindow {
             }
 
             onPurchaseRestored: {
-                showErrorDialog(qsTr("Purchase restored."))
+                //showErrorDialog(qsTr("Purchase restored."))
                 settings.supportLevel = 0
 
                 transaction.finalize()

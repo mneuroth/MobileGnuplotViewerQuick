@@ -141,6 +141,9 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     m_aGnuplotProcess.start(sGnuplotFile);
 #elif defined(Q_OS_WASM)
     // TODO
+    // see: http://gnuplot.respawned.com/
+    // see: https://github.com/YasasviPeruvemba/gnuplot.js
+    // see: https://www.it.iitb.ac.in/frg/wiki/images/c/ca/P1ProjectReport.pdf
     m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
 #elif defined(Q_OS_WIN32)
     if( useVersionBeta )
