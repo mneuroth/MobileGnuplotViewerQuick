@@ -481,6 +481,19 @@ ApplicationWindow {
             }
         }
 
+        Switch {
+            id: readonlyOutputSwitch
+            position: 1.0
+            visible: stackView.currentItem === outputPage
+            text: qsTr("Readonly")
+            anchors.right: menuButton.left
+            anchors.rightMargin: 5
+
+            onPositionChanged: {
+                outputPage.txtOutput.readOnly = position === 1 ? true : false
+            }
+        }
+
         Label {
             text: stackView.currentItem.title
             anchors.centerIn: parent
