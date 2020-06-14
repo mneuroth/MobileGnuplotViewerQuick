@@ -1,4 +1,14 @@
-import QtQuick 2.4
+/***************************************************************************
+ *
+ * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
+ *
+ * Copyright (C) 2020 by Michael Neuroth
+ *
+ * License: GPL
+ *
+ ***************************************************************************/
+import QtQuick 2.12
+import QtQuick.Controls 2.5
 
 SupportDialogForm {
 
@@ -27,5 +37,11 @@ SupportDialogForm {
         onClicked:  {
             stackView.pop()
         }
+    }
+
+    onVisibleChanged: {
+        lblLevel0.text = qsTr("Status=") + supportLevel0.status
+        lblLevel1.text = qsTr("Status=") + supportLevel1.status
+        lblLevel2.text = qsTr("Status=") + supportLevel2.status
     }
 }

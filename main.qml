@@ -71,6 +71,11 @@ ApplicationWindow {
     // *** some helper functions for the application
     // **********************************************************************
 
+    function showErrorDialog(msg) {
+        errorDialog.text = msg
+        errorDialog.open()
+    }
+
     function getFontName() {
         if( Qt.platform.os === "android" )
         {
@@ -452,6 +457,17 @@ ApplicationWindow {
                         stackView.push(aboutDialog)
                     }
                 }
+                MenuItem {
+                    text: qsTr("Test")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                        //console.log(Product.PendingRegistration)    // == 1
+                        //console.log(Product.Registered)             // == 2
+                        //console.log(Product.Unknown)                // == 3
+
+                        showErrorDialog("Test Dialog...")
+                    }
+                }
             }
         }
 
@@ -471,10 +487,17 @@ ApplicationWindow {
             }
         }
 
+        ToolButton {
+            icon.source: "edit.svg"
+            visible: stackView.currentItem === homePage
+            anchors.right: readonlySwitch.left
+            anchors.rightMargin: 1
+        }
+
         Switch {
             id: readonlySwitch
             visible: stackView.currentItem === homePage
-            text: qsTr("Readonly")
+            //text: qsTr("Readonly")
             anchors.right: menuButton.left
             anchors.rightMargin: 5
 
@@ -483,11 +506,18 @@ ApplicationWindow {
             }
         }
 
+        ToolButton {
+            icon.source: "edit.svg"
+            visible: stackView.currentItem === outputPage
+            anchors.right: readonlyOutputSwitch.left
+            anchors.rightMargin: 1
+        }
+
         Switch {
             id: readonlyOutputSwitch
             position: 1.0
             visible: stackView.currentItem === outputPage
-            text: qsTr("Readonly")
+            //text: qsTr("Readonly")
             anchors.right: menuButton.left
             anchors.rightMargin: 5
 
@@ -677,6 +707,16 @@ ApplicationWindow {
     }
 
     MessageDialog {
+        id: errorDialog
+        visible: false
+        title: qsTr("Error")
+        standardButtons: StandardButton.Ok
+        onAccepted: {
+            console.log("Close error msg")
+        }
+    }
+
+    MessageDialog {
         id: myUserNotificationDialog
         visible: false
         title: qsTr("Request for support")
@@ -702,6 +742,7 @@ ApplicationWindow {
             property bool purchasing: false
 
             onPurchaseSucceeded: {
+                showErrorDialog(qsTr("Purchase successfull."))
                 settings.supportLevel = 0
 
                 transaction.finalize()
@@ -711,7 +752,7 @@ ApplicationWindow {
             }
 
             onPurchaseFailed: {
-                popupErrorDialog(qsTr("Purchase not completed."))
+                showErrorDialog(qsTr("Purchase not completed."))
                 transaction.finalize()
 
                 // Reset purchasing flag
@@ -719,6 +760,7 @@ ApplicationWindow {
             }
 
             onPurchaseRestored: {
+                showErrorDialog(qsTr("Purchase restored."))
                 settings.supportLevel = 0
 
                 transaction.finalize()
@@ -745,7 +787,7 @@ ApplicationWindow {
             }
 
             onPurchaseFailed: {
-                popupErrorDialog(qsTr("Purchase not completed."))
+                showErrorDialog(qsTr("Purchase not completed."))
                 transaction.finalize()
 
                 // Reset purchasing flag
@@ -769,6 +811,7 @@ ApplicationWindow {
 
             property bool purchasing: false
 
+
             onPurchaseSucceeded: {
                 settings.supportLevel = 2
 
@@ -779,7 +822,7 @@ ApplicationWindow {
             }
 
             onPurchaseFailed: {
-                popupErrorDialog(qsTr("Purchase not completed."))
+                showErrorDialog(qsTr("Purchase not completed."))
                 transaction.finalize()
 
                 // Reset purchasing flag

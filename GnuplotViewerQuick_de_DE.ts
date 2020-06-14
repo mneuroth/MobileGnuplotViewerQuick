@@ -534,29 +534,58 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     </message>
 </context>
 <context>
+    <name>SupportDialog</name>
+    <message>
+        <location filename="SupportDialog.qml" line="43"/>
+        <location filename="SupportDialog.qml" line="44"/>
+        <location filename="SupportDialog.qml" line="45"/>
+        <source>Status=</source>
+        <translation>Status=</translation>
+    </message>
+</context>
+<context>
     <name>SupportDialogForm.ui</name>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="22"/>
+        <location filename="SupportDialogForm.ui.qml" line="25"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="31"/>
+        <location filename="SupportDialogForm.ui.qml" line="35"/>
+        <source>Support Level Entry</source>
+        <translation>Unterstützungsstufe Eingangsstufe</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="43"/>
+        <source>Support Level Standard</source>
+        <translation>Unterstützungsstufe Standard</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="51"/>
+        <source>Support Level Premium</source>
+        <translation>Unterstützungsstufe Premium</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="70"/>
+        <location filename="SupportDialogForm.ui.qml" line="81"/>
+        <location filename="SupportDialogForm.ui.qml" line="92"/>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
         <source>Support Level 0</source>
-        <translation>Unterstützungsstufe 0</translation>
+        <translation type="vanished">Unterstützungsstufe 0</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="40"/>
         <source>Support Level 1</source>
-        <translation>Unterstützungsstufe 1</translation>
+        <translation type="vanished">Unterstützungsstufe 1</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="49"/>
         <source>Support Level 2</source>
-        <translation>Unterstützungsstufe 2</translation>
+        <translation type="vanished">Unterstützungsstufe 2</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="60"/>
+        <location filename="SupportDialogForm.ui.qml" line="61"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
@@ -569,130 +598,150 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="267"/>
+        <location filename="main.qml" line="272"/>
         <source>Send</source>
         <translation>Senden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="277"/>
+        <location filename="main.qml" line="282"/>
         <source>Send as text</source>
         <translation>Senden als Text</translation>
     </message>
     <message>
-        <location filename="main.qml" line="286"/>
+        <location filename="main.qml" line="291"/>
         <source>Send as PDF/PNG</source>
         <translation>Senden als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="305"/>
+        <location filename="main.qml" line="310"/>
         <source>View as PDF/PNG</source>
         <translation>Zeigen als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="325"/>
+        <location filename="main.qml" line="330"/>
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="341"/>
+        <location filename="main.qml" line="346"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="347"/>
+        <location filename="main.qml" line="352"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="372"/>
+        <location filename="main.qml" line="377"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="384"/>
+        <location filename="main.qml" line="389"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="388"/>
+        <location filename="main.qml" line="393"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="394"/>
+        <location filename="main.qml" line="399"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="400"/>
+        <location filename="main.qml" line="405"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="406"/>
+        <location filename="main.qml" line="411"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="416"/>
+        <location filename="main.qml" line="421"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="427"/>
+        <location filename="main.qml" line="432"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="440"/>
+        <location filename="main.qml" line="445"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="448"/>
+        <location filename="main.qml" line="453"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="main.qml" line="477"/>
-        <location filename="main.qml" line="490"/>
-        <source>Readonly</source>
-        <translation>Schreibgeschützt</translation>
+        <location filename="main.qml" line="461"/>
+        <source>Test</source>
+        <translation>Test</translation>
     </message>
     <message>
-        <location filename="main.qml" line="514"/>
+        <location filename="main.qml" line="763"/>
+        <source>Purchase restored.</source>
+        <translation>Einkauf wiederhergestellt.</translation>
+    </message>
+    <message>
+        <source>Readonly</source>
+        <translation type="vanished">Schreibgeschützt</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="544"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="523"/>
+        <location filename="main.qml" line="553"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="532"/>
+        <location filename="main.qml" line="562"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="654"/>
+        <location filename="main.qml" line="684"/>
         <source>Choose a file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="682"/>
+        <location filename="main.qml" line="712"/>
+        <source>Error</source>
+        <translation>Fehler</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="722"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="683"/>
+        <location filename="main.qml" line="723"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.
 Vielleicht möchtest du die Entwicklung dieser App unterstützten indem du eine Unterstützungs Stufe erwirbst?</translation>
     </message>
     <message>
-        <location filename="main.qml" line="714"/>
+        <location filename="main.qml" line="745"/>
+        <source>Purchase successfull.</source>
+        <translation>Einkauf erfolgreich.</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="755"/>
+        <location filename="main.qml" line="790"/>
+        <location filename="main.qml" line="825"/>
         <source>Purchase not completed.</source>
         <translation>Kauf wurde nicht abgeschlossen.</translation>
     </message>
