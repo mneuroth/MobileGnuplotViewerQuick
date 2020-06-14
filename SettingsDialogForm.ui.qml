@@ -24,6 +24,7 @@ Page {
     property alias btnOk: btnOk
     property alias btnCancel: btnCancel
     property alias txtGraphicsResolution: txtGraphicsResolution
+    property alias txtSupportLevel: txtSupportLevel
     property alias btnSelectFont: btnSelectFont
     property alias chbUseGnuplotBeta: chbUseGnuplotBeta
 
@@ -80,7 +81,7 @@ Page {
         }
 
         Label {
-            id: label1
+            id: lblGraphicsResolution
             y: 118
             text: qsTr("Resolution for graphic area")
             anchors.verticalCenter: txtGraphicsResolution.verticalCenter
@@ -102,7 +103,7 @@ Page {
         }
 
         Label {
-            id: label
+            id: lblGraphicsFontSize
             y: 172
             text: qsTr("Font size for graphic area")
             anchors.verticalCenter: txtGraphicsFontSize.verticalCenter
@@ -112,10 +113,33 @@ Page {
             anchors.rightMargin: 5
         }
 
+        TextField {
+            id: txtSupportLevel
+            readOnly: true
+            width: 100
+            height: 40
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: txtGraphicsFontSize.bottom
+            anchors.topMargin: 5
+            placeholderText: qsTr("")
+        }
+
+        Label {
+            id: lblSupportLevel
+            y: 172
+            text: qsTr("SupportLevel")
+            anchors.verticalCenter: txtSupportLevel.verticalCenter
+            anchors.left: txtSupportLevel.right
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+        }
+
         Button {
             id: btnSelectFont
             text: qsTr("Text font")
-            anchors.top: txtGraphicsFontSize.bottom
+            anchors.top: txtSupportLevel.bottom
             anchors.topMargin: 5
             anchors.left: parent.left
             anchors.leftMargin: 5

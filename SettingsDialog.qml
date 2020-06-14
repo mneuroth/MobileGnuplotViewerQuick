@@ -26,6 +26,10 @@ SettingsDialogForm {
         validator: IntValidator { bottom: 6; top: 64 }
     }
 
+    txtSupportLevel {
+        text: settings.supportLevel
+    }
+
     btnSelectFont {
         onClicked: {
             fontDialog.font = lblExampleText.font

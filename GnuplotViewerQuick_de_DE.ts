@@ -118,33 +118,33 @@ WorkingDir not valid</source>
 <context>
     <name>ApplicationData</name>
     <message>
-        <location filename="applicationdata.cpp" line="123"/>
-        <location filename="applicationdata.cpp" line="132"/>
+        <location filename="applicationdata.cpp" line="130"/>
+        <location filename="applicationdata.cpp" line="139"/>
         <source>Error reading </source>
         <translation>Fehler beim Lesen der Datei </translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="522"/>
+        <location filename="applicationdata.cpp" line="535"/>
         <source>Send file</source>
         <translation>Sende Datei</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="526"/>
+        <location filename="applicationdata.cpp" line="539"/>
         <source>View file</source>
         <translation>Zeige Date</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="648"/>
+        <location filename="applicationdata.cpp" line="661"/>
         <source>Can not load file %1</source>
         <translation>Datei % kann nicht gelesen werden</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="659"/>
+        <location filename="applicationdata.cpp" line="672"/>
         <source>File name is empty!</source>
         <translation>Datei Name ist leer!</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="677"/>
+        <location filename="applicationdata.cpp" line="690"/>
         <source>Error writing file: </source>
         <translation>Fehler beim Schreiben der Datei: </translation>
     </message>
@@ -152,7 +152,7 @@ WorkingDir not valid</source>
 <context>
     <name>GnuplotInvoker</name>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="97"/>
+        <location filename="gnuplotinvoker.cpp" line="108"/>
         <source>Error: gnuplot exited with error: code=%1 msg=%2 err=%3
 code=%4 status=%5
 errorMsg=%6
@@ -160,15 +160,15 @@ errorMsg=%6
         <translation></translation>
     </message>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="112"/>
+        <location filename="gnuplotinvoker.cpp" line="123"/>
         <source>Error code=%1
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="147"/>
-        <source>Error: gnuplot not found!</source>
-        <translation></translation>
+        <location filename="gnuplotinvoker.cpp" line="161"/>
+        <source>Error: gnuplot not found ! path=%1</source>
+        <translation>Fehler: gnuplot nicht gefunden ! Pfad?%1</translation>
     </message>
 </context>
 <context>
@@ -475,17 +475,17 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Gnuplot Einstellungen</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="43"/>
+        <location filename="SettingsDialogForm.ui.qml" line="44"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="53"/>
+        <location filename="SettingsDialogForm.ui.qml" line="54"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="62"/>
+        <location filename="SettingsDialogForm.ui.qml" line="63"/>
         <source>Use gnuplot beta version</source>
         <translation>Verwende gnuplot beta Version</translation>
     </message>
@@ -495,22 +495,27 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="85"/>
+        <location filename="SettingsDialogForm.ui.qml" line="86"/>
         <source>Resolution for graphic area</source>
         <translation>Auflösung für den Grafik Bereich</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="107"/>
+        <location filename="SettingsDialogForm.ui.qml" line="108"/>
         <source>Font size for graphic area</source>
         <translation>Zeichensatz Größe für den Grafik Bereich</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="117"/>
+        <location filename="SettingsDialogForm.ui.qml" line="131"/>
+        <source>SupportLevel</source>
+        <translation>Unterstützungsstufe</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="141"/>
         <source>Text font</source>
         <translation>Zeichensatz</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="127"/>
+        <location filename="SettingsDialogForm.ui.qml" line="151"/>
         <source>This is an example text for the current font</source>
         <translation>Dies ist ein Beispieltext für den aktuellen Zeichensatz</translation>
     </message>
@@ -529,111 +534,167 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     </message>
 </context>
 <context>
+    <name>SupportDialogForm.ui</name>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="22"/>
+        <source>Support</source>
+        <translation>Unterstützung</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="31"/>
+        <source>Support Level 0</source>
+        <translation>Unterstützungsstufe 0</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="40"/>
+        <source>Support Level 1</source>
+        <translation>Unterstützungsstufe 1</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="49"/>
+        <source>Support Level 2</source>
+        <translation>Unterstützungsstufe 2</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="60"/>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
+</context>
+<context>
     <name>main</name>
     <message>
-        <location filename="main.qml" line="26"/>
+        <location filename="main.qml" line="27"/>
         <source>MobileGnuplotViewerQuick</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="257"/>
+        <location filename="main.qml" line="267"/>
         <source>Send</source>
         <translation>Senden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="267"/>
+        <location filename="main.qml" line="277"/>
         <source>Send as text</source>
         <translation>Senden als Text</translation>
     </message>
     <message>
-        <location filename="main.qml" line="276"/>
+        <location filename="main.qml" line="286"/>
         <source>Send as PDF/PNG</source>
         <translation>Senden als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="295"/>
+        <location filename="main.qml" line="305"/>
         <source>View as PDF/PNG</source>
         <translation>Zeigen als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="315"/>
+        <location filename="main.qml" line="325"/>
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="331"/>
+        <location filename="main.qml" line="341"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="337"/>
+        <location filename="main.qml" line="347"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="362"/>
+        <location filename="main.qml" line="372"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="374"/>
+        <location filename="main.qml" line="384"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="378"/>
+        <location filename="main.qml" line="388"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="384"/>
+        <location filename="main.qml" line="394"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="390"/>
+        <location filename="main.qml" line="400"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="396"/>
+        <location filename="main.qml" line="406"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="406"/>
+        <location filename="main.qml" line="416"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="417"/>
+        <location filename="main.qml" line="427"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="430"/>
+        <location filename="main.qml" line="440"/>
+        <source>Support</source>
+        <translation>Unterstützung</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="448"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="main.qml" line="469"/>
+        <location filename="main.qml" line="477"/>
+        <location filename="main.qml" line="490"/>
+        <source>Readonly</source>
+        <translation>Schreibgeschützt</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="514"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="478"/>
+        <location filename="main.qml" line="523"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="487"/>
+        <location filename="main.qml" line="532"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="600"/>
+        <location filename="main.qml" line="654"/>
         <source>Choose a file</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="682"/>
+        <source>Request for support</source>
+        <translation>Anfrage für Unterstützung</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="683"/>
+        <source>It seemed you like this app.
+Maybe you would like to support the development of this app with buying a support level?</source>
+        <translation>Es sieht aus als ob dir die App gefällt.
+Vielleicht möchtest du die Entwicklung dieser App unterstützten indem du eine Unterstützungs Stufe erwirbst?</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="714"/>
+        <source>Purchase not completed.</source>
+        <translation>Kauf wurde nicht abgeschlossen.</translation>
     </message>
 </context>
 </TS>

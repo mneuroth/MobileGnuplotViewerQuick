@@ -13,6 +13,7 @@ import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
 import QtQuick.Layouts 1.3
+import QtPurchasing 1.14
 
 import de.mneuroth.gnuplotinvoker 1.0
 //import de.mneuroth.storageaccess 1.0
@@ -81,7 +82,8 @@ ApplicationWindow {
     function isDialogOpen() {
         return stackView.currentItem === aboutDialog ||
                stackView.currentItem === mobileFileDialog ||
-               stackView.currentItem === settingsDialog
+               stackView.currentItem === settingsDialog ||
+               stackView.currentItem === supportDialog
     }
 
     function checkForModified() {
@@ -558,6 +560,8 @@ ApplicationWindow {
         property int graphicsFontSize: 28
         property var currentFont: null
         property int invokeCount: 0
+
+        property int supportLevel: -1   // no support level at all
     }
 
     GnuplotInvoker {
@@ -684,6 +688,112 @@ ApplicationWindow {
         }
         onNo: {
             // do nothing
+        }
+    }
+
+    Store {
+        id: store
+
+        Product {
+            id: supportLevel0
+            identifier: "support_level_0"
+            type: Product.Unlockable
+
+            property bool purchasing: false
+
+            onPurchaseSucceeded: {
+                settings.supportLevel = 0
+
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+
+            onPurchaseFailed: {
+                popupErrorDialog(qsTr("Purchase not completed."))
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+
+            onPurchaseRestored: {
+                settings.supportLevel = 0
+
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+        }
+
+        Product {
+            id: supportLevel1
+            identifier: "support_level_1"
+            type: Product.Unlockable
+
+            property bool purchasing: false
+
+            onPurchaseSucceeded: {
+                settings.supportLevel = 1
+
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+
+            onPurchaseFailed: {
+                popupErrorDialog(qsTr("Purchase not completed."))
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+
+            onPurchaseRestored: {
+                settings.supportLevel = 1
+
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+        }
+
+        Product {
+            id: supportLevel2
+            identifier: "support_level_2"
+            type: Product.Unlockable
+
+            property bool purchasing: false
+
+            onPurchaseSucceeded: {
+                settings.supportLevel = 2
+
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+
+            onPurchaseFailed: {
+                popupErrorDialog(qsTr("Purchase not completed."))
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
+
+            onPurchaseRestored: {
+                settings.supportLevel = 2
+
+                transaction.finalize()
+
+                // Reset purchasing flag
+                purchasing = false
+            }
         }
     }
 
