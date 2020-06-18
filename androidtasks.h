@@ -31,6 +31,21 @@
 #define SDCARD_DIRECTORY            "c:\\tmp"
 #define FILES_DIR                   "C:\\Users\\micha\\Documents\\git_projects\\GnuplotViewerQuick\\files\\"
 #define SCRIPTS_DIR                 "C:\\usr\\neurothmi\\Android\\gnuplotviewerquick\\files\\scripts\\"
+#elif defined(Q_OS_LINUX)
+#define DEFAULT_DIRECTORY           "./scripts"
+#define FILES_DIR                   "."
+#define SCRIPTS_DIR                 "./scripts/"
+#define SDCARD_DIRECTORY            "/sdcard"
+#elif defined(Q_OS_WASM)
+#define DEFAULT_DIRECTORY           "./scripts"
+#define FILES_DIR                   "."
+#define SCRIPTS_DIR                 "./scripts/"
+#define SDCARD_DIRECTORY            "/sdcard"
+#elif defined(Q_OS_IOS)
+#define DEFAULT_DIRECTORY           "./scripts"
+#define FILES_DIR                   "."
+#define SCRIPTS_DIR                 "./scripts/"
+#define SDCARD_DIRECTORY            "/sdcard"
 #else
 #define DEFAULT_DIRECTORY           "/Users/min/Documents/home"
 #define SDCARD_DIRECTORY            "/Users/min"
