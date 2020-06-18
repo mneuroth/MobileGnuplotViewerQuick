@@ -559,6 +559,17 @@ ApplicationWindow {
             }
         }
 
+        ToolButton {
+            icon.source: "high-five.svg"
+            visible: isAppStoreSupported && settings.supportLevel>=-2
+            anchors.left: toolButton.right
+            anchors.leftMargin: 1
+
+            onClicked: {
+                showThankYouDialog(settings.supportLevel)
+            }
+        }
+
         Label {
             text: stackView.currentItem.title
             anchors.centerIn: parent

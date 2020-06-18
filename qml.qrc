@@ -24,6 +24,7 @@
         <file alias="directory.svg">files/file96.svg</file>
         <file alias="file.svg">files/new104.svg</file>
         <file alias="edit.svg">files/edit.svg</file>
+        <file alias="high-five.svg">files/high-five.svg</file>
         <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
         <file>SupportDialog.qml</file>
         <file>SupportDialogForm.ui.qml</file>

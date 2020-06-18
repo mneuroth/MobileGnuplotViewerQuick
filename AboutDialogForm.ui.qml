@@ -92,7 +92,7 @@ Page {
 
         Text {
             id: lblIconInfos
-            text: qsTr("Icons designed by <a href='http://www.flaticon.com'>Freepik</a>")
+            text: qsTr("Icons designed by <a href='http://www.flaticon.com'>Flaticon</a>")
             anchors.top: lblAppAuthor.bottom
             anchors.topMargin: 5
             anchors.right: parent.right
