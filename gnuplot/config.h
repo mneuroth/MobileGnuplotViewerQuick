@@ -234,7 +234,8 @@
 #define HAVE_POLL_H 1
 
 /* Define to 1 if you have the `popen' function. */
-#define HAVE_POPEN 1
+//#define HAVE_POPEN 1
+#undef HAVE_POPEN
 
 /* Define to 1 if you have the <readline/history.h> header file. */
 /* #undef HAVE_READLINE_HISTORY_H */
@@ -477,7 +478,8 @@
 #define PATCHLEVEL "8"
 
 /* Define if you do have the popen and pclose functions. */
-#define PIPES 1
+//#define PIPES 1
+#undef PIPES
 
 /* Unix-type of Interprocess Communication is required for mouse support. */
 /* #undef PIPE_IPC */
