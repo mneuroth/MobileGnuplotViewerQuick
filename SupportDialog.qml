@@ -12,6 +12,7 @@ import QtQuick.Controls 2.1
 
 SupportDialogForm {
     id: supportDialog
+    visible: false
 
     btnSupportLevel0 {
         enabled: settings.supportLevel < 0
@@ -41,8 +42,8 @@ SupportDialogForm {
     }
 
     onVisibleChanged: {
-        lblLevel0.text = qsTr("Status=") + supportLevel0.status + qsTr(" price: ") + btnSupportLevel0.price
-        lblLevel1.text = qsTr("Status=") + supportLevel1.status + qsTr(" price: ") + btnSupportLevel1.price
-        lblLevel2.text = qsTr("Status=") + supportLevel2.status + qsTr(" price: ") + btnSupportLevel2.price
+        lblLevel0.text = qsTr("Status=") + store.supportLevel0.status + qsTr(" price: ") + store.supportLevel0.price
+        lblLevel1.text = qsTr("Status=") + store.supportLevel1.status + qsTr(" price: ") + store.supportLevel1.price
+        lblLevel2.text = qsTr("Status=") + store.supportLevel2.status + qsTr(" price: ") + store.supportLevel2.price
     }
 }

@@ -4,6 +4,10 @@ import QtPurchasing 1.0
 Store {
     id: store
 
+    property alias supportLevel0: supportLevel0
+    property alias supportLevel1: supportLevel1
+    property alias supportLevel2: supportLevel2
+
     Product {
         id: supportLevel0
         identifier: "support_level_0"

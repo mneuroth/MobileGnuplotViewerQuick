@@ -667,16 +667,11 @@ ApplicationWindow {
         visible: false
     }
 
-    Loader
-    {
-        source: isAppStoreSupported ? "SupportDialog.qml" : ""
-    }
-/*
     SupportDialog {
         id: supportDialog
         visible: false
     }
-*/
+
     SettingsDialog {
         id: settingsDialog
         visible: false
@@ -762,6 +757,7 @@ ApplicationWindow {
 
     Loader
     {
+        id: store
         source: isAppStoreSupported ? "ApplicationStore.qml" : ""
     }
 
