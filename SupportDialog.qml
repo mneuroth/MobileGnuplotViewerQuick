@@ -35,6 +35,10 @@ SupportDialogForm {
         }
     }
 
+    lblGooglePlay {
+        onLinkActivated: Qt.openUrlExternally(link)
+    }
+
     btnClose {
         onClicked:  {
             stackView.pop()
@@ -42,8 +46,10 @@ SupportDialogForm {
     }
 
     onVisibleChanged: {
+        /*
         lblLevel0.text = qsTr("Status=") + store.supportLevel0.status + qsTr(" price: ") + store.supportLevel0.price
         lblLevel1.text = qsTr("Status=") + store.supportLevel1.status + qsTr(" price: ") + store.supportLevel1.price
         lblLevel2.text = qsTr("Status=") + store.supportLevel2.status + qsTr(" price: ") + store.supportLevel2.price
+        */
     }
 }

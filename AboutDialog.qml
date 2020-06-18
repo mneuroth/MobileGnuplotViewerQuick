@@ -17,6 +17,14 @@ AboutDialogForm {
         text: applicationData !== null ? applicationData.getAppInfos() : "?"
     }
 
+    lblIconInfos {
+        onLinkActivated: Qt.openUrlExternally(link)
+    }
+
+    lblAppName {
+        onLinkActivated: Qt.openUrlExternally(link)
+    }
+
     btnClose {
         onClicked:  {
             stackView.pop()

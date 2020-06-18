@@ -68,7 +68,7 @@ Page {
             id: lblAppDate
             x: 5
             y: 245
-            text: qsTr("from: 11.6.2020")
+            text: qsTr("from: 18.6.2020")
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.rightMargin: 5
@@ -81,7 +81,7 @@ Page {
             id: lblAppVersion
             x: 5
             y: 219
-            text: qsTr("Version: 2.0.0")
+            text: qsTr("Version: 2.0.1")
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left
@@ -92,7 +92,7 @@ Page {
 
         Text {
             id: lblIconInfos
-            text: qsTr("Icons designed by <a href='http://www.flaticon.com'>Flaticon</a>")
+            text: "Icons designed by <a href='http://www.flaticon.com'>Flaticon</a>"
             anchors.top: lblAppAuthor.bottom
             anchors.topMargin: 5
             anchors.right: parent.right
@@ -107,7 +107,7 @@ Page {
             id: lblAppName
             x: 5
             y: 18
-            text: qsTr("MobileGnuplotViewerQuick")
+            text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick</a>"
             fontSizeMode: Text.FixedSize
             anchors.right: parent.right
             anchors.rightMargin: 5
@@ -126,7 +126,7 @@ Page {
             anchors.left: parent.left
             anchors.leftMargin: 90
             fillMode: Image.PreserveAspectFit
-            source: "gnuplotviewer_flat_512x512"
+            source: "gnuplotviewer_flat_512x512.png"
         }
 
         Button {

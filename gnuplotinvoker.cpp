@@ -202,6 +202,8 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gp504-win32-mingw\\gnuplot\\bin\\gnuplot.exe");
     }
     //m_aGnuplotProcess.start("C:\\usr\\neurothmi\\install\\gp460win32\\gnuplot\\bin\\gnuplot.exe");
+#elif defined(Q_OS_MACOS)
+    m_aGnuplotProcess.start("/usr/local/bin/gnuplot"/*, QStringList() << "-c"*/);
 #elif defined(Q_OS_WASM) || defined(Q_OS_IOS)
 #error use built in gnuplot please
 #else

@@ -309,7 +309,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Send as PDF/PNG")
                     icon.source: "share.svg"
-                    enabled: !isDialogOpen()
+                    enabled: !isDialogOpen() && settings.supportLevel>=0
                     visible: isShareSupported
                     height: isShareSupported ? aboutMenuItem.height : 0
                     onTriggered: {
@@ -489,6 +489,7 @@ ApplicationWindow {
                         stackView.push(aboutDialog)
                     }
                 }
+                /*
                 MenuItem {
                     text: qsTr("Test")
                     enabled: !isDialogOpen()
@@ -500,6 +501,7 @@ ApplicationWindow {
                         showInfoDialog("Thank you for supporting the development of this application !", "Info")
                     }
                 }
+                */
             }
         }
 
@@ -521,6 +523,7 @@ ApplicationWindow {
         }
 
         ToolButton {
+            id: readonlyIcon
             icon.source: "edit.svg"
             visible: stackView.currentItem === homePage
             anchors.right: readonlySwitch.left
@@ -540,6 +543,7 @@ ApplicationWindow {
         }
 
         ToolButton {
+            id: readonlyOutputIcon
             icon.source: "edit.svg"
             visible: stackView.currentItem === outputPage
             anchors.right: readonlyOutputSwitch.left
@@ -560,8 +564,9 @@ ApplicationWindow {
         }
 
         ToolButton {
+            id: supportIcon
             icon.source: "high-five.svg"
-            visible: isAppStoreSupported && settings.supportLevel>=-2
+            visible: isAppStoreSupported && settings.supportLevel>=0
             anchors.left: toolButton.right
             anchors.leftMargin: 1
 
@@ -572,7 +577,18 @@ ApplicationWindow {
 
         Label {
             text: stackView.currentItem.title
-            anchors.centerIn: parent
+            //anchors.centerIn: parent
+            anchors.left: supportIcon.right
+            anchors.right: menuButton.left
+            anchors.leftMargin: 5
+            anchors.rightMargin: 5 +
+                                 (readonlyIcon.visible ? readonlyIcon.width : 0) +
+                                 (readonlySwitch.visible ? readonlySwitch.width : 0 ) +
+                                 (readonlyOutputIcon.visible ? readonlyOutputIcon.width : 0) +
+                                 (readonlyOutputSwitch.visible ? readonlyOutputSwitch.width : 0 ) +
+                                 10
+            anchors.verticalCenter: parent.verticalCenter
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 
