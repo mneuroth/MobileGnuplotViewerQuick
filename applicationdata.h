@@ -60,6 +60,8 @@ class ApplicationData : public QObject
     Q_PROPERTY(QString sdCardPath READ getSDCardPath)
     Q_PROPERTY(QString defaultScript READ getDefaultScript)
     Q_PROPERTY(QString appInfos READ getAppInfos)
+    Q_PROPERTY(bool isAppStoreSupported READ isAppStoreSupported NOTIFY isAppStoreSupportedChanged)
+    Q_PROPERTY(bool isShareSupported READ isShareSupported NOTIFY isShareSupportedChanged)
 
 public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
@@ -67,7 +69,7 @@ public:
 
     Q_INVOKABLE QString getAppInfos() const;
 
-    Q_INVOKABLE void initDone();
+    Q_INVOKABLE void initDone();       
 
     Q_INVOKABLE QString getOnlyFileName(const QString & url) const;
     Q_INVOKABLE QString getNormalizedPath(const QString & path) const;
@@ -108,9 +110,15 @@ public:
     static QString simpleReadFileContent(const QString & fileName);
     static bool simpleWriteFileContent(const QString & fileName, const QString & content);
 
+    bool isAppStoreSupported() const;
+    bool isShareSupported() const;
+
 signals:
     // for testing only
     void sendDummyData(const QString & txt, int value);
+
+    void isAppStoreSupportedChanged();
+    void isShareSupportedChanged();
 
 public slots:
     void sltFileUrlReceived(const QString & sUrl);

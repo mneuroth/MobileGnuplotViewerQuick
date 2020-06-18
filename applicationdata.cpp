@@ -68,6 +68,24 @@ void ApplicationData::initDone()
     }
 }
 
+bool ApplicationData::isAppStoreSupported() const
+{
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool ApplicationData::isShareSupported() const
+{
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
 QString ApplicationData::getOnlyFileName(const QString & url) const
 {
     QUrl aUrl(url);

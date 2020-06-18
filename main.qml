@@ -13,7 +13,6 @@ import QtQuick.Controls 2.5
 import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
 import QtQuick.Layouts 1.3
-import QtPurchasing 1.14
 
 import de.mneuroth.gnuplotinvoker 1.0
 //import de.mneuroth.storageaccess 1.0
@@ -26,7 +25,9 @@ ApplicationWindow {
     height: 480
     title: qsTr("MobileGnuplotViewerQuick")
 
-    property string urlPrefix: "file://"
+    property string urlPrefix: "file://"   
+    property bool isShareSupported: applicationData !== null ? applicationData.isShareSupported : false
+    property bool isAppStoreSupported: applicationData !== null ? applicationData.isAppStoreSupported : false
 
     Component.onDestruction: {
         settings.currentFile = homePage.currentFileUrl
@@ -85,10 +86,16 @@ ApplicationWindow {
     }
 
     function isDialogOpen() {
+        var otherChecks = false
+        if( isAppStoreSupported )
+        {
+            otherChecks = (stackView.currentItem === supportDialog)
+        }
+
         return stackView.currentItem === aboutDialog ||
                stackView.currentItem === mobileFileDialog ||
                stackView.currentItem === settingsDialog ||
-               stackView.currentItem === supportDialog
+               otherChecks
     }
 
     function checkForModified() {
@@ -100,7 +107,7 @@ ApplicationWindow {
     }
 
     function checkForUserNotification() {
-        if( gnuplotInvoker.invokeCount % 101 === 100 )
+        if( isAppStoreSupported && settings.supportLevel<0 && gnuplotInvoker.invokeCount % 51 === 50 )
         {
             myUserNotificationDialog.open()
         }
@@ -272,6 +279,8 @@ ApplicationWindow {
                     text: qsTr("Send")
                     icon.source: "share.svg"
                     enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                    visible: isShareSupported
+                    height: isShareSupported ? aboutMenuItem.height : 0
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
                         var tempFileName = getTempFileNameForCurrent(stackView.currentItem)
@@ -282,6 +291,8 @@ ApplicationWindow {
                     text: qsTr("Send as text")
                     icon.source: "share.svg"
                     enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                    visible: isShareSupported
+                    height: isShareSupported ? aboutMenuItem.height : 0
                     onTriggered: {
                         var s = getCurrentText(stackView.currentItem)
                         applicationData.shareSimpleText(s);
@@ -291,6 +302,8 @@ ApplicationWindow {
                     text: qsTr("Send as PDF/PNG")
                     icon.source: "share.svg"
                     enabled: !isDialogOpen()
+                    visible: isShareSupported
+                    height: isShareSupported ? aboutMenuItem.height : 0
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
@@ -310,6 +323,8 @@ ApplicationWindow {
                     text: qsTr("View as PDF/PNG")
                     icon.source: "share.svg"
                     enabled: !isDialogOpen()
+                    visible: isShareSupported
+                    height: isShareSupported ? aboutMenuItem.height : 0
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
                         {
@@ -325,7 +340,10 @@ ApplicationWindow {
                         }
                     }
                 }
-                MenuSeparator {}
+                MenuSeparator {
+                    visible: isShareSupported
+                    height: isShareSupported ? aboutMenuItem.height : 0
+                }
                 MenuItem {
                     text: qsTr("Clear")
                     enabled: !isDialogOpen()
@@ -442,14 +460,18 @@ ApplicationWindow {
                     }
                 }
                 MenuItem {
+                    id: supportMenuItem
                     text: qsTr("Support")
-                    enabled: !isDialogOpen()
+                    enabled: !isDialogOpen() && isAppStoreSupported
+                    visible: isAppStoreSupported
+                    height: isAppStoreSupported ? aboutMenuItem.height : 0
                     onTriggered: {
                         stackView.pop()
                         stackView.push(supportDialog)
                     }
                 }
                 MenuItem {
+                    id: aboutMenuItem
                     text: qsTr("About")
                     enabled: !isDialogOpen()
                     onTriggered: {
@@ -470,6 +492,7 @@ ApplicationWindow {
                 }
             }
         }
+
 
         ToolButton {
             id: toolButton
@@ -643,11 +666,16 @@ ApplicationWindow {
         visible: false
     }
 
+    Loader
+    {
+        source: isAppStoreSupported ? "SupportDialog.qml" : ""
+    }
+/*
     SupportDialog {
         id: supportDialog
         visible: false
     }
-
+*/
     SettingsDialog {
         id: settingsDialog
         visible: false
@@ -731,113 +759,9 @@ ApplicationWindow {
         }
     }
 
-    Store {
-        id: store
-
-        Product {
-            id: supportLevel0
-            identifier: "support_level_0"
-            type: Product.Unlockable
-
-            property bool purchasing: false
-
-            onPurchaseSucceeded: {
-                //showErrorDialog(qsTr("Purchase successfull."))
-                settings.supportLevel = 0
-
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-
-            onPurchaseFailed: {
-                showErrorDialog(qsTr("Purchase not completed."))
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-
-            onPurchaseRestored: {
-                //showErrorDialog(qsTr("Purchase restored."))
-                settings.supportLevel = 0
-
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-        }
-
-        Product {
-            id: supportLevel1
-            identifier: "support_level_1"
-            type: Product.Unlockable
-
-            property bool purchasing: false
-
-            onPurchaseSucceeded: {
-                settings.supportLevel = 1
-
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-
-            onPurchaseFailed: {
-                showErrorDialog(qsTr("Purchase not completed."))
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-
-            onPurchaseRestored: {
-                settings.supportLevel = 1
-
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-        }
-
-        Product {
-            id: supportLevel2
-            identifier: "support_level_2"
-            type: Product.Unlockable
-
-            property bool purchasing: false
-
-
-            onPurchaseSucceeded: {
-                settings.supportLevel = 2
-
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-
-            onPurchaseFailed: {
-                showErrorDialog(qsTr("Purchase not completed."))
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-
-            onPurchaseRestored: {
-                settings.supportLevel = 2
-
-                transaction.finalize()
-
-                // Reset purchasing flag
-                purchasing = false
-            }
-        }
+    Loader
+    {
+        source: isAppStoreSupported ? "ApplicationStore.qml" : ""
     }
 
     // **********************************************************************

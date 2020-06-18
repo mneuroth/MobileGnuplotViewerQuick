@@ -27,6 +27,7 @@
         <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
         <file>SupportDialog.qml</file>
         <file>SupportDialogForm.ui.qml</file>
+        <file>ApplicationStore.qml</file>
     </qresource>
     <qresource prefix="/translations">
         <file>GnuplotViewerQuick_de_DE.qm</file>

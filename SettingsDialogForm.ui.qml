@@ -7,8 +7,8 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.12
-import QtQuick.Controls 2.5
+import QtQuick 2.0
+import QtQuick.Controls 2.1
 import QtQuick.Dialogs 1.2
 
 Page {
@@ -25,6 +25,7 @@ Page {
     property alias btnCancel: btnCancel
     property alias txtGraphicsResolution: txtGraphicsResolution
     property alias txtSupportLevel: txtSupportLevel
+    property alias lblSupportLevel: lblSupportLevel
     property alias btnSelectFont: btnSelectFont
     property alias chbUseGnuplotBeta: chbUseGnuplotBeta
 

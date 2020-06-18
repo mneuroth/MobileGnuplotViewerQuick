@@ -7,10 +7,11 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.12
-import QtQuick.Controls 2.5
+import QtQuick 2.0
+import QtQuick.Controls 2.1
 
 SupportDialogForm {
+    id: supportDialog
 
     btnSupportLevel0 {
         enabled: settings.supportLevel < 0
@@ -40,8 +41,8 @@ SupportDialogForm {
     }
 
     onVisibleChanged: {
-        lblLevel0.text = qsTr("Status=") + supportLevel0.status
-        lblLevel1.text = qsTr("Status=") + supportLevel1.status
-        lblLevel2.text = qsTr("Status=") + supportLevel2.status
+        lblLevel0.text = qsTr("Status=") + supportLevel0.status + qsTr(" price: ") + btnSupportLevel0.price
+        lblLevel1.text = qsTr("Status=") + supportLevel1.status + qsTr(" price: ") + btnSupportLevel1.price
+        lblLevel2.text = qsTr("Status=") + supportLevel2.status + qsTr(" price: ") + btnSupportLevel2.price
     }
 }
