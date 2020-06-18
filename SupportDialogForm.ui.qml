@@ -100,7 +100,7 @@ Page {
 
         Text {
             id: lblSupportInfo
-            text: "The development of this app can be supported in various ways:\n\n* giving feedback and rating via the store enty in Google Play\n* purchasing a support level item via in app purchase (button below)\n\nPurchasing any support level will give you some more features:\n\n- usage of the current gnuplot beta version is enabled\n- sharing as PDF/PNG is enabled\n- nice support icon is visible in title bar of the application\n"
+            text: qsTr("The development of this app can be supported in various ways:\n\n* giving feedback and rating via the store enty in Google Play\n* purchasing a support level item via in app purchase (button below)\n\nPurchasing any support level will give you some more features:\n\n- usage of the current gnuplot beta version is enabled\n- sharing as PDF/PNG is enabled\n- nice support icon is visible in title bar of the application\n")
             enabled: false
             horizontalAlignment: Text.AlignHCenter
             anchors.right: parent.right
