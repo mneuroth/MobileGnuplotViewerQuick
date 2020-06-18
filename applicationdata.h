@@ -62,6 +62,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(QString appInfos READ getAppInfos)
     Q_PROPERTY(bool isAppStoreSupported READ isAppStoreSupported NOTIFY isAppStoreSupportedChanged)
     Q_PROPERTY(bool isShareSupported READ isShareSupported NOTIFY isShareSupportedChanged)
+    Q_PROPERTY(bool isAndroid READ isAndroid NOTIFY isAndroidChanged)
 
 public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
@@ -112,6 +113,7 @@ public:
 
     bool isAppStoreSupported() const;
     bool isShareSupported() const;
+    bool isAndroid() const;
 
 signals:
     // for testing only
@@ -119,6 +121,7 @@ signals:
 
     void isAppStoreSupportedChanged();
     void isShareSupportedChanged();
+    void isAndroidChanged();
 
 public slots:
     void sltFileUrlReceived(const QString & sUrl);

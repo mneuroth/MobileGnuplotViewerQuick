@@ -86,6 +86,15 @@ bool ApplicationData::isShareSupported() const
 #endif
 }
 
+bool ApplicationData::isAndroid() const
+{
+#if defined(Q_OS_ANDROID)
+    return true;
+#else
+    return false;
+#endif
+}
+
 QString ApplicationData::getOnlyFileName(const QString & url) const
 {
     QUrl aUrl(url);

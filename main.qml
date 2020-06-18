@@ -26,6 +26,7 @@ ApplicationWindow {
     title: qsTr("MobileGnuplotViewerQuick")
 
     property string urlPrefix: "file://"   
+    property bool isAndroid: applicationData !== null ? applicationData.isAndroid : false
     property bool isShareSupported: applicationData !== null ? applicationData.isShareSupported : false
     property bool isAppStoreSupported: applicationData !== null ? applicationData.isAppStoreSupported : false
 
@@ -607,7 +608,7 @@ ApplicationWindow {
 
     Settings {
         id: settings
-        property string currentFile: "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt"
+        property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : "default.gpt"
         property bool useGnuplotBeta: false
         property int graphicsResolution: 1024
         property int graphicsFontSize: 28
