@@ -10,6 +10,7 @@
 
 #include "gnuplotinvoker.h"
 #include "androidtasks.h"
+#include "applicationdata.h"
 
 #include <QDir>
 
@@ -125,8 +126,60 @@ void GnuplotInvoker::handleGnuplotError(int exitCode)
     sltErrorText(sError+QString(error));
 }
 
+extern "C" int gnu_main(int argc, char **argv);
+
+#define TEMP_GNUPLOT_SCRIPT "./_temp_.gpt"
+#define TEMP_GNUPLOT_OUTPUT "./_output_.svg"
+
 void GnuplotInvoker::runGnuplot(const QString & sScript)
 {
+    m_iInvokeCount++;
+
+#ifdef _USE_BUILTIN_GNUPLOT
+    // see: http://gnuplot.respawned.com/
+    // see: https://github.com/YasasviPeruvemba/gnuplot.js
+    // see: https://www.it.iitb.ac.in/frg/wiki/images/c/ca/P1ProjectReport.pdf
+    int argc = 2;
+    char * argv[2];
+    argv[0] = new char[512];
+    strcpy(argv[0], "gnuplot");
+    argv[1] = new char[512];
+    strcpy(argv[1], TEMP_GNUPLOT_SCRIPT);
+
+    QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
+                        + QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)
+                        + sScript
+                        + QString("\nexit\n");
+
+    ApplicationData::simpleWriteFileContent(argv[1], sScriptContent);
+
+    int result = gnu_main(argc, argv);
+
+    if( result==0 )
+    {
+        QString sResultContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_OUTPUT);
+        if( QString(sResultContent).startsWith(QString("<?xml")) )
+        {
+            m_aLastGnuplotResult = sResultContent;
+            emit sigResultReady(sResultContent);
+        }
+        else
+        {
+            sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")));
+        }
+    }
+    else
+    {
+        sltErrorText(QString(tr("Error: executing built-in gnuplot ! return=%1")).arg(result));
+    }
+
+    delete [] argv[0];
+    delete [] argv[1];
+
+    // remove temporary files
+    QFile::remove(TEMP_GNUPLOT_SCRIPT);
+    QFile::remove(TEMP_GNUPLOT_OUTPUT);
+#else
     bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
@@ -139,12 +192,6 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     QString sCpuArchitecture(QSysInfo::buildCpuArchitecture());
     QString sGnuplotFile = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(useVersionBeta ? GNUPLOT_BETA_EXE : GNUPLOT_EXE);
     m_aGnuplotProcess.start(sGnuplotFile);
-#elif defined(Q_OS_WASM)
-    // TODO
-    // see: http://gnuplot.respawned.com/
-    // see: https://github.com/YasasviPeruvemba/gnuplot.js
-    // see: https://www.it.iitb.ac.in/frg/wiki/images/c/ca/P1ProjectReport.pdf
-    m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
 #elif defined(Q_OS_WIN32)
     if( useVersionBeta )
     {
@@ -155,8 +202,10 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gp504-win32-mingw\\gnuplot\\bin\\gnuplot.exe");
     }
     //m_aGnuplotProcess.start("C:\\usr\\neurothmi\\install\\gp460win32\\gnuplot\\bin\\gnuplot.exe");
+#elif defined(Q_OS_WASM) || defined(Q_OS_IOS)
+#error use built in gnuplot please
 #else
-    m_aGnuplotProcess.start("/usr/local/bin/gnuplot"/*, QStringList() << "-c"*/);
+    m_aGnuplotProcess.start("/usr/bin/gnuplot"/*, QStringList() << "-c"*/);
 #endif
 
     if (!m_aGnuplotProcess.waitForStarted())
@@ -172,6 +221,5 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     // write script to stdinput for gnuplot process
     m_aGnuplotProcess.write(sInput.toUtf8()/*.toLatin1()*/);
     m_aGnuplotProcess.closeWriteChannel();
-
-    m_iInvokeCount++;
+#endif
 }

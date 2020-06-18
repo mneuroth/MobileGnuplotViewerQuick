@@ -113,6 +113,41 @@ QString GetTranslatedFileName(const QString & fileName)
     return translatedFileName;
 }
 
+
+QString ApplicationData::simpleReadFileContent(const QString & fileName)
+{
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return QString(tr("Error reading ") + fileName);
+    }
+
+    QTextStream stream(&file);
+    auto text = stream.readAll();
+
+    file.close();
+
+    return text;
+}
+
+bool ApplicationData::simpleWriteFileContent(const QString & fileName, const QString & content)
+{
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream << content;
+
+    file.close();
+
+    return true;
+}
+
 QString ApplicationData::readFileContent(const QString & fileName) const
 {
     QString translatedFileName = GetTranslatedFileName(fileName);
@@ -132,19 +167,7 @@ QString ApplicationData::readFileContent(const QString & fileName) const
     }
     else
     {
-        QFile file(translatedFileName);
-
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            return QString(tr("Error reading ") + fileName);
-        }
-
-        QTextStream stream(&file);
-        auto text = stream.readAll();
-
-        file.close();
-
-        return text;
+        return simpleReadFileContent(translatedFileName);
     }
 }
 
@@ -159,19 +182,7 @@ bool ApplicationData::writeFileContent(const QString & fileName, const QString &
     }
     else
     {
-        QFile file(translatedFileName);
-
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
-            return false;
-        }
-
-        QTextStream stream(&file);
-        stream << content;
-
-        file.close();
-
-        return true;
+        return simpleWriteFileContent(translatedFileName, content);
     }
 }
 

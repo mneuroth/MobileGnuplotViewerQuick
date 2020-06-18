@@ -105,6 +105,9 @@ public:
     void setScriptName(const QString & sName);
     void setOutputText(const QString & sText);
 
+    static QString simpleReadFileContent(const QString & fileName);
+    static bool simpleWriteFileContent(const QString & fileName, const QString & content);
+
 signals:
     // for testing only
     void sendDummyData(const QString & txt, int value);

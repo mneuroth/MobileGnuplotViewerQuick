@@ -94,7 +94,7 @@ PageHomeForm {
             else
             {
 // TODO --> graphics page mit error Image fuellen
-                graphicsPage.image.source = ":/empty.svg"
+                graphicsPage.image.source = "empty.svg"
                 stackView.pop()
                 stackView.push(outputPage)
             }

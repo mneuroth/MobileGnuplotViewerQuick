@@ -48,6 +48,12 @@ HEADERS += \
     shareutils.hpp \
     storageaccess.h
 
+wasm || linux {
+    DEFINES += _USE_BUILTIN_GNUPLOT
+
+    include(gnuplot/gnuplot.pri)
+}
+
 android {
     SOURCES += android/androidshareutils.cpp
 
