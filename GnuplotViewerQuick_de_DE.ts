@@ -595,7 +595,17 @@ Purchasing any support level will give you some more features:
 - sharing as PDF/PNG is enabled
 - nice support icon is visible in title bar of the application
 </source>
-        <translation>Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:\n\n* Rückmeldung und Bewertungen im Google Play Store geben\n* Erwerben einer Unterstützungsstufe über einen In-App Kauf (Button unten)\n\nDer Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen:\n\n- Verwendung der aktuellen Beta Version von gnuplot wird ermöglicht\n- Teilen als PDF/PNG wird ermöglicht\n- schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet</translation>
+        <translation>Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:
+        
+* Rückmeldung und Bewertungen im Google Play Store geben
+* Erwerben einer Unterstützungsstufe über einen In-App Kauf (Button unten)
+
+Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen:
+
+- Verwendung der aktuellen Beta Version von gnuplot wird ermöglicht
+- Teilen als PDF/PNG wird ermöglicht
+- schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet
+</translation>
     </message>
     <message>
         <source>Support Level Entry</source>
