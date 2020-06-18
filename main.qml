@@ -8,8 +8,8 @@
  *
  ***************************************************************************/
 
-import QtQuick 2.12
-import QtQuick.Controls 2.5
+import QtQuick 2.9
+import QtQuick.Controls 2.2
 import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
 import QtQuick.Layouts 1.3
@@ -73,9 +73,16 @@ ApplicationWindow {
     // *** some helper functions for the application
     // **********************************************************************
 
-    function showErrorDialog(msg) {
-        errorDialog.text = msg
-        errorDialog.open()
+    function showInfoDialog(msg, title) {
+        infoDialog.text = msg
+        if( title !== undefined ) {
+            infoDialog.title = title
+        }
+        infoDialog.open()
+    }
+
+    function showThankYouDialog(supportLevel) {
+        showInfoDialog(qsTr("Thank you for supporting the development of this application !"), qsTr("Thank you !"))
     }
 
     function getFontName() {
@@ -343,7 +350,7 @@ ApplicationWindow {
                 }
                 MenuSeparator {
                     visible: isShareSupported
-                    height: isShareSupported ? aboutMenuItem.height : 0
+                    height: isShareSupported ? menuSeparator.height : 0
                 }
                 MenuItem {
                     text: qsTr("Clear")
@@ -403,7 +410,9 @@ ApplicationWindow {
                         stackView.push(mobileFileDialog)
                     }
                 }
-                MenuSeparator {}
+                MenuSeparator {
+                    id: menuSeparator
+                }
                 Menu {
                     title: qsTr("Documentation")
                     enabled: !isDialogOpen()
@@ -488,7 +497,7 @@ ApplicationWindow {
                         //console.log(Product.Registered)             // == 2
                         //console.log(Product.Unknown)                // == 3
 
-                        showErrorDialog("Test Dialog...")
+                        showInfoDialog("Thank you for supporting the development of this application !", "Info")
                     }
                 }
             }
@@ -731,7 +740,7 @@ ApplicationWindow {
     }
 
     MessageDialog {
-        id: errorDialog
+        id: infoDialog
         visible: false
         title: qsTr("Error")
         standardButtons: StandardButton.Ok

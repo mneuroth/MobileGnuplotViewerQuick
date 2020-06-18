@@ -16,17 +16,19 @@ Store {
         property bool purchasing: false
 
         onPurchaseSucceeded: {
-            //showErrorDialog(qsTr("Purchase successfull."))
+            //showInfoDialog(qsTr("Purchase successfull."))
             settings.supportLevel = 0
 
             transaction.finalize()
+
+            showThankYouDialog(settings.supportLevel)
 
             // Reset purchasing flag
             purchasing = false
         }
 
         onPurchaseFailed: {
-            showErrorDialog(qsTr("Purchase not completed."))
+            showInfoDialog(qsTr("Purchase not completed."))
             transaction.finalize()
 
             // Reset purchasing flag
@@ -34,7 +36,7 @@ Store {
         }
 
         onPurchaseRestored: {
-            //showErrorDialog(qsTr("Purchase restored."))
+            //showInfoDialog(qsTr("Purchase restored."))
             settings.supportLevel = 0
 
             transaction.finalize()
@@ -56,12 +58,14 @@ Store {
 
             transaction.finalize()
 
+            showThankYouDialog(settings.supportLevel)
+
             // Reset purchasing flag
             purchasing = false
         }
 
         onPurchaseFailed: {
-            showErrorDialog(qsTr("Purchase not completed."))
+            showInfoDialog(qsTr("Purchase not completed."))
             transaction.finalize()
 
             // Reset purchasing flag
@@ -91,12 +95,14 @@ Store {
 
             transaction.finalize()
 
+            showThankYouDialog(settings.supportLevel)
+
             // Reset purchasing flag
             purchasing = false
         }
 
         onPurchaseFailed: {
-            showErrorDialog(qsTr("Purchase not completed."))
+            showInfoDialog(qsTr("Purchase not completed."))
             transaction.finalize()
 
             // Reset purchasing flag
