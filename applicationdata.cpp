@@ -753,7 +753,7 @@ void ApplicationData::setScriptText(const QString & sScript)
     {
         QMetaObject::invokeMethod(homePage, "setScriptText",
                 QGenericReturnArgument(),
-                Q_ARG(QString, sScript));
+                Q_ARG(QVariant, sScript));
     }
 }
 
@@ -764,7 +764,7 @@ void ApplicationData::setScriptName(const QString & sName)
     {
         QMetaObject::invokeMethod(homePage, "setScriptName",
                 QGenericReturnArgument(),
-                Q_ARG(QString, sName));
+                Q_ARG(QVariant, sName));
     }
 }
 
@@ -775,6 +775,6 @@ void ApplicationData::setOutputText(const QString & sText)
     {
         QMetaObject::invokeMethod(homePage, "setOutputText",
                 QGenericReturnArgument(),
-                Q_ARG(QString, sText));
+                Q_ARG(QVariant, sText));
     }
 }
