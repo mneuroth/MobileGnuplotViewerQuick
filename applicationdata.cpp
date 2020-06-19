@@ -483,6 +483,8 @@ bool ApplicationData::shareViewSvgData(const QVariant & data)
 // other possibility: QPdfWriter aPdfWriter("gnuplot_print.pdf");
 void ApplicationData::writePdfFile(const QString & filename, const QString & text)
 {
+#if defined(Q_OS_IOS)
+#else
     QPrinter printer(QPrinter::PrinterResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setPaperSize(QPrinter::A4);
@@ -513,6 +515,7 @@ void ApplicationData::writePdfFile(const QString & filename, const QString & tex
     //cursor->insertText("currDate()", txtformat);
 
     doc.print(&printer);
+#endif
 }
 
 bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)

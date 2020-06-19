@@ -55,6 +55,8 @@ wasm_32 {
 }
 
 ios {
+    LIBS += -L/usr/local/lib -liconv
+
     DEFINES += _USE_BUILTIN_GNUPLOT
 
     include(gnuplot/gnuplot.pri)
@@ -172,8 +174,8 @@ ios {
     OBJECTIVE_SOURCES += ios/src/iosshareutils.mm \
     ios/src/docviewcontroller.mm
 
-    HEADERS += cpp/ios/iosshareutils.hpp \
-    cpp/ios/docviewcontroller.hpp
+    HEADERS += ios/iosshareutils.hpp \
+               ios/docviewcontroller.hpp
 
     QMAKE_INFO_PLIST = ios/Info.plist
 
@@ -191,7 +193,7 @@ ios {
     # MY_DEVELOPMENT_TEAM.value = your team Id from Apple Developer Account
     # QMAKE_MAC_XCODE_SETTINGS += MY_DEVELOPMENT_TEAM
 
-    include(ios_signature.pri)
+#    include(ios_signature.pri)
 
     MY_BUNDLE_ID.name = PRODUCT_BUNDLE_IDENTIFIER
     MY_BUNDLE_ID.value = de.mneuroth.mobilegnuplotviewerquick

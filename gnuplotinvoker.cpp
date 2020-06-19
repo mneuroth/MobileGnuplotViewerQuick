@@ -20,8 +20,10 @@ GnuplotInvoker::GnuplotInvoker()
       m_iFontSize(28),
       m_iInvokeCount(0)
 {
+#if !defined(Q_OS_IOS)
     connect(&m_aGnuplotProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(sltFinishedGnuplot(int,QProcess::ExitStatus)));
     connect(&m_aGnuplotProcess,SIGNAL(errorOccurred(QProcess::ProcessError)),this,SLOT(sltErrorGnuplot(QProcess::ProcessError)));
+#endif
 }
 
 QString GnuplotInvoker::run(const QString & sCmd)
@@ -105,8 +107,10 @@ void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitS
 
 void GnuplotInvoker::sltErrorGnuplot(QProcess::ProcessError error)
 {
+#if !defined(Q_OS_IOS)
     QByteArray errorMsg = m_aGnuplotProcess.readAllStandardError();
     sltErrorText(tr("Error: gnuplot exited with error: code=%1 msg=%2 err=%3\ncode=%4 status=%5\nerrorMsg=%6\n").arg(error).arg(QString(errorMsg)).arg(m_aGnuplotProcess.error()).arg(m_aGnuplotProcess.exitCode()).arg(m_aGnuplotProcess.exitStatus()).arg(m_aGnuplotProcess.errorString()));
+#endif
 }
 
 void GnuplotInvoker::sltErrorText(const QString & sTxt)

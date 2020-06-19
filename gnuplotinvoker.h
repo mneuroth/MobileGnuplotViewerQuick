@@ -12,7 +12,31 @@
 #define GNUPLOTINVOKER_H
 
 #include <QObject>
+#if defined(Q_OS_IOS)
+class QProcess {
+public:
+    enum ProcessError {
+        Crashed,
+        Timedout
+    };
+
+    enum ExitStatus {
+        NormalExit,
+        CrashExit
+    };
+
+    void waitForFinished() {
+    }
+    QString readAll() {
+        return "";
+    }
+    QByteArray readAllStandardError() {
+        return "";
+    }
+};
+#else
 #include <QProcess>
+#endif
 
 class GnuplotInvoker : public QObject
 {

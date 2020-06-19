@@ -154,7 +154,7 @@ void ApplicationUI::copyAssetsToAPPData() {
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
     //qDebug() << "Windows: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) && !defined(Q_OS_IOS)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
     //qDebug() << "Windows: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
