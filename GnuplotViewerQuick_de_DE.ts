@@ -20,14 +20,14 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="71"/>
-        <source>from: 18.6.2020</source>
-        <oldsource>from: 11.6.2020</oldsource>
-        <translation>vom: 18.6.2020</translation>
+        <source>from: 19.6.2020</source>
+        <oldsource>from: 18.6.2020</oldsource>
+        <translation>vom: 19.6.2020</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
-        <source>Version: 2.0.1</source>
-        <oldsource>Version: 2.0.0</oldsource>
+        <source>Version: 2.0.2</source>
+        <oldsource>Version: 2.0.1</oldsource>
         <translation></translation>
     </message>
     <message>
