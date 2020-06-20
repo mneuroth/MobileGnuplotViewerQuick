@@ -20,6 +20,7 @@ Page {
     property alias lblLevel1: lblLevel1
     property alias lblLevel2: lblLevel2
     property alias lblGooglePlay: lblGooglePlay
+    property alias lblSupporterOfClassicVersion: lblSupporterOfClassicVersion
 
     anchors.fill: parent
 
@@ -118,6 +119,20 @@ Page {
             text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick in Google Play</a>"
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: btnSupportLevel2.bottom
+            anchors.topMargin: 15
+        }
+
+        Text {
+            id: lblSupporterOfClassicVersion
+            text: qsTr("You already supported the predecessor of this application !")
+            visible: applicationData.isMobileGnuplotViewerInstalled
+            wrapMode: Text.WordWrap
+            horizontalAlignment: Text.AlignHCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: lblGooglePlay.bottom
             anchors.topMargin: 15
         }
     }

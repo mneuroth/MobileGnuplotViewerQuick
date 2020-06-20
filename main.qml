@@ -93,6 +93,10 @@ ApplicationWindow {
         return "Courier"
     }
 
+    function isCurrentUserSupporter() {
+        return settings.supportLevel>=0 || applicationData.isMobileGnuplotViewerInstalled
+    }
+
     function isDialogOpen() {
         var otherChecks = false
         if( isAppStoreSupported )
@@ -309,7 +313,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("Send as PDF/PNG")
                     icon.source: "share.svg"
-                    enabled: !isDialogOpen() && settings.supportLevel>=0
+                    enabled: !isDialogOpen() && isCurrentUserSupporter()
                     visible: isShareSupported
                     height: isShareSupported ? aboutMenuItem.height : 0
                     onTriggered: {
@@ -574,7 +578,7 @@ ApplicationWindow {
         ToolButton {
             id: supportIcon
             icon.source: "high-five.svg"
-            visible: isAppStoreSupported && settings.supportLevel>=0
+            visible: isAppStoreSupported && isCurrentUserSupporter()
             anchors.left: toolButton.right
             anchors.leftMargin: 1
 
