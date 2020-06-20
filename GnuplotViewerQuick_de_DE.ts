@@ -20,14 +20,14 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="71"/>
-        <source>from: 19.6.2020</source>
-        <oldsource>from: 18.6.2020</oldsource>
-        <translation>vom: 19.6.2020</translation>
+        <source>from: 21.6.2020</source>
+        <oldsource>from: 19.6.2020</oldsource>
+        <translation>vom: 21.6.2020</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
-        <source>Version: 2.0.2</source>
-        <oldsource>Version: 2.0.1</oldsource>
+        <source>Version: 2.0.3</source>
+        <oldsource>Version: 2.0.2</oldsource>
         <translation></translation>
     </message>
     <message>
@@ -48,69 +48,69 @@
 <context>
     <name>AndroidShareUtils</name>
     <message>
-        <location filename="android/androidshareutils.cpp" line="127"/>
-        <location filename="android/androidshareutils.cpp" line="249"/>
-        <location filename="android/androidshareutils.cpp" line="360"/>
+        <location filename="android/androidshareutils.cpp" line="145"/>
+        <location filename="android/androidshareutils.cpp" line="267"/>
+        <location filename="android/androidshareutils.cpp" line="378"/>
         <source>Share: an Error occured
 FilePath not valid</source>
         <translation>Wähle eine Datei aus</translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="134"/>
-        <location filename="android/androidshareutils.cpp" line="256"/>
-        <location filename="android/androidshareutils.cpp" line="367"/>
+        <location filename="android/androidshareutils.cpp" line="152"/>
+        <location filename="android/androidshareutils.cpp" line="274"/>
+        <location filename="android/androidshareutils.cpp" line="385"/>
         <source>Share: an Error occured
 URI not valid</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="143"/>
-        <location filename="android/androidshareutils.cpp" line="150"/>
-        <location filename="android/androidshareutils.cpp" line="171"/>
-        <location filename="android/androidshareutils.cpp" line="180"/>
-        <location filename="android/androidshareutils.cpp" line="188"/>
-        <location filename="android/androidshareutils.cpp" line="265"/>
-        <location filename="android/androidshareutils.cpp" line="272"/>
-        <location filename="android/androidshareutils.cpp" line="293"/>
-        <location filename="android/androidshareutils.cpp" line="376"/>
-        <location filename="android/androidshareutils.cpp" line="383"/>
-        <location filename="android/androidshareutils.cpp" line="404"/>
-        <location filename="android/androidshareutils.cpp" line="474"/>
+        <location filename="android/androidshareutils.cpp" line="161"/>
+        <location filename="android/androidshareutils.cpp" line="168"/>
+        <location filename="android/androidshareutils.cpp" line="189"/>
+        <location filename="android/androidshareutils.cpp" line="198"/>
+        <location filename="android/androidshareutils.cpp" line="206"/>
+        <location filename="android/androidshareutils.cpp" line="283"/>
+        <location filename="android/androidshareutils.cpp" line="290"/>
+        <location filename="android/androidshareutils.cpp" line="311"/>
+        <location filename="android/androidshareutils.cpp" line="394"/>
+        <location filename="android/androidshareutils.cpp" line="401"/>
+        <location filename="android/androidshareutils.cpp" line="422"/>
+        <location filename="android/androidshareutils.cpp" line="492"/>
         <source>Share: an Error occured</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="157"/>
-        <location filename="android/androidshareutils.cpp" line="279"/>
-        <location filename="android/androidshareutils.cpp" line="390"/>
+        <location filename="android/androidshareutils.cpp" line="175"/>
+        <location filename="android/androidshareutils.cpp" line="297"/>
+        <location filename="android/androidshareutils.cpp" line="408"/>
         <source>Share: an Error occured
 MimeType is empty</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="164"/>
-        <location filename="android/androidshareutils.cpp" line="286"/>
-        <location filename="android/androidshareutils.cpp" line="397"/>
+        <location filename="android/androidshareutils.cpp" line="182"/>
+        <location filename="android/androidshareutils.cpp" line="304"/>
+        <location filename="android/androidshareutils.cpp" line="415"/>
         <source>Share: an Error occured
 MimeType not valid</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="487"/>
+        <location filename="android/androidshareutils.cpp" line="505"/>
         <source>Share: an Error occured
 WorkingDir not valid</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="503"/>
-        <location filename="android/androidshareutils.cpp" line="535"/>
-        <location filename="android/androidshareutils.cpp" line="566"/>
+        <location filename="android/androidshareutils.cpp" line="521"/>
+        <location filename="android/androidshareutils.cpp" line="553"/>
+        <location filename="android/androidshareutils.cpp" line="584"/>
         <source>Empty URL received</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="android/androidshareutils.cpp" line="524"/>
-        <location filename="android/androidshareutils.cpp" line="556"/>
+        <location filename="android/androidshareutils.cpp" line="542"/>
+        <location filename="android/androidshareutils.cpp" line="574"/>
         <source>File does not exist: %1</source>
         <translation>Datei existiert nicht: %1</translation>
     </message>
@@ -118,33 +118,33 @@ WorkingDir not valid</source>
 <context>
     <name>ApplicationData</name>
     <message>
-        <location filename="applicationdata.cpp" line="150"/>
-        <location filename="applicationdata.cpp" line="192"/>
+        <location filename="applicationdata.cpp" line="160"/>
+        <location filename="applicationdata.cpp" line="202"/>
         <source>Error reading </source>
         <translation>Fehler beim Lesen der Datei </translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="573"/>
+        <location filename="applicationdata.cpp" line="590"/>
         <source>Send file</source>
         <translation>Sende Datei</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="577"/>
+        <location filename="applicationdata.cpp" line="594"/>
         <source>View file</source>
         <translation>Zeige Date</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="699"/>
+        <location filename="applicationdata.cpp" line="716"/>
         <source>Can not load file %1</source>
         <translation>Datei % kann nicht gelesen werden</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="710"/>
+        <location filename="applicationdata.cpp" line="727"/>
         <source>File name is empty!</source>
         <translation>Datei Name ist leer!</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="728"/>
+        <location filename="applicationdata.cpp" line="745"/>
         <source>Error writing file: </source>
         <translation>Fehler beim Schreiben der Datei: </translation>
     </message>
@@ -162,7 +162,7 @@ WorkingDir not valid</source>
 <context>
     <name>GnuplotInvoker</name>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="109"/>
+        <location filename="gnuplotinvoker.cpp" line="112"/>
         <source>Error: gnuplot exited with error: code=%1 msg=%2 err=%3
 code=%4 status=%5
 errorMsg=%6
@@ -170,23 +170,23 @@ errorMsg=%6
         <translation></translation>
     </message>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="124"/>
+        <location filename="gnuplotinvoker.cpp" line="128"/>
         <source>Error code=%1
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="168"/>
+        <location filename="gnuplotinvoker.cpp" line="172"/>
         <source>Warning: unexpected result running built-in gnuplot !</source>
         <translation>Warnung: unerwartetes Resultat der eingebauten gnuplot Ausführung !</translation>
     </message>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="173"/>
+        <location filename="gnuplotinvoker.cpp" line="177"/>
         <source>Error: executing built-in gnuplot ! return=%1</source>
         <translation>Fehler: Ausführung eingebauter gnuplot ! return=%1</translation>
     </message>
     <message>
-        <location filename="gnuplotinvoker.cpp" line="215"/>
+        <location filename="gnuplotinvoker.cpp" line="219"/>
         <source>Error: gnuplot not found ! path=%1</source>
         <translation>Fehler: gnuplot nicht gefunden ! Pfad?%1</translation>
     </message>
@@ -194,47 +194,47 @@ errorMsg=%6
 <context>
     <name>MobileFileDialog</name>
     <message>
-        <location filename="MobileFileDialog.qml" line="48"/>
+        <location filename="MobileFileDialog.qml" line="49"/>
         <source>new file name:</source>
         <translation>neuer Datei Name:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="49"/>
+        <location filename="MobileFileDialog.qml" line="50"/>
         <source>unknown.gpt</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="49"/>
+        <location filename="MobileFileDialog.qml" line="50"/>
         <source>unknown.png</source>
         <translation>unbekannt.png</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="51"/>
+        <location filename="MobileFileDialog.qml" line="52"/>
         <source>Save as</source>
         <translation>Sichern unter</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="59"/>
+        <location filename="MobileFileDialog.qml" line="60"/>
         <source>open name:</source>
         <translation>Öffne Name:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="61"/>
+        <location filename="MobileFileDialog.qml" line="62"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="69"/>
+        <location filename="MobileFileDialog.qml" line="70"/>
         <source>current file name:</source>
         <translation>aktueller Datei Name:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="72"/>
+        <location filename="MobileFileDialog.qml" line="73"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="95"/>
+        <location filename="MobileFileDialog.qml" line="96"/>
         <source>can not delete file </source>
         <translation>Datei kann nicht gelöscht werden </translation>
     </message>
@@ -563,27 +563,27 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
 <context>
     <name>SupportDialogForm.ui</name>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="26"/>
+        <location filename="SupportDialogForm.ui.qml" line="27"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="36"/>
+        <location filename="SupportDialogForm.ui.qml" line="37"/>
         <source>Support Level Bronze</source>
         <translation>Unterstützung Bronze Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="44"/>
+        <location filename="SupportDialogForm.ui.qml" line="45"/>
         <source>Support Level Silver</source>
         <translation>Unterstützung Silber Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="52"/>
+        <location filename="SupportDialogForm.ui.qml" line="53"/>
         <source>Support Level Gold</source>
         <translation>Unterstützung Gold Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="103"/>
+        <location filename="SupportDialogForm.ui.qml" line="104"/>
         <source>The development of this app can be supported in various ways:
 
 * giving feedback and rating via the store enty in Google Play
@@ -606,6 +606,11 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
 - Teilen als PDF/PNG wird ermöglicht
 - schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet
 </translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="127"/>
+        <source>You already supported the predecessor of this application !</source>
+        <translation>Du hast den Vorgänger dieser Anwendung schon unterstützt !</translation>
     </message>
     <message>
         <source>Support Level Entry</source>
@@ -636,7 +641,7 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Unterstützungsstufe 2</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="62"/>
+        <location filename="SupportDialogForm.ui.qml" line="63"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
@@ -659,87 +664,87 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation>Vielen Dank !</translation>
     </message>
     <message>
-        <location filename="main.qml" line="287"/>
+        <location filename="main.qml" line="291"/>
         <source>Send</source>
         <translation>Senden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="299"/>
+        <location filename="main.qml" line="303"/>
         <source>Send as text</source>
         <translation>Senden als Text</translation>
     </message>
     <message>
-        <location filename="main.qml" line="310"/>
+        <location filename="main.qml" line="314"/>
         <source>Send as PDF/PNG</source>
         <translation>Senden als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="331"/>
+        <location filename="main.qml" line="335"/>
         <source>View as PDF/PNG</source>
         <translation>Zeigen als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="356"/>
+        <location filename="main.qml" line="360"/>
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="372"/>
+        <location filename="main.qml" line="376"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="378"/>
+        <location filename="main.qml" line="382"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="403"/>
+        <location filename="main.qml" line="407"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="417"/>
+        <location filename="main.qml" line="421"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="421"/>
+        <location filename="main.qml" line="425"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="427"/>
+        <location filename="main.qml" line="431"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="433"/>
+        <location filename="main.qml" line="437"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="439"/>
+        <location filename="main.qml" line="443"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="449"/>
+        <location filename="main.qml" line="453"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="460"/>
+        <location filename="main.qml" line="464"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="474"/>
+        <location filename="main.qml" line="478"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="485"/>
+        <location filename="main.qml" line="489"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -756,37 +761,37 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="604"/>
+        <location filename="main.qml" line="616"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="613"/>
+        <location filename="main.qml" line="625"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="622"/>
+        <location filename="main.qml" line="634"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="744"/>
+        <location filename="main.qml" line="756"/>
         <source>Choose a file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="772"/>
+        <location filename="main.qml" line="784"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="main.qml" line="782"/>
+        <location filename="main.qml" line="794"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="783"/>
+        <location filename="main.qml" line="795"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.
