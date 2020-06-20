@@ -381,7 +381,7 @@ bool ApplicationUI::updateFileFromDocumentsLocation(const int requestId) {
 void ApplicationUI::onApplicationStateChanged(Qt::ApplicationState applicationState)
 {
     //ui->txtErrors->appendPlainText(QString("App state changed state=%1).arg(applicationState));
-AddToLog(QString("+++> onApplicationStateChanged %1").arg(applicationState));
+//AddToLog(QString("+++> onApplicationStateChanged %1").arg(applicationState));
 
     //qDebug() << "S T A T E changed into: " << applicationState;
     if(applicationState == Qt::ApplicationState::ApplicationSuspended) {
@@ -395,24 +395,24 @@ AddToLog(QString("+++> onApplicationStateChanged %1").arg(applicationState));
         return;
     }
     if(applicationState == Qt::ApplicationState::ApplicationActive) {
-AddToLog(QString("+++> Try check intent"));
+//AddToLog(QString("+++> Try check intent"));
         // if App was launched from VIEW or SEND Intent
         // there's a race collision: the event will be lost,
         // because App and UI wasn't completely initialized
         // workaround: QShareActivity remembers that an Intent is pending
         //qDebug() << "==> check pending intents " << mPendingIntentsChecked;
         if(!mPendingIntentsChecked) {
-AddToLog(QString("+++> checking"));
+//AddToLog(QString("+++> checking"));
             mPendingIntentsChecked = true;
             mShareUtils->checkPendingIntents(mAppDataFilesPath);
         }
-AddToLog(QString("+++> done."));
+//AddToLog(QString("+++> done."));
     }
 }
 
 void ApplicationUI::onSaveStateRequest(QSessionManager & sessionManager)
 {
-AddToLog(QString("+++> onSaveStateRequest() %1").arg(sessionManager.restartHint()));
+//AddToLog(QString("+++> onSaveStateRequest() %1").arg(sessionManager.restartHint()));
 }
 
 // we don't need permissions if we only share files to other apps using FileProvider

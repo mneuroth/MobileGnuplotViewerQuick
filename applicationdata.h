@@ -63,6 +63,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(bool isAppStoreSupported READ isAppStoreSupported NOTIFY isAppStoreSupportedChanged)
     Q_PROPERTY(bool isShareSupported READ isShareSupported NOTIFY isShareSupportedChanged)
     Q_PROPERTY(bool isAndroid READ isAndroid NOTIFY isAndroidChanged)
+    Q_PROPERTY(bool isMobileGnuplotViewerInstalled READ isMobileGnuplotViewerInstalled NOTIFY isMobileGnuplotViewerInstalledChanged)
 
 public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
@@ -94,6 +95,8 @@ public:
     Q_INVOKABLE void writePdfFile(const QString & sFileName, const QString & text);
     Q_INVOKABLE bool saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data);
 
+    Q_INVOKABLE bool isAppInstalled(const QString & sAppName) const;
+
     // for debugging only
     Q_INVOKABLE void logText(const QString & text);
 
@@ -115,6 +118,8 @@ public:
     bool isShareSupported() const;
     bool isAndroid() const;
 
+    bool isMobileGnuplotViewerInstalled() const;
+
 signals:
     // for testing only
     void sendDummyData(const QString & txt, int value);
@@ -122,6 +127,7 @@ signals:
     void isAppStoreSupportedChanged();
     void isShareSupportedChanged();
     void isAndroidChanged();
+    void isMobileGnuplotViewerInstalledChanged();
 
 public slots:
     void sltFileUrlReceived(const QString & sUrl);

@@ -27,6 +27,9 @@ public:
 
     virtual void checkPendingIntents(const QString workingDirPath) override;
 
+    virtual bool isMobileGnuplotViewerInstalled() override;
+    virtual bool isAppInstalled(const QString &packageName) override;
+
     static AndroidShareUtils* getInstance();
 
 public slots:

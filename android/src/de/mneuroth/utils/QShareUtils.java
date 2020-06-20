@@ -38,6 +38,7 @@ import java.util.Comparator;
 import java.util.Collections;
 import android.content.Context;
 import android.os.Parcelable;
+import android.content.pm.PackageManager;
 
 import android.os.Build;
 
@@ -542,4 +543,18 @@ public static int sendFileNew(String filePath, String title, String mimeType, in
         return filePath;
     }
 
+    public static boolean isAppInstalled(String packageName) {
+        try {
+            final Context context = QtNative.activity();
+            final PackageManager packageManager = context.getPackageManager();
+            packageManager.getApplicationInfo(packageName, 0);
+            return true;
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+    public static boolean isMobileGnuplotViewerInstalled() {
+        return isAppInstalled("de.mneuroth.gnuplotviewer");
+    }
 }

@@ -83,6 +83,16 @@ void ShareUtils::checkPendingIntents(const QString workingDirPath)
 {
     mPlatformShareUtils->checkPendingIntents(workingDirPath);
 }
+
+bool ShareUtils::isMobileGnuplotViewerInstalled()
+{
+    return mPlatformShareUtils->isMobileGnuplotViewerInstalled();
+}
+
+bool ShareUtils::isAppInstalled(const QString &packageName)
+{
+    return mPlatformShareUtils->isAppInstalled(packageName);
+}
 /*
 void ShareUtils::openFile(const int &requestId)
 {
@@ -106,16 +116,22 @@ void ShareUtils::onShareNoAppAvailable(int requestCode)
 
 void ShareUtils::onShareError(int requestCode, QString message)
 {
+//AddToLog(QString("==> ShareUtils this=").arg((unsigned long)this));
+//AddToLog(QString("==> onShareError emit ")+message);
     emit shareError(requestCode, message);
 }
 
 void ShareUtils::onFileUrlReceived(QString url)
 {
+//AddToLog(QString("==> ShareUtils this=").arg((unsigned long)this));
+//AddToLog(QString("==> onFileUrlReceived emit ")+url);
     emit fileUrlReceived(url);
 }
 
 void ShareUtils::onFileReceivedAndSaved(QString url)
 {
+//AddToLog(QString("==> ShareUtils this=").arg((unsigned long)this));
+//AddToLog(QString("==> onFileReceivedAndSaved emit ")+url);
     emit fileReceivedAndSaved(url);
 }
 

@@ -95,6 +95,16 @@ bool ApplicationData::isAndroid() const
 #endif
 }
 
+bool ApplicationData::isMobileGnuplotViewerInstalled() const
+{
+    return m_pShareUtils != 0 ? m_pShareUtils->isMobileGnuplotViewerInstalled() : false;
+}
+
+bool ApplicationData::isAppInstalled(const QString & sAppName) const
+{
+    return m_pShareUtils != 0 ? m_pShareUtils->isAppInstalled(sAppName) : false;
+}
+
 QString ApplicationData::getOnlyFileName(const QString & url) const
 {
     QUrl aUrl(url);
@@ -410,8 +420,12 @@ QString ApplicationData::getDefaultScript() const
 
 bool ApplicationData::shareSimpleText(const QString & text)
 {
-    m_pShareUtils->share(text, QUrl());
-    return true;
+    if( m_pShareUtils != 0 )
+    {
+        m_pShareUtils->share(text, QUrl());
+        return true;
+    }
+    return false;
 }
 
 bool ApplicationData::shareText(const QString & tempFileName, const QString & text)

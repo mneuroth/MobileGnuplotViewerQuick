@@ -32,6 +32,24 @@ AndroidShareUtils* AndroidShareUtils::getInstance()
     return mInstance;
 }
 
+bool AndroidShareUtils::isMobileGnuplotViewerInstalled()
+{
+    jboolean value = QAndroidJniObject::callStaticMethod<jboolean>("de/mneuroth/utils/QShareUtils",
+                                              "isMobileGnuplotViewerInstalled",
+                                              "()Z");
+    return value;
+}
+
+bool AndroidShareUtils::isAppInstalled(const QString &packageName)
+{
+    QAndroidJniObject jsPackageName = QAndroidJniObject::fromString(packageName);
+    jboolean value = QAndroidJniObject::callStaticMethod<jboolean>("de/mneuroth/utils/QShareUtils",
+                                              "isAppInstalled",
+                                              "(Ljava/lang/String;)Z",
+                                              jsPackageName.object<jstring>());
+    return value;
+}
+
 bool AndroidShareUtils::checkMimeTypeView(const QString &mimeType)
 {
     QAndroidJniObject jsMime = QAndroidJniObject::fromString(mimeType);
@@ -608,7 +626,7 @@ JNIEXPORT void JNICALL
 {
     const char *urlStr = env->GetStringUTFChars(url, NULL);
     Q_UNUSED (obj)
-AddToLog("*** java setFileUrlReceived "+QString(urlStr));
+//AddToLog("*** java setFileUrlReceived "+QString(urlStr));
     AndroidShareUtils::getInstance()->setFileUrlReceived(urlStr);
     env->ReleaseStringUTFChars(url, urlStr);
     return;
@@ -620,7 +638,7 @@ JNIEXPORT void JNICALL
                                         jstring url)
 {
     const char *urlStr = env->GetStringUTFChars(url, NULL);
-AddToLog("*** java setFileReceivedAndSaved "+QString(urlStr));
+//AddToLog("*** java setFileReceivedAndSaved "+QString(urlStr));
     Q_UNUSED (obj)
     AndroidShareUtils::getInstance()->setFileReceivedAndSaved(urlStr);
     env->ReleaseStringUTFChars(url, urlStr);
@@ -633,7 +651,7 @@ JNIEXPORT bool JNICALL
                                         jstring url)
 {
     const char *urlStr = env->GetStringUTFChars(url, NULL);
-AddToLog("*** java checkFileExits "+QString(urlStr));
+//AddToLog("*** java checkFileExits "+QString(urlStr));
     Q_UNUSED (obj)
     bool exists = AndroidShareUtils::getInstance()->checkFileExits(urlStr);
     env->ReleaseStringUTFChars(url, urlStr);

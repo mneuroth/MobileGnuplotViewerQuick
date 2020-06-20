@@ -31,7 +31,8 @@ MobileFileDialogForm {
             else
             {
                 mobileFileDialog.txtMFDInput.text = ""
-                listView.currentItem.currentFileName("")
+                mobileFileDialog.setCurrentName("")
+                //listView.currentItem.currentFileName("")
             }
 
             if( !mobileFileDialog.isSaveAsModus )

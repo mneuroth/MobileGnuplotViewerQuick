@@ -498,7 +498,15 @@ ApplicationWindow {
                         //console.log(Product.Registered)             // == 2
                         //console.log(Product.Unknown)                // == 3
 
-                        showInfoDialog("Thank you for supporting the development of this application !", "Info")
+                        showInfoDialog("installed = "+applicationData.isMobileGnuplotViewerInstalled, "Info")
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Test for app")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                        var s = homePage.textArea.text
+                        showInfoDialog("installed? >" + s + "< = "+applicationData.isAppInstalled(s), "Info")
                     }
                 }
                 */
