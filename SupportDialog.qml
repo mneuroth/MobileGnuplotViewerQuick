@@ -17,21 +17,21 @@ SupportDialogForm {
     btnSupportLevel0 {
         enabled: settings.supportLevel < 0
         onClicked: {
-            supportLevel0.purchase()
+            storeLoader.item.supportLevel0.purchase()
         }
     }
 
     btnSupportLevel1 {
         enabled: settings.supportLevel < 1
         onClicked: {
-            supportLevel1.purchase()
+            storeLoader.item.supportLevel1.purchase()
         }
     }
 
     btnSupportLevel2 {
         enabled: settings.supportLevel < 2
         onClicked: {
-            supportLevel2.purchase()
+            storeLoader.item.supportLevel2.purchase()
         }
     }
 

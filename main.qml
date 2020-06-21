@@ -805,7 +805,7 @@ ApplicationWindow {
 
     Loader
     {
-        id: store
+        id: storeLoader
         source: isAppStoreSupported ? "ApplicationStore.qml" : ""
     }
 

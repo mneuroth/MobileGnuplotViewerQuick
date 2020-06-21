@@ -81,7 +81,7 @@ Page {
             id: lblAppVersion
             x: 5
             y: 219
-            text: qsTr("Version: 2.0.3")
+            text: qsTr("Version: 2.0.4")
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left
