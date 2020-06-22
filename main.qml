@@ -94,7 +94,7 @@ ApplicationWindow {
     }
 
     function isCurrentUserSupporter() {
-        return settings.supportLevel>=0 || applicationData.isMobileGnuplotViewerInstalled
+        return settings.supportLevel>=0 || (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false)
     }
 
     function isDialogOpen() {

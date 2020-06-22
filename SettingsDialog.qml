@@ -28,7 +28,7 @@ SettingsDialogForm {
 
     txtSupportLevel {
         visible: isAppStoreSupported
-        text: applicationData.isMobileGnuplotViewerInstalled ? "99" : settings.supportLevel
+        text: (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false) ? "99" : settings.supportLevel
     }
 
     lblSupportLevel {

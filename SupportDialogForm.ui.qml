@@ -125,7 +125,7 @@ Page {
         Text {
             id: lblSupporterOfClassicVersion
             text: qsTr("You already supported the predecessor of this application !")
-            visible: applicationData.isMobileGnuplotViewerInstalled
+            visible: applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             anchors.right: parent.right

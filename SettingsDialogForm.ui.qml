@@ -52,7 +52,7 @@ Page {
         Button {
             id: btnOk
             y: 355
-            text: qsTr("Ok")
+            text: qsTr("Accept")
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.bottom: parent.bottom
