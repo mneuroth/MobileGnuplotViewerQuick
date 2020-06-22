@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.1" language="nl_NL">
 <context>
     <name>AboutDialogForm.ui</name>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="19"/>
         <source>About</source>
-        <translation>Über</translation>
+        <translation>Over</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="43"/>
@@ -16,33 +16,27 @@
     <message>
         <location filename="AboutDialogForm.ui.qml" line="58"/>
         <source>Author: Michael Neuroth</source>
-        <translation>Autor: Michael Neuroth</translation>
+        <translation>Auteur: Michael Neuroth</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="71"/>
         <source>from: 21.6.2020</source>
-        <oldsource>from: 19.6.2020</oldsource>
-        <translation>vom: 21.6.2020</translation>
+        <translation>van: 21.6.2020</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
         <source>Version: 2.0.4</source>
-        <oldsource>Version: 2.0.3</oldsource>
         <translation></translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="95"/>
         <source>Icons designed by &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Flaticon&lt;/a&gt;</source>
-        <translation>Icons entworfen von &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Flaticon&lt;/a&gt;</translation>
-    </message>
-    <message>
-        <source>Icons designed by &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Freepik&lt;/a&gt;</source>
-        <translation type="vanished">Icons entworfen von &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Freepik&lt;/a&gt;</translation>
+        <translation>Icons ontworpen van &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Flaticon&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="136"/>
         <source>Close</source>
-        <translation>Schließen</translation>
+        <translation>Afsluiten</translation>
     </message>
 </context>
 <context>
@@ -53,7 +47,7 @@
         <location filename="android/androidshareutils.cpp" line="378"/>
         <source>Share: an Error occured
 FilePath not valid</source>
-        <translation>Wähle eine Datei aus</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="android/androidshareutils.cpp" line="152"/>
@@ -112,7 +106,7 @@ WorkingDir not valid</source>
         <location filename="android/androidshareutils.cpp" line="542"/>
         <location filename="android/androidshareutils.cpp" line="574"/>
         <source>File does not exist: %1</source>
-        <translation>Datei existiert nicht: %1</translation>
+        <translation>Bestand bestaat niet: %1</translation>
     </message>
 </context>
 <context>
@@ -121,32 +115,32 @@ WorkingDir not valid</source>
         <location filename="applicationdata.cpp" line="160"/>
         <location filename="applicationdata.cpp" line="202"/>
         <source>Error reading </source>
-        <translation>Fehler beim Lesen der Datei </translation>
+        <translation>Fout bij lezen van bestand </translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="590"/>
         <source>Send file</source>
-        <translation>Sende Datei</translation>
+        <translation>Verzenden bestand</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="594"/>
         <source>View file</source>
-        <translation>Zeige Date</translation>
+        <translation>Bestand bekijken</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="716"/>
         <source>Can not load file %1</source>
-        <translation>Datei % kann nicht gelesen werden</translation>
+        <translation>Kan bestand %1 niet laden</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="727"/>
         <source>File name is empty!</source>
-        <translation>Datei Name ist leer!</translation>
+        <translation>Bestandsnaam is leeg!</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="745"/>
         <source>Error writing file: </source>
-        <translation>Fehler beim Schreiben der Datei: </translation>
+        <translation>Fout bij schrijven van bestand: </translation>
     </message>
 </context>
 <context>
@@ -156,7 +150,7 @@ WorkingDir not valid</source>
         <location filename="ApplicationStore.qml" line="68"/>
         <location filename="ApplicationStore.qml" line="105"/>
         <source>Purchase not completed.</source>
-        <translation>Kauf wurde nicht abgeschlossen.</translation>
+        <translation>Aankoop niet voltooid.</translation>
     </message>
 </context>
 <context>
@@ -178,17 +172,17 @@ errorMsg=%6
     <message>
         <location filename="gnuplotinvoker.cpp" line="172"/>
         <source>Warning: unexpected result running built-in gnuplot !</source>
-        <translation>Warnung: unerwartetes Resultat der eingebauten gnuplot Ausführung !</translation>
+        <translation>Waarschuwing: onverwacht resultaat met ingebouwde gnuplot!</translation>
     </message>
     <message>
         <location filename="gnuplotinvoker.cpp" line="177"/>
         <source>Error: executing built-in gnuplot ! return=%1</source>
-        <translation>Fehler: Ausführung eingebauter gnuplot ! return=%1</translation>
+        <translation>Fout: uitvoeren van ingebouwde gnuplot! terugkeer=%1</translation>
     </message>
     <message>
         <location filename="gnuplotinvoker.cpp" line="219"/>
         <source>Error: gnuplot not found ! path=%1</source>
-        <translation>Fehler: gnuplot nicht gefunden ! Pfad?%1</translation>
+        <translation>Fout: gnuplot niet gevonden! pad=%1</translation>
     </message>
 </context>
 <context>
@@ -196,47 +190,47 @@ errorMsg=%6
     <message>
         <location filename="MobileFileDialog.qml" line="49"/>
         <source>new file name:</source>
-        <translation>neuer Datei Name:</translation>
-    </message>
-    <message>
-        <location filename="MobileFileDialog.qml" line="50"/>
-        <source>unknown.gpt</source>
-        <translation></translation>
+        <translation>nieuwe bestandsnaam:</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="50"/>
         <source>unknown.png</source>
-        <translation>unbekannt.png</translation>
+        <translation>onbekend.png</translation>
+    </message>
+    <message>
+        <location filename="MobileFileDialog.qml" line="50"/>
+        <source>unknown.gpt</source>
+        <translation>onbekend.gpt</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="52"/>
         <source>Save as</source>
-        <translation>Sichern unter</translation>
+        <translation>Opslaan als</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="60"/>
         <source>open name:</source>
-        <translation>Öffne Name:</translation>
+        <translation>open naam:</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="62"/>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Openen</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="70"/>
         <source>current file name:</source>
-        <translation>aktueller Datei Name:</translation>
+        <translation>huidige bestandsnaam:</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="73"/>
         <source>Delete</source>
-        <translation>Löschen</translation>
+        <translation>Verwijderen</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="96"/>
         <source>can not delete file </source>
-        <translation>Datei kann nicht gelöscht werden </translation>
+        <translation>kan bestand niet verwijderen </translation>
     </message>
 </context>
 <context>
@@ -244,7 +238,7 @@ errorMsg=%6
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="37"/>
         <source>Select file</source>
-        <translation>Datei auswählen</translation>
+        <translation>Selecteer bestand</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="53"/>
@@ -259,32 +253,32 @@ errorMsg=%6
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="75"/>
         <source>SD Card</source>
-        <translation>SD Karte</translation>
+        <translation>SD-kaart</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="88"/>
         <source>Storage</source>
-        <translation>Speicher</translation>
+        <translation>Opslag</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="103"/>
         <source>Show current directory here</source>
-        <translation>Zeige hier das aktuelle Verzeichnis</translation>
+        <translation>Toon hier de huidige directory</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="139"/>
         <source>Any input</source>
-        <translation>Beliebige Eingabe</translation>
+        <translation>elke input</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="166"/>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Openen</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="177"/>
         <source>Cancel</source>
-        <translation>Abbrechen</translation>
+        <translation>Annuleren</translation>
     </message>
 </context>
 <context>
@@ -292,28 +286,27 @@ errorMsg=%6
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="26"/>
         <source>Gnuplot Graphics</source>
-        <oldsource>Graphics</oldsource>
-        <translation>Gnuplot Grafik</translation>
+        <translation>Gnuplot Grafiek</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="70"/>
         <source>Infos...</source>
-        <translation>Infos...</translation>
+        <translation>Informaties...</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="95"/>
         <source>Input</source>
-        <translation>Eingabe</translation>
+        <translation>Input</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="102"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Hulp</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="109"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Output</translation>
     </message>
 </context>
 <context>
@@ -321,34 +314,33 @@ errorMsg=%6
     <message>
         <location filename="PageHelpForm.ui.qml" line="27"/>
         <source>Gnuplot Help</source>
-        <translation>Gnuplot Hilfe</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="31"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Hulp</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="55"/>
         <source>Enter gnuplot help command here (e. g. help plot)
 and activate &quot;Run help&quot; button</source>
-        <translation>Hier gnuplot Hilfe Kommandos eingeben (z. B. help plot)
-und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
+        <translation>Gnuplot Hulp</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="75"/>
         <source>Input</source>
-        <translation>Eingabe</translation>
+        <translation>Input</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="82"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Output</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="89"/>
         <source>Run help</source>
-        <translation>Hilfe ausführen</translation>
+        <translation>Hulp uitvoeren</translation>
     </message>
 </context>
 <context>
@@ -356,12 +348,12 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     <message>
         <location filename="PageHome.qml" line="74"/>
         <source>Running gnuplot for file </source>
-        <translation>gnuplot ausführen für Datei </translation>
+        <translation>Gnuplot uitvoeren voor bestand </translation>
     </message>
     <message>
         <location filename="PageHome.qml" line="80"/>
         <source>There are informations or errors on the output page</source>
-        <translation>Es gibt Informationen oder Fehler auf der Ausgabe Seite</translation>
+        <translation>Er zijn informatie of fouten op de output pagina</translation>
     </message>
 </context>
 <context>
@@ -369,48 +361,47 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     <message>
         <location filename="PageHomeForm.ui.qml" line="32"/>
         <source>Gnuplot Input</source>
-        <oldsource>Gnuplot</oldsource>
-        <translation>Gnuplot Eingabe</translation>
+        <translation>Gnuplot Input</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="37"/>
         <source>unknown</source>
-        <translation>unbekannt</translation>
+        <translation>onbekend</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="62"/>
         <source>Enter gnuplot script here...</source>
-        <translation>gnuplot Skript hier eingeben...</translation>
+        <translation>Voer hier het gnuplot script in...</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="82"/>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Openen</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="89"/>
         <source>Save</source>
-        <translation>Speichern</translation>
+        <translation>Opslaan</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="96"/>
         <source>Run</source>
-        <translation>Ausführen</translation>
+        <translation>Uitvoeren</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="103"/>
         <source>Graphics</source>
-        <translation>Grafik</translation>
+        <translation>Grafiek</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="110"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Hulp</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="117"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Output</translation>
     </message>
 </context>
 <context>
@@ -418,32 +409,32 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     <message>
         <location filename="PageOutputForm.ui.qml" line="25"/>
         <source>Gnuplot Output</source>
-        <translation>Gnuplot Ausgabe</translation>
+        <translation>Gnuplot Output</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="29"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Output</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="51"/>
         <source>Outputs from gnuplot commands are shown here</source>
-        <translation>Ausgabe der gnuplot Kommandos werden hier angezeigt</translation>
+        <translation>Uitvoer van gnuplot opdrachten wordt hier weergegeven</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="74"/>
         <source>Input</source>
-        <translation>Eingabe</translation>
+        <translation>Input</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="81"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Hulp</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="88"/>
         <source>Graphics</source>
-        <translation>Grafik</translation>
+        <translation>Grafiek</translation>
     </message>
 </context>
 <context>
@@ -492,56 +483,52 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="18"/>
         <source>Gnuplot Settings</source>
-        <translation>Gnuplot Einstellungen</translation>
+        <translation>Gnuplot Instellingen</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="45"/>
         <source>Cancel</source>
-        <translation>Abbrechen</translation>
-    </message>
-    <message>
-        <source>Ok</source>
-        <translation type="vanished">Ok</translation>
+        <translation>Annuleren</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="55"/>
         <source>Accept</source>
-        <translation>Übernehmen</translation>
+        <translation>Overnemen</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="65"/>
         <source>Use gnuplot beta version</source>
-        <translation>Verwende gnuplot beta Version</translation>
+        <translation>Gebruik de bètaversie van gnuplot</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="77"/>
+        <location filename="SettingsDialogForm.ui.qml" line="82"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="88"/>
         <source>Resolution for graphic area</source>
-        <translation>Auflösung für den Grafik Bereich</translation>
+        <translation>Resolutie voor grafiek</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="110"/>
         <source>Font size for graphic area</source>
-        <translation>Zeichensatz Größe für den Grafik Bereich</translation>
+        <translation>Lettergrootte voor grafiek</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="133"/>
         <source>SupportLevel</source>
-        <translation>Unterstützungsstufe</translation>
+        <translation>Ondersteuningsniveau</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="143"/>
         <source>Text font</source>
-        <translation>Zeichensatz</translation>
+        <translation>Tekst lettertype</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="153"/>
         <source>This is an example text for the current font</source>
-        <translation>Dies ist ein Beispieltext für den aktuellen Zeichensatz</translation>
+        <translation>Dit is een voorbeeldtekst voor het huidige lettertype</translation>
     </message>
 </context>
 <context>
@@ -558,33 +545,31 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     </message>
 </context>
 <context>
-    <name>SupportDialog</name>
-    <message>
-        <source>Status=</source>
-        <translation type="vanished">Status=</translation>
-    </message>
-</context>
-<context>
     <name>SupportDialogForm.ui</name>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="27"/>
         <source>Support</source>
-        <translation>Unterstützung</translation>
+        <translation>Ondersteuning</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="37"/>
         <source>Support Level Bronze</source>
-        <translation>Unterstützung Bronze Stufe</translation>
+        <translation>Ondersteuningsniveau bronzen</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="45"/>
         <source>Support Level Silver</source>
-        <translation>Unterstützung Silber Stufe</translation>
+        <translation>Ondersteuningsniveau zilver</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="53"/>
         <source>Support Level Gold</source>
-        <translation>Unterstützung Gold Stufe</translation>
+        <translation>Ondersteuningsniveau goud</translation>
+    </message>
+    <message>
+        <location filename="SupportDialogForm.ui.qml" line="63"/>
+        <source>Close</source>
+        <translation>Afsluiten</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="104"/>
@@ -599,55 +584,12 @@ Purchasing any support level will give you some more features:
 - sharing as PDF/PNG is enabled
 - nice support icon is visible in title bar of the application
 </source>
-        <translation>Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:
-        
-* Rückmeldung und Bewertungen im Google Play Store geben
-* Erwerben einer Unterstützungsstufe über einen In-App Kauf (Button unten)
-
-Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen:
-
-- Verwendung der aktuellen Beta Version von gnuplot wird ermöglicht
-- Teilen als PDF/PNG wird ermöglicht
-- schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet
-</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="127"/>
         <source>You already supported the predecessor of this application !</source>
-        <translation>Du hast den Vorgänger dieser Anwendung schon unterstützt !</translation>
-    </message>
-    <message>
-        <source>Support Level Entry</source>
-        <translation type="vanished">Unterstützungsstufe Eingangsstufe</translation>
-    </message>
-    <message>
-        <source>Support Level Standard</source>
-        <translation type="vanished">Unterstützungsstufe Standard</translation>
-    </message>
-    <message>
-        <source>Support Level Premium</source>
-        <translation type="vanished">Unterstützungsstufe Premium</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation type="vanished">Status</translation>
-    </message>
-    <message>
-        <source>Support Level 0</source>
-        <translation type="vanished">Unterstützungsstufe 0</translation>
-    </message>
-    <message>
-        <source>Support Level 1</source>
-        <translation type="vanished">Unterstützungsstufe 1</translation>
-    </message>
-    <message>
-        <source>Support Level 2</source>
-        <translation type="vanished">Unterstützungsstufe 2</translation>
-    </message>
-    <message>
-        <location filename="SupportDialogForm.ui.qml" line="63"/>
-        <source>Close</source>
-        <translation>Schließen</translation>
+        <translation>Je hebt de voorganger van deze applicatie al ondersteund!</translation>
     </message>
 </context>
 <context>
@@ -660,57 +602,57 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
     <message>
         <location filename="main.qml" line="85"/>
         <source>Thank you for supporting the development of this application !</source>
-        <translation>Vielen Dank für die Unterstüzung der Entwicklung dieser Anwendung !</translation>
+        <translation>Bedankt voor het ondersteunen van de ontwikkeling van deze applicatie!</translation>
     </message>
     <message>
         <location filename="main.qml" line="85"/>
         <source>Thank you !</source>
-        <translation>Vielen Dank !</translation>
+        <translation>Dank U !</translation>
     </message>
     <message>
         <location filename="main.qml" line="291"/>
         <source>Send</source>
-        <translation>Senden</translation>
+        <translation>Verzenden</translation>
     </message>
     <message>
         <location filename="main.qml" line="303"/>
         <source>Send as text</source>
-        <translation>Senden als Text</translation>
+        <translation>Verzenden als tekst</translation>
     </message>
     <message>
         <location filename="main.qml" line="314"/>
         <source>Send as PDF/PNG</source>
-        <translation>Senden als PDF/PNG</translation>
+        <translation>Verzenden als PDF/PNG</translation>
     </message>
     <message>
         <location filename="main.qml" line="335"/>
         <source>View as PDF/PNG</source>
-        <translation>Zeigen als PDF/PNG</translation>
+        <translation>Zien als PDF/PNG</translation>
     </message>
     <message>
         <location filename="main.qml" line="360"/>
         <source>Clear</source>
-        <translation>Löschen</translation>
+        <translation>Verwijderen</translation>
     </message>
     <message>
         <location filename="main.qml" line="376"/>
         <source>unknown.gpt</source>
-        <translation>unbekannt.gpt</translation>
+        <translation>onbekend.gpt</translation>
     </message>
     <message>
         <location filename="main.qml" line="382"/>
         <source>Save as</source>
-        <translation>Speichern unter</translation>
+        <translation>Opslaan als</translation>
     </message>
     <message>
         <location filename="main.qml" line="407"/>
         <source>Delete files</source>
-        <translation>Dateien löschen</translation>
+        <translation>Verwijder bestanden</translation>
     </message>
     <message>
         <location filename="main.qml" line="421"/>
         <source>Documentation</source>
-        <translation>Dokumentation</translation>
+        <translation>Documentatie</translation>
     </message>
     <message>
         <location filename="main.qml" line="425"/>
@@ -720,94 +662,74 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
     <message>
         <location filename="main.qml" line="431"/>
         <source>License</source>
-        <translation>Lizenz</translation>
+        <translation>Licentie</translation>
     </message>
     <message>
         <location filename="main.qml" line="437"/>
         <source>Gnuplot license</source>
-        <translation>Gnuplot Lizenz</translation>
+        <translation>Gnuplot Licentie</translation>
     </message>
     <message>
         <location filename="main.qml" line="443"/>
         <source>Gnuplot help</source>
-        <translation>Gnuplot Hilfe</translation>
+        <translation>Gnuplot Hulp</translation>
     </message>
     <message>
         <location filename="main.qml" line="453"/>
         <source>Gnuplot version</source>
-        <translation>Gnuplot Version</translation>
+        <translation>Gnuplot Versie</translation>
     </message>
     <message>
         <location filename="main.qml" line="464"/>
         <source>Settings</source>
-        <translation>Einstellungen</translation>
+        <translation>Instellingen</translation>
     </message>
     <message>
         <location filename="main.qml" line="478"/>
         <source>Support</source>
-        <translation>Unterstützung</translation>
+        <translation>Ondersteuning</translation>
     </message>
     <message>
         <location filename="main.qml" line="489"/>
         <source>About</source>
-        <translation>Über</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation type="vanished">Test</translation>
-    </message>
-    <message>
-        <source>Purchase restored.</source>
-        <translation type="vanished">Einkauf wiederhergestellt.</translation>
-    </message>
-    <message>
-        <source>Readonly</source>
-        <translation type="vanished">Schreibgeschützt</translation>
+        <translation>Over</translation>
     </message>
     <message>
         <location filename="main.qml" line="616"/>
         <source>Graphics</source>
-        <translation>Grafik</translation>
+        <translation>Grafiek</translation>
     </message>
     <message>
         <location filename="main.qml" line="625"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Output</translation>
     </message>
     <message>
         <location filename="main.qml" line="634"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Hulp</translation>
     </message>
     <message>
         <location filename="main.qml" line="756"/>
         <source>Choose a file</source>
-        <translation></translation>
+        <translation>Kies een bestand</translation>
     </message>
     <message>
         <location filename="main.qml" line="784"/>
         <source>Error</source>
-        <translation>Fehler</translation>
+        <translation>Fout</translation>
     </message>
     <message>
         <location filename="main.qml" line="794"/>
         <source>Request for support</source>
-        <translation>Anfrage für Unterstützung</translation>
+        <translation>Verzoek om ondersteuning</translation>
     </message>
     <message>
         <location filename="main.qml" line="795"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
-        <translation>Es sieht aus als ob dir die App gefällt.
-Vielleicht möchtest du die Entwicklung dieser App unterstützten indem du eine Unterstützungs Stufe erwirbst?</translation>
-    </message>
-    <message>
-        <source>Purchase successfull.</source>
-        <translation type="vanished">Einkauf erfolgreich.</translation>
-    </message>
-    <message>
-        <source>Purchase not completed.</source>
-        <translation type="vanished">Kauf wurde nicht abgeschlossen.</translation>
+        <translation>Het leek erop dat je deze app leuk vond.
+Misschien wil je de ontwikkeling van deze app ondersteunen met het kopen van een ondersteuningsniveau?</translation>
     </message>
 </context>
 </TS>

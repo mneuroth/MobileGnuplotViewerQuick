@@ -28,6 +28,7 @@
 #include <QFile>
 
 #include <QTranslator>
+//#include <QQuickStyle>
 
 #undef _WITH_QDEBUG_REDIRECT
 #undef _WITH_ADD_TO_LOG
@@ -87,6 +88,8 @@ int main(int argc, char *argv[])
 // TODO DEBUGGING: AddToLog(QString("###> RESTART main()"));
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+    //QQuickStyle::setStyle("Default");  // Material Universal Fusion Imagine /Light Dark System --> C:\Qt\5.14.2\msvc2017_64\qml\QtQuick\Controls.2
+
     QGuiApplication app(argc, argv);
     app.setOrganizationName("mneuroth.de");     // Computer/HKEY_CURRENT_USER/Software/mneuroth.de
     app.setOrganizationDomain("mneuroth.de");
@@ -114,6 +117,8 @@ int main(int argc, char *argv[])
 
     QTranslator qtTranslator;
     QString sLanguage = QLocale::system().name().mid(0,2).toLower();
+    // for testing languages:
+    //sLanguage = "nl";
     QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
     /*bool ok =*/ qtTranslator.load(sResource);
     app.installTranslator(&qtTranslator);

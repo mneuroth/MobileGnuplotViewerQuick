@@ -26,7 +26,13 @@ SOURCES += \
 RESOURCES += qml.qrc
 
 TRANSLATIONS += \
-    GnuplotViewerQuick_de_DE.ts
+    GnuplotViewerQuick_de_DE.ts \
+    GnuplotViewerQuick_nl_NL.ts
+    //es_ES
+    //pt_PT
+    //fr_FR
+    //it_IT
+    //ru_RU
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

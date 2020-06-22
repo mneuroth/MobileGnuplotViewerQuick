@@ -32,5 +32,6 @@
     </qresource>
     <qresource prefix="/translations">
         <file>GnuplotViewerQuick_de_DE.qm</file>
+        <file>GnuplotViewerQuick_nl_NL.qm</file>
     </qresource>
 </RCC>
