@@ -357,6 +357,23 @@ ApplicationWindow {
                     height: isShareSupported ? menuSeparator.height : 0
                 }
                 MenuItem {
+                    text: qsTr("Readonly")
+                    icon.source: "edit.svg"
+                    checkable: true
+                    checked: readonlySwitch.visible ? readonlySwitch.position === 1 : (readonlyOutputSwitch.visible ? readonlyOutputSwitch.position === 1 : false)
+                    enabled: !isDialogOpen() && (stackView.currentItem === homePage || stackView.currentItem === outputPage)
+                    onTriggered: {
+                        if( stackView.currentItem === homePage )
+                        {
+                            readonlySwitch.position = readonlySwitch.position === 0 ? 1 : 0
+                        }
+                        if( stackView.currentItem === outputPage )
+                        {
+                            readonlyOutputSwitch.position = readonlyOutputSwitch.position === 0 ? 1 : 0
+                        }
+                    }
+                }
+                MenuItem {
                     text: qsTr("Clear")
                     enabled: !isDialogOpen()
                     onTriggered: {

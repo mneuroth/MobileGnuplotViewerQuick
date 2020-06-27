@@ -20,14 +20,14 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="71"/>
-        <source>from: 21.6.2020</source>
-        <oldsource>from: 19.6.2020</oldsource>
-        <translation>vom: 21.6.2020</translation>
+        <source>from: 27.6.2020</source>
+        <oldsource>from: 21.6.2020</oldsource>
+        <translation>vom: 27.6.2020</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
-        <source>Version: 2.0.4</source>
-        <oldsource>Version: 2.0.3</oldsource>
+        <source>Version: 2.0.5</source>
+        <oldsource>Version: 2.0.4</oldsource>
         <translation></translation>
     </message>
     <message>
@@ -688,67 +688,67 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation>Zeigen als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="360"/>
+        <location filename="main.qml" line="377"/>
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="376"/>
+        <location filename="main.qml" line="393"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="382"/>
+        <location filename="main.qml" line="399"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="407"/>
+        <location filename="main.qml" line="424"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="421"/>
+        <location filename="main.qml" line="438"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="425"/>
+        <location filename="main.qml" line="442"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="431"/>
+        <location filename="main.qml" line="448"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="437"/>
+        <location filename="main.qml" line="454"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="443"/>
+        <location filename="main.qml" line="460"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="453"/>
+        <location filename="main.qml" line="470"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="464"/>
+        <location filename="main.qml" line="481"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="478"/>
+        <location filename="main.qml" line="495"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="489"/>
+        <location filename="main.qml" line="506"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -761,41 +761,42 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Einkauf wiederhergestellt.</translation>
     </message>
     <message>
+        <location filename="main.qml" line="360"/>
         <source>Readonly</source>
-        <translation type="vanished">Schreibgeschützt</translation>
+        <translation>Schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="616"/>
+        <location filename="main.qml" line="633"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="625"/>
+        <location filename="main.qml" line="642"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="634"/>
+        <location filename="main.qml" line="651"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="756"/>
+        <location filename="main.qml" line="773"/>
         <source>Choose a file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="784"/>
+        <location filename="main.qml" line="801"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="main.qml" line="794"/>
+        <location filename="main.qml" line="811"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="795"/>
+        <location filename="main.qml" line="812"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.

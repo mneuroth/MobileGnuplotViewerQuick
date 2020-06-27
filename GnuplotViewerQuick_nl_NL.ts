@@ -20,12 +20,14 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="71"/>
-        <source>from: 21.6.2020</source>
-        <translation>van: 21.6.2020</translation>
+        <source>from: 27.6.2020</source>
+        <oldsource>from: 21.6.2020</oldsource>
+        <translation>van: 27.6.2020</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
-        <source>Version: 2.0.4</source>
+        <source>Version: 2.0.5</source>
+        <oldsource>Version: 2.0.4</oldsource>
         <translation></translation>
     </message>
     <message>
@@ -584,7 +586,7 @@ Purchasing any support level will give you some more features:
 - sharing as PDF/PNG is enabled
 - nice support icon is visible in title bar of the application
 </source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="127"/>
@@ -631,101 +633,106 @@ Purchasing any support level will give you some more features:
     </message>
     <message>
         <location filename="main.qml" line="360"/>
+        <source>Readonly</source>
+        <translation>Alleen lezen</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="377"/>
         <source>Clear</source>
         <translation>Verwijderen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="376"/>
+        <location filename="main.qml" line="393"/>
         <source>unknown.gpt</source>
         <translation>onbekend.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="382"/>
+        <location filename="main.qml" line="399"/>
         <source>Save as</source>
         <translation>Opslaan als</translation>
     </message>
     <message>
-        <location filename="main.qml" line="407"/>
+        <location filename="main.qml" line="424"/>
         <source>Delete files</source>
         <translation>Verwijder bestanden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="421"/>
+        <location filename="main.qml" line="438"/>
         <source>Documentation</source>
         <translation>Documentatie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="425"/>
+        <location filename="main.qml" line="442"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="431"/>
+        <location filename="main.qml" line="448"/>
         <source>License</source>
         <translation>Licentie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="437"/>
+        <location filename="main.qml" line="454"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Licentie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="443"/>
+        <location filename="main.qml" line="460"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="453"/>
+        <location filename="main.qml" line="470"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Versie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="464"/>
+        <location filename="main.qml" line="481"/>
         <source>Settings</source>
         <translation>Instellingen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="478"/>
+        <location filename="main.qml" line="495"/>
         <source>Support</source>
         <translation>Ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="489"/>
+        <location filename="main.qml" line="506"/>
         <source>About</source>
         <translation>Over</translation>
     </message>
     <message>
-        <location filename="main.qml" line="616"/>
+        <location filename="main.qml" line="633"/>
         <source>Graphics</source>
         <translation>Grafiek</translation>
     </message>
     <message>
-        <location filename="main.qml" line="625"/>
+        <location filename="main.qml" line="642"/>
         <source>Output</source>
         <translation>Output</translation>
     </message>
     <message>
-        <location filename="main.qml" line="634"/>
+        <location filename="main.qml" line="651"/>
         <source>Help</source>
         <translation>Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="756"/>
+        <location filename="main.qml" line="773"/>
         <source>Choose a file</source>
         <translation>Kies een bestand</translation>
     </message>
     <message>
-        <location filename="main.qml" line="784"/>
+        <location filename="main.qml" line="801"/>
         <source>Error</source>
         <translation>Fout</translation>
     </message>
     <message>
-        <location filename="main.qml" line="794"/>
+        <location filename="main.qml" line="811"/>
         <source>Request for support</source>
         <translation>Verzoek om ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="795"/>
+        <location filename="main.qml" line="812"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Het leek erop dat je deze app leuk vond.
