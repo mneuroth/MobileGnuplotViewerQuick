@@ -673,7 +673,7 @@ ApplicationWindow {
 
     Settings {
         id: settings
-        property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : "default.gpt"
+        property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : ":/default.gpt"
         property bool useGnuplotBeta: false
         property int graphicsResolution: 1024
         property int graphicsFontSize: 28
