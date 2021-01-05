@@ -3,6 +3,8 @@
 ### Description
 The Mobile Gnuplot Viewer (Quick) is a frontend for the gnuplot program (which is a scientific plot program). This implementation is optimized for touch devices like mobile phones and tablets. 
 
+All target platforms of the Qt framework are supported (Windows, Mac, Linux, Android, IOS and Webassembly). The application runs even in a [browser via Webassembly](https://mneuroth.github.io/MobileGnuplotViewerQuickWASM/).
+
 <img src="screenshots/Screenshot_default_text.png" alt="MobileGnuplotViewerQuick screenshot" width="270" height="562" > <img src="screenshots/Screenshot_default_graphics.png" alt="MobileGnuplotViewerQuick graphics screenshot" width="270" height="562" > <img src="screenshots/Screenshot_menu.png" alt="MobileGnuplotViewerQuick menu screenshot" width="270" height="562" >
 
 ### License  

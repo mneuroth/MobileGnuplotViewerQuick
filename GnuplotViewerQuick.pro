@@ -1,4 +1,11 @@
-QT += quick quickcontrols2 svg printsupport purchasing
+QT += qml quick quickcontrols2 svg printsupport
+
+android {
+    QT += purchasing
+}
+
+#QT += core5compat
+#QT += quickdialogs
 
 CONFIG += c++11
 
@@ -208,3 +215,5 @@ ios {
     # Note for devices: 1=iPhone, 2=iPad, 1,2=Universal.
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2
 }
+
+ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
