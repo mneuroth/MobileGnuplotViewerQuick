@@ -181,8 +181,8 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     delete [] argv[1];
 
     // remove temporary files
-    QFile::remove(TEMP_GNUPLOT_SCRIPT);
-    QFile::remove(TEMP_GNUPLOT_OUTPUT);
+    //QFile::remove(TEMP_GNUPLOT_SCRIPT);
+    //QFile::remove(TEMP_GNUPLOT_OUTPUT);
 #else
     bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
