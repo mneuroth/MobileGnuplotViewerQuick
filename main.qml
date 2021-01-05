@@ -129,12 +129,17 @@ ApplicationWindow {
         // ignore call, if we already have a file:// url
         if( path.startsWith(urlPrefix) )
         {
-            return path;
+            return path
+        }
+        // ignore call, if we try to access resouces from qrc --> path starting with :
+        if( path.startsWith(":") )
+        {
+            return path
         }
         // ignore call, if we already have a content:// url (android storage framework)
         if( path.startsWith("content://") )
         {
-            return path;
+            return path
         }
 
         var sAdd = path.startsWith("/") ? "" : "/"
