@@ -97,7 +97,7 @@ jobs:
         ls -lrt
         make
         ls -lrt
-        zip gnuplotviewerquick_wasm_5_15_2.zip gnuplotviewerquick.js gnuplotviewerquick.wasm gnuplotviewerquick.html qtlogo.svg qtloader.js
+        zip gnuplotviewerquick_wasm_5_15_2.zip GnuplotViewerQuick.js GnuplotViewerQuick.wasm GnuplotViewerQuick.html qtlogo.svg qtloader.js
         ls -lrt
         unzip -v gnuplotviewerquick_wasm_5_15_2.zip
         pwd
