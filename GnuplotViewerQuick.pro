@@ -61,7 +61,7 @@ HEADERS += \
     shareutils.hpp \
     storageaccess.h
 
-wasm_32 {
+wasm {  // wasm_32 ?
     DEFINES += _USE_BUILTIN_GNUPLOT
 
     include(gnuplot/gnuplot.pri)
