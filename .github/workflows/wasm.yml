@@ -45,6 +45,7 @@ jobs:
   linux_wasm_5_15_2:
   
     runs-on: ubuntu-latest
+    needs: create_release
       
     steps:
     - uses: actions/checkout@v2
