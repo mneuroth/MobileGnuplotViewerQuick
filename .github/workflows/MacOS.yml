@@ -1,23 +1,19 @@
-name: Windows CI
+name: MacOS CI
 
 on:
   push:
     branches: [ master ]
-    tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   pull_request:
     branches: [ master ]
 
 jobs:
+            
+  macos_5_15_2_build:
 
-  windows_5_15_2_msc_build:
-
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: ilammy/msvc-dev-cmd@v1
-    #- uses: edgarrc/action-7z@v1.0.4
+    - uses: actions/checkout@v2
     - uses: jurplel/install-qt-action@v2
       with:
         # Directory to install Qt
@@ -25,11 +21,11 @@ jobs:
         # Version of Qt to install
         version: '5.15.2'
         # Host platform
-        host: # optional
+        host: 'mac'
         # Target platform for build
         target: 'desktop'
         # Architecture for Windows/Android
-        arch: 'win64_msvc2019_64'
+        arch: # optional
         # Whether or not to install Qt dependencies on Linux
         install-deps: 'true'
         # Additional Qt modules to install
@@ -44,21 +40,15 @@ jobs:
         py7zrversion: # optional, default is ==0.6
         # Any extra arguments to append to the back
         extra: # optional
-        tools: 'tools_ifw,4.0.1-202012091044,qt.tools.ifw.40'
-    - name: Install 7Zip PowerShell Module
-      shell: powershell
-      run: Install-Module 7Zip4PowerShell -Force -Verbose
     - name: Install Qt and compile
       run: |
-        cd 
-        dir
-        d:
-        dir 
-        dir d:\a
-        cl
-        where qmake
+        which qmake
         qmake -r GnuplotViewerQuick.pro
-        dir
-        nmake
-        dir
-        
+        ls -lrt
+        make
+        ls -lrt
+
+        which macdeployqt
+        macdeployqt GnuplotViewerQuick.app -dmg -qmldir=qml -verbose=2
+        ls -lrt        
+
