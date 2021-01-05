@@ -49,6 +49,6 @@ jobs:
         ls -lrt
 
         which macdeployqt
-        macdeployqt GnuplotViewerQuick.app -dmg -qmldir=qml -verbose=2
+        macdeployqt GnuplotViewerQuick.app -dmg -qmldir=. -verbose=2
         ls -lrt        
 

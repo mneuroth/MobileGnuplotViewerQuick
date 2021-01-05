@@ -9,3 +9,10 @@ All target platforms of the Qt framework are supported (Windows, Mac, Linux, And
 
 ### License  
 Mobile Gnuplot Viewer Quick is released under the GPL
+
+Build status: 
+
+[![Linux CI](https://github.com/mneuroth/MobileGnuplotViewerQuick/workflows/Linux%20CI/badge.svg)](https://github.com/mneuroth/MobileGnuplotViewerQuick/actions)
+[![Windows CI](https://github.com/mneuroth/MobileGnuplotViewerQuick/workflows/Windows%20CI/badge.svg)](https://github.com/mneuroth/MobileGnuplotViewerQuick/actions)
+[![MacOS CI](https://github.com/mneuroth/MobileGnuplotViewerQuick/workflows/MacOS%20CI/badge.svg)](https://github.com/mneuroth/MobileGnuplotViewerQuick/actions)
+[![Webassembly CI](https://github.com/mneuroth/MobileGnuplotViewerQuick/workflows/WASM%20CI/badge.svg)](https://github.com/mneuroth/MobileGnuplotViewerQuick/actions)
