@@ -34,9 +34,10 @@ Page {
         anchors.top: parent.top
         anchors.topMargin: 5
     }
-
+/*
     ScrollView {
         id: scrollView
+        clip: true
         anchors.top: lblOutput.bottom
         anchors.right: parent.right
         anchors.bottom: gridButtons.top
@@ -45,15 +46,24 @@ Page {
         anchors.leftMargin: 5
         anchors.topMargin: 5
         anchors.bottomMargin: 5
-
-        TextArea {
+*/
+        TextEdit {
             id: txtOutput
-            placeholderText: qsTr("Outputs from gnuplot commands are shown here")
-            anchors.fill: parent
+            //placeholderText: qsTr("Outputs from gnuplot commands are shown here")
+            //anchors.fill: scrollView
+            anchors.top: lblOutput.bottom
+            anchors.right: parent.right
+            anchors.bottom: gridButtons.top
+            anchors.left: parent.left
+            anchors.rightMargin: 5
+            anchors.leftMargin: 5
+            anchors.topMargin: 5
+            anchors.bottomMargin: 5
             font.family: fontName
-            readOnly: true
+            //readOnly: false
+            selectByMouse: readOnly
         }
-    }
+//    }
 
     GridLayout {
         id: gridButtons

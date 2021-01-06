@@ -20,15 +20,15 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="71"/>
-        <source>from: 27.6.2020</source>
-        <oldsource>from: 21.6.2020</oldsource>
-        <translation>vom: 27.6.2020</translation>
+        <source>from: 6.1.2021</source>
+        <oldsource>from: 27.6.2020</oldsource>
+        <translation type="unfinished">vom: 6.1.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
-        <source>Version: 2.0.5</source>
-        <oldsource>Version: 2.0.4</oldsource>
-        <translation></translation>
+        <source>Version: 2.0.6</source>
+        <oldsource>Version: 2.0.5</oldsource>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="95"/>
@@ -118,33 +118,33 @@ WorkingDir not valid</source>
 <context>
     <name>ApplicationData</name>
     <message>
-        <location filename="applicationdata.cpp" line="160"/>
-        <location filename="applicationdata.cpp" line="202"/>
+        <location filename="applicationdata.cpp" line="163"/>
+        <location filename="applicationdata.cpp" line="205"/>
         <source>Error reading </source>
         <translation>Fehler beim Lesen der Datei </translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="590"/>
+        <location filename="applicationdata.cpp" line="593"/>
         <source>Send file</source>
         <translation>Sende Datei</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="594"/>
+        <location filename="applicationdata.cpp" line="597"/>
         <source>View file</source>
         <translation>Zeige Date</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="716"/>
+        <location filename="applicationdata.cpp" line="719"/>
         <source>Can not load file %1</source>
         <translation>Datei % kann nicht gelesen werden</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="727"/>
+        <location filename="applicationdata.cpp" line="730"/>
         <source>File name is empty!</source>
         <translation>Datei Name ist leer!</translation>
     </message>
     <message>
-        <location filename="applicationdata.cpp" line="745"/>
+        <location filename="applicationdata.cpp" line="748"/>
         <source>Error writing file: </source>
         <translation>Fehler beim Schreiben der Datei: </translation>
     </message>
@@ -329,24 +329,23 @@ errorMsg=%6
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="55"/>
         <source>Enter gnuplot help command here (e. g. help plot)
 and activate &quot;Run help&quot; button</source>
-        <translation>Hier gnuplot Hilfe Kommandos eingeben (z. B. help plot)
+        <translation type="vanished">Hier gnuplot Hilfe Kommandos eingeben (z. B. help plot)
 und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="75"/>
+        <location filename="PageHelpForm.ui.qml" line="78"/>
         <source>Input</source>
         <translation>Eingabe</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="82"/>
+        <location filename="PageHelpForm.ui.qml" line="85"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="89"/>
+        <location filename="PageHelpForm.ui.qml" line="92"/>
         <source>Run help</source>
         <translation>Hilfe ausführen</translation>
     </message>
@@ -378,37 +377,36 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
         <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="62"/>
         <source>Enter gnuplot script here...</source>
-        <translation>gnuplot Skript hier eingeben...</translation>
+        <translation type="vanished">gnuplot Skript hier eingeben...</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="82"/>
+        <location filename="PageHomeForm.ui.qml" line="84"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="89"/>
+        <location filename="PageHomeForm.ui.qml" line="91"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="96"/>
+        <location filename="PageHomeForm.ui.qml" line="98"/>
         <source>Run</source>
         <translation>Ausführen</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="103"/>
+        <location filename="PageHomeForm.ui.qml" line="105"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="110"/>
+        <location filename="PageHomeForm.ui.qml" line="112"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="PageHomeForm.ui.qml" line="117"/>
+        <location filename="PageHomeForm.ui.qml" line="119"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
@@ -426,22 +424,21 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="51"/>
         <source>Outputs from gnuplot commands are shown here</source>
-        <translation>Ausgabe der gnuplot Kommandos werden hier angezeigt</translation>
+        <translation type="vanished">Ausgabe der gnuplot Kommandos werden hier angezeigt</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="74"/>
+        <location filename="PageOutputForm.ui.qml" line="84"/>
         <source>Input</source>
         <translation>Eingabe</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="81"/>
+        <location filename="PageOutputForm.ui.qml" line="91"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="88"/>
+        <location filename="PageOutputForm.ui.qml" line="98"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
@@ -668,87 +665,96 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation>Vielen Dank !</translation>
     </message>
     <message>
-        <location filename="main.qml" line="291"/>
+        <location filename="main.qml" line="296"/>
         <source>Send</source>
         <translation>Senden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="303"/>
+        <location filename="main.qml" line="308"/>
         <source>Send as text</source>
         <translation>Senden als Text</translation>
     </message>
     <message>
-        <location filename="main.qml" line="314"/>
+        <location filename="main.qml" line="319"/>
         <source>Send as PDF/PNG</source>
         <translation>Senden als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="335"/>
+        <location filename="main.qml" line="340"/>
         <source>View as PDF/PNG</source>
         <translation>Zeigen als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="377"/>
         <source>Clear</source>
-        <translation>Löschen</translation>
+        <translation type="vanished">Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="393"/>
+        <location filename="main.qml" line="398"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="399"/>
+        <location filename="main.qml" line="404"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="424"/>
+        <location filename="main.qml" line="429"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="438"/>
+        <location filename="main.qml" line="445"/>
+        <source>Undo</source>
+        <translation type="unfinished">Rückgängig</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="458"/>
+        <source>Redo</source>
+        <translation type="unfinished">Wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="472"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="442"/>
+        <location filename="main.qml" line="476"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="448"/>
+        <location filename="main.qml" line="482"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="454"/>
+        <location filename="main.qml" line="488"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="460"/>
+        <location filename="main.qml" line="494"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="470"/>
+        <location filename="main.qml" line="504"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="481"/>
+        <location filename="main.qml" line="515"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="495"/>
+        <location filename="main.qml" line="529"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="506"/>
+        <location filename="main.qml" line="540"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -761,42 +767,47 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Einkauf wiederhergestellt.</translation>
     </message>
     <message>
-        <location filename="main.qml" line="360"/>
+        <location filename="main.qml" line="365"/>
         <source>Readonly</source>
         <translation>Schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="633"/>
+        <location filename="main.qml" line="382"/>
+        <source>Clear/New</source>
+        <translation>Löschen/Neu</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="691"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="642"/>
+        <location filename="main.qml" line="700"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="651"/>
+        <location filename="main.qml" line="709"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="773"/>
+        <location filename="main.qml" line="831"/>
         <source>Choose a file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="801"/>
+        <location filename="main.qml" line="859"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="main.qml" line="811"/>
+        <location filename="main.qml" line="869"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="812"/>
+        <location filename="main.qml" line="870"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.

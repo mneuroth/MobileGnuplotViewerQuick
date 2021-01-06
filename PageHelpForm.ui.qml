@@ -13,9 +13,10 @@ import QtQuick.Layouts 1.3
 
 Page {
     id: page
-
     width: 600
     height: 400
+    anchors.fill: parent
+
     property alias btnOutput: btnOutput
     property alias btnInput: btnInput
     property alias btnRunHelp: btnRunHelp
@@ -23,7 +24,6 @@ Page {
 
     property string fontName: "Courier"
 
-    anchors.fill: parent
     title: qsTr("Gnuplot Help")
 
     Label {
@@ -39,6 +39,7 @@ Page {
 
     ScrollView {
         id: scrollView
+        clip: true
         anchors.top: lblHelp.bottom
         anchors.right: parent.right
         anchors.bottom: gridButtons.top
@@ -48,11 +49,13 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        TextArea {
+        TextEdit {
             id: txtHelp
-            anchors.fill: parent
+            anchors.fill: scrollView
             font.family: fontName
-            placeholderText: qsTr("Enter gnuplot help command here (e. g. help plot)\nand activate \"Run help\" button")
+            text: "dies ist ein dummy text !!!"
+            //placeholderText: qsTr("Enter gnuplot help command here (e. g. help plot)\nand activate \"Run help\" button")
+            selectByMouse: readOnly
         }
     }
 

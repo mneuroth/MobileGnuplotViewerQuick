@@ -45,6 +45,7 @@ Page {
 
     ScrollView {
         id: scrollView
+        clip: true
         anchors.top: lblFileName.bottom
         anchors.right: parent.right
         anchors.bottom: gridButtons.top
@@ -54,12 +55,13 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        TextArea {
+        TextEdit {
             id: textArea
             font.family: fontName
-            //anchors.fill: parent
+            anchors.fill: scrollView
             objectName: "textArea"
-            placeholderText: qsTr("Enter gnuplot script here...")
+            //placeholderText: qsTr("Enter gnuplot script here...")
+            selectByMouse: readOnly
         }
     }
 

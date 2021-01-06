@@ -379,7 +379,7 @@ ApplicationWindow {
                     }
                 }
                 MenuItem {
-                    text: qsTr("Clear")
+                    text: qsTr("Clear/New")
                     enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
@@ -438,6 +438,35 @@ ApplicationWindow {
                 }
                 MenuSeparator {
                     id: menuSeparator
+                }
+                MenuItem {
+                    id: menuUndo
+                    icon.source: "back-arrow.svg"
+                    text: qsTr("Undo")
+                    enabled: !isDialogOpen() && (stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo)
+                    onTriggered: {
+                        var textControl = getCurrentTextRef(stackView.currentItem)
+                        if( textControl !== null )
+                        {
+                            textControl.undo()
+                        }
+                    }
+                }
+                MenuItem {
+                    id: menuRedo
+                    icon.source: "redo-arrow.svg"
+                    text: qsTr("Redo")
+                    enabled: !isDialogOpen() && (stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo)
+                    onTriggered: {
+                        var textControl = getCurrentTextRef(stackView.currentItem)
+                        if( textControl !== null )
+                        {
+                            textControl.redo()
+                        }
+                    }
+                }
+                MenuSeparator {
+                    id: menuSeparator2
                 }
                 Menu {
                     title: qsTr("Documentation")
@@ -553,6 +582,30 @@ ApplicationWindow {
                 } else {
                     drawer.open()
                 }
+            }
+        }
+
+        ToolButton {
+            id: undoIcon
+            icon.source: "back-arrow.svg"
+            visible: stackView.currentItem === homePage || stackView.currentItem === outputPage
+            enabled: (stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo)
+            anchors.right: redoIcon.left
+            anchors.rightMargin: 1
+            onClicked: {
+                menuUndo.clicked()
+            }
+        }
+
+        ToolButton {
+            id: redoIcon
+            icon.source: "redo-arrow.svg"
+            visible: stackView.currentItem === homePage || stackView.currentItem === outputPage
+            enabled: (stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo)
+            anchors.right: readonlyIcon.left
+            anchors.rightMargin: 1
+            onClicked: {
+                menuRedo.clicked()
             }
         }
 

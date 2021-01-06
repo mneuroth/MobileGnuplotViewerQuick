@@ -263,7 +263,7 @@ MobileFileDialogForm {
     }
 
     btnStorage {
-        visible: isShareSupported
+        visible: applicationData.isShareSupported
         onClicked: {
             if( mobileFileDialog.isSaveAsModus )
             {
