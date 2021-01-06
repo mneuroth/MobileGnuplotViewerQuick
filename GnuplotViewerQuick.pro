@@ -4,7 +4,8 @@ android {
     QT += purchasing
 }
 
-#QT += core5compat
+greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
+
 #QT += quickdialogs
 
 CONFIG += c++11

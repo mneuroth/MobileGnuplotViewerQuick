@@ -788,6 +788,7 @@ ApplicationWindow {
         }
     }
 */
+/*
     // only for testing...
     FileDialog {
         id: fileDialog
@@ -817,7 +818,7 @@ ApplicationWindow {
         }
         onRejected: { console.log("Rejected") }
     }
-
+*/
     MessageDialog {
         id: infoDialog
         visible: false
