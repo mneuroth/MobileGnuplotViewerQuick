@@ -49,13 +49,12 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        TextEdit {
+        TextArea {
             id: txtHelp
             anchors.fill: scrollView
             font.family: fontName
-            text: "dies ist ein dummy text !!!"
-            //placeholderText: qsTr("Enter gnuplot help command here (e. g. help plot)\nand activate \"Run help\" button")
-            selectByMouse: readOnly
+            placeholderText: qsTr("Enter gnuplot help command here (e. g. help plot)\nand activate \"Run help\" button")
+            //selectByMouse: readOnly
         }
     }
 

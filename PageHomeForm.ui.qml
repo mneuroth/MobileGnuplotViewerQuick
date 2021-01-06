@@ -55,13 +55,13 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        TextEdit {
+        TextArea {
             id: textArea
             font.family: fontName
             anchors.fill: scrollView
             objectName: "textArea"
-            //placeholderText: qsTr("Enter gnuplot script here...")
-            selectByMouse: readOnly
+            placeholderText: qsTr("Enter gnuplot script here...")
+            //selectByMouse: !readOnly
         }
     }
 

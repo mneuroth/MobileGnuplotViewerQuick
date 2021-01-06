@@ -154,8 +154,8 @@ jobs:
         em++ --version
         which em++
         echo $PATH
-        emsdk install sdk-fastcomp-1.38.27-64bit
-        emsdk activate sdk-fastcomp-1.38.27-64bit
+        emsdk install sdk-fastcomp-1.38.30-64bit
+        emsdk activate sdk-fastcomp-1.38.30-64bit
         echo $PATH
         echo $EMSDK
         . $EMSDK/emsdk_env.sh

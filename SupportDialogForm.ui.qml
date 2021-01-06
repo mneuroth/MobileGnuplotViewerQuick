@@ -31,29 +31,81 @@ Page {
         color: "#ffffff"
         anchors.fill: parent
 
-        Button {
-            id: btnSupportLevel0
-            x: 30
-            text: qsTr("Support Level Bronze")
-            anchors.horizontalCenter: parent.horizontalCenter
+        Row {
+            id: row0
+
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
             anchors.top: lblSupportInfo.bottom
             anchors.topMargin: 5
+            spacing: 10
+
+            Button {
+                id: btnSupportLevel0
+                x: 30
+                text: qsTr("Support Level Bronze")
+                width: parent.width / 2
+            }
+
+            Label {
+                id: lblLevel0
+                y: 18
+                text: "?"
+                anchors.verticalCenter: btnSupportLevel0.verticalCenter
+            }
+
         }
 
-        Button {
-            id: btnSupportLevel1
-            text: qsTr("Support Level Silver")
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: btnSupportLevel0.bottom
+        Row {
+            id: row1
+
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.top: row0.bottom
             anchors.topMargin: 5
+            spacing: 10
+
+            Button {
+                id: btnSupportLevel1
+                text: qsTr("Support Level Silver")
+                width: parent.width / 2
+            }
+
+            Label {
+                id: lblLevel1
+                y: 18
+                text: "?"
+                anchors.verticalCenter: btnSupportLevel1.verticalCenter
+            }
         }
 
-        Button {
-            id: btnSupportLevel2
-            text: qsTr("Support Level Gold")
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: btnSupportLevel1.bottom
+        Row {
+            id: row2
+
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.top: row1.bottom
             anchors.topMargin: 5
+            spacing: 10
+
+            Button {
+                id: btnSupportLevel2
+                text: qsTr("Support Level Gold")
+                width: parent.width / 2
+            }
+
+            Label {
+                id: lblLevel2
+                y: 18
+                text: "?"
+                anchors.verticalCenter: btnSupportLevel2.verticalCenter
+            }
         }
 
         Button {
@@ -66,45 +118,12 @@ Page {
             anchors.bottomMargin: 5
         }
 
-        Label {
-            id: lblLevel0
-            y: 18
-            text: ""
-            anchors.verticalCenter: btnSupportLevel0.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: btnSupportLevel0.right
-            anchors.leftMargin: 21
-        }
-
-        Label {
-            id: lblLevel1
-            y: 18
-            text: ""
-            anchors.verticalCenter: btnSupportLevel1.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: btnSupportLevel1.right
-            anchors.leftMargin: 21
-        }
-
-        Label {
-            id: lblLevel2
-            y: 18
-            text: ""
-            anchors.verticalCenter: btnSupportLevel2.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: btnSupportLevel2.right
-            anchors.leftMargin: 21
-        }
-
         Text {
             id: lblSupportInfo
             text: qsTr("The development of this app can be supported in various ways:\n\n* giving feedback and rating via the store enty in Google Play\n* purchasing a support level item via in app purchase (button below)\n\nPurchasing any support level will give you some more features:\n\n- usage of the current gnuplot beta version is enabled\n- sharing as PDF/PNG is enabled\n- nice support icon is visible in title bar of the application\n")
             wrapMode: Text.WordWrap
             enabled: false
-            horizontalAlignment: Text.AlignHCenter
+            //horizontalAlignment: Text.AlignHCenter
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left
@@ -115,10 +134,13 @@ Page {
 
         Text {
             id: lblGooglePlay
-            y: 18
+            //y: 18
             text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick in Google Play</a>"
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: btnSupportLevel2.bottom
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.top: row2.bottom
             anchors.topMargin: 15
         }
 
