@@ -120,7 +120,7 @@ Page {
 
         Text {
             id: lblSupportInfo
-            text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>usage of the current gnuplot beta version is enabled</li><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ol></body>")
+            text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>usage of the current gnuplot beta version is enabled</li><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
             wrapMode: Text.WordWrap
             enabled: false
             //horizontalAlignment: Text.AlignHCenter

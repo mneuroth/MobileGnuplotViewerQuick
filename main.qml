@@ -362,13 +362,13 @@ ApplicationWindow {
                     height: isShareSupported ? menuSeparator.height : 0
                 }
                 MenuItem {
-                    text: qsTr("Readonly")
+                    text: qsTr("Writable")
                     icon.source: "edit.svg"
                     checkable: true
-                    checked: readonlySwitch.position === 1
+                    checked: writableIcon.checked
                     enabled: !isDialogOpen() && (stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage)
                     onTriggered: {
-                        readonlySwitch.position = readonlySwitch.position === 0 ? 1 : 0
+                        writableIcon.toggle()
                     }
                 }
                 MenuItem {
@@ -595,7 +595,7 @@ ApplicationWindow {
             icon.source: "redo-arrow.svg"
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
             enabled: (stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo)
-            anchors.right: readonlyIcon.left
+            anchors.right: writableIcon.left
             anchors.rightMargin: 1
             onClicked: {
                 menuRedo.clicked()
@@ -603,26 +603,19 @@ ApplicationWindow {
         }
 
         ToolButton {
-            id: readonlyIcon
+            id: writableIcon
             icon.source: "edit.svg"
+            checkable: true
+            checked: (stackView.currentItem === homePage && !homePage.textArea.readOnly) || (stackView.currentItem === outputPage && !outputPage.txtOutput.readOnly) || (stackView.currentItem === helpPage && !helpPage.txtHelp.readOnly)
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
-            anchors.right: readonlySwitch.left
-            anchors.rightMargin: 1
-        }
-
-        Switch {
-            id: readonlySwitch
-            visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
-            checked: (stackView.currentItem === homePage && homePage.textArea.readOnly) || (stackView.currentItem === outputPage && outputPage.txtOutput.readOnly) || (stackView.currentItem === helpPage && helpPage.txtHelp.readOnly)
-            //text: qsTr("Readonly")
-            anchors.right: menuButton.left
+            anchors.right: menuButton.left //readonlySwitch.left
             anchors.rightMargin: 5
 
-            onPositionChanged: {
+            onToggled: {
                 var textControl = getCurrentTextRef(stackView.currentItem)
                 if( textControl !== null )
                 {
-                    textControl.readOnly = position === 1 ? true : false
+                    textControl.readOnly = !writableIcon.checked
                 }
             }
         }
@@ -643,7 +636,7 @@ ApplicationWindow {
             text: stackView.currentItem.title
             //anchors.centerIn: parent
             anchors.left: supportIcon.visible ? supportIcon.right : toolButton.right
-            anchors.right: undoIcon.visible ? undoIcon.left : (readonlyIcon.visible ? readonlyIcon.left : menuButton.left) //menuButton.left
+            anchors.right: undoIcon.visible ? undoIcon.left : (writableIcon.visible ? writableIcon.left : menuButton.left) //menuButton.left
             anchors.leftMargin: 5
             anchors.rightMargin: 5
             anchors.verticalCenter: parent.verticalCenter

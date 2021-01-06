@@ -62,7 +62,7 @@ Page {
             anchors.bottomMargin: 5
             */
             font.family: fontName
-            //readOnly: false
+            readOnly: true
             //selectByMouse: !readOnly
         }
     }

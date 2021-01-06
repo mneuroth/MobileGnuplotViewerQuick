@@ -22,7 +22,7 @@
         <location filename="AboutDialogForm.ui.qml" line="71"/>
         <source>from: 6.1.2021</source>
         <oldsource>from: 27.6.2020</oldsource>
-        <translation type="unfinished">vom: 6.1.2021</translation>
+        <translation>vom: 6.1.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
@@ -136,7 +136,7 @@ WorkingDir not valid</source>
     <message>
         <location filename="applicationdata.cpp" line="719"/>
         <source>Can not load file %1</source>
-        <translation>Datei % kann nicht gelesen werden</translation>
+        <translation>Datei %1 kann nicht gelesen werden</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="730"/>
@@ -588,28 +588,16 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="123"/>
-        <source>The development of this app can be supported in various ways:
-
-* giving feedback and rating via the store enty in Google Play
-* purchasing a support level item via in app purchase (button below)
-
-Purchasing any support level will give you some more features:
-
-- usage of the current gnuplot beta version is enabled
-- sharing as PDF/PNG is enabled
-- nice support icon is visible in title bar of the application
-</source>
-        <translation>Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:
-        
-* Rückmeldung und Bewertungen im Google Play Store geben
-* Erwerben einer Unterstützungsstufe über einen In-App Kauf (Button unten)
-
-Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen:
-
-- Verwendung der aktuellen Beta Version von gnuplot wird ermöglicht
-- Teilen als PDF/PNG wird ermöglicht
-- schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet
-</translation>
+        <source>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the current gnuplot beta version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;</source>
+        <oldsource>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the current gnuplot beta version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;</oldsource>
+        <translation>&lt;body&gt;Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:
+&lt;br&gt;&lt;ul&gt;&lt;li&gt;Rückmeldung und Bewertungen im Google Play Store geben&lt;/li&gt;
+&lt;li&gt;Erwerben einer Unterstützungsstufe über einen In-App Kauf (Button unten)&lt;/li&gt;
+&lt;/ul&gt;&lt;br&gt;Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen:&lt;br&gt;&lt;ul&gt;
+&lt;li&gt;Verwendung der aktuellen Beta Version von gnuplot wird ermöglicht&lt;/li&gt;
+&lt;li&gt;Teilen als PDF/PNG wird ermöglicht&lt;/li&gt;
+&lt;li&gt;schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet&lt;/li&gt;&lt;/ul&gt;
+&lt;/body&gt;</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="149"/>
@@ -692,72 +680,77 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="402"/>
+        <location filename="main.qml" line="365"/>
+        <source>Writable</source>
+        <translation>Änderbar</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="391"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="408"/>
+        <location filename="main.qml" line="397"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="433"/>
+        <location filename="main.qml" line="422"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="449"/>
+        <location filename="main.qml" line="438"/>
         <source>Undo</source>
         <translation>Rückgängig</translation>
     </message>
     <message>
-        <location filename="main.qml" line="462"/>
+        <location filename="main.qml" line="451"/>
         <source>Redo</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="476"/>
+        <location filename="main.qml" line="465"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="480"/>
+        <location filename="main.qml" line="469"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="486"/>
+        <location filename="main.qml" line="475"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="492"/>
+        <location filename="main.qml" line="481"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="498"/>
+        <location filename="main.qml" line="487"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="508"/>
+        <location filename="main.qml" line="497"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="519"/>
+        <location filename="main.qml" line="508"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="533"/>
+        <location filename="main.qml" line="522"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="544"/>
+        <location filename="main.qml" line="533"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -770,47 +763,46 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Einkauf wiederhergestellt.</translation>
     </message>
     <message>
-        <location filename="main.qml" line="365"/>
         <source>Readonly</source>
-        <translation>Schreibgeschützt</translation>
+        <translation type="vanished">Schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="386"/>
+        <location filename="main.qml" line="375"/>
         <source>Clear/New</source>
         <translation>Löschen/Neu</translation>
     </message>
     <message>
-        <location filename="main.qml" line="701"/>
+        <location filename="main.qml" line="656"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="710"/>
+        <location filename="main.qml" line="665"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="719"/>
+        <location filename="main.qml" line="674"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="841"/>
+        <location filename="main.qml" line="796"/>
         <source>Choose a file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="869"/>
+        <location filename="main.qml" line="824"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="main.qml" line="879"/>
+        <location filename="main.qml" line="834"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="880"/>
+        <location filename="main.qml" line="835"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.

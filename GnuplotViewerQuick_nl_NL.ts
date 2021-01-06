@@ -575,18 +575,9 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="123"/>
-        <source>The development of this app can be supported in various ways:
-
-* giving feedback and rating via the store enty in Google Play
-* purchasing a support level item via in app purchase (button below)
-
-Purchasing any support level will give you some more features:
-
-- usage of the current gnuplot beta version is enabled
-- sharing as PDF/PNG is enabled
-- nice support icon is visible in title bar of the application
-</source>
-        <translation></translation>
+        <source>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the current gnuplot beta version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;</source>
+        <oldsource>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the current gnuplot beta version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;</oldsource>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="149"/>
@@ -632,121 +623,125 @@ Purchasing any support level will give you some more features:
         <translation>Zien als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="365"/>
         <source>Readonly</source>
-        <translation>Alleen lezen</translation>
+        <translation type="vanished">Alleen lezen</translation>
     </message>
     <message>
         <source>Clear</source>
         <translation type="vanished">Verwijderen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="386"/>
+        <location filename="main.qml" line="365"/>
+        <source>Writable</source>
+        <translation>Beschrijfbaar</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="375"/>
         <source>Clear/New</source>
         <translation>Verwijderen/Nieuw</translation>
     </message>
     <message>
-        <location filename="main.qml" line="402"/>
+        <location filename="main.qml" line="391"/>
         <source>unknown.gpt</source>
         <translation>onbekend.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="408"/>
+        <location filename="main.qml" line="397"/>
         <source>Save as</source>
         <translation>Opslaan als</translation>
     </message>
     <message>
-        <location filename="main.qml" line="433"/>
+        <location filename="main.qml" line="422"/>
         <source>Delete files</source>
         <translation>Verwijder bestanden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="449"/>
+        <location filename="main.qml" line="438"/>
         <source>Undo</source>
         <translation>Ongedaan maken</translation>
     </message>
     <message>
-        <location filename="main.qml" line="462"/>
+        <location filename="main.qml" line="451"/>
         <source>Redo</source>
         <translation>Opnieuw</translation>
     </message>
     <message>
-        <location filename="main.qml" line="476"/>
+        <location filename="main.qml" line="465"/>
         <source>Documentation</source>
         <translation>Documentatie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="480"/>
+        <location filename="main.qml" line="469"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="486"/>
+        <location filename="main.qml" line="475"/>
         <source>License</source>
         <translation>Licentie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="492"/>
+        <location filename="main.qml" line="481"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Licentie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="498"/>
+        <location filename="main.qml" line="487"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="508"/>
+        <location filename="main.qml" line="497"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Versie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="519"/>
+        <location filename="main.qml" line="508"/>
         <source>Settings</source>
         <translation>Instellingen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="533"/>
+        <location filename="main.qml" line="522"/>
         <source>Support</source>
         <translation>Ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="544"/>
+        <location filename="main.qml" line="533"/>
         <source>About</source>
         <translation>Over</translation>
     </message>
     <message>
-        <location filename="main.qml" line="701"/>
+        <location filename="main.qml" line="656"/>
         <source>Graphics</source>
         <translation>Grafiek</translation>
     </message>
     <message>
-        <location filename="main.qml" line="710"/>
+        <location filename="main.qml" line="665"/>
         <source>Output</source>
         <translation>Output</translation>
     </message>
     <message>
-        <location filename="main.qml" line="719"/>
+        <location filename="main.qml" line="674"/>
         <source>Help</source>
         <translation>Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="841"/>
+        <location filename="main.qml" line="796"/>
         <source>Choose a file</source>
         <translation>Kies een bestand</translation>
     </message>
     <message>
-        <location filename="main.qml" line="869"/>
+        <location filename="main.qml" line="824"/>
         <source>Error</source>
         <translation>Fout</translation>
     </message>
     <message>
-        <location filename="main.qml" line="879"/>
+        <location filename="main.qml" line="834"/>
         <source>Request for support</source>
         <translation>Verzoek om ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="880"/>
+        <location filename="main.qml" line="835"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Het leek erop dat je deze app leuk vond.
