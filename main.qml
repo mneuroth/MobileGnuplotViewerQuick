@@ -365,21 +365,10 @@ ApplicationWindow {
                     text: qsTr("Readonly")
                     icon.source: "edit.svg"
                     checkable: true
-                    checked: readonlySwitch.visible ? readonlySwitch.position === 1 : (readonlyOutputSwitch.visible ? readonlyOutputSwitch.position === 1 : false)
+                    checked: readonlySwitch.position === 1
                     enabled: !isDialogOpen() && (stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage)
                     onTriggered: {
-                        if( stackView.currentItem === homePage )
-                        {
-                            readonlySwitch.position = readonlySwitch.position === 0 ? 1 : 0
-                        }
-                        if( stackView.currentItem === outputPage )
-                        {
-//                            readonlyOutputSwitch.position = readonlyOutputSwitch.position === 0 ? 1 : 0
-                        }
-                        if( stackView.currentItem === helpPage )
-                        {
-//                            readonlyOutputSwitch.position = readonlyOutputSwitch.position === 0 ? 1 : 0
-                        }
+                        readonlySwitch.position = readonlySwitch.position === 0 ? 1 : 0
                     }
                 }
                 MenuItem {
@@ -637,28 +626,7 @@ ApplicationWindow {
                 }
             }
         }
-/*
-        ToolButton {
-            id: readonlyOutputIcon
-            icon.source: "edit.svg"
-            visible: stackView.currentItem === outputPage
-            anchors.right: readonlyOutputSwitch.left
-            anchors.rightMargin: 1
-        }
 
-        Switch {
-            id: readonlyOutputSwitch
-            position: 1.0
-            visible: stackView.currentItem === outputPage
-            //text: qsTr("Readonly")
-            anchors.right: menuButton.left
-            anchors.rightMargin: 5
-
-            onPositionChanged: {
-                outputPage.txtOutput.readOnly = position === 1 ? true : false
-            }
-        }
-*/
         ToolButton {
             id: supportIcon
             icon.source: "high-five.svg"
@@ -674,16 +642,10 @@ ApplicationWindow {
         Label {
             text: stackView.currentItem.title
             //anchors.centerIn: parent
-            anchors.left: supportIcon.right
-            anchors.right: readonlyIcon.visible ? readonlyIcon.left : menuButton.left //menuButton.left
+            anchors.left: supportIcon.visible ? supportIcon.right : toolButton.right
+            anchors.right: undoIcon.visible ? undoIcon.left : (readonlyIcon.visible ? readonlyIcon.left : menuButton.left) //menuButton.left
             anchors.leftMargin: 5
             anchors.rightMargin: 5
-//                                 +
-//                                 (readonlyIcon.visible ? readonlyIcon.width : 0) +
-//                                 (readonlySwitch.visible ? readonlySwitch.width : 0 ) +
-                                 //(readonlyOutputIcon.visible ? readonlyOutputIcon.width : 0) +
-                                 //(readonlyOutputSwitch.visible ? readonlyOutputSwitch.width : 0 ) +
-//                                 10
             anchors.verticalCenter: parent.verticalCenter
             horizontalAlignment: Text.AlignHCenter
         }
