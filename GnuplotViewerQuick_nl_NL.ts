@@ -324,22 +324,23 @@ errorMsg=%6
         <translation>Hulp</translation>
     </message>
     <message>
+        <location filename="PageHelpForm.ui.qml" line="56"/>
         <source>Enter gnuplot help command here (e. g. help plot)
 and activate &quot;Run help&quot; button</source>
-        <translation type="vanished">Gnuplot Hulp</translation>
+        <translation>Gnuplot Hulp</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="78"/>
+        <location filename="PageHelpForm.ui.qml" line="77"/>
         <source>Input</source>
         <translation>Input</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="85"/>
+        <location filename="PageHelpForm.ui.qml" line="84"/>
         <source>Output</source>
         <translation>Output</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="92"/>
+        <location filename="PageHelpForm.ui.qml" line="91"/>
         <source>Run help</source>
         <translation>Hulp uitvoeren</translation>
     </message>
@@ -370,8 +371,9 @@ and activate &quot;Run help&quot; button</source>
         <translation>onbekend</translation>
     </message>
     <message>
+        <location filename="PageHomeForm.ui.qml" line="63"/>
         <source>Enter gnuplot script here...</source>
-        <translation type="vanished">Voer hier het gnuplot script in...</translation>
+        <translation>Voer hier het gnuplot script in...</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="84"/>
@@ -417,21 +419,22 @@ and activate &quot;Run help&quot; button</source>
         <translation>Output</translation>
     </message>
     <message>
+        <location filename="PageOutputForm.ui.qml" line="52"/>
         <source>Outputs from gnuplot commands are shown here</source>
-        <translation type="vanished">Uitvoer van gnuplot opdrachten wordt hier weergegeven</translation>
+        <translation>Uitvoer van gnuplot opdrachten wordt hier weergegeven</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="84"/>
+        <location filename="PageOutputForm.ui.qml" line="86"/>
         <source>Input</source>
         <translation>Input</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="91"/>
+        <location filename="PageOutputForm.ui.qml" line="93"/>
         <source>Help</source>
         <translation>Hulp</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="98"/>
+        <location filename="PageOutputForm.ui.qml" line="100"/>
         <source>Graphics</source>
         <translation>Grafiek</translation>
     </message>
@@ -551,27 +554,27 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Ondersteuning</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="37"/>
+        <location filename="SupportDialogForm.ui.qml" line="48"/>
         <source>Support Level Bronze</source>
         <translation>Ondersteuningsniveau bronzen</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="45"/>
+        <location filename="SupportDialogForm.ui.qml" line="74"/>
         <source>Support Level Silver</source>
         <translation>Ondersteuningsniveau zilver</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="53"/>
+        <location filename="SupportDialogForm.ui.qml" line="99"/>
         <source>Support Level Gold</source>
         <translation>Ondersteuningsniveau goud</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="63"/>
+        <location filename="SupportDialogForm.ui.qml" line="115"/>
         <source>Close</source>
         <translation>Afsluiten</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="104"/>
+        <location filename="SupportDialogForm.ui.qml" line="123"/>
         <source>The development of this app can be supported in various ways:
 
 * giving feedback and rating via the store enty in Google Play
@@ -586,7 +589,7 @@ Purchasing any support level will give you some more features:
         <translation></translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="127"/>
+        <location filename="SupportDialogForm.ui.qml" line="149"/>
         <source>You already supported the predecessor of this application !</source>
         <translation>Je hebt de voorganger van deze applicatie al ondersteund!</translation>
     </message>
@@ -638,112 +641,112 @@ Purchasing any support level will give you some more features:
         <translation type="vanished">Verwijderen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="382"/>
+        <location filename="main.qml" line="386"/>
         <source>Clear/New</source>
-        <translation type="unfinished">Verwijderen/Nieuw</translation>
+        <translation>Verwijderen/Nieuw</translation>
     </message>
     <message>
-        <location filename="main.qml" line="398"/>
+        <location filename="main.qml" line="402"/>
         <source>unknown.gpt</source>
         <translation>onbekend.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="404"/>
+        <location filename="main.qml" line="408"/>
         <source>Save as</source>
         <translation>Opslaan als</translation>
     </message>
     <message>
-        <location filename="main.qml" line="429"/>
+        <location filename="main.qml" line="433"/>
         <source>Delete files</source>
         <translation>Verwijder bestanden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="445"/>
+        <location filename="main.qml" line="449"/>
         <source>Undo</source>
         <translation>Ongedaan maken</translation>
     </message>
     <message>
-        <location filename="main.qml" line="458"/>
+        <location filename="main.qml" line="462"/>
         <source>Redo</source>
         <translation>Opnieuw</translation>
     </message>
     <message>
-        <location filename="main.qml" line="472"/>
+        <location filename="main.qml" line="476"/>
         <source>Documentation</source>
         <translation>Documentatie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="476"/>
+        <location filename="main.qml" line="480"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="482"/>
+        <location filename="main.qml" line="486"/>
         <source>License</source>
         <translation>Licentie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="488"/>
+        <location filename="main.qml" line="492"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Licentie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="494"/>
+        <location filename="main.qml" line="498"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="504"/>
+        <location filename="main.qml" line="508"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Versie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="515"/>
+        <location filename="main.qml" line="519"/>
         <source>Settings</source>
         <translation>Instellingen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="529"/>
+        <location filename="main.qml" line="533"/>
         <source>Support</source>
         <translation>Ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="540"/>
+        <location filename="main.qml" line="544"/>
         <source>About</source>
         <translation>Over</translation>
     </message>
     <message>
-        <location filename="main.qml" line="691"/>
+        <location filename="main.qml" line="701"/>
         <source>Graphics</source>
         <translation>Grafiek</translation>
     </message>
     <message>
-        <location filename="main.qml" line="700"/>
+        <location filename="main.qml" line="710"/>
         <source>Output</source>
         <translation>Output</translation>
     </message>
     <message>
-        <location filename="main.qml" line="709"/>
+        <location filename="main.qml" line="719"/>
         <source>Help</source>
         <translation>Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="831"/>
+        <location filename="main.qml" line="841"/>
         <source>Choose a file</source>
         <translation>Kies een bestand</translation>
     </message>
     <message>
-        <location filename="main.qml" line="859"/>
+        <location filename="main.qml" line="869"/>
         <source>Error</source>
         <translation>Fout</translation>
     </message>
     <message>
-        <location filename="main.qml" line="869"/>
+        <location filename="main.qml" line="879"/>
         <source>Request for support</source>
         <translation>Verzoek om ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="870"/>
+        <location filename="main.qml" line="880"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Het leek erop dat je deze app leuk vond.

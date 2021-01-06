@@ -329,23 +329,24 @@ errorMsg=%6
         <translation>Hilfe</translation>
     </message>
     <message>
+        <location filename="PageHelpForm.ui.qml" line="56"/>
         <source>Enter gnuplot help command here (e. g. help plot)
 and activate &quot;Run help&quot; button</source>
-        <translation type="vanished">Hier gnuplot Hilfe Kommandos eingeben (z. B. help plot)
+        <translation>Hier gnuplot Hilfe Kommandos eingeben (z. B. help plot)
 und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="78"/>
+        <location filename="PageHelpForm.ui.qml" line="77"/>
         <source>Input</source>
         <translation>Eingabe</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="85"/>
+        <location filename="PageHelpForm.ui.qml" line="84"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="PageHelpForm.ui.qml" line="92"/>
+        <location filename="PageHelpForm.ui.qml" line="91"/>
         <source>Run help</source>
         <translation>Hilfe ausführen</translation>
     </message>
@@ -377,8 +378,9 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
         <translation>unbekannt</translation>
     </message>
     <message>
+        <location filename="PageHomeForm.ui.qml" line="63"/>
         <source>Enter gnuplot script here...</source>
-        <translation type="vanished">gnuplot Skript hier eingeben...</translation>
+        <translation>gnuplot Skript hier eingeben...</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="84"/>
@@ -424,21 +426,22 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
         <translation>Ausgabe</translation>
     </message>
     <message>
+        <location filename="PageOutputForm.ui.qml" line="52"/>
         <source>Outputs from gnuplot commands are shown here</source>
-        <translation type="vanished">Ausgabe der gnuplot Kommandos werden hier angezeigt</translation>
+        <translation>Ausgabe der gnuplot Kommandos werden hier angezeigt</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="84"/>
+        <location filename="PageOutputForm.ui.qml" line="86"/>
         <source>Input</source>
         <translation>Eingabe</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="91"/>
+        <location filename="PageOutputForm.ui.qml" line="93"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="PageOutputForm.ui.qml" line="98"/>
+        <location filename="PageOutputForm.ui.qml" line="100"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
@@ -569,22 +572,22 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="37"/>
+        <location filename="SupportDialogForm.ui.qml" line="48"/>
         <source>Support Level Bronze</source>
         <translation>Unterstützung Bronze Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="45"/>
+        <location filename="SupportDialogForm.ui.qml" line="74"/>
         <source>Support Level Silver</source>
         <translation>Unterstützung Silber Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="53"/>
+        <location filename="SupportDialogForm.ui.qml" line="99"/>
         <source>Support Level Gold</source>
         <translation>Unterstützung Gold Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="104"/>
+        <location filename="SupportDialogForm.ui.qml" line="123"/>
         <source>The development of this app can be supported in various ways:
 
 * giving feedback and rating via the store enty in Google Play
@@ -609,7 +612,7 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
 </translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="127"/>
+        <location filename="SupportDialogForm.ui.qml" line="149"/>
         <source>You already supported the predecessor of this application !</source>
         <translation>Du hast den Vorgänger dieser Anwendung schon unterstützt !</translation>
     </message>
@@ -642,7 +645,7 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Unterstützungsstufe 2</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="63"/>
+        <location filename="SupportDialogForm.ui.qml" line="115"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
@@ -689,72 +692,72 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation type="vanished">Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="398"/>
+        <location filename="main.qml" line="402"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="404"/>
+        <location filename="main.qml" line="408"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="429"/>
+        <location filename="main.qml" line="433"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="445"/>
+        <location filename="main.qml" line="449"/>
         <source>Undo</source>
-        <translation type="unfinished">Rückgängig</translation>
+        <translation>Rückgängig</translation>
     </message>
     <message>
-        <location filename="main.qml" line="458"/>
+        <location filename="main.qml" line="462"/>
         <source>Redo</source>
-        <translation type="unfinished">Wiederherstellen</translation>
+        <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="472"/>
+        <location filename="main.qml" line="476"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="476"/>
+        <location filename="main.qml" line="480"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="482"/>
+        <location filename="main.qml" line="486"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="488"/>
+        <location filename="main.qml" line="492"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="494"/>
+        <location filename="main.qml" line="498"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="504"/>
+        <location filename="main.qml" line="508"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="515"/>
+        <location filename="main.qml" line="519"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="529"/>
+        <location filename="main.qml" line="533"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="540"/>
+        <location filename="main.qml" line="544"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -772,42 +775,42 @@ Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen
         <translation>Schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="382"/>
+        <location filename="main.qml" line="386"/>
         <source>Clear/New</source>
         <translation>Löschen/Neu</translation>
     </message>
     <message>
-        <location filename="main.qml" line="691"/>
+        <location filename="main.qml" line="701"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="700"/>
+        <location filename="main.qml" line="710"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="709"/>
+        <location filename="main.qml" line="719"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="831"/>
+        <location filename="main.qml" line="841"/>
         <source>Choose a file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="859"/>
+        <location filename="main.qml" line="869"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="main.qml" line="869"/>
+        <location filename="main.qml" line="879"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="870"/>
+        <location filename="main.qml" line="880"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.
