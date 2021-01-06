@@ -563,6 +563,13 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <source>Status=</source>
         <translation type="vanished">Status=</translation>
     </message>
+    <message>
+        <location filename="SupportDialog.qml" line="51"/>
+        <location filename="SupportDialog.qml" line="52"/>
+        <location filename="SupportDialog.qml" line="53"/>
+        <source>Price: </source>
+        <translation>Preis: </translation>
+    </message>
 </context>
 <context>
     <name>SupportDialogForm.ui</name>
@@ -577,17 +584,17 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Unterstützung Bronze Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="74"/>
+        <location filename="SupportDialogForm.ui.qml" line="73"/>
         <source>Support Level Silver</source>
         <translation>Unterstützung Silber Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="99"/>
+        <location filename="SupportDialogForm.ui.qml" line="98"/>
         <source>Support Level Gold</source>
         <translation>Unterstützung Gold Stufe</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="123"/>
+        <location filename="SupportDialogForm.ui.qml" line="122"/>
         <source>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the current gnuplot beta version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;</source>
         <oldsource>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the current gnuplot beta version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;</oldsource>
         <translation>&lt;body&gt;Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:
@@ -600,7 +607,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
 &lt;/body&gt;</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="149"/>
+        <location filename="SupportDialogForm.ui.qml" line="148"/>
         <source>You already supported the predecessor of this application !</source>
         <translation>Du hast den Vorgänger dieser Anwendung schon unterstützt !</translation>
     </message>
@@ -633,7 +640,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Unterstützungsstufe 2</translation>
     </message>
     <message>
-        <location filename="SupportDialogForm.ui.qml" line="115"/>
+        <location filename="SupportDialogForm.ui.qml" line="114"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>

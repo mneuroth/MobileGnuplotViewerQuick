@@ -46,7 +46,7 @@ Page {
                 id: btnSupportLevel0
                 x: 30
                 text: qsTr("Support Level Bronze")
-                width: parent.width / 2
+                width: parent.width * 2 / 3
             }
 
             Label {
@@ -55,7 +55,6 @@ Page {
                 text: "?"
                 anchors.verticalCenter: btnSupportLevel0.verticalCenter
             }
-
         }
 
         Row {
@@ -72,7 +71,7 @@ Page {
             Button {
                 id: btnSupportLevel1
                 text: qsTr("Support Level Silver")
-                width: parent.width / 2
+                width: parent.width * 2 / 3
             }
 
             Label {
@@ -97,7 +96,7 @@ Page {
             Button {
                 id: btnSupportLevel2
                 text: qsTr("Support Level Gold")
-                width: parent.width / 2
+                width: parent.width * 2 / 3
             }
 
             Label {
