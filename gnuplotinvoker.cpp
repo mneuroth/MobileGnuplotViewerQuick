@@ -134,6 +134,7 @@ extern "C" int gnu_main(int argc, char **argv);
 
 #define TEMP_GNUPLOT_SCRIPT "./_temp_.gpt"
 #define TEMP_GNUPLOT_OUTPUT "./_output_.svg"
+#define TEMP_GNUPLOT_ERROR  "./_error_.txt"
 
 void GnuplotInvoker::runGnuplot(const QString & sScript)
 {
@@ -152,15 +153,26 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
                         + QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)
+                        + QString("set print '%1'\n").arg(TEMP_GNUPLOT_ERROR)
                         + sScript
                         + QString("\nexit\n");
 
     ApplicationData::simpleWriteFileContent(argv[1], sScriptContent);
 
     int result = gnu_main(argc, argv);
+// TODO: how to redirect stderr outputs?
+// http://blog.debao.me/2013/07/redirect-current-processs-stdout-to-a-widget-such-as-qtextedit/
+// https://stackoverflow.com/questions/23769339/capture-my-programs-stderr-output-in-qt
 
     if( result==0 )
     {
+        QString sErrorContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_ERROR);
+        if( sErrorContent.length() )
+        {
+            m_aLastGnuplotError = sErrorContent;
+            emit sigShowErrorText(m_aLastGnuplotError);
+        }
+
         QString sResultContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_OUTPUT);
         if( QString(sResultContent).startsWith(QString("<?xml")) )
         {
@@ -181,8 +193,11 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     delete [] argv[1];
 
     // remove temporary files
+// TODO patch !!! for test !!!
     //QFile::remove(TEMP_GNUPLOT_SCRIPT);
     //QFile::remove(TEMP_GNUPLOT_OUTPUT);
+    //QFile::remove(TEMP_GNUPLOT_ERROR);
+// TODO: get STDERROR also !!!
 #else
     bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
