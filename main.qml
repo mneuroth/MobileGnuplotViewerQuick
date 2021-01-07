@@ -25,6 +25,7 @@ ApplicationWindow {
     height: 480
     title: qsTr("MobileGnuplotViewerQuick")
 
+    property string emptyString: "      "
     property string urlPrefix: "file://"   
     property bool isAndroid: applicationData !== null ? applicationData.isAndroid : false
     property bool isShareSupported: applicationData !== null ? applicationData.isShareSupported : false
@@ -384,7 +385,7 @@ ApplicationWindow {
                             var textControl = getCurrentTextRef(stackView.currentItem)
                             if( textControl !== null)
                             {
-                                textControl.text = ""
+                                textControl.text = emptyString
                             }
                             if( stackView.currentItem === homePage )
                             {
@@ -436,7 +437,7 @@ ApplicationWindow {
                     id: menuUndo
                     icon.source: "back-arrow.svg"
                     text: qsTr("Undo")
-                    enabled: !isDialogOpen() && (stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canUndo)
+                    enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canUndo))
                     onTriggered: {
                         var textControl = getCurrentTextRef(stackView.currentItem)
                         if( textControl !== null )
@@ -449,7 +450,7 @@ ApplicationWindow {
                     id: menuRedo
                     icon.source: "redo-arrow.svg"
                     text: qsTr("Redo")
-                    enabled: !isDialogOpen() && (stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo)
+                    enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo))
                     onTriggered: {
                         var textControl = getCurrentTextRef(stackView.currentItem)
                         if( textControl !== null )
@@ -582,7 +583,7 @@ ApplicationWindow {
             id: undoIcon
             icon.source: "back-arrow.svg"
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
-            enabled: (stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canUndo)
+            enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canUndo))
             anchors.right: redoIcon.left
             anchors.rightMargin: 1
             onClicked: {
@@ -594,7 +595,7 @@ ApplicationWindow {
             id: redoIcon
             icon.source: "redo-arrow.svg"
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
-            enabled: (stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo)
+            enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo))
             anchors.right: writableIcon.left
             anchors.rightMargin: 1
             onClicked: {

@@ -47,9 +47,10 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        TextArea {
+        TextEdit/*Area*/ {
             id: txtOutput
-            placeholderText: qsTr("Outputs from gnuplot commands are shown here")
+            text: "   "
+            //placeholderText: qsTr("Outputs from gnuplot commands are shown here")
             anchors.fill: scrollView
             /*
             anchors.top: lblOutput.bottom
