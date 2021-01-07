@@ -58,7 +58,7 @@ Page {
         TextEdit/*Area*/ {
             id: textArea
             font.family: fontName
-            anchors.fill: scrollView
+            anchors.fill: parent
             objectName: "textArea"
             //placeholderText: qsTr("Enter gnuplot script here...")
             //selectByMouse: !readOnly

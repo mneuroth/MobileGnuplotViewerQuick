@@ -51,7 +51,7 @@ Page {
             id: txtOutput
             text: "   "
             //placeholderText: qsTr("Outputs from gnuplot commands are shown here")
-            anchors.fill: scrollView
+            anchors.fill: parent
             /*
             anchors.top: lblOutput.bottom
             anchors.right: parent.right

@@ -51,7 +51,7 @@ Page {
 
         TextEdit/*Area*/ {
             id: txtHelp
-            anchors.fill: scrollView
+            anchors.fill: parent
             font.family: fontName
             text: "   "
             //placeholderText: qsTr("Enter gnuplot help command here (e. g. help plot)\nand activate \"Run help\" button")
