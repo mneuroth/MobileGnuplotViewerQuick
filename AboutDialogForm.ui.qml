@@ -67,7 +67,7 @@ Page {
             id: lblAppDate
             x: 5
             y: 245
-            text: qsTr("from: 7.1.2021")
+            text: qsTr("from: 9.1.2021")
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.rightMargin: 5

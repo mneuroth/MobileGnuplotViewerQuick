@@ -32,6 +32,7 @@
 #include <QPdfWriter>
 #include <QTextDocument>
 #include <QTextCursor>
+#include <QFileDialog>
 
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
@@ -89,6 +90,15 @@ bool ApplicationData::isShareSupported() const
 bool ApplicationData::isAndroid() const
 {
 #if defined(Q_OS_ANDROID)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool ApplicationData::isWASM() const
+{
+#if defined(Q_OS_WASM)
     return true;
 #else
     return false;
@@ -547,6 +557,25 @@ bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)
 void ApplicationData::logText(const QString & text)
 {
     AddToLog(text);
+}
+
+void ApplicationData::getOpenFileContentAsync(const QString & nameFilter)
+{
+    auto fileContentReady = [this](const QString &fileName, const QByteArray &fileContent) {
+         if (fileName.isEmpty()) {
+             // No file was selected
+         } else {
+             // Use fileName and fileContent
+             emit this->receiveOpenFileContent(fileName, fileContent);
+         }
+     };
+
+    QFileDialog::getOpenFileContent(nameFilter, fileContentReady);
+}
+
+void ApplicationData::saveFileContentAsync(const QByteArray &fileContent, const QString &fileNameHint)
+{
+    QFileDialog::saveFileContent(fileContent, fileNameHint);
 }
 
 bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc, bool bSendFile)

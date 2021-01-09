@@ -49,22 +49,36 @@ PageHomeForm {
 
     btnOpen  {
         onClicked:  {
-            //fileDialog.open()
-            //mobileFileDialog.open()
-            mobileFileDialog.setOpenModus()
-            if( mobileFileDialog.currentDirectory == "" )
+            if( applicationData.isWASM )
             {
-                mobileFileDialog.currentDirectory = applicationData.homePath
+                applicationData.getOpenFileContentAsync("*.gpt")
             }
-            mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-            stackView.pop()
-            stackView.push(mobileFileDialog)
+            else
+            {
+                //fileDialog.open()
+                //mobileFileDialog.open()
+                mobileFileDialog.setOpenModus()
+                if( mobileFileDialog.currentDirectory == "" )
+                {
+                    mobileFileDialog.currentDirectory = applicationData.homePath
+                }
+                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                stackView.pop()
+                stackView.push(mobileFileDialog)
+            }
         }
     }
 
     btnSave {
         onClicked: {
-            saveCurrentDoc(homePage.textArea)
+            if( applicationData.isWASM )
+            {
+                applicationData.saveFileContentAsync(homePage.textArea, applicationData.getOnlyFileName(homePage.currentFileUrl))
+            }
+            else
+            {
+                saveCurrentDoc(homePage.textArea)
+            }
         }
     }
 

@@ -538,6 +538,24 @@ ApplicationWindow {
                         stackView.push(aboutDialog)
                     }
                 }
+                /* for testing...
+                MenuItem {
+                    text: qsTr("WASM Open")
+                    onTriggered: {
+                        applicationData.getOpenFileContentAsync("*.gpt")
+                    }
+                }
+                MenuItem {
+                    text: qsTr("WASM Save")
+                    onTriggered: {
+                        var textControl = getCurrentTextRef(stackView.currentItem)
+                        if( textControl !== null )
+                        {
+                            applicationData.saveFileContentAsync(textControl.text, applicationData.getOnlyFileName(homePage.currentFileUrl))
+                        }
+                    }
+                }
+                */
                 /*
                 MenuItem {
                     text: qsTr("Test")
@@ -860,6 +878,12 @@ ApplicationWindow {
 
         onSendDummyData: {
             console.log("========> Dummy Data !!! "+txt+" "+value)
+        }
+
+        // used for WASM platform:
+        onReceiveOpenFileContent: {
+            setScriptName(fileName)
+            setScriptText(fileContent)
         }
     }
 

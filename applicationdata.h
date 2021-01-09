@@ -63,6 +63,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(bool isAppStoreSupported READ isAppStoreSupported NOTIFY isAppStoreSupportedChanged)
     Q_PROPERTY(bool isShareSupported READ isShareSupported NOTIFY isShareSupportedChanged)
     Q_PROPERTY(bool isAndroid READ isAndroid NOTIFY isAndroidChanged)
+    Q_PROPERTY(bool isWASM READ isWASM NOTIFY isWASMChanged)
     Q_PROPERTY(bool isMobileGnuplotViewerInstalled READ isMobileGnuplotViewerInstalled NOTIFY isMobileGnuplotViewerInstalledChanged)
 
 public:
@@ -100,6 +101,10 @@ public:
     // for debugging only
     Q_INVOKABLE void logText(const QString & text);
 
+    // for WASM only
+    Q_INVOKABLE void getOpenFileContentAsync(const QString & nameFilter);
+    Q_INVOKABLE void saveFileContentAsync(const QByteArray &fileContent, const QString &fileNameHint = QString());
+
     Q_INVOKABLE QStringList getSDCardPaths() const;
     QString getSDCardPath() const;
     QString getFilesPath() const;
@@ -117,6 +122,7 @@ public:
     bool isAppStoreSupported() const;
     bool isShareSupported() const;
     bool isAndroid() const;
+    bool isWASM() const;
 
     bool isMobileGnuplotViewerInstalled() const;
 
@@ -127,7 +133,10 @@ signals:
     void isAppStoreSupportedChanged();
     void isShareSupportedChanged();
     void isAndroidChanged();
+    void isWASMChanged();
     void isMobileGnuplotViewerInstalledChanged();
+
+    void receiveOpenFileContent(const QString & fileName, const QByteArray & fileContent);
 
 public slots:
     void sltFileUrlReceived(const QString & sUrl);
