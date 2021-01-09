@@ -96,9 +96,9 @@ Page {
 
     Label {
         id: lblDirectoryName
-        x: 16
-        width: 418
-        height: 40
+//        x: 16
+//        width: 418
+//        height: 40
         text: qsTr("Show current directory here")
         anchors.top: columnLayout.bottom
         anchors.topMargin: 5
@@ -109,13 +109,13 @@ Page {
     ListView {
         id: listView
         anchors.bottom: lblMFDInput.top
-        anchors.bottomMargin: 6
+        anchors.bottomMargin: 10
         anchors.left: parent.left
         anchors.leftMargin: 10
         anchors.right: parent.right
         anchors.rightMargin: 10
         anchors.top: lblDirectoryName.bottom
-        anchors.topMargin: 5
+        anchors.topMargin: 10
 
         FolderListModel {
             id: folderModel
@@ -126,28 +126,30 @@ Page {
             color: "lightsteelblue"
             radius: 3
         }
-        focus: true
+        focus: true        
         model: folderModel
         delegate: fileDelegate
     }
 
     Label {
         id: lblMFDInput
-        width: 221
-        height: 40
+//        width: 221
+//        height: 40
         text: qsTr("Any input")
         anchors.left: parent.left
         anchors.leftMargin: 5
         anchors.bottom: btnOpen.top
         anchors.bottomMargin: 5
+        //anchors.top: listView.bottom
+        //anchors.topMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
     }
 
     TextInput {
         id: txtMFDInput
-        y: 323
-        height: 40
+//        y: 323
+//        height: 40
         text: ""
         anchors.bottom: btnCancel.top
         anchors.bottomMargin: 5
@@ -155,6 +157,7 @@ Page {
         anchors.rightMargin: 5
         anchors.left: lblMFDInput.right
         anchors.leftMargin: 5
+        //anchors.top: listView.bottom
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
     }

@@ -74,6 +74,19 @@ ApplicationWindow {
     // *** some helper functions for the application
     // **********************************************************************
 
+    function clearCurrentText() {
+        var textControl = getCurrentTextRef(stackView.currentItem)
+        if( textControl !== null)
+        {
+            textControl.text = emptyString
+            textControl.textDocument.modified = false
+        }
+        if( stackView.currentItem === homePage )
+        {
+            setScriptName(buildValidUrl(mobileFileDialog.currentDirectory+"/"+qsTr("unknown.gpt")))
+        }
+    }
+
     function showInfoDialog(msg, title) {
         infoDialog.text = msg
         if( title !== undefined ) {
@@ -383,13 +396,13 @@ ApplicationWindow {
                         else
                         {
                             var textControl = getCurrentTextRef(stackView.currentItem)
-                            if( textControl !== null)
+                            if( textControl.textDocument.modified )
                             {
-                                textControl.text = emptyString
+                                askForClearDialog.open()
                             }
-                            if( stackView.currentItem === homePage )
+                            else
                             {
-                                setScriptName(buildValidUrl(mobileFileDialog.currentDirectory+"/"+qsTr("unknown.gpt")))
+                                clearCurrentText()
                             }
                         }
                     }
@@ -858,6 +871,20 @@ ApplicationWindow {
         onYes: {
             stackView.pop()
             stackView.push(supportDialog)
+        }
+        onNo: {
+            // do nothing
+        }
+    }
+
+    MessageDialog {
+        id: askForClearDialog
+        visible: false
+        title: qsTr("Question")
+        text: qsTr("Current text is changed, really discard the changed text?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            clearCurrentText()
         }
         onNo: {
             // do nothing

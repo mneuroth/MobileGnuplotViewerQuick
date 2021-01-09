@@ -33,7 +33,7 @@ Page {
 
     Label {
         id: lblFileName
-        height: 14
+//        height: 14
         text: qsTr("unknown")
         anchors.right: parent.right
         anchors.rightMargin: 5
@@ -62,6 +62,8 @@ Page {
             objectName: "textArea"
             //placeholderText: qsTr("Enter gnuplot script here...")
             //selectByMouse: !readOnly
+            text: "   "
+            inputMethodHints: Qt.ImhNoAutoUppercase
         }
     }
 

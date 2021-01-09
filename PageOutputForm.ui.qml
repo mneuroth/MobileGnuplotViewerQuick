@@ -64,6 +64,7 @@ Page {
             */
             font.family: fontName
             readOnly: true
+            inputMethodHints: Qt.ImhNoAutoUppercase
             //selectByMouse: !readOnly
         }
     }
