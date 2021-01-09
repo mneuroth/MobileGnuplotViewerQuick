@@ -512,6 +512,7 @@ ApplicationWindow {
                         settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
                         settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
                         settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
+                        settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
                         settingsDialog.lblExampleText.font = homePage.textArea.font
 
                         stackView.pop()

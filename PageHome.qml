@@ -49,7 +49,7 @@ PageHomeForm {
 
     btnOpen  {
         onClicked:  {
-            if( applicationData.isWASM )
+            if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
             {
                 applicationData.getOpenFileContentAsync("*.gpt")
             }
@@ -71,7 +71,7 @@ PageHomeForm {
 
     btnSave {
         onClicked: {
-            if( applicationData.isWASM )
+            if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
             {
                 applicationData.saveFileContentAsync(homePage.textArea, applicationData.getOnlyFileName(homePage.currentFileUrl))
             }

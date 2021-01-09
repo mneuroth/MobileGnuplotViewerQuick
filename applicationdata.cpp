@@ -37,7 +37,8 @@
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
       m_aStorageAccess(aStorageAccess),
-      m_aEngine(aEngine)
+      m_aEngine(aEngine),
+      m_bUseLocalFileDialog(false)
 {
     m_pShareUtils = pShareUtils;
 #if defined(Q_OS_ANDROID)
@@ -108,6 +109,21 @@ bool ApplicationData::isWASM() const
 bool ApplicationData::isMobileGnuplotViewerInstalled() const
 {
     return m_pShareUtils != 0 ? m_pShareUtils->isMobileGnuplotViewerInstalled() : false;
+}
+
+
+bool ApplicationData::isUseLocalFileDialog() const
+{
+    return m_bUseLocalFileDialog;
+}
+
+void ApplicationData::setUseLocalFileDialog(bool value)
+{
+    if( m_bUseLocalFileDialog != value )
+    {
+        m_bUseLocalFileDialog = value;
+        emit isUseLocalFileDialogChanged();
+    }
 }
 
 bool ApplicationData::isAppInstalled(const QString & sAppName) const

@@ -65,6 +65,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(bool isAndroid READ isAndroid NOTIFY isAndroidChanged)
     Q_PROPERTY(bool isWASM READ isWASM NOTIFY isWASMChanged)
     Q_PROPERTY(bool isMobileGnuplotViewerInstalled READ isMobileGnuplotViewerInstalled NOTIFY isMobileGnuplotViewerInstalledChanged)
+    Q_PROPERTY(bool isUseLocalFileDialog READ isUseLocalFileDialog WRITE setUseLocalFileDialog NOTIFY isUseLocalFileDialogChanged)
 
 public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
@@ -126,6 +127,9 @@ public:
 
     bool isMobileGnuplotViewerInstalled() const;
 
+    bool isUseLocalFileDialog() const;
+    void setUseLocalFileDialog(bool value);
+
 signals:
     // for testing only
     void sendDummyData(const QString & txt, int value);
@@ -135,6 +139,7 @@ signals:
     void isAndroidChanged();
     void isWASMChanged();
     void isMobileGnuplotViewerInstalledChanged();
+    void isUseLocalFileDialogChanged();
 
     void receiveOpenFileContent(const QString & fileName, const QByteArray & fileContent);
 
@@ -166,6 +171,8 @@ private:
     ShareUtils *                m_pShareUtils;      // not an owner !
 
     QQmlApplicationEngine &     m_aEngine;          // not an owner !
+
+    bool                        m_bUseLocalFileDialog;
 };
 
 #endif // APPLICATIONDATA_H

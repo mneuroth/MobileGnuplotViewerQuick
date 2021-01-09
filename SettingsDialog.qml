@@ -54,6 +54,7 @@ SettingsDialogForm {
             gnuplotInvoker.resolution = parseInt(txtGraphicsResolution.text)
             gnuplotInvoker.useBeta = chbUseGnuplotBeta.checked
             gnuplotInvoker.fontSize = parseInt(txtGraphicsFontSize.text)
+            applicationData.isUseLocalFileDialog = chbUseLocalFiledialog.checked
             var aFont = settingsDialog.lblExampleText.font
             homePage.textArea.font = aFont
             outputPage.txtOutput.font = aFont
