@@ -24,6 +24,10 @@ AboutDialogForm {
         onLinkActivated: Qt.openUrlExternally(link)
     }
 
+    lblGithubPage {
+        onLinkActivated: Qt.openUrlExternally(link)
+    }
+
     btnClose {
         onClicked:  {
             stackView.pop()

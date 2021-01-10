@@ -26,6 +26,7 @@ Page {
     property alias lblAppDate: lblAppDate
     property alias lblAppAuthor: lblAppAuthor
     property alias lblAppInfos: lblAppInfos
+    property alias lblGithubPage: lblGithubPage
 
     Rectangle {
         id: rectangle
@@ -91,8 +92,8 @@ Page {
 
         Text {
             id: lblIconInfos
-            text: qsTr("Icons designed by <a href='http://www.flaticon.com'>Flaticon</a>")
-            anchors.top: lblAppAuthor.bottom
+            text: qsTr("<a href='http://www.flaticon.com'>Icons designed by Flaticon</a>")
+            anchors.top: lblGithubPage.bottom
             anchors.topMargin: 5
             anchors.right: parent.right
             anchors.rightMargin: 5
@@ -114,6 +115,19 @@ Page {
             anchors.leftMargin: 5
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: 18
+        }
+
+        Text {
+            id: lblGithubPage
+            text: qsTr("<a href='https://github.com/mneuroth/MobileGnuplotViewerQuick'>Github page for MobileGnuplotViewerQuick</a>")
+            anchors.top: lblAppAuthor.bottom
+            anchors.topMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 12
         }
 
         Image {
