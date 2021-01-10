@@ -62,7 +62,7 @@ Page {
         CheckBox {
             id: chbUseGnuplotBeta
             enabled: settings.supportLevel>=0
-            text: qsTr("Use gnuplot beta version")
+            text: qsTr("Use latest Gnuplot (beta) version")
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left
