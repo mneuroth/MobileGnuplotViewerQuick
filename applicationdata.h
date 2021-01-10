@@ -66,6 +66,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(bool isWASM READ isWASM NOTIFY isWASMChanged)
     Q_PROPERTY(bool isMobileGnuplotViewerInstalled READ isMobileGnuplotViewerInstalled NOTIFY isMobileGnuplotViewerInstalledChanged)
     Q_PROPERTY(bool isUseLocalFileDialog READ isUseLocalFileDialog WRITE setUseLocalFileDialog NOTIFY isUseLocalFileDialogChanged)
+    Q_PROPERTY(bool isAdmin READ isAdmin WRITE setAdmin NOTIFY isAdminChanged)
 
 public:
     explicit ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine);
@@ -129,6 +130,8 @@ public:
 
     bool isUseLocalFileDialog() const;
     void setUseLocalFileDialog(bool value);
+    bool isAdmin() const;
+    void setAdmin(bool value);
 
 signals:
     // for testing only
@@ -140,6 +143,7 @@ signals:
     void isWASMChanged();
     void isMobileGnuplotViewerInstalledChanged();
     void isUseLocalFileDialogChanged();
+    void isAdminChanged();
 
     void receiveOpenFileContent(const QString & fileName, const QByteArray & fileContent);
 
@@ -173,6 +177,7 @@ private:
     QQmlApplicationEngine &     m_aEngine;          // not an owner !
 
     bool                        m_bUseLocalFileDialog;
+    bool                        m_bIsAdmin;
 };
 
 #endif // APPLICATIONDATA_H

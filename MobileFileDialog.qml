@@ -223,7 +223,7 @@ MobileFileDialogForm {
     btnUp {
         onClicked: {
             // stop with moving up when home directory is reached
-            if( applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(applicationData.homePath) )
+            if( applicationData.isAdmin || (applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(applicationData.homePath)) )
             {
                 mobileFileDialog.setDirectory(currentDirectory + "/..")
                 mobileFileDialog.setCurrentName("")

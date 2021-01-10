@@ -38,7 +38,8 @@ ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, Stor
     : QObject(parent),
       m_aStorageAccess(aStorageAccess),
       m_aEngine(aEngine),
-      m_bUseLocalFileDialog(false)
+      m_bUseLocalFileDialog(false),
+      m_bIsAdmin(false)
 {
     m_pShareUtils = pShareUtils;
 #if defined(Q_OS_ANDROID)
@@ -125,6 +126,21 @@ void ApplicationData::setUseLocalFileDialog(bool value)
         emit isUseLocalFileDialogChanged();
     }
 }
+
+bool ApplicationData::isAdmin() const
+{
+    return m_bIsAdmin;
+}
+
+void ApplicationData::setAdmin(bool value)
+{
+    if( m_bIsAdmin != value )
+    {
+        m_bIsAdmin = value;
+        emit isAdminChanged();
+    }
+}
+
 
 bool ApplicationData::isAppInstalled(const QString & sAppName) const
 {

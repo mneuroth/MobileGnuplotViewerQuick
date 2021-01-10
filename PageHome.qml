@@ -84,35 +84,46 @@ PageHomeForm {
 
     btnRun {
         onClicked: {
-            outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
-            var sData = gnuplotInvoker.run(homePage.textArea.text)
-            var sErrorText = gnuplotInvoker.lastError
-            outputPage.txtOutput.text += sErrorText
-            if( sErrorText.length>0 )
+            // special handling for meta commands like: admin=1/0
+            var cmd = homePage.textArea.text
+            if( cmd.startsWith("admin=") )
             {
-                graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
+                var value = cmd.startsWith("admin=1") ? true : false
+                applicationData.isAdmin = value
+                outputPage.txtOutput.text += "Admin-Modus = "+value+"\n"
             }
             else
             {
-                graphicsPage.lblShowGraphicsInfo.text = ""
-            }
-            // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
-            if( sData.length > 0 )
-            {
-                graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
-                graphicsPage.svgdata = sData
-                stackView.pop()
-                stackView.push(graphicsPage)
-            }
-            else
-            {
+                outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
+                var sData = gnuplotInvoker.run(homePage.textArea.text)
+                var sErrorText = gnuplotInvoker.lastError
+                outputPage.txtOutput.text += sErrorText
+                if( sErrorText.length>0 )
+                {
+                    graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
+                }
+                else
+                {
+                    graphicsPage.lblShowGraphicsInfo.text = ""
+                }
+                // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
+                if( sData.length > 0 )
+                {
+                    graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
+                    graphicsPage.svgdata = sData
+                    stackView.pop()
+                    stackView.push(graphicsPage)
+                }
+                else
+                {
 // TODO --> graphics page mit error Image fuellen
-                graphicsPage.image.source = "empty.svg"
-                stackView.pop()
-                stackView.push(outputPage)
-            }
+                    graphicsPage.image.source = "empty.svg"
+                    stackView.pop()
+                    stackView.push(outputPage)
+                }
 
-            checkForUserNotification()
+                checkForUserNotification()
+            }
         }
     }
 
