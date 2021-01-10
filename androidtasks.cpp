@@ -18,9 +18,11 @@
 #include <QMessageBox>
 #endif
 
+#include <QDebug>
+
 #include "androidtasks.h"
 
-QDateTime g_aCurrentReleaseDate( QDate(2015,12,31), QTime(17,00,00) );
+QDateTime g_aCurrentReleaseDate( QDate(2021,1,11), QTime(7,00,00) );        // should be short date in future, to give some time for google play release
 
 //*************************************************************************
 
@@ -54,8 +56,9 @@ bool GrantAccessToSDCardPath(QObject * parent)
 
 bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFileName, bool bExecuteFlags, QDateTime * pDateForReplace = 0)
 {
-    bool bForce = true; //false;
+    bool bForce = false;
 
+    //qDebug() << "extractAssetFile " << sAssetFileName << " --> " << sOutputFileName << " execute=" << bExecuteFlags << " date=" << pDateForReplace << endl;
     if( pDateForReplace!=0 )
     {
         if( QFile::exists(sOutputFileName) )
@@ -63,6 +66,7 @@ bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFil
             QFileInfo aOutputFile(sOutputFileName);
 
             // force replace of file if last modification date of existing file is older than the given date
+            // Remark: date of from asset extracted file is the time of installation !!!
             bForce = aOutputFile.lastModified() < *pDateForReplace;
         }
     }    
@@ -80,15 +84,23 @@ bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFil
             aDir.mkpath(sPath);
 
             QFile aFileOut(sOutputFileName);
-            aFileOut.open(QIODevice::WriteOnly);
-            aFileOut.write(aContent);
-            if( bExecuteFlags )
+            bool ok = aFileOut.open(QIODevice::WriteOnly | QIODevice::Truncate);  // allow overwrite of existing files
+            if( ok )
             {
-                aFileOut.setPermissions(QFile::ExeGroup|QFile::ExeOther|QFile::ExeOwner|QFile::ExeUser|aFileOut.permissions());
+                aFileOut.write(aContent);
+                if( bExecuteFlags )
+                {
+                    /*bool ok =*/ aFileOut.setPermissions(QFile::ExeGroup|QFile::ExeOther|QFile::ExeOwner|QFile::ExeUser|QFile::ReadOwner|QFile::ReadUser|QFile::ReadOther|QFile::ReadGroup|QFile::WriteOwner|QFile::WriteUser|QFile::WriteOther|QFile::WriteGroup|aFileOut.permissions());
+                }
+                aFileOut.close();
+                //QFile::setPermissions(sOutputFileName, QFile::ExeGroup|QFile::ExeOther|QFile::ExeOwner|QFile::ExeUser|QFile::permissions(sOutputFileName));
+                return true;
             }
-            aFileOut.close();
-
-            return true;
+            else
+            {
+                qDebug() << "Error overwriting file " << sOutputFileName << endl;
+                return false;
+            }
         }
         return false;
     }
@@ -152,25 +164,25 @@ void UnpackFiles(QObject * /*pProgress*/)
     // example scripts...
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT1_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT1_GPT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);                         // do not overwrite existing (and maybe modified) example files !
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT2_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT2_GPT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT3_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT3_GPT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT4_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT4_GPT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT5_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT5_GPT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(SCRIPT6_GPT);
     sOutput = QString(SCRIPTS_DIR)+QString(SCRIPT6_GPT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(DATA2_DAT);
     sOutput = QString(SCRIPTS_DIR)+QString(DATA2_DAT);
-    extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);
+    extractAssetFile(sAsset,sOutput,false);
 }
 
 UnpackFilesThread::UnpackFilesThread(QObject * pTarget)

@@ -68,7 +68,7 @@ Page {
             id: lblAppDate
             x: 5
             y: 245
-            text: qsTr("from: 9.1.2021")
+            text: qsTr("from: 10.1.2021")
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.rightMargin: 5
@@ -81,7 +81,7 @@ Page {
             id: lblAppVersion
             x: 5
             y: 219
-            text: qsTr("Version: 2.0.7")
+            text: qsTr("Version: 2.0.8")
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left

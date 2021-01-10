@@ -232,6 +232,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     if (!m_aGnuplotProcess.waitForStarted())
     {
         sltErrorText(QString(tr("Error: gnuplot not found ! path=%1")).arg(m_aGnuplotProcess.program()));
+        //sltErrorText(QString("exitCode=%1 exitStatus=%2 error=%3").arg(m_aGnuplotProcess.exitCode()).arg(m_aGnuplotProcess.exitStatus()).arg(m_aGnuplotProcess.error()));
         return;
     }
 

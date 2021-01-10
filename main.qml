@@ -205,7 +205,7 @@ ApplicationWindow {
     }
 
     function showInOutput(sContent) {
-        outputPage.txtOutput.text = sContent
+        outputPage.txtOutput.text += "\n" + sContent
         stackView.pop()
         stackView.push(outputPage)
     }

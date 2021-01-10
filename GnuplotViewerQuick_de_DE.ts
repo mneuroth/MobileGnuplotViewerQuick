@@ -191,7 +191,7 @@ errorMsg=%6
     <message>
         <location filename="gnuplotinvoker.cpp" line="234"/>
         <source>Error: gnuplot not found ! path=%1</source>
-        <translation>Fehler: gnuplot nicht gefunden ! Pfad?%1</translation>
+        <translation>Fehler: gnuplot nicht gefunden ! Pfad=%1</translation>
     </message>
 </context>
 <context>
