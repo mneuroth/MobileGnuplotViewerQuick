@@ -73,7 +73,7 @@ PageHomeForm {
         onClicked: {
             if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
             {
-                applicationData.saveFileContentAsync(homePage.textArea, applicationData.getOnlyFileName(homePage.currentFileUrl))
+                applicationData.saveFileContentAsync(homePage.textArea.text, applicationData.getOnlyFileName(homePage.currentFileUrl))
             }
             else
             {
