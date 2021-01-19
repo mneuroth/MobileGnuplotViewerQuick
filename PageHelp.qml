@@ -18,7 +18,7 @@ PageHelpForm {
         onClicked: {
             var s = gnuplotInvoker.run(helpPage.txtHelp.text)
             var sErrorText = gnuplotInvoker.lastError
-            outputPage.txtOutput.text = s
+            outputPage.txtOutput.text += s
             outputPage.txtOutput.text += sErrorText
             stackView.pop()
             stackView.push(outputPage)

@@ -204,10 +204,12 @@ ApplicationWindow {
         mobileFileDialog.currentDirectory = applicationData.getLocalPathWithoutFileName(urlFileName)
     }
 
-    function showInOutput(sContent) {
+    function showInOutput(sContent, bShowOutputPage) {
         outputPage.txtOutput.text += "\n" + sContent
-        stackView.pop()
-        stackView.push(outputPage)
+        if(bShowOutputPage) {
+            stackView.pop()
+            stackView.push(outputPage)
+        }
     }
 
     function showFileContentInOutput(sOnlyFileName) {
@@ -919,7 +921,7 @@ ApplicationWindow {
         target: gnuplotInvoker
 
         onSigShowErrorText: {
-            showInOutput(txt)
+            showInOutput(txt, bShowOutputPage)
         }
     }
 

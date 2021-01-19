@@ -118,6 +118,11 @@ void GnuplotInvoker::sltErrorText(const QString & sTxt)
     emit sigShowErrorText(sTxt);
 }
 
+void GnuplotInvoker::sltErrorTextWithoutPageActivation(const QString & sTxt)
+{
+    emit sigShowErrorText(sTxt, false);
+}
+
 void GnuplotInvoker::handleGnuplotError(int exitCode)
 {
     QByteArray error = m_aGnuplotProcess.readAllStandardError();

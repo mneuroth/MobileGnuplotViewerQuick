@@ -64,12 +64,13 @@ public:
 
 signals:
     void sigResultReady(const QString & svgData);
-    void sigShowErrorText(const QString & txt);
+    void sigShowErrorText(const QString & txt, bool bShowOutputPage = true);
 
 public slots:
     void sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus);
     void sltErrorGnuplot(QProcess::ProcessError error);
     void sltErrorText(const QString & sTxt);
+    void sltErrorTextWithoutPageActivation(const QString & sTxt);
 
 private:
     void handleGnuplotError(int exitCode);
