@@ -97,10 +97,10 @@ android {
         ARCH_PATH = arm
     }
     equals(ANDROID_TARGET_ARCH, x86)  {
-        ARCH_PATH = x86
+        ARCH_PATH = i386
     }
     equals(ANDROID_TARGET_ARCH, x86_64)  {
-        ARCH_PATH = x64
+        ARCH_PATH = x86_64
     }
     equals(ANDROID_TARGET_ARCH, mips)  {
         ARCH_PATH = mips
