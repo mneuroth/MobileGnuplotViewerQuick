@@ -1121,7 +1121,7 @@ history_command()
 	int n = 0;		   /* print only <last> entries */
 	char *tmp;
 	TBOOLEAN append = FALSE;   /* rewrite output file or append it */
-	static char *name = NULL;  /* name of the output file; NULL for stdout */
+	static char *name = NULL;  /* name of the output file; NULL for _stdout */
 
 	TBOOLEAN quiet = history_quiet;
 	if (!END_OF_COMMAND && almost_equals(c_token,"q$uiet")) {
@@ -1581,7 +1581,7 @@ load_command()
 	int_error(c_token, "expecting filename");
     gp_expand_tilde(&save_file);
 
-    fp = strcmp(save_file, "-") ? loadpath_fopen(save_file, "r") : stdout;
+    fp = strcmp(save_file, "-") ? loadpath_fopen(save_file, "r") : _stdout;
     load_file(fp, save_file, 1);
 }
 
@@ -1858,7 +1858,7 @@ plot_command()
 void
 print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 {
-    if (print_out && print_out != _stderr && print_out != stdout) {
+    if (print_out && print_out != _stderr && print_out != _stdout) {
 #ifdef PIPES
 	if (print_out_name[0] == '|') {
 	    if (0 > pclose(print_out))
@@ -1879,7 +1879,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
     }
 
     if (strcmp(name, "-") == 0) {
-	print_out = stdout;
+	print_out = _stdout;
 	return;
     }
 
@@ -1927,8 +1927,8 @@ print_show_output()
 {
     if (print_out_name)
 	return print_out_name;
-    if (print_out == stdout)
-	return "<stdout>";
+    if (print_out == _stdout)
+	return "<_stdout>";
     if (!print_out || print_out == _stderr || !print_out_name)
     return "<stderr>";
     return print_out_name;
@@ -2185,9 +2185,9 @@ save_command()
     {
     gp_expand_tilde(&save_file);
 #ifdef _WIN32
-    fp = strcmp(save_file,"-") ? loadpath_fopen(save_file,"w") : stdout;
+    fp = strcmp(save_file,"-") ? loadpath_fopen(save_file,"w") : _stdout;
 #else
-    fp = strcmp(save_file,"-") ? fopen(save_file,"w") : stdout;
+    fp = strcmp(save_file,"-") ? fopen(save_file,"w") : _stdout;
 #endif
     }
 
@@ -2214,7 +2214,7 @@ save_command()
 	    save_all(fp);
     }
 
-    if (stdout != fp) {
+    if (_stdout != fp) {
 #ifdef PIPES
 	if (save_file[0] == '|')
 	    (void) pclose(fp);

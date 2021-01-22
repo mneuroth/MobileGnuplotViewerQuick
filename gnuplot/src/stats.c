@@ -388,7 +388,7 @@ file_output( struct file_stats s )
     ensure_output();
 
     /* Non-formatted to disk */
-    if ( print_out != stdout && print_out != _stderr ) {
+    if ( print_out != _stdout && print_out != _stderr ) {
 	fprintf( print_out, "%s\t%ld\n", "records", s.records );
 	fprintf( print_out, "%s\t%ld\n", "invalid", s.invalid );
 	fprintf( print_out, "%s\t%ld\n", "blanks", s.blanks );
@@ -461,7 +461,7 @@ sgl_column_output( struct sgl_column_stats s, long n )
     ensure_output();
 
     /* Non-formatted to disk */
-    if ( print_out != stdout && print_out != _stderr ) {
+    if ( print_out != _stdout && print_out != _stderr ) {
 	sgl_column_output_nonformat( s, "_y" );
 	return;
     }
@@ -524,7 +524,7 @@ two_column_output( struct sgl_column_stats x,
 	width = 1 + (int)log10((double)n);
 
     /* Non-formatted to disk */
-    if ( print_out != stdout && print_out != _stderr ) {
+    if ( print_out != _stdout && print_out != _stderr ) {
 	sgl_column_output_nonformat( x, "_x" );
 	sgl_column_output_nonformat( y, "_y" );
 

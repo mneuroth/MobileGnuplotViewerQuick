@@ -142,11 +142,14 @@ void GnuplotInvoker::handleGnuplotError(int exitCode)
     sltErrorText(sError+QString(error));
 }
 
-extern "C" int gnu_main(int argc, char **argv, FILE * filedescr);
+extern "C" int gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror);
 
 #define TEMP_GNUPLOT_SCRIPT "./_temp_.gpt"
 #define TEMP_GNUPLOT_OUTPUT "./_output_.svg"
 #define TEMP_GNUPLOT_ERROR  "./_error_.txt"
+
+#define TEMP_STDERR  "errtemp.tmp"
+#define TEMP_STDOUT  "outtemp.tmp"
 
 void GnuplotInvoker::runGnuplot(const QString & sScript)
 {
@@ -166,21 +169,28 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     qputenv("GNUHELP", sHelpFile.toLocal8Bit());
 
+    // see: https://forum.qt.io/topic/40150/read-stderr-output-from-own-process/5
+    // char buffer[size]; setbuf(stderr, buffer);
+
     QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
-                        + QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)
-                        + QString("set print '%1'\n").arg(TEMP_GNUPLOT_ERROR)
+                        //+ QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)
+                        //+ QString("set print '%1'\n").arg(TEMP_GNUPLOT_ERROR)
                         + sScript
                         + QString("\nexit\n");
 
     ApplicationData::simpleWriteFileContent(argv[1], sScriptContent);
 
-    QFile::remove("temp.tmp");
-    FILE * temp = fopen("temp.tmp", "w");
-    int result = gnu_main(argc, argv, /*aTempFile.handle()*/temp);
+    QFile::remove(TEMP_STDERR);
+    QFile::remove(TEMP_STDOUT);
+    FILE * temp = fopen(TEMP_STDERR, "w");
+    FILE * tempout = fopen(TEMP_STDOUT, "w");
+    int result = gnu_main(argc, argv, /*aTempFile.handle()*/tempout, temp);
+    fflush(tempout);
+    fclose(tempout);
     fflush(temp);
     fclose(temp);
 
-    temp = fopen("temp.tmp", "r");
+    temp = fopen(TEMP_STDERR, "r");
     fseek (temp , 0 , SEEK_END);
     long lSize = ftell (temp);
     rewind(temp);
@@ -190,9 +200,23 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     size_t resultread = fread(buffer,1,lSize,temp);
     fclose(temp);
     buffer[lSize] = 0;
-    QString sStdErrTemp = buffer;
+    m_aLastGnuplotError = buffer;
     free(buffer);
-    emit sigShowErrorText(sStdErrTemp);
+    emit sigShowErrorText(m_aLastGnuplotError);
+
+    tempout = fopen(TEMP_STDOUT, "r");
+    fseek (tempout , 0 , SEEK_END);
+    long lSizeOut = ftell (tempout);
+    rewind(tempout);
+
+    char * bufferout = (char*) malloc (sizeof(char)*(lSizeOut+1));
+    memset(bufferout,0,lSizeOut+1);
+    size_t resultreadout = fread(bufferout,1,lSizeOut,tempout);
+    fclose(tempout);
+    bufferout[lSizeOut] = 0;
+    m_aLastGnuplotResult = bufferout;
+    free(bufferout);
+    emit sigResultReady(m_aLastGnuplotResult);
 
 // TODO: how to redirect stderr outputs?
 // http://blog.debao.me/2013/07/redirect-current-processs-stdout-to-a-widget-such-as-qtextedit/
@@ -200,13 +224,28 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     if( result==0 )
     {
+        /*
+        if(aStdOut.bytesAvailable()>0)
+        {
+            QString sOutput = aStdOut.readAll();
+            emit sigShowErrorText(sOutput);
+        }
+        if(aStdErr.bytesAvailable()>0)
+        {
+            QString sOutput = aStdErr.readAll();
+            emit sigShowErrorText(sOutput);
+        }
+        */
+/*
         QString sErrorContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_ERROR);
         if( sErrorContent.length() )
         {
             m_aLastGnuplotError = sErrorContent;
             emit sigShowErrorText(m_aLastGnuplotError);
         }
-
+*/
+// TODO: und nicht Help Command !!!
+/*
         QString sResultContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_OUTPUT);
         if( QString(sResultContent).startsWith(QString("<?xml")) )
         {
@@ -217,6 +256,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         {
             sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")+" "+sResultContent));
         }
+*/
     }
     else
     {

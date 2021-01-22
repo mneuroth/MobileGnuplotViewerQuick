@@ -354,7 +354,7 @@ typedef RETSIGTYPE (*sigfunc)__PROTO((void));
 # define CONCAT3(x,y,z) x/**/y/**/z
 #endif
 
-/* Windows needs to redefine stdin/stdout functions */
+/* Windows needs to redefine stdin/_stdout functions */
 #if defined(_WIN32) && !defined(WINDOWS_NO_GUI)
 # include "win/wtext.h"
 #endif
@@ -422,5 +422,6 @@ typedef unsigned char _Bool;
 
 #include <stdio.h>
 extern FILE * _stderr;
+extern FILE * _stdout;
 
 #endif /* !SYSCFG_H */

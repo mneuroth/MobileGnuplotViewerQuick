@@ -264,19 +264,22 @@ bail_to_command_line()
 }
 
 FILE * _stderr = 0;
+FILE * _stdout = 0;
 
 #if defined(_WIN32)
 int
-gnu_main(int argc, char **argv, FILE * stderror)
+gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 #else
 int
-gnu_main(int argc, char **argv, FILE * stderror)
+gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 #endif
 {
     int i;
 
     _stderr = stderror;                         // PATCH for embedded gnuplot
+    _stdout = stdoutput;                        // PATCH for embedded gnuplot
     outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
+    multiplot = FALSE;      // reset value      // PATCH for embedded gnuplot
 
 #ifdef LINUXVGA
     LINUX_setup();		/* setup VGA before dropping privilege DBT 4/5/99 */
@@ -427,8 +430,8 @@ gnu_main(int argc, char **argv, FILE * stderror)
      * faults this (size out of range), so we try with
      * size of 1024 instead. [SAS/C does that, too. -lh]
      */
-    if (setvbuf(stdout, (char *) NULL, _IOLBF, (size_t) 1024) != 0)
-    (void) fputs("Could not linebuffer stdout\n", _stderr);
+    if (setvbuf(_stdout, (char *) NULL, _IOLBF, (size_t) 1024) != 0)
+    (void) fputs("Could not linebuffer _stdout\n", _stderr);
 
     /* Switching to unbuffered mode causes all characters in the input
      * buffer to be lost. So the only safe time to do it is on program entry.
@@ -438,7 +441,7 @@ gnu_main(int argc, char **argv, FILE * stderror)
     setvbuf(stdin, (char *) NULL, _IONBF, 0);
 #endif
 
-    gpoutfile = stdout;
+    gpoutfile = _stdout;
 
     /* Initialize pre-loaded user variables */
     /* "pi" is hard-wired as the first variable */
@@ -566,17 +569,17 @@ gnu_main(int argc, char **argv, FILE * stderror)
 
 #ifdef VMS
 	/* after catching interrupt */
-	/* VAX stuffs up stdout on SIGINT while writing to stdout,
-	   so reopen stdout. */
-	if (gpoutfile == stdout) {
-	    if ((stdout = freopen("SYS$OUTPUT", "w", stdout)) == NULL) {
+	/* VAX stuffs up _stdout on SIGINT while writing to _stdout,
+	   so reopen _stdout. */
+	if (gpoutfile == _stdout) {
+	    if ((_stdout = freopen("SYS$OUTPUT", "w", _stdout)) == NULL) {
 		/* couldn't reopen it so try opening it instead */
-		if ((stdout = fopen("SYS$OUTPUT", "w")) == NULL) {
+		if ((_stdout = fopen("SYS$OUTPUT", "w")) == NULL) {
 		    /* don't use int_error here - causes infinite loop! */
-            fputs("Error opening SYS$OUTPUT as stdout\n", _stderr);
+            fputs("Error opening SYS$OUTPUT as _stdout\n", _stderr);
 		}
 	    }
-	    gpoutfile = stdout;
+	    gpoutfile = _stdout;
 	}
 #endif /* VMS */
 

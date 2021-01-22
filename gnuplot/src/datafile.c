@@ -1333,9 +1333,9 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 	if (*substr != '\0' || data_fd < 0 || substr == df_filename+2)
 	    int_error(name_token, "invalid file descriptor integer");
 	else if (data_fd == fileno(stdin)
-	     ||  data_fd == fileno(stdout)
+	     ||  data_fd == fileno(_stdout)
 	     ||  data_fd == fileno(_stderr))
-	    int_error(name_token, "cannot plot from stdin/stdout/_stderr");
+	    int_error(name_token, "cannot plot from stdin/_stdout/_stderr");
 	else if ((data_fp = fdopen(data_fd, "r")) == (FILE *) NULL)
 	    int_error(name_token, "cannot open file descriptor for reading data");
 

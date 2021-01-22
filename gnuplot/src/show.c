@@ -2239,7 +2239,7 @@ show_palette_palette()
 	c_token++;
     }
 
-    i = (print_out==NULL || print_out==_stderr || print_out==stdout);
+    i = (print_out==NULL || print_out==_stderr || print_out==_stdout);
     f = (print_out) ? print_out : _stderr;
     fprintf(_stderr, "%s palette with %i discrete colors",
 	    (sm_palette.colorMode == SMPAL_COLOR_MODE_GRAY) ? "Gray" : "Color", colors);

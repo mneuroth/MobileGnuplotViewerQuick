@@ -3209,14 +3209,12 @@ set_output()
 	int_error(c_token, "you can't change the output in multiplot mode");
 
     if (END_OF_COMMAND) {	/* no file specified */
-    fprintf(_stderr, "set_output() p1\n");
 	term_set_output(NULL);
 	if (outstr) {
 	    free(outstr);
 	    outstr = NULL; /* means STDOUT */
 	}
     } else if ((testfile = try_to_get_string())) {
-    fprintf(_stderr, "set_output() p2 %s\n",testfile);
     gp_expand_tilde(&testfile);
 	term_set_output(testfile);
 	if (testfile != outstr) {

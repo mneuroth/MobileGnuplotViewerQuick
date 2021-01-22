@@ -486,7 +486,7 @@ void gp_atexit(void (*function)(void))
 void gp_exit(int status)
 {
     gp_exit_cleanup();
-    exit(status);
+    exit(status);       // TODO --> need patch for embedded gnuplot ?
 }
 
 #if _WIN32

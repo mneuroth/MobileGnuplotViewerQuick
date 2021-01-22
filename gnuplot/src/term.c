@@ -312,7 +312,7 @@ term_close_output()
 
     opened_binary = FALSE;
 
-    if (!outstr)                /* ie using stdout */
+    if (!outstr)                /* ie using _stdout */
 	return;
 
 #if defined(PIPES)
@@ -329,7 +329,7 @@ term_close_output()
     if (gpoutfile != gppsfile)
      fclose(gpoutfile);
 
-    gpoutfile = stdout;         /* Don't dup... */
+    gpoutfile = _stdout;         /* Don't dup... */
     free(outstr);
     outstr = NULL;
 
@@ -359,7 +359,7 @@ term_set_output(char *dest)
 	/* switch off output to special postscript file (if used) */
 	gppsfile = NULL;
     }
-    if (dest == NULL) {         /* stdout */
+    if (dest == NULL) {         /* _stdout */
 	term_close_output();
     } else {
 
@@ -385,7 +385,7 @@ term_set_output(char *dest)
 	if (outstr && stricmp(outstr, "PRN") == 0) {
 	    /* we can't call open_printer() while printer is open, so */
 	    close_printer(gpoutfile);   /* close printer immediately if open */
-	    gpoutfile = stdout; /* and reset output to stdout */
+	    gpoutfile = _stdout; /* and reset output to _stdout */
 	    free(outstr);
 	    outstr = NULL;
 	}
@@ -486,9 +486,9 @@ term_initialise()
 		if (outstr == NULL && !(term->flags & TERM_NO_OUTPUTFILE))
 		    int_error(c_token, "cannot output binary data to wgnuplot text window");
 #endif
-	    /* binary to stdout in non-interactive session... */
-	    fflush(stdout);
-	    setmode(fileno(stdout), O_BINARY);
+	    /* binary to _stdout in non-interactive session... */
+	    fflush(_stdout);
+	    setmode(fileno(_stdout), O_BINARY);
 	}
 #endif
 
@@ -735,11 +735,11 @@ term_check_multiplot_okay(TBOOLEAN f_interactive)
      * it is safe if
      *   it is not an interactive read, or
      *   the terminal supports interactive multiplot, or
-     *   we are not writing to stdout and terminal doesn't
+     *   we are not writing to _stdout and terminal doesn't
      *     refuse multiplot outright
      */
     if (!f_interactive || (term->flags & TERM_CAN_MULTIPLOT) ||
-	((gpoutfile != stdout) && !(term->flags & TERM_CANNOT_MULTIPLOT))
+	((gpoutfile != _stdout) && !(term->flags & TERM_CANNOT_MULTIPLOT))
 	) {
 	/* it's okay to use multiplot here, but suspend first */
 	term_suspend();
@@ -2060,8 +2060,8 @@ term_mode_tek()
 {
     long status;
 
-    if (gpoutfile != stdout)
-	return;                 /* don't modify if not stdout */
+    if (gpoutfile != _stdout)
+	return;                 /* don't modify if not _stdout */
     sys$assign(&sysoutput_desc, &chan, 0, 0);
     cur_char_buf[0] = 0x004A0000 | DC$_TERM | (TT$_TEK401X << 8);
     cur_char_buf[1] = (cur_char_buf[1] & 0x00FFFFFF) | 0x18000000;
@@ -2120,8 +2120,8 @@ term_mode_native()
 {
     int i;
 
-    if (gpoutfile != stdout)
-	return;                 /* don't modify if not stdout */
+    if (gpoutfile != _stdout)
+	return;                 /* don't modify if not _stdout */
     sys$assign(&sysoutput_desc, &chan, 0, 0);
     sys$qiow(0, chan, IO$_SETMODE, 0, 0, 0, old_char_buf, 12, 0, 0, 0, 0);
     for (i = 0; i < 3; ++i)
@@ -2133,8 +2133,8 @@ term_mode_native()
 void
 term_pasthru()
 {
-    if (gpoutfile != stdout)
-	return;                 /* don't modify if not stdout */
+    if (gpoutfile != _stdout)
+	return;                 /* don't modify if not _stdout */
     sys$assign(&sysoutput_desc, &chan, 0, 0);
     cur_char_buf[2] |= TT2$M_PASTHRU;
     sys$qiow(0, chan, IO$_SETMODE, 0, 0, 0, cur_char_buf, 12, 0, 0, 0, 0);
@@ -2145,8 +2145,8 @@ term_pasthru()
 void
 term_nopasthru()
 {
-    if (gpoutfile != stdout)
-	return;                 /* don't modify if not stdout */
+    if (gpoutfile != _stdout)
+	return;                 /* don't modify if not _stdout */
     sys$assign(&sysoutput_desc, &chan, 0, 0);
     cur_char_buf[2] &= ~TT2$M_PASTHRU;
     sys$qiow(0, chan, IO$_SETMODE, 0, 0, 0, cur_char_buf, 12, 0, 0, 0, 0);
@@ -2159,7 +2159,7 @@ fflush_binary()
     typedef short int INT16;    /* signed 16-bit integers */
     INT16 k;            /* loop index */
 
-    if (gpoutfile != stdout) {
+    if (gpoutfile != _stdout) {
 	/* Stupid VMS fflush() raises error and loses last data block
 	   unless it is full for a fixed-length record binary file.
 	   Pad it here with NULL characters. */

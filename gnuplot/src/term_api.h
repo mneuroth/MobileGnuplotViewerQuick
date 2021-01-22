@@ -251,8 +251,8 @@ typedef enum t_imagecolor { IC_PALETTE, IC_RGB, IC_RGBA }
 
 /* Values for the flags field of TERMENTRY
  */
-#define TERM_CAN_MULTIPLOT    (1<<0)	/* tested if stdout not redirected */
-#define TERM_CANNOT_MULTIPLOT (1<<1)	/* tested if stdout is redirected  */
+#define TERM_CAN_MULTIPLOT    (1<<0)	/* tested if _stdout not redirected */
+#define TERM_CANNOT_MULTIPLOT (1<<1)	/* tested if _stdout is redirected  */
 #define TERM_BINARY           (1<<2)	/* open output file with "b"       */
 #define TERM_INIT_ON_REPLOT   (1<<3)	/* call term->init() on replot     */
 #define TERM_IS_POSTSCRIPT    (1<<4)	/* post, next, pslatex, etc        */

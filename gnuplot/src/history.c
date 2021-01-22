@@ -392,7 +392,7 @@ gp_read_history(const char *filename)
 
 #ifdef USE_READLINE
 
-/* Save history to file, or write to stdout or pipe.
+/* Save history to file, or write to _stdout or pipe.
  * For pipes, only "|" works, pipes starting with ">" get a strange 
  * filename like in the non-readline version.
  *
@@ -402,7 +402,7 @@ void
 write_history_list(const int num, const char *const filename, const char *mode)
 {
     const HIST_ENTRY *list_entry;
-    FILE *out = stdout;
+    FILE *out = _stdout;
     int is_pipe = 0;
     int is_file = 0;
     int is_quiet = 0;
@@ -420,7 +420,7 @@ write_history_list(const int num, const char *const filename, const char *mode)
 	{
 	    if (!(out = fopen(filename, mode))) {
 		int_warn(NO_CARET, "Cannot open file to save history, using standard output.\n");
-		out = stdout;
+		out = _stdout;
 	    } else {
 		is_file = 1;
 	    }
