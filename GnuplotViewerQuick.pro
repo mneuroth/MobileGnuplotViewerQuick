@@ -68,6 +68,12 @@ wasm {  # wasm_32 ?
     include(gnuplot/gnuplot.pri)
 }
 
+win32 {
+    #DEFINES += _USE_BUILTIN_GNUPLOT
+
+    #include(gnuplot/gnuplot.pri)
+}
+
 ios {
     LIBS += -L/usr/local/lib -liconv
 
@@ -77,6 +83,10 @@ ios {
 }
 
 android {
+    DEFINES += _USE_BUILTIN_GNUPLOT
+
+    include(gnuplot/gnuplot.pri)
+
     SOURCES += android/androidshareutils.cpp
 
     HEADERS += android/androidshareutils.hpp
@@ -86,6 +96,8 @@ android {
     # see: https://groups.google.com/forum/#!msg/android-qt/zmtqbUz7KmI/3jLoaK84fd4J
 
     QT += androidextras
+
+    #LIBS += -liconv
 
     equals(ANDROID_TARGET_ARCH, arm64-v8a) {
         ARCH_PATH = arm64
