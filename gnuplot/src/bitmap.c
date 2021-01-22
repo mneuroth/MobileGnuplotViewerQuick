@@ -790,10 +790,10 @@ b_setpixel(unsigned int x, unsigned int y, unsigned int value)
 #ifdef BITMAPDEBUG
     else {
 	if (b_rastermode)
-	    fprintf(stderr, "Warning: setpixel(%d, %d, %d) out of bounds\n",
+	    fprintf(_stderr, "Warning: setpixel(%d, %d, %d) out of bounds\n",
 		    b_ysize - 1 - y, x, value);
 	else
-	    fprintf(stderr, "Warning: setpixel(%d, %d, %d) out of bounds\n",
+	    fprintf(_stderr, "Warning: setpixel(%d, %d, %d) out of bounds\n",
 		    x, y, value);
     }
 #endif
@@ -833,10 +833,10 @@ b_getpixel(unsigned int x, unsigned int y)
     } else {
 #ifdef BITMAPDEBUG
 	if (b_rastermode)
-	    fprintf(stderr, "Warning: getpixel(%d,%d) out of bounds\n",
+	    fprintf(_stderr, "Warning: getpixel(%d,%d) out of bounds\n",
 		    b_ysize-1-y, x);
 	else
-	    fprintf(stderr, "Warning: getpixel(%d,%d) out of bounds\n", x, y);
+	    fprintf(_stderr, "Warning: getpixel(%d,%d) out of bounds\n", x, y);
 #endif
 	return(0);
     }

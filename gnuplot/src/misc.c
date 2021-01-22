@@ -365,9 +365,9 @@ load_file(FILE *fp, char *name, int calltype)
 	start = 0;
 	more = TRUE;
 
-	/* read one logical line */
+    /* read one logical line */
 	while (more) {
-	    if (fgets(&(gp_input_line[start]), left, fp) == (char *) NULL) {
+        if (fgets(&(gp_input_line[start]), left, fp) == (char *) NULL) {
 		stop = TRUE;	/* EOF in file */
 		gp_input_line[start] = '\0';
 		more = FALSE;
@@ -435,7 +435,7 @@ load_file(FILE *fp, char *name, int calltype)
 	    }
 	}
 	
-	/* If we hit a 'break' or 'continue' statement in the lines just processed */
+    /* If we hit a 'break' or 'continue' statement in the lines just processed */
 	if (iteration_early_exit())
 	    continue;
 
@@ -446,9 +446,9 @@ load_file(FILE *fp, char *name, int calltype)
 		expand_call_args();
 #endif
 	    screen_ok = FALSE;	/* make sure command line is echoed on error */
-	    if (do_line())
-		stop = TRUE;
-	}
+        if (do_line())
+        stop = TRUE;
+    }
     }
 
     /* pop state */
@@ -793,10 +793,10 @@ push_terminal(int is_interactive)
 	push_term_name = gp_strdup(term->name);
 	push_term_opts = gp_strdup(term_options);
 	if (is_interactive)
-	    fprintf(stderr, "   pushed terminal %s %s\n", push_term_name, push_term_opts);
+	    fprintf(_stderr, "   pushed terminal %s %s\n", push_term_name, push_term_opts);
     } else {
 	if (is_interactive)
-	    fputs("\tcurrent terminal type is unknown\n", stderr);
+	    fputs("\tcurrent terminal type is unknown\n", _stderr);
     }
 }
 
@@ -822,9 +822,9 @@ pop_terminal()
 	do_string_and_free(s);
 	interactive = i;
 	if (interactive)
-	    fprintf(stderr,"   restored terminal is %s %s\n", term->name, ((*term_options) ? term_options : ""));
+	    fprintf(_stderr,"   restored terminal is %s %s\n", term->name, ((*term_options) ? term_options : ""));
     } else
-	fprintf(stderr,"No terminal has been pushed yet\n");
+	fprintf(_stderr,"No terminal has been pushed yet\n");
 }
 
 

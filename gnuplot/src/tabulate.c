@@ -194,7 +194,7 @@ print_table(struct curve_points *current_plot, int plot_num)
 
 	default:
 	    if (interactive)
-		fprintf(stderr, "Tabular output of %s plot style not fully implemented\n",
+		fprintf(_stderr, "Tabular output of %s plot style not fully implemented\n",
 		    current_plot->plot_style == HISTOGRAMS ? "histograms" :
 		    "this");
 	    break;
@@ -408,7 +408,7 @@ print_3dtable(int pcount)
 	    break;
 
 	default:
-	    fprintf(stderr, "Tabular output of this 3D plot style not implemented\n");
+	    fprintf(_stderr, "Tabular output of this 3D plot style not implemented\n");
 	    continue;
 	}
 

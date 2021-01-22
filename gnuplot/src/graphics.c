@@ -2952,7 +2952,7 @@ plot_boxplot(struct curve_points *plot)
 	else
 	    quartile3 = subset_points[N - (N+3)/4].y;
 
-	FPRINTF((stderr,"Boxplot: quartile boundaries for %d points: %g %g %g\n",
+	FPRINTF((_stderr,"Boxplot: quartile boundaries for %d points: %g %g %g\n",
 			N, quartile1, median, quartile3));
 
 	/* Set the whisker limits based on the user-defined style */
@@ -3699,7 +3699,7 @@ place_parallel_axes(struct curve_points *first_plot, int pcount, int layer)
 	    (plot_bounds.ytop - plot_bounds.ybot)
 	    / (this_axis->max - this_axis->min);
 
-	FPRINTF((stderr,
+	FPRINTF((_stderr,
 	    "axis p%d: min %g max %g set_min %g set_max %g autoscale %o set_autoscale %o\n",
 	    j, this_axis->min, this_axis->max,
 	    this_axis->set_min, this_axis->set_max,
@@ -4248,7 +4248,7 @@ process_image(void *plot, t_procimg_action action)
 			    break;
 	    L = p_count / K;
 	}
-	FPRINTF((stderr, "No dimension information for %d pixels total. Trying %d x %d\n",
+	FPRINTF((_stderr, "No dimension information for %d pixels total. Trying %d x %d\n",
 		p_count, L, K));
     }
 
@@ -4750,7 +4750,7 @@ process_image(void *plot, t_procimg_action action)
 			    if ((points[i_image].type == UNDEFINED)
 			    ||  (isnan(points[i_image].CRD_COLOR))) {
 				/* EAM April 2012 Distinguish +/-Inf from NaN */
-			    	FPRINTF((stderr,"undefined pixel value %g\n",
+			    	FPRINTF((_stderr,"undefined pixel value %g\n",
 					points[i_image].CRD_COLOR));
 				if (isnan(points[i_image].CRD_COLOR))
 					goto skip_pixel;

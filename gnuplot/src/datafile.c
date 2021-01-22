@@ -601,7 +601,7 @@ df_gets()
 {
     /* HBB 20000526: prompt user for inline data, if in interactive mode */
     if (mixed_data_fp && interactive)
-	fputs("input data ('e' ends) > ", stderr);
+	fputs("input data ('e' ends) > ", _stderr);
 
     /* Special pseudofiles '+' and '++' return coords of sample */
     if (df_pseudodata)
@@ -800,7 +800,7 @@ df_tokenise(char *s)
 
 	    if (isnan(df_column[df_no_cols].datum)) {
 		df_column[df_no_cols].good = DF_UNDEFINED;
-		FPRINTF((stderr,"NaN in column %d\n", df_no_cols));
+		FPRINTF((_stderr,"NaN in column %d\n", df_no_cols));
 	    }
 	}
 
@@ -1302,7 +1302,7 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 	/* Save the matrix/array/image dimensions for binary image plot styles	*/
 	plot->image_properties.ncols = df_xpixels;
 	plot->image_properties.nrows = df_ypixels;
-	FPRINTF((stderr,"datafile.c:%d (ncols,nrows) set to (%d,%d)\n", __LINE__,
+	FPRINTF((_stderr,"datafile.c:%d (ncols,nrows) set to (%d,%d)\n", __LINE__,
 		df_xpixels, df_ypixels));
 
 	if (set_every && df_xpixels && df_ypixels) {
@@ -1310,14 +1310,14 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 		    ((int)(GPMIN(lastpoint,df_xpixels-1)) - firstpoint) / everypoint;
 	    plot->image_properties.nrows = 1 +
 		    ((int)(GPMIN(lastline,df_ypixels-1)) - firstline) / everyline;
-	    FPRINTF((stderr,"datafile.c:%d  adjusting to (%d, %d)\n", __LINE__,
+	    FPRINTF((_stderr,"datafile.c:%d  adjusting to (%d, %d)\n", __LINE__,
 		    plot->image_properties.ncols, plot->image_properties.nrows));
 	}
 	if (df_transpose) {
 	    unsigned int temp = plot->image_properties.ncols;
 	    plot->image_properties.ncols = plot->image_properties.nrows;
 	    plot->image_properties.nrows = temp;
-	    FPRINTF((stderr,"datafile.c:%d  adjusting to (%d, %d)\n", __LINE__,
+	    FPRINTF((_stderr,"datafile.c:%d  adjusting to (%d, %d)\n", __LINE__,
 		    plot->image_properties.ncols, plot->image_properties.nrows));
 	}
     }
@@ -1334,8 +1334,8 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 	    int_error(name_token, "invalid file descriptor integer");
 	else if (data_fd == fileno(stdin)
 	     ||  data_fd == fileno(stdout)
-	     ||  data_fd == fileno(stderr))
-	    int_error(name_token, "cannot plot from stdin/stdout/stderr");
+	     ||  data_fd == fileno(_stderr))
+	    int_error(name_token, "cannot plot from stdin/stdout/_stderr");
 	else if ((data_fp = fdopen(data_fd, "r")) == (FILE *) NULL)
 	    int_error(name_token, "cannot open file descriptor for reading data");
 
@@ -1486,7 +1486,7 @@ df_close()
 	     * Leave it open in either case.
 	     */
 	    rewind(data_fp);
-	    fprintf(stderr,"Rewinding fd %d\n", data_fd);
+	    fprintf(_stderr,"Rewinding fd %d\n", data_fd);
 	} else
 #endif
 #if defined(PIPES)
@@ -1511,7 +1511,7 @@ df_showdata()
 {
   if (data_fp && df_filename && df_line) {
     /* display no more than 77 characters */
-    fprintf(stderr, "%.77s%s\n%s:%d:", df_line,
+    fprintf(_stderr, "%.77s%s\n%s:%d:", df_line,
 	    (strlen(df_line) > 77) ? "..." : "",
 	    df_filename, df_line_number);
   }
@@ -1948,7 +1948,7 @@ df_readascii(double v[], int max)
 	/* Bookkeeping for the plot ... every N:M:etc option */
 	if ((parse_1st_row_as_headers || column_for_key_title > 0)
 	&&  !df_already_got_headers) {
-		FPRINTF((stderr,"skipping 'every' test in order to read column headers\n"));
+		FPRINTF((_stderr,"skipping 'every' test in order to read column headers\n"));
 	} else {
 		/* Accept only lines with (line_count%everyline) == 0 */
 		if (line_count < firstline || line_count > lastline ||
@@ -2022,7 +2022,7 @@ df_readascii(double v[], int max)
 		if (df_column[j].header) {
 		    if (df_longest_columnhead < strlen(df_column[j].header))
 			df_longest_columnhead = strlen(df_column[j].header);
-		    FPRINTF((stderr,"Col %d: \"%s\"\n",j+1,df_column[j].header));
+		    FPRINTF((_stderr,"Col %d: \"%s\"\n",j+1,df_column[j].header));
 		}
 	    }
 	    df_already_got_headers = TRUE;
@@ -2036,7 +2036,7 @@ df_readascii(double v[], int max)
 	    if (column_for_key_title > 0) {
 		df_key_title = gp_strdup(df_column[column_for_key_title-1].header);
 		if (!df_key_title) {
-		    FPRINTF((stderr,
+		    FPRINTF((_stderr,
 			 "df_readline: missing column head for key title\n"));
 		    return(DF_KEY_TITLE_MISSING);
 		}
@@ -2169,7 +2169,7 @@ df_readascii(double v[], int max)
 		    if (use_spec[output].depends_on_column > 0) {
 			if ((use_spec[output].depends_on_column > df_no_cols)
 			|| df_column[use_spec[output].depends_on_column-1].good == DF_MISSING) {
-			    FPRINTF((stderr,
+			    FPRINTF((_stderr,
 				"df_readascii: skipping evaluation that uses missing value in $%d\n",
 				use_spec[output].depends_on_column));
 			    v[output] = not_a_number();
@@ -2528,7 +2528,7 @@ df_determine_matrix_info(FILE *fin)
 		if (set_every) {
 		    df_xpixels = 1 + ((int)(GPMIN(lastpoint,df_xpixels-1)) - firstpoint) / everypoint;
 		    df_ypixels = 1 + ((int)(GPMIN(lastline,df_ypixels-1)) - firstline) / everyline;
-		    FPRINTF((stderr,"datafile.c:%d filtering (%d,%d) to (%d,%d)\n",
+		    FPRINTF((_stderr,"datafile.c:%d filtering (%d,%d) to (%d,%d)\n",
 				 __LINE__, nc, nr, df_xpixels, df_ypixels));
 		}
 
@@ -3613,7 +3613,7 @@ plot_option_binary(TBOOLEAN set_matrix, TBOOLEAN set_default)
 		(*binary_input_function)();
 		df_xpixels = df_bin_record[0].scan_dim[0];
 		df_ypixels = df_bin_record[0].scan_dim[1];
-		FPRINTF((stderr,"datafile.c:%d  image dimensions %d x %d\n", __LINE__,
+		FPRINTF((_stderr,"datafile.c:%d  image dimensions %d x %d\n", __LINE__,
 			df_xpixels, df_ypixels));
 	    }
 
@@ -3656,7 +3656,7 @@ plot_option_binary(TBOOLEAN set_matrix, TBOOLEAN set_default)
 	    set_record = TRUE;
 	    df_xpixels = df_bin_record[df_num_bin_records - 1].cart_dim[0];
 	    df_ypixels = df_bin_record[df_num_bin_records - 1].cart_dim[1];
-	    FPRINTF((stderr,"datafile.c:%d  record dimensions %d x %d\n", __LINE__,
+	    FPRINTF((_stderr,"datafile.c:%d  record dimensions %d x %d\n", __LINE__,
 		df_xpixels, df_ypixels));
 	    continue;
 	}
@@ -3678,7 +3678,7 @@ plot_option_binary(TBOOLEAN set_matrix, TBOOLEAN set_default)
 	    set_array = TRUE;
 	    df_xpixels = df_bin_record[df_num_bin_records - 1].cart_dim[0];
 	    df_ypixels = df_bin_record[df_num_bin_records - 1].cart_dim[1];
-	    FPRINTF((stderr,"datafile.c:%d  array dimensions %d x %d\n", __LINE__,
+	    FPRINTF((_stderr,"datafile.c:%d  array dimensions %d x %d\n", __LINE__,
 		df_xpixels, df_ypixels));
 	    continue;
 	}
@@ -4804,7 +4804,7 @@ df_readbinary(double v[], int max)
 		 * but scan_size was not. For that case we must not overwrite here.
 		 * For binary matrix, df_xpixels is still 0.
 		 */
-		FPRINTF((stderr,"datafile.c:%d matrix dimensions %d x %d\n",
+		FPRINTF((_stderr,"datafile.c:%d matrix dimensions %d x %d\n",
 			__LINE__, scan_size[1], scan_size[0]));
 		df_xpixels = scan_size[1];
 		df_ypixels = scan_size[0];
@@ -4956,8 +4956,8 @@ df_readbinary(double v[], int max)
 	    memory_data = gp_alloc(bytes_total, "df_readbinary slurper");
 	    this_record->memory_data = memory_data;
 
-	    FPRINTF((stderr,"Fast matrix code:\n"));
-	    FPRINTF((stderr,"\t\t skip %d bytes, read %ld bytes as %d x %d array\n",
+	    FPRINTF((_stderr,"Fast matrix code:\n"));
+	    FPRINTF((_stderr,"\t\t skip %d bytes, read %ld bytes as %d x %d array\n",
 		    record_skip, bytes_total, scan_size[0], scan_size[1]));
 
 	    /* Do the actual slurping */
@@ -5322,7 +5322,7 @@ df_readbinary(double v[], int max)
 
 		if (isnan(v[output])) {
 			/* EAM April 2012 - return, continue, or ignore??? */
-			FPRINTF((stderr,"NaN input value"));
+			FPRINTF((_stderr,"NaN input value"));
 			if (!df_matrix)
 				return DF_UNDEFINED;
 		}

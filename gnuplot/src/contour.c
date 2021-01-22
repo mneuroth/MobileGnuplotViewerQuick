@@ -452,7 +452,7 @@ gen_one_contour(
 	}
 	if (!pe_temp) {
 	    *num_active = 0;
-	    fprintf(stderr, "gen_one_contour: no contour found\n");
+	    fprintf(_stderr, "gen_one_contour: no contour found\n");
 	    return NULL;
 	} else {
 	    *contr_isclosed = TRUE;
@@ -505,7 +505,7 @@ trace_contour(
 	    if (!p_next_edge) {	/* Error exit */
 		pc_tail->next = NULL;
 		free_contour(p_cntr);
-		fprintf(stderr, "trace_contour: unexpected end of contour\n");
+		fprintf(_stderr, "trace_contour: unexpected end of contour\n");
 		return NULL;
 	    }
 	    p_edge = p_next_edge;
@@ -764,9 +764,9 @@ calc_min_max(
     }
 
     /*
-     * fprintf(stderr," x: %g, %g\n", (*xx_min), (*xx_max));
-     * fprintf(stderr," y: %g, %g\n", (*yy_min), (*yy_max));
-     * fprintf(stderr," z: %g, %g\n", (*zz_min), (*zz_max));
+     * fprintf(_stderr," x: %g, %g\n", (*xx_min), (*xx_max));
+     * fprintf(_stderr," y: %g, %g\n", (*yy_min), (*yy_max));
+     * fprintf(_stderr," z: %g, %g\n", (*zz_min), (*zz_max));
      */
 }
 

@@ -202,14 +202,14 @@ extend_input_line()
 	sprintf( mouseSharedMemName, "\\SHAREMEM\\GP%i_Mouse_Input", getpid() );
 	if (DosAllocSharedMem((PVOID) & input_from_PM_Terminal,
 		mouseSharedMemName, MAX_LINE_LEN, PAG_WRITE | PAG_COMMIT))
-	    fputs("command.c: DosAllocSharedMem ERROR\n",stderr);
+        fputs("command.c: DosAllocSharedMem ERROR\n",_stderr);
 #endif /* OS2_IPC */
 
     } else {
 	gp_input_line = gp_realloc(gp_input_line, gp_input_line_len + MAX_LINE_LEN,
 				"extend input line");
 	gp_input_line_len += MAX_LINE_LEN;
-	FPRINTF((stderr, "extending input line to %d chars\n",
+    FPRINTF((_stderr, "extending input line to %d chars\n",
 		 gp_input_line_len));
     }
 }
@@ -230,7 +230,7 @@ extend_token_table()
 	token = gp_realloc(token, (token_table_size + MAX_TOKENS) * sizeof(struct lexical_unit), "extend token table");
 	memset(token+token_table_size, 0, MAX_TOKENS * sizeof(*token));
 	token_table_size += MAX_TOKENS;
-	FPRINTF((stderr, "extending token table to %d elements\n", token_table_size));
+    FPRINTF((_stderr, "extending token table to %d elements\n", token_table_size));
     }
 }
 
@@ -255,7 +255,7 @@ static char *input_line_SharedMem = NULL;
     if (input_line_SharedMem == NULL) {  /* get shared mem only once */
     if (DosGetNamedSharedMem((PVOID) &input_line_SharedMem,
 		mouseSharedMemName, PAG_WRITE | PAG_READ))
-	fputs("readline.c: DosGetNamedSharedMem ERROR\n", stderr);
+    fputs("readline.c: DosGetNamedSharedMem ERROR\n", _stderr);
     else
 	*input_line_SharedMem = 0;
     }
@@ -274,7 +274,7 @@ static char *input_line_SharedMem = NULL;
         if (thread_rl_Running == 0) {
 	    int res = _beginthread(thread_read_line,NULL,32768,NULL);
 	    if (res == -1)
-		fputs("error command.c could not begin thread\n",stderr);
+        fputs("error command.c could not begin thread\n",_stderr);
 	}
 	/* wait until a line is read or gnupmdrv makes shared mem available */
 	DosWaitEventSem(semInputReady,SEM_INDEFINITE_WAIT);
@@ -292,8 +292,8 @@ static char *input_line_SharedMem = NULL;
 	        strstr(input_line_SharedMem,"plot") != NULL &&
 		(strcmp(term->name,"pm") && strcmp(term->name,"x11"))) {
 		/* avoid plotting if terminal is not PM or X11 */
-		fprintf(stderr,"\n\tCommand(s) ignored for other than PM and X11 terminals\a\n");
-		if (interactive) fputs(PROMPT,stderr);
+        fprintf(_stderr,"\n\tCommand(s) ignored for other than PM and X11 terminals\a\n");
+        if (interactive) fputs(PROMPT,_stderr);
 		input_line_SharedMem[0] = 0; /* discard the whole command line */
 		return (0);
 	    }
@@ -348,7 +348,7 @@ do_line()
     }
 
     /* Strip off trailing comment */
-    FPRINTF((stderr,"doline( \"%s\" )\n", gp_input_line));
+    FPRINTF((_stderr,"doline( \"%s\" )\n", gp_input_line));
     if (strchr(inlptr, '#')) {
         num_tokens = scanner(&gp_input_line, &gp_input_line_len);
 	if (gp_input_line[token[num_tokens].start_index] == '#')
@@ -363,7 +363,7 @@ do_line()
 	/* Terminate resulting string */
 	gp_input_line[strlen(inlptr)] = NUL;
     }
-    FPRINTF((stderr, "  echo: \"%s\"\n", gp_input_line));
+    FPRINTF((_stderr, "  echo: \"%s\"\n", gp_input_line));
 
     if_depth = 0;
     num_tokens = scanner(&gp_input_line, &gp_input_line_len);
@@ -382,7 +382,7 @@ do_line()
 	     * and therefore requesting interactive input is not an option.
 	     * FIXME: or is it?
 	     */
-	    int_error(NO_CARET, "Syntax error: missing block terminator }");
+        int_error(NO_CARET, "Syntax error: missing block terminator }");
 	}
 	else if (interactive || noinputfiles) {
 	    /* If we are really in interactive mode and there are unterminated blocks,
@@ -393,7 +393,7 @@ do_line()
 	     * as a slave process. The test for noinputfiles is for the latter case.
 	     * If we didn't have that test here, unterminated blocks sent via a pipe
 	     * would trigger the error message in the else branch below. */
-	    int retval;
+        int retval;
 	    strcat(gp_input_line,";");
 	    retval = read_line("more> ", strlen(gp_input_line));
 	    if (retval)
@@ -406,7 +406,7 @@ do_line()
 		gp_input_line[token[num_tokens].start_index] = NUL;
 	}
 	else {
-	    /* Non-interactive mode here means that we got a string from -e.
+        /* Non-interactive mode here means that we got a string from -e.
 	     * Having curly_brace_count > 0 means that there are at least one
 	     * unterminated blocks in the string.
 	     * Likely user error, so we die with an error message. */
@@ -416,9 +416,9 @@ do_line()
 
     c_token = 0;
     while (c_token < num_tokens) {
-	command();
-	if (iteration_early_exit()) {
-	    c_token = num_tokens;
+    command();
+    if (iteration_early_exit()) {
+        c_token = num_tokens;
 	    break;
 	}
 	if (command_exit_status) {
@@ -426,7 +426,7 @@ do_line()
 	    return 1;
 	}
 	if (c_token < num_tokens) {	/* something after command */
-	    if (equals(c_token, ";")) {
+        if (equals(c_token, ";")) {
 		c_token++;
 	    } else if (equals(c_token, "{")) {
 		begin_clause();
@@ -455,7 +455,7 @@ do_string_and_free(char *cmdline)
 {
 #ifdef USE_MOUSE
     if (display_ipc_commands())
-	fprintf(stderr, "%s\n", cmdline);
+    fprintf(_stderr, "%s\n", cmdline);
 #endif
 
     lf_push(NULL, NULL, cmdline); /* save state for errors and recursion */
@@ -493,7 +493,7 @@ do_string_replot(const char *s)
 
     if (volatile_data && (E_REFRESH_NOT_OK != refresh_ok)) {
 	if (display_ipc_commands())
-	    fprintf(stderr, "refresh\n");
+        fprintf(_stderr, "refresh\n");
 	refresh_request();
 
     } else if (!replot_disabled)
@@ -514,8 +514,8 @@ restore_prompt()
 	rl_redisplay();
 #  endif
 #else
-	fputs(PROMPT, stderr);
-	fflush(stderr);
+    fputs(PROMPT, _stderr);
+    fflush(_stderr);
 #endif
     }
 }
@@ -898,14 +898,14 @@ bind_command()
     if (END_OF_COMMAND) {
 	; /* Fall through */
     } else if (isstringvalue(c_token) && (lhs = try_to_get_string())) {
-	FPRINTF((stderr,"Got bind quoted lhs = \"%s\"\n",lhs));
+    FPRINTF((_stderr,"Got bind quoted lhs = \"%s\"\n",lhs));
     } else {
 	char *first = gp_input_line + token[c_token].start_index;
 	int size = strcspn(first, " \";");
 	lhs = gp_alloc(size + 1, "bind_command->lhs");
 	strncpy(lhs, first, size);
 	lhs[size] = '\0';
-	FPRINTF((stderr,"Got bind unquoted lhs = \"%s\"\n",lhs));
+    FPRINTF((_stderr,"Got bind unquoted lhs = \"%s\"\n",lhs));
 	while (gp_input_line + token[c_token].start_index < first+size)
 	    c_token++;
     }
@@ -917,13 +917,13 @@ bind_command()
     if (END_OF_COMMAND) {
 	; /* Fall through */
     } else if (isstringvalue(c_token) && (rhs = try_to_get_string())) {
-        FPRINTF((stderr,"Got bind quoted rhs = \"%s\"\n",rhs));
+        FPRINTF((_stderr,"Got bind quoted rhs = \"%s\"\n",rhs));
     } else {
 	int save_token = c_token;
 	while (!END_OF_COMMAND)
 	    c_token++;
 	m_capture( &rhs, save_token, c_token-1 );
-        FPRINTF((stderr,"Got bind unquoted rhs = \"%s\"\n",rhs));
+        FPRINTF((_stderr,"Got bind unquoted rhs = \"%s\"\n",rhs));
     }
 
     /* bind_process() will eventually free lhs / rhs ! */
@@ -1166,10 +1166,10 @@ do {                                                                        \
     int i;                                                                  \
     int end_index = token[tok].start_index + token[tok].length;             \
     for (i = token[tok].start_index; i < end_index && gp_input_line[i]; i++) { \
-	fputc(gp_input_line[i], stderr);                                       \
+    fputc(gp_input_line[i], _stderr);                                       \
     }                                                                       \
-    fputc('\n', stderr);                                                    \
-    fflush(stderr);                                                         \
+    fputc('\n', _stderr);                                                    \
+    fflush(_stderr);                                                         \
 } while (0)
 #endif
 
@@ -1651,7 +1651,7 @@ void
 clause_reset_after_error()
 {
     if (clause_depth)
-	FPRINTF((stderr,"CLAUSE RESET after error at depth %d\n",clause_depth));
+    FPRINTF((_stderr,"CLAUSE RESET after error at depth %d\n",clause_depth));
     clause_depth = 0;
     iteration_depth = 0;
 }
@@ -1753,17 +1753,17 @@ pause_command()
 	    free(buf);
 	    buf = tmp;
 	    if (sleep_time >= 0) {
-		fputs(buf, stderr);
+        fputs(buf, _stderr);
 	    }
 #elif defined(OS2)
 	    free(buf);
 	    buf = tmp;
 	    if (strcmp(term->name, "pm") != 0 || sleep_time >= 0)
-		fputs(buf, stderr);
+        fputs(buf, _stderr);
 #else /* Not WIN32 or OS2 */
 	    free(buf);
 	    buf = tmp;
-	    fputs(buf, stderr);
+        fputs(buf, _stderr);
 #endif
 	    text = 1;
 	}
@@ -1777,7 +1777,7 @@ pause_command()
 	    int junk = 0;
 	    if (buf) {
 		/* Use of fprintf() triggers a bug in MinGW + SJIS encoding */
-		fputs(buf, stderr); fputs("\n",stderr);
+        fputs(buf, _stderr); fputs("\n",_stderr);
 	    }
 	    /* cannot use EAT_INPUT_WITH here */
 	    do {
@@ -1801,7 +1801,7 @@ pause_command()
 		 */
 		bail_to_command_line();
 	    } else if (rc == 2) {
-		fputs(buf, stderr);
+        fputs(buf, _stderr);
 		text = 1;
 		EAT_INPUT_WITH(fgetc(stdin));
 	    }
@@ -1823,7 +1823,7 @@ pause_command()
 	timed_pause(sleep_time);
 
     if (text != 0 && sleep_time >= 0)
-	fputc('\n', stderr);
+    fputc('\n', _stderr);
     screen_ok = FALSE;
 }
 
@@ -1858,7 +1858,7 @@ plot_command()
 void
 print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 {
-    if (print_out && print_out != stderr && print_out != stdout) {
+    if (print_out && print_out != _stderr && print_out != stdout) {
 #ifdef PIPES
 	if (print_out_name[0] == '|') {
 	    if (0 > pclose(print_out))
@@ -1874,7 +1874,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
     print_out_var = NULL;
 
     if (! name) {
-	print_out = stderr;
+    print_out = _stderr;
 	return;
     }
 
@@ -1904,7 +1904,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
     } else {
 	print_out_var = add_udv_by_name(name);
 	if (print_out_var == NULL) {
-	    fprintf(stderr, "Error allocating datablock \"%s\"\n", name);
+        fprintf(_stderr, "Error allocating datablock \"%s\"\n", name);
 	    return;
 	}
 	if (print_out_var->udv_value.type != NOTDEFINED) {
@@ -1929,18 +1929,18 @@ print_show_output()
 	return print_out_name;
     if (print_out == stdout)
 	return "<stdout>";
-    if (!print_out || print_out == stderr || !print_out_name)
-	return "<stderr>";
+    if (!print_out || print_out == _stderr || !print_out_name)
+    return "<stderr>";
     return print_out_name;
 }
 
-/* 'printerr' is the same as 'print' except that output is always to stderr */
+/* 'printerr' is the same as 'print' except that output is always to _stderr */
 void
 printerr_command()
 {
     FILE *save_print_out = print_out;
 
-    print_out = stderr;
+    print_out = _stderr;
     print_command();
     print_out = save_print_out;
 }
@@ -1957,7 +1957,7 @@ print_command()
     size_t len = 0;
 
     if (!print_out)
-	print_out = stderr;
+    print_out = _stderr;
     if (print_out_var != NULL) { /* print to datablock */
 	dataline = (char *) gp_alloc(size, "dataline");
 	*dataline = NUL;
@@ -2032,9 +2032,9 @@ pwd_command()
 
     save_file = gp_alloc(PATH_MAX, "print current dir");
     if (GP_GETCWD(save_file, PATH_MAX) == NULL)
-	fprintf(stderr, "<invalid>\n");
+    fprintf(_stderr, "<invalid>\n");
     else
-	fprintf(stderr, "%s\n", save_file);
+    fprintf(_stderr, "%s\n", save_file);
     free(save_file);
     c_token++;
 }
@@ -2112,7 +2112,7 @@ replot_command()
 	int_error(c_token, "no previous plot");
 
     if (volatile_data && (refresh_ok != E_REFRESH_NOT_OK) && !replot_disabled) {
-	FPRINTF((stderr,"volatile_data %d refresh_ok %d plotted_data_from_stdin %d\n",
+    FPRINTF((_stderr,"volatile_data %d refresh_ok %d plotted_data_from_stdin %d\n",
 		volatile_data, refresh_ok, plotted_data_from_stdin));
 	refresh_command();
 	return;
@@ -2235,7 +2235,7 @@ screendump_command()
 #ifdef _Windows
     screen_dump();
 #else
-    fputs("screendump not implemented\n", stderr);
+    fputs("screendump not implemented\n", _stderr);
 #endif
 }
 
@@ -2881,7 +2881,7 @@ do_system(const char *cmd)
     if ((vaxc$errno = lib$spawn(&line_desc)) != SS$_NORMAL)
 	os_error(NO_CARET, "spawn error");
 
-    (void) putc('\n', stderr);
+    (void) putc('\n', _stderr);
 
 }
 #endif /* VMS */
@@ -2902,7 +2902,7 @@ help_command()
     if (help_window == NULL) {
 	help_window = HtmlHelp(parent, winhelpname, HH_DISPLAY_TOPIC, (DWORD_PTR)NULL);
 	if (help_window == NULL) {
-	    fprintf(stderr, "Error: Could not open help file \"" TCHARFMT "\"\n", winhelpname);
+        fprintf(_stderr, "Error: Could not open help file \"" TCHARFMT "\"\n", winhelpname);
 	    return;
 	}
     }
@@ -2943,7 +2943,7 @@ help_command()
 {
     while (!(END_OF_COMMAND))
 	c_token++;
-    fputs("This gnuplot was not built with inline help\n", stderr);
+    fputs("This gnuplot was not built with inline help\n", _stderr);
 }
 #endif /* VMS */
 #endif /* _Windows */
@@ -3295,7 +3295,7 @@ do_shell()
 	if (system(user_shell) == -1)
 	    os_error(NO_CARET, "system() failed");
     }
-    (void) putc('\n', stderr);
+    (void) putc('\n', _stderr);
 }
 
 #  else				/* !OS2 */
@@ -3316,7 +3316,7 @@ do_shell()
 				sizeof(exec) - sizeof(EXEC) - 1)))
 	    os_error(NO_CARET, "system() failed");
     }
-    (void) putc('\n', stderr);
+    (void) putc('\n', _stderr);
 }
 
 # endif				/* !MSDOS */
@@ -3342,7 +3342,7 @@ cgets_emu(char *str, int len)
     if (buffer[leftover] == NUL) {
 	buffer[0] = 126;
 	cgets(buffer);
-	fputc('\n', stderr);
+    fputc('\n', _stderr);
 	if (buffer[2] == 26)
 	    return NULL;
 	leftover = 2;
@@ -3353,7 +3353,7 @@ cgets_emu(char *str, int len)
 }
 #  else				/* !plain DOS */
 
-#   define PUT_STRING(s) fputs(s, stderr)
+#   define PUT_STRING(s) fputs(s, _stderr)
 #   define GET_STRING(s,l) fgets(s, l, stdin)
 
 #  endif			/* !plain DOS */
@@ -3444,7 +3444,7 @@ read_line(const char *prompt, int start)
 	{
 	    /* end-of-file */
 	    if (interactive)
-		(void) putc('\n', stderr);
+        (void) putc('\n', _stderr);
 	    gp_input_line[start] = NUL;
 	    inline_num++;
 	    if (start > 0 && curly_brace_count == 0)	/* don't quit yet - process what we have */
@@ -3544,7 +3544,7 @@ expand_1level_macros()
 		    if (udv && udv->udv_value.type == STRING) {
 			nfound++;
 			m = udv->udv_value.v.string_val;
-			FPRINTF((stderr,"Replacing @%s with \"%s\"\n",udv->udv_name,m));
+            FPRINTF((_stderr,"Replacing @%s with \"%s\"\n",udv->udv_name,m));
 			while (strlen(m) + o + len > gp_input_line_len)
 			    extend_input_line();
 			while (*m)
@@ -3579,7 +3579,7 @@ expand_1level_macros()
     free(temp_string);
 
     if (nfound)
-	FPRINTF((stderr,
+    FPRINTF((_stderr,
 		 "After string substitution command line is:\n\t%s\n",
 		 gp_input_line));
 

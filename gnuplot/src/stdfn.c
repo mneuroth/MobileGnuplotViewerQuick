@@ -459,7 +459,7 @@ void gp_exit_cleanup(void)
 static void debug_exit_handler(void)
 {
     if (exit_handlers) {
-        fprintf(stderr, "Gnuplot exiting abnormally. Trying to execute exit handlers anyway.\n");
+        fprintf(_stderr, "Gnuplot exiting abnormally. Trying to execute exit handlers anyway.\n");
         gp_exit_cleanup();
     }
 }

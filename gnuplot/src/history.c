@@ -542,7 +542,7 @@ history_find_all(char *cmd)
 #if !defined(HAVE_LIBEDITLINE)
     ret = history_set_pos(0);
     if (ret == 0) {
-	fprintf(stderr, "ERROR (history_find_all): could not rewind history\n");
+	fprintf(_stderr, "ERROR (history_find_all): could not rewind history\n");
 	return 0;
     }
 #else /* HAVE_LIBEDITLINE */

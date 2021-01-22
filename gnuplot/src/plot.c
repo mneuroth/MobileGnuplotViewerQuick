@@ -180,7 +180,7 @@ inter(int anint)
     if (!strcmp(term->name,"pm")) {
 	PM_intc_cleanup();
 	/* ??
-	  putc('\n', stderr);
+      putc('\n', _stderr);
 	  LONGJMP(command_line_env, TRUE);
 	 */
     } else
@@ -197,7 +197,7 @@ inter(int anint)
 #else
     {
     term_reset();
-    (void) putc('\n', stderr);
+    (void) putc('\n', _stderr);
     bail_to_command_line();	/* return to prompt */
     }
 #endif
@@ -225,10 +225,10 @@ drop_privilege()
 	asked_privi = 1;
     }
     if (setegid(rgid) == -1)
-	(void) fprintf(stderr, "setegid(%d): %s\n",
+    (void) fprintf(_stderr, "setegid(%d): %s\n",
 		       (int) rgid, strerror(errno));
     if (seteuid(ruid) == -1)
-	(void) fprintf(stderr, "seteuid(%d): %s\n",
+    (void) fprintf(_stderr, "seteuid(%d): %s\n",
 		       (int) ruid, strerror(errno));
 }
 
@@ -243,10 +243,10 @@ take_privilege()
 	asked_privi = 1;
     }
     if (setegid(egid) == -1)
-	(void) fprintf(stderr, "setegid(%d): %s\n",
+    (void) fprintf(_stderr, "setegid(%d): %s\n",
 		       (int) egid, strerror(errno));
     if (seteuid(euid) == -1)
-	(void) fprintf(stderr, "seteuid(%d): %s\n",
+    (void) fprintf(_stderr, "seteuid(%d): %s\n",
 		       (int) euid, strerror(errno));
 }
 
@@ -263,15 +263,20 @@ bail_to_command_line()
     LONGJMP(command_line_env, TRUE);
 }
 
+FILE * _stderr = 0;
+
 #if defined(_WIN32)
 int
-gnu_main(int argc, char **argv)
+gnu_main(int argc, char **argv, FILE * stderror)
 #else
 int
-gnu_main(int argc, char **argv)
+gnu_main(int argc, char **argv, FILE * stderror)
 #endif
 {
     int i;
+
+    _stderr = stderror;                         // PATCH for embedded gnuplot
+    outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
 
 #ifdef LINUXVGA
     LINUX_setup();		/* setup VGA before dropping privilege DBT 4/5/99 */
@@ -280,8 +285,8 @@ gnu_main(int argc, char **argv)
 /* make sure that we really have revoked root access, this might happen if
    gnuplot is compiled without vga support but is installed suid by mistake */
 #ifdef __linux__
-    if (setuid(getuid()) != 0) {
-	fprintf(stderr,"gnuplot: refusing to run at elevated privilege\n");
+    if (/*setuid(getuid())*/0 != 0) {
+    fprintf(_stderr,"gnuplot: refusing to run at elevated privilege\n");
 	exit(EXIT_FAILURE);
     }
 #endif
@@ -305,7 +310,7 @@ gnu_main(int argc, char **argv)
 	sprintf(semInputReadyName, "\\SEM32\\GP%i_Input_Ready", getpid());
 	rc = DosCreateEventSem(semInputReadyName, &semInputReady, 0, 0);
 	if (rc != 0)
-	    fputs("DosCreateEventSem error\n", stderr);
+        fputs("DosCreateEventSem error\n", _stderr);
 #endif
 	rc = RexxRegisterSubcomExe("GNUPLOT", (PFN) RexxInterface, NULL);
     }
@@ -414,7 +419,7 @@ gnu_main(int argc, char **argv)
     }
 #endif
 
-    setbuf(stderr, (char *) NULL);
+    setbuf(_stderr, (char *) NULL);
 
 #ifdef HAVE_SETVBUF
     /* This was once setlinebuf(). Docs say this is
@@ -423,7 +428,7 @@ gnu_main(int argc, char **argv)
      * size of 1024 instead. [SAS/C does that, too. -lh]
      */
     if (setvbuf(stdout, (char *) NULL, _IOLBF, (size_t) 1024) != 0)
-	(void) fputs("Could not linebuffer stdout\n", stderr);
+    (void) fputs("Could not linebuffer stdout\n", _stderr);
 
     /* Switching to unbuffered mode causes all characters in the input
      * buffer to be lost. So the only safe time to do it is on program entry.
@@ -456,7 +461,7 @@ gnu_main(int argc, char **argv)
 # endif
 
     /* Note: we want to know whether this is an interactive session so that we can
-     * decide whether or not to write status information to stderr.  The old test
+     * decide whether or not to write status information to _stderr.  The old test
      * for this was to see if (argc > 1) but the addition of optional command line
      * switches broke this.  What we really wanted to know was whether any of the
      * command line arguments are file names or an explicit in-line "-e command".
@@ -475,7 +480,7 @@ gnu_main(int argc, char **argv)
     /* Need this before show_version is called for the first time */
 
     if (interactive)
-	show_version(stderr);
+    show_version(_stderr);
     else
 	show_version(NULL); /* Only load GPVAL_COMPILE_OPTIONS */
 
@@ -514,7 +519,7 @@ gnu_main(int argc, char **argv)
 	push_terminal(0);	/* remember the initial terminal */
 	gp_atexit(term_reset);
 
-	/* Execute commands in ~/.gnuplot */
+    /* Execute commands in ~/.gnuplot */
 	init_session();
 
 	if (interactive && term != 0) {		/* not unknown */
@@ -537,7 +542,7 @@ gnu_main(int argc, char **argv)
 #endif /* GNUPLOT_HISTORY */
 
 #if defined(READLINE) && defined(WGP_CONSOLE)
-	    fprintf(stderr, "Encoding set to '%s'.\n", encoding_names[encoding]);
+        fprintf(_stderr, "Encoding set to '%s'.\n", encoding_names[encoding]);
 #endif
 	}			/* if (interactive && term != 0) */
     } else {
@@ -545,7 +550,7 @@ gnu_main(int argc, char **argv)
 	if (!successful_initialization) {
 	    /* Only print the warning once */
 	    successful_initialization = TRUE;
-	    fprintf(stderr,"WARNING: Error during initialization\n\n");
+        fprintf(_stderr,"WARNING: Error during initialization\n\n");
 	}
 	if (interactive == FALSE)
 	    exit_status = EXIT_FAILURE;
@@ -568,7 +573,7 @@ gnu_main(int argc, char **argv)
 		/* couldn't reopen it so try opening it instead */
 		if ((stdout = fopen("SYS$OUTPUT", "w")) == NULL) {
 		    /* don't use int_error here - causes infinite loop! */
-		    fputs("Error opening SYS$OUTPUT as stdout\n", stderr);
+            fputs("Error opening SYS$OUTPUT as stdout\n", _stderr);
 		}
 	    }
 	    gpoutfile = stdout;
@@ -595,14 +600,14 @@ gnu_main(int argc, char **argv)
 
     /* load filenames given as arguments */
     while (--argc > 0) {
-	    ++argv;
+        ++argv;
 	    c_token = 0;
 	    if (!strncmp(*argv, "-persist", 2) || !strcmp(*argv, "--persist")
 #ifdef _WIN32
 		|| !stricmp(*argv, "-noend") || !stricmp(*argv, "/noend")
 #endif
 	    ) {
-		FPRINTF((stderr,"'persist' command line option recognized\n"));
+        FPRINTF((_stderr,"'persist' command line option recognized\n"));
 	    } else if (strcmp(*argv, "-") == 0) {
 #if defined(_WIN32) && !defined(WGP_CONSOLE)
 		TextShow(&textwin);
@@ -620,7 +625,7 @@ RECOVER_FROM_ERROR_IN_DASH:
 	    } else if (strcmp(*argv, "-e") == 0) {
 		--argc; ++argv;
 		if (argc <= 0) {
-		    fprintf(stderr, "syntax:  gnuplot -e \"commands\"\n");
+            fprintf(_stderr, "syntax:  gnuplot -e \"commands\"\n");
 		    return 0;
 		}
 		interactive = FALSE;
@@ -632,7 +637,7 @@ RECOVER_FROM_ERROR_IN_DASH:
 
 	    } else if (!strncmp(*argv, "-d", 2) || !strcmp(*argv, "--default-settings")) {
 		/* Ignore this; it already had its effect */
-		FPRINTF((stderr, "ignoring -d\n"));
+        FPRINTF((_stderr, "ignoring -d\n"));
 
 	    } else if (strcmp(*argv, "-c") == 0) {
 		/* Pass command line arguments to the gnuplot script in the next
@@ -642,7 +647,7 @@ RECOVER_FROM_ERROR_IN_DASH:
 		noinputfiles = FALSE;
 		--argc; ++argv;
 		if (argc <= 0) {
-		    fprintf(stderr, "syntax:  gnuplot -c scriptname args\n");
+            fprintf(_stderr, "syntax:  gnuplot -c scriptname args\n");
 		    gp_exit(EXIT_FAILURE);
 		}
 		call_argc = GPMIN(9, argc - 1);
@@ -655,12 +660,12 @@ RECOVER_FROM_ERROR_IN_DASH:
 		gp_exit(EXIT_SUCCESS);
 
 	    } else if (*argv[0] == '-') {
-		fprintf(stderr, "unrecognized option %s\n", *argv);
+        fprintf(_stderr, "unrecognized option %s\n", *argv);
 	    } else {
 		interactive = FALSE;
 		noinputfiles = FALSE;
-		load_file(loadpath_fopen(*argv, "r"), gp_strdup(*argv), 4);
-	    }
+        load_file(loadpath_fopen(*argv, "r"), gp_strdup(*argv), 4);
+        }
     }
 
     /* take commands from stdin */
@@ -1045,7 +1050,7 @@ wrapper_for_write_history()
 
     /* returns 0 on success */
     if (write_history(expanded_history_filename))
-	fprintf (stderr, "Warning:  Could not write history file!!!\n");
+    fprintf (_stderr, "Warning:  Could not write history file!!!\n");
 
     unstifle_history();
 }

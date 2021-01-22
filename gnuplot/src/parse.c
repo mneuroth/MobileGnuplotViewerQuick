@@ -329,7 +329,7 @@ extend_at()
 
     at = gp_realloc(at, newsize, "extend_at");
     at_size += MAX_AT_LEN;
-    FPRINTF((stderr, "Extending at size to %d\n", at_size));
+    FPRINTF((_stderr, "Extending at size to %d\n", at_size));
 }
 
 /* Add function number <sf_index> to the current action table */
@@ -1415,7 +1415,7 @@ check_for_iteration()
 	 */
 	if (no_iteration(this_iter)) {
 	    no_parent = TRUE;
-	    FPRINTF((stderr,"iteration at level %d is moot\n", nesting_depth));
+	    FPRINTF((_stderr,"iteration at level %d is moot\n", nesting_depth));
 	}
 
 	nesting_depth++;

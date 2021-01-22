@@ -420,4 +420,7 @@ typedef unsigned char _Bool;
 # endif
 #endif
 
+#include <stdio.h>
+extern FILE * _stderr;
+
 #endif /* !SYSCFG_H */

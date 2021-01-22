@@ -213,14 +213,14 @@ void
 show_jitter()
 {
     if (jitter.spread <= 0) {
-	fprintf(stderr, "\tno jitter\n");
+	fprintf(_stderr, "\tno jitter\n");
 	return;
     }
-    fprintf(stderr, "\toverlap criterion  %g %s coords\n", jitter.overlap.x, coord_msg[jitter.overlap.scalex]);
-    fprintf(stderr, "\tspread multiplier on x (or y): %g\n", jitter.spread);
+    fprintf(_stderr, "\toverlap criterion  %g %s coords\n", jitter.overlap.x, coord_msg[jitter.overlap.scalex]);
+    fprintf(_stderr, "\tspread multiplier on x (or y): %g\n", jitter.spread);
     if (jitter.limit > 0)
-	fprintf(stderr, "\twrap at %g character widths\n", jitter.limit);
-    fprintf(stderr, "\tstyle: %s\n", jitter.style == JITTER_SQUARE ? "square" :
+	fprintf(_stderr, "\twrap at %g character widths\n", jitter.limit);
+    fprintf(_stderr, "\tstyle: %s\n", jitter.style == JITTER_SQUARE ? "square" :
 			jitter.style == JITTER_ON_Y ? "vertical" : "swarm");
 }
 

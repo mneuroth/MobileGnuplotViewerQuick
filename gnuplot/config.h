@@ -144,7 +144,11 @@
 /* #undef HAVE_GTK */
 
 /* define if you have libiconv and iconv.h */
+#ifdef __ANDROID__
+#undef HAVE_ICONV
+#else
 #define HAVE_ICONV 1
+#endif
 
 /* Define to 1 if you have the `index' function. */
 #define HAVE_INDEX 1

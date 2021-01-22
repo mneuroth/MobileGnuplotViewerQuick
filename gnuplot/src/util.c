@@ -257,7 +257,7 @@ copy_str(char *str, int t_num, int max)
 
     if (count >= max) {
 	count = max - 1;
-	FPRINTF((stderr, "str buffer overflow in copy_str"));
+	FPRINTF((_stderr, "str buffer overflow in copy_str"));
     }
 
     do {
@@ -286,7 +286,7 @@ capture(char *str, int start, int end, int max)
     e = token[end].start_index + token[end].length;
     if (e - token[start].start_index >= max) {
 	e = token[start].start_index + max - 1;
-	FPRINTF((stderr, "str buffer overflow in capture"));
+	FPRINTF((_stderr, "str buffer overflow in capture"));
     }
     for (i = token[start].start_index; i < e && gp_input_line[i] != NUL; i++)
 	*str++ = gp_input_line[i];
@@ -1027,7 +1027,7 @@ do {						\
     if (!current_prompt)			\
 	break;					\
     for (p = current_prompt; *p != '\0'; p++)	\
-	(void) fputc(' ', stderr);		\
+	(void) fputc(' ', _stderr);		\
 } while (0)
 
 /*
@@ -1066,7 +1066,7 @@ print_line_with_error(int t_num)
 	if (t_num != NO_CARET) {
 	    /* Refresh current command line */
 	    if (!screen_ok)
-		fprintf(stderr, "\n%s%s\n",
+		fprintf(_stderr, "\n%s%s\n",
 		    current_prompt ? current_prompt : "",
 		    minimal_input_line);
 
@@ -1074,10 +1074,10 @@ print_line_with_error(int t_num)
 
 	    /* Print spaces up to token */
 	    for (i = 0; i < token[t_num].start_index; i++)
-		fputc((minimal_input_line[i] == '\t') ? '\t' : ' ', stderr);
+		fputc((minimal_input_line[i] == '\t') ? '\t' : ' ', _stderr);
 
 	    /* Print token */
-	    fputs("^\n",stderr);
+	    fputs("^\n",_stderr);
 	}
 	free(copy_of_input_line);
     }
@@ -1090,8 +1090,8 @@ print_line_with_error(int t_num)
 	while (lf && !lf->fp && !lf->name && lf->prev)
 	    lf = lf->prev;
 	if (lf && lf->name)
-	    fprintf(stderr, "\"%s\" ", lf->name);
-	fprintf(stderr, "line %d: ", true_line_num);
+	    fprintf(_stderr, "\"%s\" ", lf->name);
+	fprintf(_stderr, "line %d: ", true_line_num);
     }
 }
 
@@ -1121,15 +1121,15 @@ os_error(int t_num, const char *str, va_dcl)
 #ifdef VA_START
     VA_START(args, str);
 # if defined(HAVE_VFPRINTF) || _LIBC
-    vfprintf(stderr, str, args);
+    vfprintf(_stderr, str, args);
 # else
-    _doprnt(str, args, stderr);
+    _doprnt(str, args, _stderr);
 # endif
     va_end(args);
 #else
-    fprintf(stderr, str, a1, a2, a3, a4, a5, a6, a7, a8);
+    fprintf(_stderr, str, a1, a2, a3, a4, a5, a6, a7, a8);
 #endif
-    putc('\n', stderr);
+    putc('\n', _stderr);
 
 #ifdef VMS
     status[1] = vaxc$errno;
@@ -1138,7 +1138,7 @@ os_error(int t_num, const char *str, va_dcl)
     perror("system error");
 #endif /* VMS */
 
-    putc('\n', stderr);
+    putc('\n', _stderr);
     fill_gpval_string("GPVAL_ERRMSG", strerror(errno));
     common_error_exit();
 }
@@ -1165,17 +1165,17 @@ int_error(int t_num, const char str[], va_dcl)
     VA_START(args, str);
 # if defined(HAVE_VFPRINTF) || _LIBC
     vsnprintf(error_message, sizeof(error_message), str, args);
-    fprintf(stderr,"%.120s",error_message);
+    fprintf(_stderr,"%.120s",error_message);
 # else
-    _doprnt(str, args, stderr);
+    _doprnt(str, args, _stderr);
 # endif
     va_end(args);
 #else
-    fprintf(stderr, str, a1, a2, a3, a4, a5, a6, a7, a8);
+    fprintf(_stderr, str, a1, a2, a3, a4, a5, a6, a7, a8);
     snprintf(error_message, sizeof(error_message), str, a1, a2, a3, a4, a5, a6, a7, a8);
 #endif
 
-    fputs("\n\n", stderr);
+    fputs("\n\n", _stderr);
     fill_gpval_string("GPVAL_ERRMSG", error_message);
     common_error_exit();
 }
@@ -1220,19 +1220,19 @@ int_warn(int t_num, const char str[], va_dcl)
     /* reprint line if screen has been written to */
     print_line_with_error(t_num);
 
-    fputs("warning: ", stderr);
+    fputs("warning: ", _stderr);
 #ifdef VA_START
     VA_START(args, str);
 # if defined(HAVE_VFPRINTF) || _LIBC
-    vfprintf(stderr, str, args);
+    vfprintf(_stderr, str, args);
 # else
-    _doprnt(str, args, stderr);
+    _doprnt(str, args, _stderr);
 # endif
     va_end(args);
 #else  /* VA_START */
-    fprintf(stderr, str, a1, a2, a3, a4, a5, a6, a7, a8);
+    fprintf(_stderr, str, a1, a2, a3, a4, a5, a6, a7, a8);
 #endif /* VA_START */
-    putc('\n', stderr);
+    putc('\n', _stderr);
 }
 
 /*}}} */

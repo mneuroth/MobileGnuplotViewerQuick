@@ -104,9 +104,9 @@ make_palette()
 	if (memcmp(&prev_palette, &sm_palette, sizeof(t_sm_palette))) {
 	    term->make_palette(&sm_palette);
 	    prev_palette = sm_palette;
-	    FPRINTF((stderr,"make_palette: calling term->make_palette for term with ncolors == 0\n"));
+	    FPRINTF((_stderr,"make_palette: calling term->make_palette for term with ncolors == 0\n"));
 	} else {
-	    FPRINTF((stderr,"make_palette: skipping duplicate palette for term with ncolors == 0\n"));
+	    FPRINTF((_stderr,"make_palette: skipping duplicate palette for term with ncolors == 0\n"));
 	}
 	return 0;
     }
@@ -129,7 +129,7 @@ make_palette()
 	|| sm_palette.colors != prev_palette.colors) {
 	/* print the message only if colors have changed */
 	if (interactive)
-	    fprintf(stderr, "smooth palette in %s: using %i of %i available color positions\n",
+	    fprintf(_stderr, "smooth palette in %s: using %i of %i available color positions\n",
 	    		term->name, sm_palette.colors, i);
     }
 

@@ -318,7 +318,7 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
 	return DT_DMS;
     }
 
-    FPRINTF((stderr, "read date-time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
+    FPRINTF((_stderr, "read date-time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
 
     /* now sanity check the date/time entered, normalising if necessary
      * read_int cannot read a -ve number, but can read %m=0 then decrement
@@ -347,7 +347,7 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
 #undef M
 #undef H
 
-    FPRINTF((stderr, "normalised time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
+    FPRINTF((_stderr, "normalised time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
 
     if (sanity_check_date) {
 	if (yday) {
@@ -766,7 +766,7 @@ gtimegm(struct tm *tm)
     dsec *= 60.0;
     dsec += tm->tm_sec;
 
-    FPRINTF((stderr, "broken-down time : %02d/%02d/%d:%02d:%02d:%02d = %g seconds\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour,
+    FPRINTF((_stderr, "broken-down time : %02d/%02d/%d:%02d:%02d:%02d = %g seconds\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour,
 	     tm->tm_min, tm->tm_sec, dsec));
 
     return (dsec);
@@ -781,7 +781,7 @@ ggmtime(struct tm *tm, double l_clock)
     /* dodgy way of doing wday - i hope it works ! */
     int wday = JAN_FIRST_WDAY;	/* eg 6 for 2000 */
 
-    FPRINTF((stderr, "%g seconds = ", l_clock));
+    FPRINTF((_stderr, "%g seconds = ", l_clock));
     if (fabs(l_clock) > 1.e12) {  /* Some time in the year 33688 */
 	int_warn(NO_CARET, "time value out of range");
 	return(-1);
@@ -832,7 +832,7 @@ ggmtime(struct tm *tm, double l_clock)
     }
     tm->tm_mday = days + 1;
 
-    FPRINTF((stderr, "broken-down time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
+    FPRINTF((_stderr, "broken-down time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
 
     return (0);
 }
@@ -871,7 +871,7 @@ ggmtime(struct tm *tm, double l_clock)
 char *
 gstrptime(char *s, char *fmt, struct tm *tm)
 {
-    FPRINTF((stderr, "gstrptime(\"%s\", \"%s\")\n", s, fmt));
+    FPRINTF((_stderr, "gstrptime(\"%s\", \"%s\")\n", s, fmt));
 
     /* linux does not appear to like years before 1902
      * NT complains if its before 1970
@@ -925,14 +925,14 @@ gstrptime(char *s, char *fmt, struct tm *tm)
 	}
     }
 
-    FPRINTF((stderr, "Before mktime : %d/%d/%d:%d:%d:%d\n", tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
+    FPRINTF((_stderr, "Before mktime : %d/%d/%d:%d:%d:%d\n", tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
     /* mktime range-checks the time */
 
     if (mktime(tm) == -1) {
-	FPRINTF((stderr, "mktime() was not happy\n"));
+	FPRINTF((_stderr, "mktime() was not happy\n"));
 	int_error(DATAFILE, "Invalid date/time [mktime() did not like it]");
     }
-    FPRINTF((stderr, "After mktime : %d/%d/%d:%d:%d:%d\n", tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
+    FPRINTF((_stderr, "After mktime : %d/%d/%d:%d:%d:%d\n", tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
 
     return s;
 }

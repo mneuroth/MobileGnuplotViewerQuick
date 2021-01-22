@@ -788,14 +788,14 @@ get_data(struct curve_points *current_plot)
 	    /* Jun 2006 - Return to behavior of 3.7 and current docs:
 	     *            do not interrupt plotted line because of missing data
 	     */
-	    FPRINTF((stderr,"Missing datum %d\n", i));
+        FPRINTF((_stderr,"Missing datum %d\n", i));
 	    continue;
 
 	case DF_UNDEFINED:
 	    /* Version 5:  can't get here because we trapped DF_UNDEFINED above */
 #if (0)
 	    current_plot->points[i].type = UNDEFINED;
-	    FPRINTF((stderr,"undefined point %g %g %g\n", v[0], v[1], v[2]));
+        FPRINTF((_stderr,"undefined point %g %g %g\n", v[0], v[1], v[2]));
 	    if (current_plot->plot_style == IMAGE)
 		goto images;
 	    i++;
@@ -830,7 +830,7 @@ get_data(struct curve_points *current_plot)
 	    df_set_key_title(current_plot);
 	    continue;
 	case DF_KEY_TITLE_MISSING:
-	    fprintf(stderr,"get_data: key title not found in requested column\n");
+        fprintf(_stderr,"get_data: key title not found in requested column\n");
 	    continue;
 
 	case DF_COLUMN_HEADERS:
@@ -1893,7 +1893,7 @@ store_label(
     tl->text[textlen] = '\0';
     parse_esc(tl->text);
 
-    FPRINTF((stderr,"LABELPOINT %f %f \"%s\" \n", tl->place.x, tl->place.y, tl->text));
+    FPRINTF((_stderr,"LABELPOINT %f %f \"%s\" \n", tl->place.x, tl->place.y, tl->text));
 
     return tl;
 }
@@ -2950,7 +2950,7 @@ eval_plots()
 	if (forever_iteration(plot_iterator) && !this_plot)
 	    int_error(NO_CARET,"unbounded iteration in something other than a data plot");
 	else if (forever_iteration(plot_iterator) && (this_plot->plot_type == NODATA)) {
-	    FPRINTF((stderr,"Ending * iteration at %d\n",plot_iterator->iteration));
+        FPRINTF((_stderr,"Ending * iteration at %d\n",plot_iterator->iteration));
 	    /* Clearing the plot title ensures that it will not appear in the key */
 	    free (this_plot->title);
 	    this_plot->title = NULL;
@@ -3130,7 +3130,7 @@ eval_plots()
 				int_error(NO_CARET,"logscaled axis must have positive range");
 			    t_min = eval_link_function(primary, t_min);
 			    t_max = eval_link_function(primary, t_max);
-			    FPRINTF((stderr,"sample range on primary axis: %g %g\n", t_min, t_max));
+                FPRINTF((_stderr,"sample range on primary axis: %g %g\n", t_min, t_max));
 			} else {
 			    axis_unlog_interval(&X_AXIS, &t_min, &t_max, 1);
 			}

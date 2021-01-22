@@ -1310,7 +1310,7 @@ f_range(union argument *arg)
     if (full.type != STRING)
 	int_error(NO_CARET, "internal error: substring range operator applied to non-STRING type");
 
-    FPRINTF((stderr,"f_range( \"%s\", %d, %d)\n", full.v.string_val, beg.v.int_val, end.v.int_val));
+    FPRINTF((_stderr,"f_range( \"%s\", %d, %d)\n", full.v.string_val, beg.v.int_val, end.v.int_val));
 
     if (iend > gp_strlen(full.v.string_val))
 	iend = gp_strlen(full.v.string_val);
@@ -1596,7 +1596,7 @@ f_sprintf(union argument *arg)
     }
     *outpos = '\0';
 
-    FPRINTF((stderr," snprintf result = \"%s\"\n",buffer));
+    FPRINTF((_stderr," snprintf result = \"%s\"\n",buffer));
     push(Gstring(&result, buffer));
     free(buffer);
 
@@ -1641,7 +1641,7 @@ f_gprintf(union argument *arg)
     /* Call the old internal routine */
     gprintf(buffer, length, fmt.v.string_val, base, real(&val));
 
-    FPRINTF((stderr," gprintf result = \"%s\"\n",buffer));
+    FPRINTF((_stderr," gprintf result = \"%s\"\n",buffer));
     push(Gstring(&result, buffer));
 
     gpfree_string(&fmt);
@@ -1724,7 +1724,7 @@ f_strptime(union argument *arg)
 	/* Add back any extra fractional second */
 	result += usec;
     }
-    FPRINTF((stderr," strptime result = %g seconds \n", result));
+    FPRINTF((_stderr," strptime result = %g seconds \n", result));
 
     gpfree_string(&val);
     gpfree_string(&fmt);
@@ -1840,7 +1840,7 @@ f_system(union argument *arg)
     if (val.type != STRING)
 	int_error(NO_CARET, "non-string argument to system()");
 
-    FPRINTF((stderr," f_system input = \"%s\"\n", val.v.string_val));
+    FPRINTF((_stderr," f_system input = \"%s\"\n", val.v.string_val));
 
     ierr = do_system_func(val.v.string_val, &output);
     fill_gpval_integer("GPVAL_ERRNO", ierr); 
@@ -1850,7 +1850,7 @@ f_system(union argument *arg)
     if ( output_len > 0 && output[output_len-1] == '\n' )
 	output[output_len-1] = NUL;
 
-    FPRINTF((stderr," f_system result = \"%s\"\n", output));
+    FPRINTF((_stderr," f_system result = \"%s\"\n", output));
 
     push(Gstring(&result, output));
 

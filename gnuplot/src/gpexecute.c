@@ -148,7 +148,7 @@ static gpe_fifo_t *
 gpe_init()
 {
     gpe_fifo_t *base = malloc(sizeof(gpe_fifo_t));
-    /* fprintf(stderr, "(gpe_init) \n"); */
+    /* fprintf(_stderr, "(gpe_init) \n"); */
     assert(base);
     base->next = (gpe_fifo_t *) 0;
     base->prev = (gpe_fifo_t *) 0;
@@ -161,7 +161,7 @@ gpe_push(gpe_fifo_t ** base, struct gp_event_t *ge)
     buffered_output_pending++;
     if ((*base)->prev) {
 	gpe_fifo_t *new = malloc(sizeof(gpe_fifo_t));
-	/* fprintf(stderr, "(gpe_push) \n"); */
+	/* fprintf(_stderr, "(gpe_push) \n"); */
 	assert(new);
 	(*base)->prev->next = new;
 	new->prev = (*base)->prev;
@@ -190,7 +190,7 @@ gpe_pop(gpe_fifo_t ** base)
 	return 0;
     } else {
 	gpe_fifo_t *save = *base;
-	/* fprintf(stderr, "(gpe_pop) \n"); */
+	/* fprintf(_stderr, "(gpe_pop) \n"); */
 	(*base)->next->prev = (*base)->prev;
 	(*base) = (*base)->next;
 	free(save);
@@ -204,7 +204,7 @@ RETSIGTYPE
 pipe_died_handler(int signum)
 {
     (void) signum;		/* avoid -Wunused warning. */
-    /* fprintf(stderr, "\n*******(pipe_died_handler)*******\n"); */
+    /* fprintf(_stderr, "\n*******(pipe_died_handler)*******\n"); */
     close(1);
     pipe_died = 1;
 }
@@ -251,10 +251,10 @@ gp_exec_event(char type, int mx, int my, int par1, int par2, int winid)
 	    switch (errno) {
 	    case EAGAIN:
 		/* do nothing */
-		FPRINTF((stderr, "(gp_exec_event) EAGAIN\n"));
+		FPRINTF((_stderr, "(gp_exec_event) EAGAIN\n"));
 		break;
 	    default:
-		FPRINTF((stderr, "(gp_exec_event) errno = %d\n", errno));
+		FPRINTF((_stderr, "(gp_exec_event) errno = %d\n", errno));
 		break;
 	    }
 	    break;

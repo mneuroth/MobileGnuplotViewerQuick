@@ -335,10 +335,10 @@ analyze_two_columns( double *x, double *y,
 	    res.slope_err = res.intercept_err = not_a_number();
 	}
     } else if (n == 2) {
-	fprintf(stderr, "Warning:  Errors of slope and intercept are zero. There are as many data points as there are parameters.\n");
+	fprintf(_stderr, "Warning:  Errors of slope and intercept are zero. There are as many data points as there are parameters.\n");
 	res.slope_err = res.intercept_err = 0.0;
     } else {
-	fprintf(stderr, "Warning:  Can't compute errors of slope and intercept. Not enough data points.\n");
+	fprintf(_stderr, "Warning:  Can't compute errors of slope and intercept. Not enough data points.\n");
 	res.slope_err = res.intercept_err = not_a_number();
     }
 
@@ -359,7 +359,7 @@ static void
 ensure_output()
 {
     if (!print_out)
-	print_out = stderr;
+	print_out = _stderr;
 }
 
 static char*
@@ -388,7 +388,7 @@ file_output( struct file_stats s )
     ensure_output();
 
     /* Non-formatted to disk */
-    if ( print_out != stdout && print_out != stderr ) {
+    if ( print_out != stdout && print_out != _stderr ) {
 	fprintf( print_out, "%s\t%ld\n", "records", s.records );
 	fprintf( print_out, "%s\t%ld\n", "invalid", s.invalid );
 	fprintf( print_out, "%s\t%ld\n", "blanks", s.blanks );
@@ -461,7 +461,7 @@ sgl_column_output( struct sgl_column_stats s, long n )
     ensure_output();
 
     /* Non-formatted to disk */
-    if ( print_out != stdout && print_out != stderr ) {
+    if ( print_out != stdout && print_out != _stderr ) {
 	sgl_column_output_nonformat( s, "_y" );
 	return;
     }
@@ -524,7 +524,7 @@ two_column_output( struct sgl_column_stats x,
 	width = 1 + (int)log10((double)n);
 
     /* Non-formatted to disk */
-    if ( print_out != stdout && print_out != stderr ) {
+    if ( print_out != stdout && print_out != _stderr ) {
 	sgl_column_output_nonformat( x, "_x" );
 	sgl_column_output_nonformat( y, "_y" );
 
@@ -1018,7 +1018,7 @@ statsrequest(void)
 	      break;
 
 	    default: /* Who are these? */
-	      FPRINTF((stderr,"unhandled return code %d from df_readline\n", i));
+	      FPRINTF((_stderr,"unhandled return code %d from df_readline\n", i));
 	      break;
 
 	    }

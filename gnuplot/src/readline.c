@@ -362,7 +362,7 @@ static int mbwidth(const char *c);
 static int strwidth(const char * str);
 
 /* user_putc and user_puts should be used in the place of
- * fputc(ch,stderr) and fputs(str,stderr) for all output
+ * fputc(ch,_stderr) and fputs(str,_stderr) for all output
  * of user typed characters.  This allows MS-Windows to
  * display user input in a different color.
  */
@@ -373,7 +373,7 @@ user_putc(int ch)
 #if defined(_WIN32) && !defined(WGP_CONSOLE)
     TextAttr(&textwin, TEXTUSER);
 #endif
-    rv = fputc(ch, stderr);
+    rv = fputc(ch, _stderr);
 #if defined(_WIN32) && !defined(WGP_CONSOLE)
     TextAttr(&textwin, TEXTGNUPLOT);
 #endif
@@ -387,7 +387,7 @@ user_puts(char *str)
 #if defined(_WIN32) && !defined(WGP_CONSOLE)
     TextAttr(&textwin, TEXTUSER);
 #endif
-    rv = fputs(str, stderr);
+    rv = fputs(str, _stderr);
 #if defined(_WIN32) && !defined(WGP_CONSOLE)
     TextAttr(&textwin, TEXTGNUPLOT);
 #endif
@@ -617,7 +617,7 @@ extend_cur_line()
     }
     cur_line = new_line;
     line_len += MAXBUF;
-    FPRINTF((stderr, "\nextending readline length to %d chars\n", line_len));
+    FPRINTF((_stderr, "\nextending readline length to %d chars\n", line_len));
 }
 
 
@@ -832,7 +832,7 @@ readline(const char *prompt)
     set_termio();
 
     /* print the prompt */
-    fputs(prompt, stderr);
+    fputs(prompt, _stderr);
     cur_line[0] = '\0';
     cur_pos = 0;
     max_pos = 0;
@@ -968,7 +968,7 @@ readline(const char *prompt)
 #ifdef VREPRINT
 #if 0 /* conflict with reverse-search */
 	} else if (cur_char == term_chars[VREPRINT]) {	/* ^R? */
-	    putc(NEWLINE, stderr);	/* go to a fresh line */
+	    putc(NEWLINE, _stderr);	/* go to a fresh line */
 	    redraw_line(prompt);
 #endif
 #endif /* VREPRINT */
@@ -1045,7 +1045,7 @@ readline(const char *prompt)
 		print_search_result(NULL);
 		break;
 	    case 014:		/* ^L */
-		putc(NEWLINE, stderr);	/* go to a fresh line */
+		putc(NEWLINE, _stderr);	/* go to a fresh line */
 		redraw_line(prompt);
 		break;
 #ifndef DEL_ERASES_CURRENT_CHAR
@@ -1086,7 +1086,7 @@ readline(const char *prompt)
 		    cur_pos += 1;
 		}
 #endif
-		putc(NEWLINE, stderr);
+		putc(NEWLINE, _stderr);
 
 		/* Shrink the block down to fit the string ?
 		 * if the alloc fails, we still own block at cur_line,
@@ -1099,7 +1099,7 @@ readline(const char *prompt)
 		/* else we just hang on to what we had - it's not a problem */
 
 		line_len = 0;
-		FPRINTF((stderr, "Resizing input line to %d chars\n", strlen(cur_line)));
+		FPRINTF((_stderr, "Resizing input line to %d chars\n", strlen(cur_line)));
 		reset_termio();
 		return (cur_line);
 	    default:
@@ -1181,25 +1181,25 @@ print_search_result(const struct hist * result)
     int i, width = 0;
 
     SUSPENDOUTPUT;
-    fputs(search_prompt2, stderr);
+    fputs(search_prompt2, _stderr);
     if (result != NULL && result->line != NULL) {
-	fputs(result->line, stderr);
+	fputs(result->line, _stderr);
 	width = strwidth(result->line);
     }
 
     /* overwrite previous search result, and the line might
        just have gotten 1 double-width character shorter */
     for (i = 0; i < search_result_width - width + 2; i++)
-	putc(SPACE, stderr);
+	putc(SPACE, _stderr);
     for (i = 0; i < search_result_width - width + 2; i++)
-	putc(BACKSPACE, stderr);
+	putc(BACKSPACE, _stderr);
     search_result_width = width;
 
     /* restore cursor position */
     for (i = 0; i < width; i++)
-	putc(BACKSPACE, stderr);
+	putc(BACKSPACE, _stderr);
     for (i = 0; i < strlen(search_prompt2); i++)
-	putc(BACKSPACE, stderr);
+	putc(BACKSPACE, _stderr);
     RESUMEOUTPUT;
 }
 
@@ -1221,8 +1221,8 @@ switch_prompt(const char * old_prompt, const char * new_prompt)
 
     /* clear current line */
     clear_line(old_prompt);
-    putc('\r', stderr);
-    fputs(new_prompt, stderr);
+    putc('\r', _stderr);
+    fputs(new_prompt, _stderr);
     cur_pos = 0;
     
     /* erase remainder of previous prompt */
@@ -1278,7 +1278,7 @@ redraw_line(const char *prompt)
     size_t i;
 
     SUSPENDOUTPUT;
-    fputs(prompt, stderr);
+    fputs(prompt, _stderr);
     user_puts(cur_line);
 
     /* put the cursor where it belongs */
@@ -1293,8 +1293,8 @@ static void
 clear_line(const char *prompt)
 {
     SUSPENDOUTPUT;
-    putc('\r', stderr);
-    fputs(prompt, stderr);
+    putc('\r', _stderr);
+    fputs(prompt, _stderr);
     cur_pos = 0;
 
     while (cur_pos < max_pos) {
@@ -1306,8 +1306,8 @@ clear_line(const char *prompt)
     while (max_pos > 0)
 	cur_line[--max_pos] = '\0';
 
-    putc('\r', stderr);
-    fputs(prompt, stderr);
+    putc('\r', _stderr);
+    fputs(prompt, _stderr);
     cur_pos = 0;
     RESUMEOUTPUT;
 }
@@ -1329,8 +1329,8 @@ clear_eoline(const char *prompt)
     while (max_pos > cur_pos)
 	cur_line[--max_pos] = '\0';
 
-    putc('\r', stderr);
-    fputs(prompt, stderr);
+    putc('\r', _stderr);
+    fputs(prompt, _stderr);
     user_puts(cur_line);
     RESUMEOUTPUT;
 }

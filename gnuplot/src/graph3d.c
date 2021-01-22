@@ -599,7 +599,7 @@ place_arrows3d(int layer)
 	    apply_head_properties(&(this_arrow->arrow_properties));
 	    draw_clip_arrow(sx, sy, ex, ey, this_arrow->arrow_properties.head);
 	} else {
-	    FPRINTF((stderr,"place_arrows3d: skipping out-of-bounds arrow\n"));
+	    FPRINTF((_stderr,"place_arrows3d: skipping out-of-bounds arrow\n"));
 	}
     }
     clip_area = clip_save;
@@ -982,7 +982,7 @@ do_3dplot(
      */
     if (pcount == 1 && plots->num_iso_read == 1 && can_pm3d &&
 	(plots->plot_style == PM3DSURFACE || PM3D_IMPLICIT == pm3d.implicit))
-	    fprintf(stderr, "  Warning: Single isoline (scan) is not enough for a pm3d plot.\n\t   Hint: Missing blank lines in the data file? See 'help pm3d' and FAQ.\n");
+	    fprintf(_stderr, "  Warning: Single isoline (scan) is not enough for a pm3d plot.\n\t   Hint: Missing blank lines in the data file? See 'help pm3d' and FAQ.\n");
 
 
     pm3d_order_depth = (can_pm3d && !draw_contour && pm3d.direction == PM3D_DEPTH);
@@ -2164,7 +2164,7 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
     struct termentry *t = term;
     BoundingBox *clip_save = clip_area;
 
-    FPRINTF((stderr,
+    FPRINTF((_stderr,
 	"draw_3d_graphbox: whichgrid = %d current_layer = %d border_layer = %d\n",
 	whichgrid,current_layer,border_layer));
 
@@ -3316,9 +3316,9 @@ get_surface_cbminmax(struct surface_points *plot, double *cbmin, double *cbmax)
     *cbmax = -VERYLARGE;
 
     while (icrvs && curve < plot->num_iso_read) {
-	/* fprintf(stderr,"**** NEW ISOCURVE - nb of pts: %i ****\n", icrvs->p_count); */
+	/* fprintf(_stderr,"**** NEW ISOCURVE - nb of pts: %i ****\n", icrvs->p_count); */
 	for (i = 0, points = icrvs->points; i < icrvs->p_count; i++) {
-		/* fprintf(stderr,"  point i=%i => x=%4g y=%4g z=%4lg cb=%4lg\n",i, points[i].x,points[i].y,points[i].z,points[i].CRD_COLOR); */
+		/* fprintf(_stderr,"  point i=%i => x=%4g y=%4g z=%4lg cb=%4lg\n",i, points[i].x,points[i].y,points[i].z,points[i].CRD_COLOR); */
 		if (points[i].type == INRANGE) {
 		    /* ?? if (!clip_point(x, y)) ... */
 		    cb = color_from_column ? points[i].CRD_COLOR : points[i].z;

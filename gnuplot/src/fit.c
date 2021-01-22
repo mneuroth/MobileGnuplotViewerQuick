@@ -167,7 +167,7 @@ static void Dblfn __PROTO(());
 #define LASTFITCMDLENGTH 511
 
 /* compatible with gnuplot philosophy */
-#define STANDARD stderr
+#define STANDARD _stderr
 
 /* Suffix of a backup file */
 #define BACKUP_SUFFIX ".old"
@@ -499,7 +499,7 @@ marquardt(double a[], double **C, double *chisq, double *lambda)
     if (tmp_chisq <= *chisq) {	/* Success, accept new solution */
 	if (*lambda > MIN_LAMBDA) {
 	    if (fit_verbosity == VERBOSE)
-		putc('/', stderr);
+		putc('/', _stderr);
 	    *lambda /= lambda_down_factor;
 	}
 	/* update chisq, C, d, a */
@@ -514,7 +514,7 @@ marquardt(double a[], double **C, double *chisq, double *lambda)
     } else {			/* failure, increase lambda and return */
 	*lambda *= lambda_up_factor;
 	if (fit_verbosity == VERBOSE)
-	    (void) putc('*', stderr);
+	    (void) putc('*', _stderr);
 	else if (fit_verbosity == BRIEF)  /* one-line report even if chisq increases */
 	    fit_show_brief(-1, tmp_chisq, *chisq, temp_a, *lambda, STANDARD);
 
@@ -1957,7 +1957,7 @@ fit_command()
 		 } else
 		    Eexc(c_token, "Invalid variable specifier.");
 	    }
-	    FPRINTF((stderr, "error spec \"%s\"\n", err_spec));
+	    FPRINTF((_stderr, "error spec \"%s\"\n", err_spec));
 	    free(err_spec);
 	} while (equals(++c_token, ",") && ++c_token);
 
@@ -2039,8 +2039,8 @@ fit_command()
 	} 
     }
 
-    FPRINTF((stderr, "cmd=%s\n", gp_input_line));
-    FPRINTF((stderr, "cols=%i indep=%i errors=%i\n", columns, num_indep, num_errors));
+    FPRINTF((_stderr, "cmd=%s\n", gp_input_line));
+    FPRINTF((_stderr, "cols=%i indep=%i errors=%i\n", columns, num_indep, num_errors));
 
     /* HBB 980401: if this is a single-variable fit, we shouldn't have
      * allowed a variable name specifier for 'y': */
@@ -2515,7 +2515,7 @@ fit_command()
 }
 
 /*
- * Print message to stderr and log file
+ * Print message to _stderr and log file
  */
 #if defined(VA_START) && defined(STDC_HEADERS)
 static void

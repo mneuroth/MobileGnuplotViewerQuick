@@ -890,7 +890,7 @@ get_3ddata(struct surface_points *this_plot)
 		continue;
 	    }
 	    else if (j == DF_KEY_TITLE_MISSING){
-		fprintf(stderr,
+		fprintf(_stderr,
 			"get_data: key title not found in requested column\n"
 		    );
 		continue;
@@ -2054,8 +2054,8 @@ eval_3dplots()
 
 	/* Iterate-over-plot mechanisms */
 	if (eof_during_iteration) {
-	    FPRINTF((stderr, "eof during iteration current %d\n", plot_iterator->iteration_current));
-	    FPRINTF((stderr, "    last_iteration_in_first_pass %d\n", last_iteration_in_first_pass));
+	    FPRINTF((_stderr, "eof during iteration current %d\n", plot_iterator->iteration_current));
+	    FPRINTF((_stderr, "    last_iteration_in_first_pass %d\n", last_iteration_in_first_pass));
 	    eof_during_iteration = FALSE;
 	} else if (next_iteration(plot_iterator)) {
 	    c_token = start_token;

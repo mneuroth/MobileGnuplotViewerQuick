@@ -1362,6 +1362,7 @@ unset_output()
 	return;
     }
 
+    fprintf(_stderr, "unset_output() p1\n");
     term_set_output(NULL);
     if (outstr) {
 	free(outstr);
@@ -1394,7 +1395,7 @@ unset_parametric()
 	if (!polar) { /* keep t for polar */
 	    unset_dummy();
 	    if (interactive)
-		(void) fprintf(stderr,"\n\tdummy variable is x for curves, x/y for surfaces\n");
+		(void) fprintf(_stderr,"\n\tdummy variable is x for curves, x/y for surfaces\n");
 	}
     }
 }
@@ -1404,7 +1405,7 @@ static void
 unset_palette()
 {
     c_token++;
-    fprintf(stderr, "you can't unset the palette.\n");
+    fprintf(_stderr, "you can't unset the palette.\n");
 }
 
 
@@ -1466,7 +1467,7 @@ unset_polar()
 	if (!parametric) {
 	    strcpy (set_dummy_var[0], "x");
 	    if (interactive)
-		(void) fprintf(stderr,"\n\tdummy variable is x for curves\n");
+		(void) fprintf(_stderr,"\n\tdummy variable is x for curves\n");
 	}
     }
     raxis = FALSE;

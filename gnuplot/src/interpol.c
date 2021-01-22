@@ -1536,7 +1536,7 @@ make_bins(struct curve_points *plot, int nbins,
     }
     range = top - bottom;
 
-    FPRINTF((stderr,"make_bins: %d bins from %g to %g, binwidth %g\n",
+    FPRINTF((_stderr,"make_bins: %d bins from %g to %g, binwidth %g\n",
 	    nbins, bottom, top, binwidth));
 
     bin = gp_alloc(nbins*sizeof(double), "bins");
@@ -1581,7 +1581,7 @@ make_bins(struct curve_points *plot, int nbins,
 	} else {
 	    plot->points[i].type = OUTRANGE;
 	}
-	FPRINTF((stderr, "bin[%d] %g %g\n", i, plot->points[i].x, plot->points[i].y));
+	FPRINTF((_stderr, "bin[%d] %g %g\n", i, plot->points[i].x, plot->points[i].y));
     }
 
     if (yaxis->autoscale & AUTOSCALE_MIN) {

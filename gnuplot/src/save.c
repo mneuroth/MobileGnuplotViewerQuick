@@ -1221,7 +1221,7 @@ void
 save_axis_format(FILE *fp, AXIS_INDEX axis)
 {
     fprintf(fp, 
-	    (fp == stderr) ? "\t  %s-axis: \"%s\"%s\n" : "set format %s \"%s\" %s\n",
+	    (fp == _stderr) ? "\t  %s-axis: \"%s\"%s\n" : "set format %s \"%s\" %s\n",
 	     axis_name(axis), conv_text(axis_array[axis].formatstring),
 	    axis_array[axis].tictype == DT_DMS ? "geographic" :
 	    axis_array[axis].tictype == DT_TIMEDATE ? "timedate" :
@@ -1231,7 +1231,7 @@ save_axis_format(FILE *fp, AXIS_INDEX axis)
 void
 save_style_parallel(FILE *fp)
 {
-    if (fp == stderr)
+    if (fp == _stderr)
 	fputs("\t",fp);
     fprintf(fp, "set style parallel %s ",
 	parallel_axis_style.layer == LAYER_BACK ? "back" : "front");
@@ -1346,7 +1346,7 @@ save_prange(FILE *fp, struct axis *this_axis)
 	return;
     }
 
-    if (this_axis->set_autoscale && fp == stderr) {
+    if (this_axis->set_autoscale && fp == _stderr) {
 	/* add current (hidden) range as comments */
 	fputs("  # (currently [", fp);
 	if (this_axis->set_autoscale & AUTOSCALE_MIN) {
@@ -1360,7 +1360,7 @@ save_prange(FILE *fp, struct axis *this_axis)
     } else
 	putc('\n', fp);
 
-    if (fp != stderr) {
+    if (fp != _stderr) {
 	if (this_axis->set_autoscale & (AUTOSCALE_FIXMIN))
 	    fprintf(fp, "set autoscale %sfixmin\n", axis_name(this_axis->index));
 	if (this_axis->set_autoscale & AUTOSCALE_FIXMAX)
@@ -1393,11 +1393,11 @@ save_nonlinear(FILE *fp, AXIS *this_axis)
 	if (primary->link_udf->at)
 	    fprintf(fp, "via %s ", primary->link_udf->definition);
 	else
-	    fprintf(stderr, "[corrupt linkage] ");
+	    fprintf(_stderr, "[corrupt linkage] ");
 	if (this_axis->link_udf->at)
 	    fprintf(fp, "inverse %s ", this_axis->link_udf->definition);
 	else
-	    fprintf(stderr, "[corrupt linkage] ");
+	    fprintf(_stderr, "[corrupt linkage] ");
 	fputs("\n", fp);
     }
 #endif
@@ -1617,7 +1617,7 @@ save_dashtype(FILE *fp, int d_type, const t_dashtype *dt)
     if (d_type == DASHTYPE_CUSTOM) {
 	if (dt->dstring[0] != '\0')
 	    fprintf(fp, " \"%s\"", dt->dstring);
-	if (fp == stderr || dt->dstring[0] == '\0') {
+	if (fp == _stderr || dt->dstring[0] == '\0') {
 	    int i;
 	    fputs(" (", fp);
 	    for (i = 0; i < DASHPATTERN_LENGTH && dt->pattern[i] > 0; i++)
@@ -1721,7 +1721,7 @@ save_histogram_opts (FILE *fp)
 	case HT_STACKED_IN_TOWERS:
 	    fprintf(fp,"columnstacked "); break;
     }
-    if (fp == stderr)
+    if (fp == _stderr)
 	fprintf(fp,"\n\t\t");
     fprintf(fp,"title");
     save_textcolor(fp, &histogram_opts.title.textcolor);
@@ -1748,7 +1748,7 @@ save_object(FILE *fp, int tag)
 	    && (tag == 0 || tag == this_object->tag)) {
 	    this_rect = &this_object->o.rectangle;
 	    showed = TRUE;
-	    fprintf(fp, "%sobject %2d rect ", (fp==stderr) ? "\t" : "set ",this_object->tag);
+	    fprintf(fp, "%sobject %2d rect ", (fp==_stderr) ? "\t" : "set ",this_object->tag);
 
 	    if (this_rect->type == 1) {
 		fprintf(fp, "center ");
@@ -1768,7 +1768,7 @@ save_object(FILE *fp, int tag)
 	    struct position *e = &this_object->o.circle.extent;
 	    this_circle = &this_object->o.circle;
 	    showed = TRUE;
-	    fprintf(fp, "%sobject %2d circle ", (fp==stderr) ? "\t" : "set ",this_object->tag);
+	    fprintf(fp, "%sobject %2d circle ", (fp==_stderr) ? "\t" : "set ",this_object->tag);
 
 	    fprintf(fp, "center ");
 	    save_position(fp, &this_circle->center, 3, FALSE);
@@ -1783,7 +1783,7 @@ save_object(FILE *fp, int tag)
 	    struct position *e = &this_object->o.ellipse.extent;
 	    this_ellipse = &this_object->o.ellipse;
 	    showed = TRUE;
-	    fprintf(fp, "%sobject %2d ellipse ", (fp==stderr) ? "\t" : "set ",this_object->tag);
+	    fprintf(fp, "%sobject %2d ellipse ", (fp==_stderr) ? "\t" : "set ",this_object->tag);
 	    fprintf(fp, "center ");
 	    save_position(fp, &this_ellipse->center, 3, FALSE);
 	    fprintf(fp, " size ");
@@ -1809,20 +1809,20 @@ save_object(FILE *fp, int tag)
 	    t_polygon *this_polygon = &this_object->o.polygon;
 	    int nv;
 	    showed = TRUE;
-	    fprintf(fp, "%sobject %2d polygon ", (fp==stderr) ? "\t" : "set ",this_object->tag);
+	    fprintf(fp, "%sobject %2d polygon ", (fp==_stderr) ? "\t" : "set ",this_object->tag);
 	    if (this_polygon->vertex) {
 		fprintf(fp, "from ");
 		save_position(fp, &this_polygon->vertex[0], 3, FALSE);
 	    }
 	    for (nv=1; nv < this_polygon->type; nv++) {
-		fprintf(fp, (fp==stderr) ? "\n\t\t\t    to " : " to ");
+		fprintf(fp, (fp==_stderr) ? "\n\t\t\t    to " : " to ");
 		save_position(fp, &this_polygon->vertex[nv], 3, FALSE);
 	    }
 	}
 
 	/* Properties common to all objects */
 	if (tag == 0 || tag == this_object->tag) {
-	    fprintf(fp, "\n%sobject %2d ", (fp==stderr) ? "\t" : "set ",this_object->tag);
+	    fprintf(fp, "\n%sobject %2d ", (fp==_stderr) ? "\t" : "set ",this_object->tag);
 	    fprintf(fp, "%s ", this_object->layer > 0 ? "front" : this_object->layer < 0 ? "behind" : "back");
 	    if (this_object->clip == OBJ_NOCLIP)
 		fputs("noclip ", fp);

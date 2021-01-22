@@ -343,7 +343,7 @@ gd_filetype_function(int filetype)
     /* check on image properties and complain if we can't handle them */
     M = im->sx;
     N = im->sy;
-    FPRINTF((stderr,"This is a %u X %u %s image\n",M,N,
+    FPRINTF((_stderr,"This is a %u X %u %s image\n",M,N,
 		im->trueColor ? "TrueColor" : "palette"));
 
     df_pixeldata = im->trueColor ? (void *)im->tpixels : (void *)im->pixels;

@@ -287,8 +287,8 @@ pm3d_rearrange_part(
 	}
     }
 
-    FPRINTF((stderr, "(pm3d_rearrange_part) invert       = %d\n", *invert));
-    FPRINTF((stderr, "(pm3d_rearrange_part) invert_order = %d\n", invert_order));
+    FPRINTF((_stderr, "(pm3d_rearrange_part) invert       = %d\n", *invert));
+    FPRINTF((_stderr, "(pm3d_rearrange_part) invert_order = %d\n", invert_order));
 
     for (scanA = src, scan = len - 1, i = 0; scan >= 0; --scan, i++) {
 	if (pm3d.direction == PM3D_SCANS_AUTOMATIC) {
@@ -548,9 +548,9 @@ pm3d_plot(struct surface_points *this_plot, int at_which_z)
 	    interp_j = floor(ii / max_scans) + 1;
 	}
 #if 0
-	fprintf(stderr, "pm3d.interp_i=%i\t pm3d.interp_j=%i\n", pm3d.interp_i, pm3d.interp_j);
-	fprintf(stderr, "INRANGE: max_scans=%i  max_scan_pts=%i\n", max_scans, max_scan_pts);
-	fprintf(stderr, "seting interp_i=%i\t interp_j=%i => there will be %i and %i points\n",
+	fprintf(_stderr, "pm3d.interp_i=%i\t pm3d.interp_j=%i\n", pm3d.interp_i, pm3d.interp_j);
+	fprintf(_stderr, "INRANGE: max_scans=%i  max_scan_pts=%i\n", max_scans, max_scan_pts);
+	fprintf(_stderr, "seting interp_i=%i\t interp_j=%i => there will be %i and %i points\n",
 		interp_i, interp_j, interp_i*max_scan_pts, interp_j*max_scans);
 #endif
     }
@@ -575,7 +575,7 @@ pm3d_plot(struct surface_points *this_plot, int at_which_z)
 
 	if (needed_quadrangles > 0) {
 	    while (current_quadrangle + needed_quadrangles >= allocated_quadrangles) {
-		FPRINTF((stderr, "allocated_quadrangles = %d current = %d needed = %d\n",
+		FPRINTF((_stderr, "allocated_quadrangles = %d current = %d needed = %d\n",
 		    allocated_quadrangles, current_quadrangle, needed_quadrangles));
 		allocated_quadrangles = needed_quadrangles + 2*allocated_quadrangles;
 		quadrangles = (quadrangle*)gp_realloc(quadrangles,
@@ -629,7 +629,7 @@ pm3d_plot(struct surface_points *this_plot, int at_which_z)
 	scanA = scan_array[scan];
 	scanB = scan_array[scan + 1];
 
-	FPRINTF((stderr,"\n#IsoCurveA = scan nb %d has %d points   ScanB has %d points\n",
+	FPRINTF((_stderr,"\n#IsoCurveA = scan nb %d has %d points   ScanB has %d points\n",
 		scan, scanA->p_count, scanB->p_count));
 
 	pointsA = scanA->points;
@@ -694,7 +694,7 @@ pm3d_plot(struct surface_points *this_plot, int at_which_z)
 		ii1 = itmp;
 	    }
 
-	    FPRINTF((stderr,"j=%i:  i=%i i1=%i  [%i]   ii=%i ii1=%i  [%i]\n",
+	    FPRINTF((_stderr,"j=%i:  i=%i i1=%i  [%i]   ii=%i ii1=%i  [%i]\n",
 	    		j,i,i1,scanA->p_count,ii,ii1,scanB->p_count));
 
 	    /* choose the clipping method */
@@ -941,7 +941,7 @@ pm3d_plot(struct surface_points *this_plot, int at_which_z)
 			    corners[3].c = bl_point[i1][j1+1].c;
 			}
 
-			FPRINTF((stderr,"(%g,%g),(%g,%g),(%g,%g),(%g,%g)\n",
+			FPRINTF((_stderr,"(%g,%g),(%g,%g),(%g,%g),(%g,%g)\n",
 			    corners[0].x, corners[0].y, corners[1].x, corners[1].y,
 			    corners[2].x, corners[2].y, corners[3].x, corners[3].y));
 

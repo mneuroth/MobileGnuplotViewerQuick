@@ -1602,7 +1602,7 @@ set_decimalsign()
 	if (!setlocale(LC_NUMERIC, newlocale ? newlocale : ""))
 	    int_error(c_token-1, "Could not find requested locale");
 	decimalsign = gp_strdup(get_decimal_locale());
-	fprintf(stderr,"decimal_sign in locale is %s\n", decimalsign);
+	fprintf(_stderr,"decimal_sign in locale is %s\n", decimalsign);
 	/* Save this locale for later use, but return to "C" for now */
 	free(numeric_locale);
 	numeric_locale = newlocale;
@@ -3080,13 +3080,13 @@ set_mouse()
 		if (itmp >= MOUSE_COORDINATES_REAL
 		    && itmp <= MOUSE_COORDINATES_ALT) {
 		    if (MOUSE_COORDINATES_ALT == itmp && !mouse_alt_string) {
-			fprintf(stderr,
+			fprintf(_stderr,
 			    "please 'set mouse mouseformat <fmt>' first.\n");
 		    } else {
 			mouse_mode = itmp;
 		    }
 		} else {
-		    fprintf(stderr, "should be: %d <= mouseformat <= %d\n",
+		    fprintf(_stderr, "should be: %d <= mouseformat <= %d\n",
 			MOUSE_COORDINATES_REAL, MOUSE_COORDINATES_ALT);
 		}
 	    }
@@ -3209,13 +3209,15 @@ set_output()
 	int_error(c_token, "you can't change the output in multiplot mode");
 
     if (END_OF_COMMAND) {	/* no file specified */
+    fprintf(_stderr, "set_output() p1\n");
 	term_set_output(NULL);
 	if (outstr) {
 	    free(outstr);
 	    outstr = NULL; /* means STDOUT */
 	}
     } else if ((testfile = try_to_get_string())) {
-	gp_expand_tilde(&testfile);
+    fprintf(_stderr, "set_output() p2 %s\n",testfile);
+    gp_expand_tilde(&testfile);
 	term_set_output(testfile);
 	if (testfile != outstr) {
 	    if (testfile)
@@ -3295,7 +3297,7 @@ set_parametric()
 	    strcpy (set_dummy_var[0], "t");
 	    strcpy (set_dummy_var[1], "y");
 	    if (interactive)
-		(void) fprintf(stderr,"\n\tdummy variable is t for curves, u/v for surfaces\n");
+		(void) fprintf(_stderr,"\n\tdummy variable is t for curves, u/v for surfaces\n");
 	}
     }
 }
@@ -4084,7 +4086,7 @@ set_pm3d()
 	    && PM3D_FLUSH_BEGIN != pm3d.flush) {
 	    pm3d.direction = PM3D_SCANS_FORWARD;
 	    /* FIXME: Why isn't this combination supported? */
-	    FPRINTF((stderr, "pm3d: `scansautomatic' and `flush %s' are incompatible\n",
+	    FPRINTF((_stderr, "pm3d: `scansautomatic' and `flush %s' are incompatible\n",
 		PM3D_FLUSH_END == pm3d.flush ? "end": "center"));
 	}
     }
@@ -4132,7 +4134,7 @@ set_polar()
 
     if (!parametric) {
 	if (interactive)
-	    (void) fprintf(stderr,"\n\tdummy variable is t for curves\n");
+	    (void) fprintf(_stderr,"\n\tdummy variable is t for curves\n");
 	strcpy (set_dummy_var[0], "t");
     }
     if (axis_array[T_AXIS].set_autoscale) {
@@ -4460,7 +4462,7 @@ set_obj(int tag, int obj_type)
 		    }
 		    if (got_corners && memcmp(&this_polygon->vertex[this_polygon->type-1],
 					      &this_polygon->vertex[0],sizeof(struct position))) {
-			fprintf(stderr,"Polygon is not closed - adding extra vertex\n");
+			fprintf(_stderr,"Polygon is not closed - adding extra vertex\n");
 			this_polygon->vertex = gp_realloc(this_polygon->vertex,
 					    (this_polygon->type+1) * sizeof(struct position),
 					    "polygon vertex");
@@ -4957,7 +4959,7 @@ set_terminal()
     *term_options = 0;
     term->options();
     if (interactive && *term_options)
-	fprintf(stderr,"Options are '%s'\n",term_options);
+	fprintf(_stderr,"Options are '%s'\n",term_options);
     if ((term->flags & TERM_MONOCHROME))
 	init_monochrome();
 }

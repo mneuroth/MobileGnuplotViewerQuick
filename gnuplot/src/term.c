@@ -308,7 +308,7 @@ static TBOOLEAN output_pipe_open = FALSE;
 static void
 term_close_output()
 {
-    FPRINTF((stderr, "term_close_output\n"));
+    FPRINTF((_stderr, "term_close_output\n"));
 
     opened_binary = FALSE;
 
@@ -327,14 +327,14 @@ term_close_output()
     else
 #endif
     if (gpoutfile != gppsfile)
-	fclose(gpoutfile);
+     fclose(gpoutfile);
 
     gpoutfile = stdout;         /* Don't dup... */
     free(outstr);
     outstr = NULL;
 
     if (gppsfile)
-	fclose(gppsfile);
+    fclose(gppsfile);
     gppsfile = NULL;
 }
 
@@ -346,11 +346,11 @@ term_set_output(char *dest)
 {
     FILE *f = NULL;
 
-    FPRINTF((stderr, "term_set_output\n"));
+    FPRINTF((_stderr, "term_set_output %s\n",dest));
     assert(dest == NULL || dest != outstr);
 
     if (multiplot) {
-	fputs("In multiplot mode you can't change the output\n", stderr);
+	fputs("In multiplot mode you can't change the output\n", _stderr);
 	return;
     }
     if (term && term_initialised) {
@@ -431,7 +431,7 @@ term_set_output(char *dest)
 void
 term_initialise()
 {
-    FPRINTF((stderr, "term_initialise()\n"));
+    FPRINTF((_stderr, "term_initialise()\n"));
 
     if (!term)
 	int_error(NO_CARET, "No terminal defined");
@@ -444,7 +444,7 @@ term_initialise()
 
     if (outstr && (term->flags & TERM_NO_OUTPUTFILE)) {
 	if (interactive)
-	    fprintf(stderr,"Closing %s\n",outstr);
+	    fprintf(_stderr,"Closing %s\n",outstr);
 	term_close_output();
     }
 
@@ -458,17 +458,18 @@ term_initialise()
 	 */
 	char *temp = gp_alloc(strlen(outstr) + 1, "temp file string");
 	if (temp) {
-	    FPRINTF((stderr, "term_initialise: reopening \"%s\" as %s\n",
+	    FPRINTF((_stderr, "term_initialise: reopening \"%s\" as %s\n",
 		     outstr, term->flags & TERM_BINARY ? "binary" : "text"));
 	    strcpy(temp, outstr);
-	    term_set_output(temp);      /* will free outstr */
+        fprintf(_stderr, "term_initialise() p1 %s\n",temp);
+        term_set_output(temp);      /* will free outstr */
 	    if (temp != outstr) {
 		if (temp)
 		    free(temp);
 		temp = outstr;
 	    }
 	} else
-	    fputs("Cannot reopen output file in binary", stderr);
+	    fputs("Cannot reopen output file in binary", _stderr);
 	/* and carry on, hoping for the best ! */
     }
 #if defined(MSDOS) || defined (_WIN32) || defined(OS2)
@@ -492,7 +493,7 @@ term_initialise()
 #endif
 
     if (!term_initialised || term_force_init) {
-	FPRINTF((stderr, "- calling term->init()\n"));
+	FPRINTF((_stderr, "- calling term->init()\n"));
 	(*term->init) ();
 	term_initialised = TRUE;
 #ifdef HAVE_LOCALE_H
@@ -510,18 +511,18 @@ term_initialise()
 void
 term_start_plot()
 {
-    FPRINTF((stderr, "term_start_plot()\n"));
+    FPRINTF((_stderr, "term_start_plot()\n"));
 
     if (!term_initialised)
 	term_initialise();
 
     if (!term_graphics) {
-	FPRINTF((stderr, "- calling term->graphics()\n"));
+	FPRINTF((_stderr, "- calling term->graphics()\n"));
 	(*term->graphics) ();
 	term_graphics = TRUE;
     } else if (multiplot && term_suspended) {
 	if (term->resume) {
-	    FPRINTF((stderr, "- calling term->resume()\n"));
+	    FPRINTF((_stderr, "- calling term->resume()\n"));
 	    (*term->resume) ();
 	}
 	term_suspended = FALSE;
@@ -546,7 +547,7 @@ term_start_plot()
 void
 term_end_plot()
 {
-    FPRINTF((stderr, "term_end_plot()\n"));
+    FPRINTF((_stderr, "term_end_plot()\n"));
 
     if (!term_initialised)
 	return;
@@ -555,7 +556,7 @@ term_end_plot()
     (*term->layer)(TERM_LAYER_END_TEXT);
 
     if (!multiplot) {
-	FPRINTF((stderr, "- calling term->text()\n"));
+	FPRINTF((_stderr, "- calling term->text()\n"));
 	(*term->text) ();
 	term_graphics = FALSE;
     } else {
@@ -579,9 +580,9 @@ term_end_plot()
 static void
 term_suspend()
 {
-    FPRINTF((stderr, "term_suspend()\n"));
+    FPRINTF((_stderr, "term_suspend()\n"));
     if (term_initialised && !term_suspended && term->suspend) {
-	FPRINTF((stderr, "- calling term->suspend()\n"));
+	FPRINTF((_stderr, "- calling term->suspend()\n"));
 	(*term->suspend) ();
 	term_suspended = TRUE;
     }
@@ -590,7 +591,7 @@ term_suspend()
 void
 term_reset()
 {
-    FPRINTF((stderr, "term_reset()\n"));
+    FPRINTF((_stderr, "term_reset()\n"));
 
 #ifdef USE_MOUSE
     /* Make sure that ^C will break out of a wait for 'pause mouse' */
@@ -605,7 +606,7 @@ term_reset()
 
     if (term_suspended) {
 	if (term->resume) {
-	    FPRINTF((stderr, "- calling term->resume()\n"));
+	    FPRINTF((_stderr, "- calling term->resume()\n"));
 	    (*term->resume) ();
 	}
 	term_suspended = FALSE;
@@ -694,7 +695,7 @@ term_apply_lp_properties(struct lp_style_type *lp)
 void
 term_start_multiplot()
 {
-    FPRINTF((stderr, "term_start_multiplot()\n"));
+    FPRINTF((_stderr, "term_start_multiplot()\n"));
     multiplot_start();
 #ifdef USE_MOUSE
     UpdateStatusline();
@@ -704,7 +705,7 @@ term_start_multiplot()
 void
 term_end_multiplot()
 {
-    FPRINTF((stderr, "term_end_multiplot()\n"));
+    FPRINTF((_stderr, "term_end_multiplot()\n"));
     if (!multiplot)
 	return;
 
@@ -725,7 +726,7 @@ term_end_multiplot()
 void
 term_check_multiplot_okay(TBOOLEAN f_interactive)
 {
-    FPRINTF((stderr, "term_multiplot_okay(%d)\n", f_interactive));
+    FPRINTF((_stderr, "term_multiplot_okay(%d)\n", f_interactive));
 
     if (!term_initialised)
 	return;                 /* they've not started yet */
@@ -1263,7 +1264,7 @@ options_null()
 static void
 graphics_null()
 {
-    fprintf(stderr,
+    fprintf(_stderr,
 	    "WARNING: Plotting with an 'unknown' terminal.\n"
 	    "No output will be generated. Please select a terminal with 'set terminal'.\n");
 }
@@ -1525,7 +1526,7 @@ change_term(const char *origname, int length)
 	term->dashtype = null_dashtype;
 
     if (interactive)
-	fprintf(stderr, "\nTerminal type is now '%s'\n", term->name);
+	fprintf(_stderr, "\nTerminal type is now '%s'\n", term->name);
 
     /* Invalidate any terminal-specific structures that may be active */
     invalidate_palette();
@@ -1678,7 +1679,7 @@ init_terminal()
 		term->options();
 	    return;
 	}
-	fprintf(stderr, "Unknown or ambiguous terminal name '%s'\n", term_name);
+	fprintf(_stderr, "Unknown or ambiguous terminal name '%s'\n", term_name);
     }
     change_term("unknown", 7);
 }
@@ -2245,7 +2246,7 @@ enhanced_recursion(
     wasitalic = (strstr(fontname, ":Italic") != NULL);
     wasbold = (strstr(fontname, ":Bold") != NULL);
 
-    FPRINTF((stderr, "RECURSE WITH \"%s\", %d %s %.1f %.1f %d %d %d",
+    FPRINTF((_stderr, "RECURSE WITH \"%s\", %d %s %.1f %.1f %d %d %d",
 		p, brace, fontname, fontsize, base, widthflag, showflag, overprint));
 
     /* Start each recursion with a clean string */
@@ -2602,7 +2603,7 @@ stylefont(const char *fontname, TBOOLEAN isbold, TBOOLEAN isitalic)
     if (isitalic)
 	strcat(markup, ":Italic");
 
-    FPRINTF((stderr, "MARKUP FONT: %s -> %s\n", fontname, markup));
+    FPRINTF((_stderr, "MARKUP FONT: %s -> %s\n", fontname, markup));
     return markup;
 }
 
@@ -2641,7 +2642,7 @@ int len;
 	term = &ENHest;
 	term->put_text(0,0,text);
 	len = term->xmax;
-	FPRINTF((stderr,"Estimating length %d height %g for enhanced text string \"%s\"\n",
+	FPRINTF((_stderr,"Estimating length %d height %g for enhanced text string \"%s\"\n",
 		len, (double)(term->ymax)/10., text));
 	term = tsave;
     } else if (encoding == S_ENC_UTF8)
@@ -2968,7 +2969,7 @@ strlen_tex(const char *str)
 
     if (!strpbrk(s, "{}$[]\\")) {
 	len = strlen(s);
-	FPRINTF((stderr,"strlen_tex(\"%s\") = %d\n",s,len));
+	FPRINTF((_stderr,"strlen_tex(\"%s\") = %d\n",s,len));
 	return len;
     }
 
@@ -2997,7 +2998,7 @@ strlen_tex(const char *str)
     }
 
 
-    FPRINTF((stderr,"strlen_tex(\"%s\") = %d\n",str,len));
+    FPRINTF((_stderr,"strlen_tex(\"%s\") = %d\n",str,len));
     return len;
 }
 
@@ -3025,8 +3026,8 @@ check_for_mouse_events()
     if (ctrlc_flag) {
 	ctrlc_flag = FALSE;
 	term_reset();
-	putc('\n', stderr);
-	fprintf(stderr, "Ctrl-C detected!\n");
+	putc('\n', _stderr);
+	fprintf(_stderr, "Ctrl-C detected!\n");
 	bail_to_command_line();	/* return to prompt */
     }
 #endif

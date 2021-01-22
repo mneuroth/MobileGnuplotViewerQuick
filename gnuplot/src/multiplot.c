@@ -499,7 +499,7 @@ mp_layout_size_and_offset(void)
 {
     if (!mp_layout.auto_layout) return;
 
-    /* fprintf(stderr,"col==%d row==%d\n",mp_layout.act_col,mp_layout.act_row); */
+    /* fprintf(_stderr,"col==%d row==%d\n",mp_layout.act_col,mp_layout.act_row); */
     /* the 'set size' command */
     xsize = mp_layout.xscale / mp_layout.num_cols;
     ysize = mp_layout.yscale / mp_layout.num_rows;
@@ -510,7 +510,7 @@ mp_layout_size_and_offset(void)
 	yoffset = 1.0 - (double)(mp_layout.act_row+1) / mp_layout.num_rows;
     else
 	yoffset = (double)(mp_layout.act_row) / mp_layout.num_rows;
-    /* fprintf(stderr,"xoffset==%g  yoffset==%g\n", xoffset,yoffset); */
+    /* fprintf(_stderr,"xoffset==%g  yoffset==%g\n", xoffset,yoffset); */
 
     /* Allow a little space at the top for a title */
     if (mp_layout.title.text) {
@@ -521,10 +521,10 @@ mp_layout_size_and_offset(void)
     /* corrected for x/y-scaling factors and user defined offsets */
     xoffset -= (mp_layout.xscale-1)/(2*mp_layout.num_cols);
     yoffset -= (mp_layout.yscale-1)/(2*mp_layout.num_rows);
-    /* fprintf(stderr,"  xoffset==%g  yoffset==%g\n", xoffset,yoffset); */
+    /* fprintf(_stderr,"  xoffset==%g  yoffset==%g\n", xoffset,yoffset); */
     xoffset += mp_layout.xoffset;
     yoffset += mp_layout.yoffset;
-    /* fprintf(stderr,"  xoffset==%g  yoffset==%g\n", xoffset,yoffset); */
+    /* fprintf(_stderr,"  xoffset==%g  yoffset==%g\n", xoffset,yoffset); */
 }
 
 /* Helper function for multiplot auto layout to set the explicit plot margins, 

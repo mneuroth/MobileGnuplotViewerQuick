@@ -58,10 +58,10 @@ do {						\
     char *s = start;				\
 						\
     while (s < limit) {				\
-	fprintf(stderr, "\"%s\" ", s);		\
+	fprintf(_stderr, "\"%s\" ", s);		\
 	s += strlen(s) + 1;			\
     }						\
-    fputc('\n',stderr);				\
+    fputc('\n',_stderr);				\
 } while (0)
 
 /*
@@ -86,14 +86,14 @@ loadpath_handler(int action, char *path)
     switch (action) {
     case ACTION_CLEAR:
 	/* Clear loadpath, fall through to init */
-	FPRINTF((stderr, "Clear loadpath\n"));
+	FPRINTF((_stderr, "Clear loadpath\n"));
 	free(loadpath);
 	loadpath = p = last = NULL;
 	/* HBB 20000726: 'limit' has to be initialized to NULL, too! */
 	limit = NULL;
     case ACTION_INIT:
 	/* Init loadpath from environment */
-	FPRINTF((stderr, "Init loadpath from environment\n"));
+	FPRINTF((_stderr, "Init loadpath from environment\n"));
 	assert(loadpath == NULL);
 	if (!loadpath)
 	{
@@ -112,7 +112,7 @@ loadpath_handler(int action, char *path)
 	break;
     case ACTION_SET:
 	/* set the loadpath */
-	FPRINTF((stderr, "Set loadpath\n"));
+	FPRINTF((_stderr, "Set loadpath\n"));
 	if (path && *path != NUL) {
 	    /* length of env portion */
 	    size_t elen = last - envptr;
@@ -141,29 +141,29 @@ loadpath_handler(int action, char *path)
 	break;
     case ACTION_SHOW:
 	/* print the current, full loadpath */
-	FPRINTF((stderr, "Show loadpath\n"));
+	FPRINTF((_stderr, "Show loadpath\n"));
 	if (loadpath) {
-	    fputs("\tloadpath is ", stderr);
+	    fputs("\tloadpath is ", _stderr);
 	    PRINT_PATHLIST(loadpath, envptr);
 	    if (envptr) {
 		/* env part */
-		fputs("\tloadpath from GNUPLOT_LIB is ", stderr);
+		fputs("\tloadpath from GNUPLOT_LIB is ", _stderr);
 		PRINT_PATHLIST(envptr, last);
 	    }
 	} else
-	    fputs("\tloadpath is empty\n", stderr);
+	    fputs("\tloadpath is empty\n", _stderr);
 #ifdef GNUPLOT_SHARE_DIR
-	fprintf(stderr,"\tgnuplotrc is read from %s\n",GNUPLOT_SHARE_DIR);
+	fprintf(_stderr,"\tgnuplotrc is read from %s\n",GNUPLOT_SHARE_DIR);
 #endif
 #ifdef X11
 	if ((appdir = getenv("XAPPLRESDIR"))) {
-	    fprintf(stderr,"\tenvironmental path for X11 application defaults: \"%s\"\n",
+	    fprintf(_stderr,"\tenvironmental path for X11 application defaults: \"%s\"\n",
 		appdir);
 	}
 #ifdef XAPPLRESDIR
 	else {
-	    fprintf(stderr,"\tno XAPPLRESDIR found in the environment,\n");
-	    fprintf(stderr,"\t    falling back to \"%s\"\n", XAPPLRESDIR);
+	    fprintf(_stderr,"\tno XAPPLRESDIR found in the environment,\n");
+	    fprintf(_stderr,"\t    falling back to \"%s\"\n", XAPPLRESDIR);
 	}
 #endif
 #endif
@@ -178,7 +178,7 @@ loadpath_handler(int action, char *path)
 	/* subsequent calls to get_loadpath() return all
 	 * elements of the loadpath until exhausted
 	 */
-	FPRINTF((stderr, "Get loadpath\n"));
+	FPRINTF((_stderr, "Get loadpath\n"));
 	if (!loadpath)
 	    return NULL;
 	if (!p) {
@@ -319,14 +319,14 @@ fontpath_handler(int action, char *path)
     switch (action) {
     case ACTION_CLEAR:
 	/* Clear fontpath, fall through to init */
-	FPRINTF((stderr, "Clear fontpath\n"));
+	FPRINTF((_stderr, "Clear fontpath\n"));
 	free(fontpath);
 	fontpath = p = last = NULL;
 	/* HBB 20000726: 'limit' has to be initialized to NULL, too! */
 	limit = NULL;
     case ACTION_INIT:
 	/* Init fontpath from environment */
-	FPRINTF((stderr, "Init fontpath from environment\n"));
+	FPRINTF((_stderr, "Init fontpath from environment\n"));
 	assert(fontpath == NULL);
 	if (!fontpath)
 	{
@@ -464,7 +464,7 @@ fontpath_handler(int action, char *path)
 	break;
     case ACTION_SET:
 	/* set the fontpath */
-	FPRINTF((stderr, "Set fontpath\n"));
+	FPRINTF((_stderr, "Set fontpath\n"));
 	if (path && *path != NUL) {
 	    /* length of env portion */
 	    size_t elen = last - envptr;
@@ -493,17 +493,17 @@ fontpath_handler(int action, char *path)
 	break;
     case ACTION_SHOW:
 	/* print the current, full fontpath */
-	FPRINTF((stderr, "Show fontpath\n"));
+	FPRINTF((_stderr, "Show fontpath\n"));
 	if (fontpath) {
-	    fputs("\tfontpath is ", stderr);
+	    fputs("\tfontpath is ", _stderr);
 	    PRINT_PATHLIST(fontpath, envptr);
 	    if (envptr) {
 		/* env part */
-		fputs("\tsystem fontpath is ", stderr);
+		fputs("\tsystem fontpath is ", _stderr);
 		PRINT_PATHLIST(envptr, last);
 	    }
 	} else
-	    fputs("\tfontpath is empty\n", stderr);
+	    fputs("\tfontpath is empty\n", _stderr);
 	break;
     case ACTION_SAVE:
 	/* we don't save the font path taken from the
@@ -515,7 +515,7 @@ fontpath_handler(int action, char *path)
 	/* subsequent calls to get_fontpath() return all
 	 * elements of the fontpath until exhausted
 	 */
-	FPRINTF((stderr, "Get fontpath\n"));
+	FPRINTF((_stderr, "Get fontpath\n"));
 	if (!fontpath)
 	    return NULL;
 	if (!p) {
@@ -606,12 +606,12 @@ locale_handler(int action, char *newlocale)
 
     case ACTION_SHOW:
 #ifdef HAVE_LOCALE_H
-	fprintf(stderr, "\tgnuplot LC_CTYPE   %s\n", setlocale(LC_CTYPE,NULL));
-	fprintf(stderr, "\tgnuplot encoding   %s\n", encoding_names[encoding]);
-	fprintf(stderr, "\tgnuplot LC_TIME    %s\n", setlocale(LC_TIME,NULL));
-	fprintf(stderr, "\tgnuplot LC_NUMERIC %s\n", numeric_locale ? numeric_locale : "C");
+	fprintf(_stderr, "\tgnuplot LC_CTYPE   %s\n", setlocale(LC_CTYPE,NULL));
+	fprintf(_stderr, "\tgnuplot encoding   %s\n", encoding_names[encoding]);
+	fprintf(_stderr, "\tgnuplot LC_TIME    %s\n", setlocale(LC_TIME,NULL));
+	fprintf(_stderr, "\tgnuplot LC_NUMERIC %s\n", numeric_locale ? numeric_locale : "C");
 #else
-	fprintf(stderr, "\tlocale is \"%s\"\n", current_locale);
+	fprintf(_stderr, "\tlocale is \"%s\"\n", current_locale);
 #endif
 	break;
     

@@ -387,9 +387,9 @@ set_hidden3doptions()
 void
 show_hidden3doptions()
 {
-    fprintf(stderr,"\t  Hidden3d elements will be drawn in %s of non-hidden3d elements\n",
+    fprintf(_stderr,"\t  Hidden3d elements will be drawn in %s of non-hidden3d elements\n",
 	    hidden3d_layer == LAYER_BACK ? "back" : "front");
-    fprintf(stderr,"\
+    fprintf(_stderr,"\
 \t  Back side of surfaces has linestyle offset of %d\n\
 \t  Bit-Mask of Lines to draw in each triangle is %ld\n\
 \t  %d: ",
@@ -399,23 +399,23 @@ show_hidden3doptions()
     switch (hiddenHandleUndefinedPoints) {
     case OUTRANGE:
 	fputs("Outranged and undefined datapoints are omitted from the surface.\n",
-	      stderr);
+	      _stderr);
 	break;
     case UNDEFINED:
 	fputs("Only undefined datapoints are omitted from the surface.\n",
-	      stderr);
+	      _stderr);
 	break;
     case UNHANDLED:
 	fputs("Will not check for undefined datapoints (may cause crashes).\n",
-	      stderr);
+	      _stderr);
 	break;
     default:
 	fputs("Value stored for undefined datapoint handling is illegal!!!\n",
-	      stderr);
+	      _stderr);
 	break;
     }
 
-    fprintf(stderr,"\
+    fprintf(_stderr,"\
 \t  Will %suse other diagonal if it gives a less jaggy outline\n\
 \t  Will %sdraw diagonal visibly if quadrangle is 'bent over'\n",
 	    hiddenShowAlternativeDiagonal ? "" : "not ",
@@ -2282,7 +2282,7 @@ draw_label_hidden(p_vertex v, struct lp_style_type *lp, int x, int y)
 
     edgenum = make_edge(thisvertex, thisvertex, lp, lp->l_type, -1);
 
-    FPRINTF((stderr,"label: \"%s\" at [%d %d]  vertex %ld edge %ld\n", 
+    FPRINTF((_stderr,"label: \"%s\" at [%d %d]  vertex %ld edge %ld\n", 
     	v->label->text, x, y, thisvertex, edgenum));
 
     temp_pfirst = pfirst;

@@ -430,7 +430,7 @@ axis_checked_extend_empty_range(AXIS_INDEX axis, const char *mesg)
 		FIXUP_RANGE__WIDEN_ZERO_ABS
 		: FIXUP_RANGE__WIDEN_NONZERO_REL * fabs(dmax);
 	    if (!(axis == FIRST_Z_AXIS && !mesg)) /* set view map */
-		fprintf(stderr, "Warning: empty %s range [%g:%g], ",
+		fprintf(_stderr, "Warning: empty %s range [%g:%g], ",
 		    axis_name(axis), dmin, dmax);
 	    /* HBB 20010525: correctly handle single-ended
 	     * autoscaling, too: */
@@ -439,7 +439,7 @@ axis_checked_extend_empty_range(AXIS_INDEX axis, const char *mesg)
 	    if (this_axis->autoscale & AUTOSCALE_MAX)
 		this_axis->max += widen;
 	    if (!(axis == FIRST_Z_AXIS && !mesg)) /* set view map */
-		fprintf(stderr, "adjusting to [%g:%g]\n",
+		fprintf(_stderr, "adjusting to [%g:%g]\n",
 		    this_axis->min, this_axis->max);
 	} else {
 	    /* user has explicitly set the range (to something empty)
@@ -1206,7 +1206,7 @@ gen_tics(struct axis *this, tic_callback callback)
 	step = fabs(step);
 
 	if ((minitics != MINI_OFF) && (this->miniticscale != 0)) {
-	    FPRINTF((stderr,"axis.c: %d  start = %g end = %g step = %g base = %g\n", 
+	    FPRINTF((_stderr,"axis.c: %d  start = %g end = %g step = %g base = %g\n", 
 			__LINE__, start, end, step, this->base));
 
 	    /* {{{  figure out ministart, ministep, miniend */
@@ -2455,19 +2455,19 @@ clone_linked_axes(AXIS *axis1, AXIS *axis2)
 		goto inverse_function_sanity_check;
 	    }
 	    int_warn(NO_CARET, "could not confirm linked axis inverse mapping function");
-	    fprintf(stderr, "\t");
-	    fprintf(stderr, "axis1: (set_min,min,testmin) = (%g,%g,%g); ",
+	    fprintf(_stderr, "\t");
+	    fprintf(_stderr, "axis1: (set_min,min,testmin) = (%g,%g,%g); ",
 		    axis1->set_min,
 		    axis1->min,
 		    testmin);
-	    fprintf(stderr, "axis1: (set_max,max,testmax) = (%g,%g,%g); ",
+	    fprintf(_stderr, "axis1: (set_max,max,testmax) = (%g,%g,%g); ",
 		    axis1->set_max,
 		    axis1->max,
 		    testmax);
-	    fprintf(stderr, "axis2: (set_min,min) = (%g,%g); ",
+	    fprintf(_stderr, "axis2: (set_min,min) = (%g,%g); ",
 		    axis1->set_min,
 		    axis1->min);
-	    fprintf(stderr, "axis2: (set_max,max) = (%g,%g)\n",
+	    fprintf(_stderr, "axis2: (set_max,max) = (%g,%g)\n",
 		    axis1->set_max,
 		    axis1->max);
 	}
@@ -2521,7 +2521,7 @@ eval_link_function(struct axis *axis, double raw_coord)
     evaluate_at(link_udf->at, &a);
 
     if (undefined || a.type != CMPLX) {
-	FPRINTF((stderr, "eval_link_function(%g) returned %s\n",
+	FPRINTF((_stderr, "eval_link_function(%g) returned %s\n",
 		raw_coord, undefined ? "undefined" : "unexpected type"));
 	a = udv_NaN->udv_value;
     }

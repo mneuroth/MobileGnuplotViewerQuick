@@ -40,7 +40,7 @@ static char *RCSid() { return RCSid("$Id: help.c,v 1.31 2015/09/11 19:48:02 sfea
 #include <stdio.h>
 void EndOutput(){}
 void StartOutput(){}
-void OutLine(const char *M){fputs(M,stderr);}
+void OutLine(const char *M){fputs(M,_stderr);}
 #else
 
 #include "alloc.h"
@@ -462,13 +462,13 @@ Ambiguous(KEY *key, size_t len)
 		/* yup, this is different up to the next space */
 		if (!status) {
 		    /* first one we have printed is special */
-		    fprintf(stderr,
+            fprintf(_stderr,
 			    "Ambiguous request '%.*s'; possible matches:\n",
 			    (int)len, first);
-		    fprintf(stderr, "\t%s\n", prev);
+            fprintf(_stderr, "\t%s\n", prev);
 		    status = TRUE;
 		}
-		fprintf(stderr, "\t%s\n", key->key);
+        fprintf(_stderr, "\t%s\n", key->key);
 		prev = key->key;
 	    }
 	}
@@ -663,7 +663,7 @@ StartOutput()
 	if ((outfile = popen(pager_name, "w")) != (FILE *) NULL)
 	    return;		/* success */
     }
-    outfile = stderr;
+    outfile = _stderr;
     /* fall through to built-in pager */
 #endif
 
@@ -687,7 +687,7 @@ OutLine(const char *line)
 {
     int c;			/* dummy input char */
 #if defined(PIPES)
-    if (outfile != stderr) {
+    if (outfile != _stderr) {
 	fputs(line, outfile);
 	return;
     }
@@ -696,7 +696,7 @@ OutLine(const char *line)
     /* built-in dumb pager */
     /* leave room for prompt line */
     if (pagelines >= screensize - 2) {
-	fputs("Press return for more: ", stderr);
+    fputs("Press return for more: ", _stderr);
 #if defined(_WIN32)
 	do
 	    c = getchar();
@@ -708,7 +708,7 @@ OutLine(const char *line)
 #endif
 	pagelines = 0;
     }
-    fputs(line, stderr);
+    fputs(line, _stderr);
     pagelines++;
 }
 
@@ -722,9 +722,9 @@ OutLine_InternalPager(const char *line)
     int c;			/* dummy input char */
 
 #if defined(PIPES)
-    if (outfile != stderr) {
+    if (outfile != _stderr) {
 	/* do not go through external pager */
-	fputs(line, stderr);
+    fputs(line, _stderr);
 	return;
     }
 #endif /* PIPES */
@@ -732,7 +732,7 @@ OutLine_InternalPager(const char *line)
     /* built-in dumb pager */
     /* leave room for prompt line */
     if (pagelines >= screensize - 2) {
-	fputs("Press return for more: ", stderr);
+    fputs("Press return for more: ", _stderr);
 #if defined(_WIN32)
 	do
 	    c = getchar();
@@ -744,7 +744,7 @@ OutLine_InternalPager(const char *line)
 #endif
 	pagelines = 0;
     }
-    fputs(line, stderr);
+    fputs(line, _stderr);
     pagelines++;
 }
 
@@ -752,7 +752,7 @@ void
 EndOutput()
 {
 #if defined(PIPES)
-    if (outfile != stderr)
+    if (outfile != _stderr)
 	(void) pclose(outfile);
 #endif
 }

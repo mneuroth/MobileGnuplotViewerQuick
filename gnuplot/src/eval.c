@@ -429,7 +429,7 @@ gpfree_string(struct value *a)
     else if (a->type == ARRAY) {
 	/* gpfree_array() is now a separate routine. This is to help find */
 	/* any remaining callers who expect gpfree_string to handle it.   */
-	FPRINTF((stderr,"eval.c:%d hit array in gpfree_string()", __LINE__));
+	FPRINTF((_stderr,"eval.c:%d hit array in gpfree_string()", __LINE__));
 	a->type = NOTDEFINED;
     }
 
@@ -484,7 +484,7 @@ void
 check_stack()
 {				/* make sure stack's empty */
     if (s_p != -1)
-	fprintf(stderr, "\n\
+	fprintf(_stderr, "\n\
 warning:  internal error--stack not empty!\n\
           (function called with too many parameters?)\n");
 }
@@ -534,7 +534,7 @@ pop_or_convert_from_string(struct value *v)
 	    }
 	    gpfree_string(v);
 	    Gcomplex(v, d, 0.);
-	    FPRINTF((stderr,"converted string to CMPLX value %g\n",real(v)));
+	    FPRINTF((_stderr,"converted string to CMPLX value %g\n",real(v)));
 	}
     }
     return(v);

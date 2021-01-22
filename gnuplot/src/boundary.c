@@ -723,7 +723,7 @@ boundary(struct curve_points *plots, int count)
 
 	plot_bounds.ytop = plot_bounds.ybot;
 	plot_bounds.ybot = i;
-	FPRINTF((stderr,"boundary: Big problems! plot_bounds.ybot > plot_bounds.ytop\n"));
+    FPRINTF((_stderr,"boundary: Big problems! plot_bounds.ybot > plot_bounds.ytop\n"));
     }
 
     /*  compute coordinates for axis labels, title et al

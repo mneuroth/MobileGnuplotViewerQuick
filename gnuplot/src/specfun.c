@@ -1145,7 +1145,7 @@ ranf(struct value *init)
 	seed2 = 1234567890L;
     }
 
-    FPRINTF((stderr,"ranf: seed = %lo %lo        %ld %ld\n", seed1, seed2));
+    FPRINTF((_stderr,"ranf: seed = %lo %lo        %ld %ld\n", seed1, seed2));
 
     /* Generate pseudo random integers, which always end up positive */
     k = seed1 / 53668L;

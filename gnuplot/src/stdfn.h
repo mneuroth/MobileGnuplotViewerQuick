@@ -459,7 +459,7 @@ void gp_rewinddir(GPDIR *);
 
 
 #ifdef DEBUG
-# define DEBUG_WHERE do { fprintf(stderr,"%s:%d ",__FILE__,__LINE__); } while (0)
+# define DEBUG_WHERE do { fprintf(_stderr,"%s:%d ",__FILE__,__LINE__); } while (0)
 # define FPRINTF(a) do { DEBUG_WHERE; fprintf a; } while (0)
 #else
 # define DEBUG_WHERE     do { /* nought */ } while(0)

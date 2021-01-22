@@ -511,7 +511,7 @@ approximate_palette(t_sm_palette *palette, int samples,
 
 	    /* test for extremum */
 	    if(is_extremum(colors[j - 2], colors[j - 1], colors[j])) {
-	        /* fprintf(stderr,"Extremum at %g\n", gray); */
+	        /* fprintf(_stderr,"Extremum at %g\n", gray); */
 	        /* ++extrema; */
 		break;
 	    }
@@ -519,7 +519,7 @@ approximate_palette(t_sm_palette *palette, int samples,
 	    /* to big deviation */
 	    max_dev = get_max_dev(colors, j, allowed_deviation);
 	    if(max_dev > allowed_deviation) {
-	        /* fprintf(stderr,"Control Point at %.3g\n",gray); */
+	        /* fprintf(_stderr,"Control Point at %.3g\n",gray); */
 		break;
 	    }
 	}
@@ -543,11 +543,11 @@ approximate_palette(t_sm_palette *palette, int samples,
     ++cnt;
 
     /***********
-    fprintf(stderr,
+    fprintf(_stderr,
 	     "PS interpolation table: %d samples, allowed deviation %.2f%%:\n",
 	     samples, 100*allowed_deviation);
 
-    fprintf(stderr, "  --> new size %d, %d extrema, max skip %d\n",
+    fprintf(_stderr, "  --> new size %d, %d extrema, max skip %d\n",
 	     cnt, extrema, maximum_j);
     ************/
     free(colors);
@@ -697,7 +697,7 @@ GetColorValueFromFormula(int formula, double x)
 	 */
     default:
 	/* Cannot happen! */
-	FPRINTF((stderr, "gnuplot:  invalid palette rgbformula"));
+	FPRINTF((_stderr, "gnuplot:  invalid palette rgbformula"));
 	x = 0;
     }
     if (x <= 0)
