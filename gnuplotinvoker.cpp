@@ -12,6 +12,13 @@
 #include "androidtasks.h"
 #include "applicationdata.h"
 
+#ifdef Q_OS_ANDROID
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
+#include <stdio.h>
+
 #include <QDir>
 
 GnuplotInvoker::GnuplotInvoker()
@@ -135,7 +142,7 @@ void GnuplotInvoker::handleGnuplotError(int exitCode)
     sltErrorText(sError+QString(error));
 }
 
-extern "C" int gnu_main(int argc, char **argv);
+extern "C" int gnu_main(int argc, char **argv, FILE * filedescr);
 
 #define TEMP_GNUPLOT_SCRIPT "./_temp_.gpt"
 #define TEMP_GNUPLOT_OUTPUT "./_output_.svg"
@@ -156,6 +163,9 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     argv[1] = new char[512];
     strcpy(argv[1], TEMP_GNUPLOT_SCRIPT);
 
+    QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
+    qputenv("GNUHELP", sHelpFile.toLocal8Bit());
+
     QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
                         + QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)
                         + QString("set print '%1'\n").arg(TEMP_GNUPLOT_ERROR)
@@ -164,7 +174,26 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     ApplicationData::simpleWriteFileContent(argv[1], sScriptContent);
 
-    int result = gnu_main(argc, argv);
+    QFile::remove("temp.tmp");
+    FILE * temp = fopen("temp.tmp", "w");
+    int result = gnu_main(argc, argv, /*aTempFile.handle()*/temp);
+    fflush(temp);
+    fclose(temp);
+
+    temp = fopen("temp.tmp", "r");
+    fseek (temp , 0 , SEEK_END);
+    long lSize = ftell (temp);
+    rewind(temp);
+
+    char * buffer = (char*) malloc (sizeof(char)*(lSize+1));
+    memset(buffer,0,lSize+1);
+    size_t resultread = fread(buffer,1,lSize,temp);
+    fclose(temp);
+    buffer[lSize] = 0;
+    QString sStdErrTemp = buffer;
+    free(buffer);
+    emit sigShowErrorText(sStdErrTemp);
+
 // TODO: how to redirect stderr outputs?
 // http://blog.debao.me/2013/07/redirect-current-processs-stdout-to-a-widget-such-as-qtextedit/
 // https://stackoverflow.com/questions/23769339/capture-my-programs-stderr-output-in-qt
@@ -186,7 +215,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         }
         else
         {
-            sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")));
+            sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")+" "+sResultContent));
         }
     }
     else
@@ -198,11 +227,9 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     delete [] argv[1];
 
     // remove temporary files
-// TODO patch !!! for test !!!
-    //QFile::remove(TEMP_GNUPLOT_SCRIPT);
-    //QFile::remove(TEMP_GNUPLOT_OUTPUT);
-    //QFile::remove(TEMP_GNUPLOT_ERROR);
-// TODO: get STDERROR also !!!
+    QFile::remove(TEMP_GNUPLOT_SCRIPT);
+    QFile::remove(TEMP_GNUPLOT_OUTPUT);
+    QFile::remove(TEMP_GNUPLOT_ERROR);
 #else
     bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
