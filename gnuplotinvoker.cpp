@@ -28,8 +28,10 @@ GnuplotInvoker::GnuplotInvoker()
       m_iInvokeCount(0)
 {
 #if !defined(Q_OS_IOS)
+#ifndef _USE_BUILTIN_GNUPLOT
     connect(&m_aGnuplotProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(sltFinishedGnuplot(int,QProcess::ExitStatus)));
     connect(&m_aGnuplotProcess,SIGNAL(errorOccurred(QProcess::ProcessError)),this,SLOT(sltErrorGnuplot(QProcess::ProcessError)));
+#endif
 #endif
 }
 
@@ -37,8 +39,16 @@ QString GnuplotInvoker::run(const QString & sCmd)
 {
     m_aLastGnuplotError = "";
     m_aLastGnuplotResult = "";
+
     runGnuplot(sCmd);
+
+#ifndef _USE_BUILTIN_GNUPLOT
     m_aGnuplotProcess.waitForFinished();
+#endif
+
+#ifdef Q_OS_WASM
+    ApplicationData::simpleWriteFileContent("temp.svg", m_aLastGnuplotResult);
+#endif
 
     return m_aLastGnuplotResult /*+ m_aLastGnuplotError*/;
 }
@@ -88,6 +98,7 @@ void GnuplotInvoker::setInvokeCount(int value)
     m_iInvokeCount = value;
 }
 
+#ifndef _USE_BUILTIN_GNUPLOT
 void GnuplotInvoker::sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if( exitStatus==QProcess::NormalExit)
@@ -119,6 +130,7 @@ void GnuplotInvoker::sltErrorGnuplot(QProcess::ProcessError error)
     sltErrorText(tr("Error: gnuplot exited with error: code=%1 msg=%2 err=%3\ncode=%4 status=%5\nerrorMsg=%6\n").arg(error).arg(QString(errorMsg)).arg(m_aGnuplotProcess.error()).arg(m_aGnuplotProcess.exitCode()).arg(m_aGnuplotProcess.exitStatus()).arg(m_aGnuplotProcess.errorString()));
 #endif
 }
+#endif
 
 void GnuplotInvoker::sltErrorText(const QString & sTxt)
 {
@@ -132,7 +144,11 @@ void GnuplotInvoker::sltErrorTextWithoutPageActivation(const QString & sTxt)
 
 void GnuplotInvoker::handleGnuplotError(int exitCode)
 {
+#ifndef _USE_BUILTIN_GNUPLOT
     QByteArray error = m_aGnuplotProcess.readAllStandardError();
+#else
+    QByteArray error;
+#endif
 
     QString sError;
     if( exitCode!=0 )
@@ -168,9 +184,6 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     qputenv("GNUHELP", sHelpFile.toLocal8Bit());
-
-    // see: https://forum.qt.io/topic/40150/read-stderr-output-from-own-process/5
-    // char buffer[size]; setbuf(stderr, buffer);
 
     QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
                         //+ QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)

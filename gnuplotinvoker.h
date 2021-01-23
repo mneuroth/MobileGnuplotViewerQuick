@@ -12,6 +12,7 @@
 #define GNUPLOTINVOKER_H
 
 #include <QObject>
+
 #if defined(Q_OS_IOS)
 class QProcess {
 public:
@@ -67,8 +68,10 @@ signals:
     void sigShowErrorText(const QString & txt, bool bShowOutputPage = true);
 
 public slots:
+#ifndef _USE_BUILTIN_GNUPLOT
     void sltFinishedGnuplot(int exitCode, QProcess::ExitStatus exitStatus);
     void sltErrorGnuplot(QProcess::ProcessError error);
+#endif
     void sltErrorText(const QString & sTxt);
     void sltErrorTextWithoutPageActivation(const QString & sTxt);
 
@@ -76,13 +79,15 @@ private:
     void handleGnuplotError(int exitCode);
     void runGnuplot(const QString & sScript);
 
-    QString   m_aLastGnuplotResult;
-    QString   m_aLastGnuplotError;
-    bool      m_bUseBeta;
-    int       m_iResolution;
-    int       m_iFontSize;
-    int       m_iInvokeCount;
-    QProcess  m_aGnuplotProcess;
+    QString     m_aLastGnuplotResult;
+    QString     m_aLastGnuplotError;
+    bool        m_bUseBeta;
+    int         m_iResolution;
+    int         m_iFontSize;
+    int         m_iInvokeCount;
+#ifndef _USE_BUILTIN_GNUPLOT
+    QProcess    m_aGnuplotProcess;
+#endif
 };
 
 #endif // GNUPLOTINVOKER_H

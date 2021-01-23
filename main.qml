@@ -212,6 +212,16 @@ ApplicationWindow {
         }
     }
 
+    function jumpToEndOfOutput() {
+        var bReadOnly = outputPage.txtOutput.text.readOnly;
+        outputPage.forceActiveFocus()
+        outputPage.txtOutput.forceActiveFocus()
+        outputPage.txtOutput.text.readOnly = false
+        outputPage.txtOutput.text.focus = true
+        outputPage.txtOutput.text.cursorPosition = outputPage.txtOutput.text.length
+        outputPage.txtOutput.text.readOnly = bReadOnly
+    }
+
     function showFileContentInOutput(sOnlyFileName) {
         var sFileName = applicationData.filesPath + sOnlyFileName
         var sContent = applicationData.readFileContent(buildValidUrl(sFileName))

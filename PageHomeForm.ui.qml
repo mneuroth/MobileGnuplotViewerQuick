@@ -55,6 +55,7 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
+        // TextArea problem: if switch to readoly --> cursor and view jumps to the end of the text ???
         TextEdit/*Area*/ {
             id: textArea
             font.family: fontName

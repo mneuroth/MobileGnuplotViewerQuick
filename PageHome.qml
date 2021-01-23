@@ -98,6 +98,7 @@ PageHomeForm {
                 var sData = gnuplotInvoker.run(homePage.textArea.text)
                 var sErrorText = gnuplotInvoker.lastError
                 outputPage.txtOutput.text += sErrorText
+                jumpToEndOfOutput()
                 if( sErrorText.length>0 )
                 {
                     graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
@@ -109,7 +110,13 @@ PageHomeForm {
                 // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
                 if( sData.length > 0 )
                 {
-                    graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
+                    if(applicationData.isWASM) {
+                        // TODO: bug in wasm qt 5.15.2 ?
+                        graphicsPage.image.source = "file:///temp.svg"
+                    }
+                    else {
+                        graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
+                    }
                     graphicsPage.svgdata = sData
                     stackView.pop()
                     stackView.push(graphicsPage)
