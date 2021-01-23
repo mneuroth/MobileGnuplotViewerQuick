@@ -266,6 +266,13 @@ bail_to_command_line()
 FILE * _stderr = 0;
 FILE * _stdout = 0;
 
+// PATCH for embedded gnuplot
+void ResetGlobalVariables()
+{
+    outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
+    multiplot = FALSE;      // reset value      // PATCH for embedded gnuplot
+}
+
 #if defined(_WIN32)
 int
 gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
@@ -278,8 +285,7 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 
     _stderr = stderror;                         // PATCH for embedded gnuplot
     _stdout = stdoutput;                        // PATCH for embedded gnuplot
-    outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
-    multiplot = FALSE;      // reset value      // PATCH for embedded gnuplot
+    ResetGlobalVariables();                     // PATCH for embedded gnuplot
 
 #ifdef LINUXVGA
     LINUX_setup();		/* setup VGA before dropping privilege DBT 4/5/99 */
