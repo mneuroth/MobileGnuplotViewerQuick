@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="gnuplot.gih">files/arm/gnuplot.gih</file>
+        <file alias="gnuplot.gih">files/gnuplot.gih</file>
         <file alias="simple.gpt">files/scripts/simple.gpt</file>
         <file alias="fitdata.gpt">files/scripts/fitdata.gpt</file>
         <file alias="splot.gpt">files/scripts/splot.gpt</file>

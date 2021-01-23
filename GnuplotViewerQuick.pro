@@ -126,10 +126,10 @@ android {
 deployment1.files=files/$$ARCH_PATH/gnuplot_android
 deployment1.path=/assets/files/$$ARCH_PATH
 
-deployment2.files=files/arm/gnuplot.gih
+deployment2.files=files/gnuplot.gih
 deployment2.path=/assets/files
 
-deployment3.files=files/arm/gnuplot_copyright
+deployment3.files=files/gnuplot_copyright
 deployment3.path=/assets/files
 
 #deployment4.files=files/empty.svg
