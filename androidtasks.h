@@ -26,6 +26,11 @@
 #define FILES_DIR                   "/data/data/de.mneuroth.gnuplotviewerquick/files/"
 #define SCRIPTS_DIR                 "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts/"
 #define SDCARD_DIRECTORY            "/sdcard"
+#elif defined(Q_OS_WASM)
+#define DEFAULT_DIRECTORY           "/"
+#define FILES_DIR                   "/"
+#define SCRIPTS_DIR                 "/"
+#define SDCARD_DIRECTORY            "/"
 #elif defined(Q_OS_WIN)
 #define DEFAULT_DIRECTORY           "C:\\usr\\neurothmi\\Android\\gnuplotviewerquick"
 #define SDCARD_DIRECTORY            "c:\\tmp"

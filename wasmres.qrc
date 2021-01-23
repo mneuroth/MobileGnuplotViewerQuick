@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="gnuplot.gih">files/arm/gnuplot.gih</file>
+        <file alias="simple.gpt">files/scripts/simple.gpt</file>
+        <file alias="fitdata.gpt">files/scripts/fitdata.gpt</file>
+        <file alias="splot.gpt">files/scripts/splot.gpt</file>
+        <file alias="multiplot.gpt">files/scripts/multiplot.gpt</file>
+        <file alias="butterfly.gpt">files/scripts/butterfly.gpt</file>
+        <file alias="default.gpt">files/scripts/default.gpt</file>
+        <file alias="data.dat">files/scripts/data.dat</file>
+    </qresource>
+</RCC>

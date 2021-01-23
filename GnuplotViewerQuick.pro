@@ -66,6 +66,8 @@ wasm {  # wasm_32 ?
     DEFINES += _USE_BUILTIN_GNUPLOT
 
     include(gnuplot/gnuplot.pri)
+
+    RESOURCES += wasmres.qrc
 }
 
 win32 {

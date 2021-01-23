@@ -56,6 +56,7 @@ bool GrantAccessToSDCardPath(QObject * parent)
 
 bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFileName, bool bExecuteFlags, QDateTime * pDateForReplace = 0)
 {
+#if defined(Q_OS_ANDROID)
     bool bForce = false;
 
     //qDebug() << "extractAssetFile " << sAssetFileName << " --> " << sOutputFileName << " execute=" << bExecuteFlags << " date=" << pDateForReplace << endl;
@@ -69,7 +70,7 @@ bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFil
             // Remark: date of from asset extracted file is the time of installation !!!
             bForce = aOutputFile.lastModified() < *pDateForReplace;
         }
-    }    
+    }
     if( bForce || !QFile::exists(sOutputFileName) )
     {
         QFile aFile(sAssetFileName);
@@ -105,6 +106,9 @@ bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFil
         return false;
     }
     return true;    // file already existed !
+#else
+    return false;
+#endif
 }
 
 //*************************************************************************
@@ -210,9 +214,23 @@ AndroidTasks::~AndroidTasks()
 
 void AndroidTasks::Init()
 {
+#if defined(Q_OS_ANDROID)
     m_pUnpackThread = new UnpackFilesThread( this );
     connect(m_pUnpackThread,SIGNAL(finished()),this,SLOT(sltUnpackFinished()));
     m_pUnpackThread->start();
+#elif defined(Q_OS_WASM)
+    QDir aDir("/");
+    aDir.mkpath("/scripts");
+    QFile::copy(":/gnuplot.gih", "/gnuplot.gih");
+    QFile::copy(":/default.gpt", "/default.gpt");
+    QFile::copy(":/butterfly.gpt", "/butterfly.gpt");
+    QFile::copy(":/multiplot.gpt", "/multiplot.gpt");
+    QFile::copy(":/splot.gpt", "/splot.gpt");
+    QFile::copy(":/fitdata.gpt", "/fitdata.gpt");
+    QFile::copy(":/data.dat", "/data.dat");
+    QFile::copy(":/data.dat", "/scripts/data.dat");
+#else
+#endif
 }
 
 void AndroidTasks::sltUnpackFinished()

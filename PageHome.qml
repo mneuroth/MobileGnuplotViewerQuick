@@ -112,6 +112,8 @@ PageHomeForm {
                 {
                     if(applicationData.isWASM) {
                         // TODO: bug in wasm qt 5.15.2 ?
+                        // first clear and then assigne new content again
+                        graphicsPage.image.source = "empty.svg"
                         graphicsPage.image.source = "file:///temp.svg"
                     }
                     else {
