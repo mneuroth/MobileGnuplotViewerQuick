@@ -142,14 +142,17 @@ void UnpackFiles(QObject * /*pProgress*/)
 
     // extract the gnuplot binary and help file to call gnuplot as external process
     QString sAsset,sOutput;
+    //QString sGnuplot,sGnuplot_beta;
     QString sCpuArchitecture(QSysInfo::buildCpuArchitecture());
-    sAsset = QString(ASSETS_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_EXE);
-    sOutput = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_EXE);
-    /*bool ok =*/ extractAssetFile(sAsset,sOutput,true,&aUpdateTimeStamp);
+//    sAsset = QString(ASSETS_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_EXE);
+//    sOutput = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_EXE);
+    //sGnuplot = sOutput;
+//    /*bool ok =*/ extractAssetFile(sAsset,sOutput,true,&aUpdateTimeStamp);
     // unpack beta version only for commerical version...
-    sAsset = QString(ASSETS_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_BETA_EXE);
-    sOutput = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_BETA_EXE);
-    /*bool ok =*/ extractAssetFile(sAsset,sOutput,true,&aUpdateTimeStamp);
+//    sAsset = QString(ASSETS_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_BETA_EXE);
+//    sOutput = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(GNUPLOT_BETA_EXE);
+    //sGnuplot_beta = sOutput;
+//    /*bool ok =*/ extractAssetFile(sAsset,sOutput,true,&aUpdateTimeStamp);
     sAsset = QString(ASSETS_DIR)+QString(GNUPLOT_GIH);
     sOutput = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     extractAssetFile(sAsset,sOutput,false,&aUpdateTimeStamp);

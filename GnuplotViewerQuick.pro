@@ -166,13 +166,13 @@ data2.files=files/scripts/data.dat
 data2.path=/assets/files/scripts
 
 
-INSTALLS += deployment1
+#INSTALLS += deployment1
 INSTALLS += deployment2
 INSTALLS += deployment3
 #INSTALLS += deployment4
 INSTALLS += deployment5
 INSTALLS += deployment6
-INSTALLS += deployment7
+#INSTALLS += deployment7
 INSTALLS += script1
 INSTALLS += script2
 INSTALLS += script3
