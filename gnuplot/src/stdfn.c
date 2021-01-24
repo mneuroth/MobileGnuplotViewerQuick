@@ -480,13 +480,16 @@ void gp_atexit(void (*function)(void))
     }
 }
 
+extern void jump_to_exit(int status);
+
 /* Gnuplot replacement for exit(3). Calls the functions registered using
  * gp_atexit(). Always use this function instead of exit(3)!
  */
 void gp_exit(int status)
 {
     gp_exit_cleanup();
-    exit(status);       // TODO --> need patch for embedded gnuplot ?
+    /*exit(status);*/     /* PATCH for embedded gnuplot ! */
+    jump_to_exit(status); /* PATCH for embedded gnuplot ! */
 }
 
 #if _WIN32

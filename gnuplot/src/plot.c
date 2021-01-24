@@ -263,15 +263,28 @@ bail_to_command_line()
     LONGJMP(command_line_env, TRUE);
 }
 
+/* START PATCHES for embedded gnuplot */
+
 FILE * _stderr = 0;
 FILE * _stdout = 0;
 
-// PATCH for embedded gnuplot
+jmp_buf buf_to_exit;
+
 void ResetGlobalVariables()
 {
     outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
     multiplot = FALSE;      // reset value      // PATCH for embedded gnuplot
+    exit_status = EXIT_SUCCESS;
 }
+
+void jump_to_exit(int status)
+{
+    fprintf(_stderr,"called gp_exit(%d) !!!!\n",status);
+
+    longjmp(buf_to_exit, 1);
+}
+
+/* END PATCHES for embedded gnuplot */
 
 #if defined(_WIN32)
 int
@@ -283,10 +296,17 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 {
     int i;
 
-    _stderr = stderror;                         // PATCH for embedded gnuplot
-    _stdout = stdoutput;                        // PATCH for embedded gnuplot
-    ResetGlobalVariables();                     // PATCH for embedded gnuplot
+    _stderr = stderror;                         /* PATCH for embedded gnuplot */
+    _stdout = stdoutput;                        /* PATCH for embedded gnuplot */
+    ResetGlobalVariables();                     /* PATCH for embedded gnuplot */
 
+    /* handle calls to exit() for embedded gnuplot as long jumps ! */
+    if(setjmp(buf_to_exit))
+    {
+        fprintf(_stderr,"ERROR calling gnuplot !\n");
+    }
+    else
+    {
 #ifdef LINUXVGA
     LINUX_setup();		/* setup VGA before dropping privilege DBT 4/5/99 */
     drop_privilege();
@@ -714,6 +734,8 @@ RECOVER_FROM_ERROR_IN_DASH:
 #ifdef OS2
     RexxDeregisterSubcom("GNUPLOT", NULL);
 #endif
+
+    }   /* for setjmp */
 
     /* HBB 20040223: Not all compilers like exit() to end main() */
     /* exit(exit_status); */

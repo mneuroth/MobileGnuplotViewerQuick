@@ -40,6 +40,11 @@ QString GnuplotInvoker::run(const QString & sCmd)
     m_aLastGnuplotError = "";
     m_aLastGnuplotResult = "";
 
+#ifdef Q_OS_WASM
+    // before running gnuplot delete temporary files
+    QFile::remove("temp.svg");
+#endif
+
     runGnuplot(sCmd);
 
 #ifndef _USE_BUILTIN_GNUPLOT
@@ -53,11 +58,13 @@ QString GnuplotInvoker::run(const QString & sCmd)
     }
     else
     {
-        sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")+"\n"+m_aLastGnuplotResult));
-        QFile::remove("temp.svg");
+        sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !\n")+m_aLastGnuplotResult));
+        sltErrorText(QString("data len=%1").arg(m_aLastGnuplotResult.length()));
+        //QFile::remove("temp.svg");
     }
 #endif
 
+    qDebug() << "Gnuplot::run() result len=" << m_aLastGnuplotResult.length() << endl;
     return m_aLastGnuplotResult /*+ m_aLastGnuplotError*/;
 }
 
@@ -224,7 +231,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     if( result!=0 )
     {
-        sltErrorText(QString(tr("Error: executing built-in gnuplot ! return=%1")).arg(result));
+        sltErrorText(QString(tr("Error: executing built-in gnuplot ! return=%1\n")).arg(result));
     }
 
     delete [] argv[0];
