@@ -116,12 +116,13 @@ int main(int argc, char *argv[])
     StorageAccess aStorageAccess;
 
     QTranslator qtTranslator;
+    // WASM --> returns "c"
     QString sLanguage = QLocale::system().name().mid(0,2).toLower();
     // for testing languages:
     //sLanguage = "nl";
     QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
-    /*bool ok =*/ qtTranslator.load(sResource);
-    app.installTranslator(&qtTranslator);
+    /*bool ok1 =*/ qtTranslator.load(sResource);
+    /*bool ok2 =*/ app.installTranslator(&qtTranslator);
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
