@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file alias="gnuplot.gih">files/gnuplot.gih</file>
+        <file alias="gnuplot_copyright">files/gnuplot_copyright</file>
+        <file alias="faq.txt">files/faq.txt</file>
+        <file alias="gnuplotviewer_license.txt">files/gnuplotviewer_license.txt</file>
         <file alias="simple.gpt">files/scripts/simple.gpt</file>
         <file alias="fitdata.gpt">files/scripts/fitdata.gpt</file>
         <file alias="splot.gpt">files/scripts/splot.gpt</file>

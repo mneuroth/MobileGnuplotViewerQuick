@@ -225,6 +225,9 @@ void AndroidTasks::Init()
     QDir aDir("/");
     aDir.mkpath("/scripts");
     QFile::copy(":/gnuplot.gih", "/gnuplot.gih");
+    QFile::copy(":/gnuplot_copyright", "/gnuplot_copyright");
+    QFile::copy(":/faq.txt", "/faq.txt");
+    QFile::copy(":/gnuplotviewer_license.txt", "/gnuplotviewer_license.txt");
     QFile::copy(":/default.gpt", "/default.gpt");
     QFile::copy(":/butterfly.gpt", "/butterfly.gpt");
     QFile::copy(":/multiplot.gpt", "/multiplot.gpt");
