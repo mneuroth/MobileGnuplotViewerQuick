@@ -207,7 +207,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     {
         emit sigShowErrorText(m_aLastGnuplotError);
     }
-    m_aLastGnuplotResult = ApplicationData::simpleReadFileContent(TEMP_STDERR);
+    m_aLastGnuplotResult = ApplicationData::simpleReadFileContent(TEMP_STDOUT);
     if( m_aLastGnuplotResult.length()>0 )
     {
         emit sigResultReady(m_aLastGnuplotResult);
