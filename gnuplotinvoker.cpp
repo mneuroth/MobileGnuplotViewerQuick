@@ -59,12 +59,10 @@ QString GnuplotInvoker::run(const QString & sCmd)
     else
     {
         sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !\n")+m_aLastGnuplotResult));
-        sltErrorText(QString("data len=%1").arg(m_aLastGnuplotResult.length()));
         //QFile::remove("temp.svg");
     }
 #endif
 
-    qDebug() << "Gnuplot::run() result len=" << m_aLastGnuplotResult.length() << endl;
     return m_aLastGnuplotResult /*+ m_aLastGnuplotError*/;
 }
 
