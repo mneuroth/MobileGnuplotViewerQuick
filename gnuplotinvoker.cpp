@@ -161,11 +161,8 @@ void GnuplotInvoker::handleGnuplotError(int exitCode)
 extern "C" int gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror);
 
 #define TEMP_GNUPLOT_SCRIPT "./_temp_.gpt"
-#define TEMP_GNUPLOT_OUTPUT "./_output_.svg"
-#define TEMP_GNUPLOT_ERROR  "./_error_.txt"
-
-#define TEMP_STDERR  "errtemp.tmp"
-#define TEMP_STDOUT  "outtemp.tmp"
+#define TEMP_STDERR         "_errtemp.tmp"
+#define TEMP_STDOUT         "_outtemp.tmp"
 
 void GnuplotInvoker::runGnuplot(const QString & sScript)
 {
@@ -186,92 +183,38 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     qputenv("GNUHELP", sHelpFile.toLocal8Bit());
 
     QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
-                        //+ QString("set output '%1'\n").arg(TEMP_GNUPLOT_OUTPUT)
-                        //+ QString("set print '%1'\n").arg(TEMP_GNUPLOT_ERROR)
-                        + sScript
-                        + QString("\nexit\n");
+                             + sScript
+                             + QString("\nexit\n");
 
     ApplicationData::simpleWriteFileContent(argv[1], sScriptContent);
 
-    QFile::remove(TEMP_STDERR);
-    QFile::remove(TEMP_STDOUT);
-    FILE * temp = fopen(TEMP_STDERR, "w");
+    // create files for stderr and stdout
+    FILE * temperr = fopen(TEMP_STDERR, "w");
     FILE * tempout = fopen(TEMP_STDOUT, "w");
-    int result = gnu_main(argc, argv, /*aTempFile.handle()*/tempout, temp);
+
+    // call embedded gnuplot
+    int result = gnu_main(argc, argv, tempout, temperr);
+
+    // close files for stderr and stdout
     fflush(tempout);
     fclose(tempout);
-    fflush(temp);
-    fclose(temp);
+    fflush(temperr);
+    fclose(temperr);
 
-    temp = fopen(TEMP_STDERR, "r");
-    fseek (temp , 0 , SEEK_END);
-    long lSize = ftell (temp);
-    rewind(temp);
-
-    char * buffer = (char*) malloc (sizeof(char)*(lSize+1));
-    memset(buffer,0,lSize+1);
-    size_t resultread = fread(buffer,1,lSize,temp);
-    fclose(temp);
-    buffer[lSize] = 0;
-    m_aLastGnuplotError = buffer;
-    free(buffer);
-    emit sigShowErrorText(m_aLastGnuplotError);
-
-    tempout = fopen(TEMP_STDOUT, "r");
-    fseek (tempout , 0 , SEEK_END);
-    long lSizeOut = ftell (tempout);
-    rewind(tempout);
-
-    char * bufferout = (char*) malloc (sizeof(char)*(lSizeOut+1));
-    memset(bufferout,0,lSizeOut+1);
-    size_t resultreadout = fread(bufferout,1,lSizeOut,tempout);
-    fclose(tempout);
-    bufferout[lSizeOut] = 0;
-    m_aLastGnuplotResult = bufferout;
-    free(bufferout);
-    emit sigResultReady(m_aLastGnuplotResult);
-
-// TODO: how to redirect stderr outputs?
-// http://blog.debao.me/2013/07/redirect-current-processs-stdout-to-a-widget-such-as-qtextedit/
-// https://stackoverflow.com/questions/23769339/capture-my-programs-stderr-output-in-qt
-
-    if( result==0 )
+    // read temporary files for stdout and stderr
+    m_aLastGnuplotError = ApplicationData::simpleReadFileContent(TEMP_STDERR);
+    if( m_aLastGnuplotError.length()>0 )
     {
-        /*
-        if(aStdOut.bytesAvailable()>0)
-        {
-            QString sOutput = aStdOut.readAll();
-            emit sigShowErrorText(sOutput);
-        }
-        if(aStdErr.bytesAvailable()>0)
-        {
-            QString sOutput = aStdErr.readAll();
-            emit sigShowErrorText(sOutput);
-        }
-        */
-/*
-        QString sErrorContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_ERROR);
-        if( sErrorContent.length() )
-        {
-            m_aLastGnuplotError = sErrorContent;
-            emit sigShowErrorText(m_aLastGnuplotError);
-        }
-*/
-// TODO: und nicht Help Command !!!
-/*
-        QString sResultContent = ApplicationData::simpleReadFileContent(TEMP_GNUPLOT_OUTPUT);
-        if( QString(sResultContent).startsWith(QString("<?xml")) )
-        {
-            m_aLastGnuplotResult = sResultContent;
-            emit sigResultReady(sResultContent);
-        }
-        else
-        {
-            sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")+" "+sResultContent));
-        }
-*/
+        emit sigShowErrorText(m_aLastGnuplotError);
     }
-    else
+    m_aLastGnuplotResult = ApplicationData::simpleReadFileContent(TEMP_STDERR);
+    if( m_aLastGnuplotResult.length()>0 )
+    {
+        emit sigResultReady(m_aLastGnuplotResult);
+    }
+    // remark: results are used via member variables in run() method above
+
+    if( result!=0 )
     {
         sltErrorText(QString(tr("Error: executing built-in gnuplot ! return=%1")).arg(result));
     }
@@ -281,8 +224,8 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 
     // remove temporary files
     QFile::remove(TEMP_GNUPLOT_SCRIPT);
-    QFile::remove(TEMP_GNUPLOT_OUTPUT);
-    QFile::remove(TEMP_GNUPLOT_ERROR);
+    QFile::remove(TEMP_STDERR);
+    QFile::remove(TEMP_STDOUT);
 #else
     bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
