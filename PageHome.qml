@@ -97,7 +97,7 @@ PageHomeForm {
                 outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
                 var sData = gnuplotInvoker.run(homePage.textArea.text)
                 var sErrorText = gnuplotInvoker.lastError
-                outputPage.txtOutput.text += sErrorText
+                //outputPage.txtOutput.text += sErrorText   // not needed here, because error text will be updated in output via sigShowErrorText() asynchroniously !
                 jumpToEndOfOutput()
                 if( sErrorText.length>0 )
                 {

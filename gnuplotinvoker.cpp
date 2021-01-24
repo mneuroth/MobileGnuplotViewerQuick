@@ -47,7 +47,15 @@ QString GnuplotInvoker::run(const QString & sCmd)
 #endif
 
 #ifdef Q_OS_WASM
+    if( QString(m_aLastGnuplotResult).startsWith(QString("<?xml")) )
+    {
     ApplicationData::simpleWriteFileContent("temp.svg", m_aLastGnuplotResult);
+    }
+    else
+    {
+        sltErrorText(QString(tr("Warning: unexpected result running built-in gnuplot !")+"\n"+m_aLastGnuplotResult));
+        QFile::remove("temp.svg");
+    }
 #endif
 
     return m_aLastGnuplotResult /*+ m_aLastGnuplotError*/;
