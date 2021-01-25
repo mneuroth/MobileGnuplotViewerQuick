@@ -291,6 +291,8 @@ QString ApplicationData::getFilesPath() const
     return FILES_DIR;
 #elif defined(Q_OS_WINDOWS)
     return FILES_DIR;
+#elif defined(Q_OS_WASM)
+    return FILES_DIR;
 #else
     return ".";
 #endif

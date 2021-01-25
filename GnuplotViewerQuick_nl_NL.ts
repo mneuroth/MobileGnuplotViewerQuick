@@ -22,22 +22,22 @@
         <location filename="AboutDialogForm.ui.qml" line="71"/>
         <source>from: 24.1.2021</source>
         <oldsource>from: 10.1.2021</oldsource>
-        <translation>van: 21.1.2021</translation>
+        <translation>van: 24.1.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
         <source>Version: 2.0.8</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="95"/>
         <source>&lt;a href=&apos;http://www.flaticon.com&apos;&gt;Icons designed by Flaticon&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="122"/>
         <source>&lt;a href=&apos;https://github.com/mneuroth/MobileGnuplotViewerQuick&apos;&gt;Github page for MobileGnuplotViewerQuick&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>from: 9.1.2021</source>

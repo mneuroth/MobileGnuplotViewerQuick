@@ -225,7 +225,7 @@ ApplicationWindow {
     function showFileContentInOutput(sOnlyFileName) {
         var sFileName = applicationData.filesPath + sOnlyFileName
         var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
-        showInOutput(sContent)
+        showInOutput(sContent, true)
     }
 
     function getCurrentTextRef(currentPage) {

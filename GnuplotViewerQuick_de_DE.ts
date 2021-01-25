@@ -22,7 +22,7 @@
         <location filename="AboutDialogForm.ui.qml" line="71"/>
         <source>from: 24.1.2021</source>
         <oldsource>from: 10.1.2021</oldsource>
-        <translation>vom: 21.1.2021</translation>
+        <translation>vom: 24.1.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="84"/>
