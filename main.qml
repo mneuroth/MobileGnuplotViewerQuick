@@ -513,7 +513,7 @@ ApplicationWindow {
                         text: qsTr("Gnuplot help")
                         onTriggered: {
                             var sContent = gnuplotInvoker.run("help")
-                            outputPage.txtOutput.text = sContent
+                            outputPage.txtOutput.text += sContent
                             outputPage.txtOutput.text += gnuplotInvoker.lastError
                             stackView.pop()
                             stackView.push(outputPage)
@@ -523,7 +523,7 @@ ApplicationWindow {
                         text: qsTr("Gnuplot version")
                         onTriggered: {
                             var sContent = gnuplotInvoker.run("show version")
-                            outputPage.txtOutput.text = sContent
+                            outputPage.txtOutput.text += sContent
                             outputPage.txtOutput.text += gnuplotInvoker.lastError
                             stackView.pop()
                             stackView.push(outputPage)
