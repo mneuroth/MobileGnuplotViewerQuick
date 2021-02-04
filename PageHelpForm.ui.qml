@@ -64,7 +64,8 @@ Page {
         id: gridButtons
         x: 44
         y: 5
-        height: 50
+        height: !settings.useToolBar ? 50 : 0
+        visible: !settings.useToolBar
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.bottomMargin: 5

@@ -27,6 +27,7 @@ Page {
     property alias lblSupportLevel: lblSupportLevel
     property alias btnSelectFont: btnSelectFont
     property alias chbUseGnuplotBeta: chbUseGnuplotBeta
+    property alias chbUseToolBar: chbUseToolBar
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
 
     Rectangle {
@@ -72,15 +73,27 @@ Page {
         }
 
         CheckBox {
-            id: chbUseLocalFiledialog
-            visible: applicationData.isWASM
-            height: applicationData.isWASM ? chbUseGnuplotBeta.height : 0
-            text: qsTr("Use local filedialog")
+            id: chbUseToolBar
+            enabled: true
+            text: qsTr("Show toolbar")
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.top: chbUseGnuplotBeta.bottom
+            anchors.topMargin: 5
+        }
+
+        CheckBox {
+            id: chbUseLocalFiledialog
+            visible: applicationData !== null ? applicationData.isWASM : false
+            height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
+            text: qsTr("Use local filedialog")
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: chbUseToolBar.bottom
             anchors.topMargin: 5
         }
 

@@ -419,6 +419,29 @@ ApplicationWindow {
                         }
                     }
                 }
+                /*
+                MenuItem {
+                    text: qsTr("set graphics")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                        graphicsPage.image.source = applicationData.isWASM ? "file:///temp.svg" : "file:///c:/tmp/temp.svg"
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Open local")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                        mobileFileDialog.setOpenModus()
+                        if( mobileFileDialog.currentDirectory == "" )
+                        {
+                            mobileFileDialog.currentDirectory = applicationData.homePath
+                        }
+                        mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                        stackView.pop()
+                        stackView.push(mobileFileDialog)
+                    }
+                }
+                */
                 MenuItem {
                     text: qsTr("Save as")
                     enabled: !isDialogOpen()
@@ -537,6 +560,7 @@ ApplicationWindow {
                         settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
                         settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
                         settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
+                        settingsDialog.chbUseToolBar.checked = settings.useToolBar
                         settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
                         settingsDialog.lblExampleText.font = homePage.textArea.font
 
@@ -689,6 +713,93 @@ ApplicationWindow {
         }
     }
 
+    ToolBar {
+        id: toolBar
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        visible: settings.useToolBar
+        height: settings.useToolBar ? implicitHeight : 0
+
+        Flow {
+            id: flow
+            anchors.fill: parent
+            spacing: 5
+
+            ToolButton {
+                id: toolButtonOpen
+                icon.source: "open-folder-with-document.svg"
+                //text: "Open"
+                onClicked: {
+                    homePage.do_open_file()
+                }
+            }
+            ToolButton {
+                id: toolButtonSave
+                icon.source: "floppy-disk.svg"
+                //text: "Open"
+                onClicked: {
+                    homePage.do_save_file()
+                }
+            }
+            ToolButton {
+                id: toolButtonRun
+                icon.source: "play-button-arrowhead.svg"
+                //text: "Run"
+                onClicked: {
+                    homePage.run_guplot()
+                }
+            }
+            ToolSeparator {
+            }
+            ToolButton {
+                id: toolButtonShare
+                icon.source: "share.svg"
+                visible: isShareSupported
+                //text: "Run"
+            }
+            ToolSeparator {
+                visible: isShareSupported
+            }
+            ToolButton {
+                id: toolButtonInput
+                icon.source: "document.svg"
+                //text: "Input"
+                onClicked: {
+                    stackView.pop()
+                    stackView.push(homePage)
+                }
+            }
+            ToolButton {
+                id: toolButtonOutput
+                icon.source: "log-format.svg"
+                //text: "Output"
+                onClicked: {
+                    stackView.pop()
+                    stackView.push(outputPage)
+                }
+            }
+            ToolButton {
+                id: toolButtonGraphics
+                icon.source: "line-chart.svg"
+                //text: "Graphics"
+                onClicked: {
+                    stackView.pop()
+                    stackView.push(graphicsPage)
+                }
+            }
+            ToolButton {
+                id: toolButtonHelp
+                icon.source: "information.svg"
+                //text: "Help"
+                onClicked: {
+                    stackView.pop()
+                    stackView.push(helpPage)
+                }
+            }
+        }
+    }
+
     Drawer {
         id: drawer
         width: window.width * 0.66
@@ -730,9 +841,14 @@ ApplicationWindow {
     StackView {
         id: stackView
         initialItem: homePage
-        anchors.fill: parent
+        //anchors.fill: parent
+        anchors.top: toolBar.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
         width: parent.width
-        height: parent.height
+        //height: 250
+        //height: parent.height
     }
 
     // **********************************************************************
@@ -743,6 +859,7 @@ ApplicationWindow {
         id: settings
         property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : ":/default.gpt"
         property bool useGnuplotBeta: false
+        property bool useToolBar: true
         property int graphicsResolution: 1024
         property int graphicsFontSize: 28
         property var currentFont: null

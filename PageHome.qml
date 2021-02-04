@@ -34,6 +34,89 @@ PageHomeForm {
         }
     }
 
+    function do_save_file() {
+        if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
+        {
+            applicationData.saveFileContentAsync(homePage.textArea.text, applicationData.getOnlyFileName(homePage.currentFileUrl))
+        }
+        else
+        {
+            saveCurrentDoc(homePage.textArea)
+        }
+    }
+
+    function do_open_file() {
+        if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
+        {
+            applicationData.getOpenFileContentAsync("*.gpt")
+        }
+        else
+        {
+            //fileDialog.open()
+            //mobileFileDialog.open()
+            mobileFileDialog.setOpenModus()
+            if( mobileFileDialog.currentDirectory == "" )
+            {
+                mobileFileDialog.currentDirectory = applicationData.homePath
+            }
+            mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+            stackView.pop()
+            stackView.push(mobileFileDialog)
+        }
+    }
+
+    function run_guplot() {
+        // special handling for meta commands like: admin=1/0
+        var cmd = homePage.textArea.text
+        if( cmd.startsWith("admin=") )
+        {
+            var value = cmd.startsWith("admin=1") ? true : false
+            applicationData.isAdmin = value
+            outputPage.txtOutput.text += "Admin-Modus = "+value+"\n"
+        }
+        else
+        {
+            outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
+            var sData = gnuplotInvoker.run(homePage.textArea.text)
+            var sErrorText = gnuplotInvoker.lastError
+            //outputPage.txtOutput.text += sErrorText   // not needed here, because error text will be updated in output via sigShowErrorText() asynchroniously !
+            jumpToEndOfOutput()
+            if( sErrorText.length>0 )
+            {
+                graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
+            }
+            else
+            {
+                graphicsPage.lblShowGraphicsInfo.text = ""
+            }
+            // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
+            if( sData.length > 0 )
+            {
+                if(applicationData.isWASM) {
+                    // TODO: bug in wasm qt 5.15.2 ?
+                    // first clear and then assigne new content again
+                    graphicsPage.image.source = "empty.svg"
+                    graphicsPage.image.source = "file:///temp.svg"
+                }
+                else {
+                    graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
+                }
+                graphicsPage.svgdata = sData
+                stackView.pop()
+                stackView.push(graphicsPage)
+            }
+            else
+            {
+// TODO --> graphics page mit error Image fuellen
+                graphicsPage.image.source = "empty.svg"
+                stackView.pop()
+                stackView.push(outputPage)
+            }
+
+            checkForUserNotification()
+        }
+    }
+
     textArea {
         //placeholderText: applicationData.defaultScript
         onTextChanged: {
@@ -49,90 +132,19 @@ PageHomeForm {
 
     btnOpen  {
         onClicked:  {
-            if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
-            {
-                applicationData.getOpenFileContentAsync("*.gpt")
-            }
-            else
-            {
-                //fileDialog.open()
-                //mobileFileDialog.open()
-                mobileFileDialog.setOpenModus()
-                if( mobileFileDialog.currentDirectory == "" )
-                {
-                    mobileFileDialog.currentDirectory = applicationData.homePath
-                }
-                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-                stackView.pop()
-                stackView.push(mobileFileDialog)
-            }
+            do_open_file()
         }
     }
 
     btnSave {
         onClicked: {
-            if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
-            {
-                applicationData.saveFileContentAsync(homePage.textArea.text, applicationData.getOnlyFileName(homePage.currentFileUrl))
-            }
-            else
-            {
-                saveCurrentDoc(homePage.textArea)
-            }
+            do_save_file()
         }
     }
 
     btnRun {
         onClicked: {
-            // special handling for meta commands like: admin=1/0
-            var cmd = homePage.textArea.text
-            if( cmd.startsWith("admin=") )
-            {
-                var value = cmd.startsWith("admin=1") ? true : false
-                applicationData.isAdmin = value
-                outputPage.txtOutput.text += "Admin-Modus = "+value+"\n"
-            }
-            else
-            {
-                outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
-                var sData = gnuplotInvoker.run(homePage.textArea.text)
-                var sErrorText = gnuplotInvoker.lastError
-                //outputPage.txtOutput.text += sErrorText   // not needed here, because error text will be updated in output via sigShowErrorText() asynchroniously !
-                jumpToEndOfOutput()
-                if( sErrorText.length>0 )
-                {
-                    graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")
-                }
-                else
-                {
-                    graphicsPage.lblShowGraphicsInfo.text = ""
-                }
-                // see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
-                if( sData.length > 0 )
-                {
-                    if(applicationData.isWASM) {
-                        // TODO: bug in wasm qt 5.15.2 ?
-                        // first clear and then assigne new content again
-                        graphicsPage.image.source = "empty.svg"
-                        graphicsPage.image.source = "file:///temp.svg"
-                    }
-                    else {
-                        graphicsPage.image.source = "data:image/svg+xml;utf8," + sData
-                    }
-                    graphicsPage.svgdata = sData
-                    stackView.pop()
-                    stackView.push(graphicsPage)
-                }
-                else
-                {
-// TODO --> graphics page mit error Image fuellen
-                    graphicsPage.image.source = "empty.svg"
-                    stackView.pop()
-                    stackView.push(outputPage)
-                }
-
-                checkForUserNotification()
-            }
+            run_gnuplot()
         }
     }
 
