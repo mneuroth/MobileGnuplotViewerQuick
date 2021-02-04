@@ -65,7 +65,7 @@ PageHomeForm {
         }
     }
 
-    function run_guplot() {
+    function run_gnuplot() {
         // special handling for meta commands like: admin=1/0
         var cmd = homePage.textArea.text
         if( cmd.startsWith("admin=") )

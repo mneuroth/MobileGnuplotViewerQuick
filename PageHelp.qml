@@ -14,15 +14,19 @@ PageHelpForm {
 
     fontName: getFontName()
 
+    function run_help() {
+        var s = gnuplotInvoker.run(helpPage.txtHelp.text)
+        var sErrorText = gnuplotInvoker.lastError
+        outputPage.txtOutput.text += s
+        outputPage.txtOutput.text += sErrorText
+        stackView.pop()
+        stackView.push(outputPage)
+        jumpToEndOfOutput()
+    }
+
     btnRunHelp {
         onClicked: {
-            var s = gnuplotInvoker.run(helpPage.txtHelp.text)
-            var sErrorText = gnuplotInvoker.lastError
-            outputPage.txtOutput.text += s
-            outputPage.txtOutput.text += sErrorText
-            stackView.pop()
-            stackView.push(outputPage)
-            jumpToEndOfOutput()
+            run_help()
         }
     }
 

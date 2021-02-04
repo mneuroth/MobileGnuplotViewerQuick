@@ -331,6 +331,7 @@ ApplicationWindow {
                     }
                 }
                 MenuItem {
+                    id: shareText
                     text: qsTr("Send as text")
                     icon.source: "share.svg"
                     enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
@@ -342,6 +343,7 @@ ApplicationWindow {
                     }
                 }
                 MenuItem {
+                    id: sharePng
                     text: qsTr("Send as PDF/PNG")
                     icon.source: "share.svg"
                     enabled: !isDialogOpen() && isCurrentUserSupporter()
@@ -729,6 +731,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonOpen
                 icon.source: "open-folder-with-document.svg"
+                enabled: stackView.currentItem === homePage
                 //text: "Open"
                 onClicked: {
                     homePage.do_open_file()
@@ -737,6 +740,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonSave
                 icon.source: "floppy-disk.svg"
+                enabled: stackView.currentItem === homePage
                 //text: "Open"
                 onClicked: {
                     homePage.do_save_file()
@@ -745,9 +749,14 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonRun
                 icon.source: "play-button-arrowhead.svg"
+                enabled: stackView.currentItem === homePage || stackView.currentItem === helpPage
                 //text: "Run"
                 onClicked: {
-                    homePage.run_guplot()
+                    if(stackView.currentItem === homePage) {
+                        homePage.run_gnuplot()
+                    } else if(stackView.currentItem === helpPage) {
+                        helpPage.run_help()
+                    }
                 }
             }
             ToolSeparator {
@@ -757,6 +766,13 @@ ApplicationWindow {
                 icon.source: "share.svg"
                 visible: isShareSupported
                 //text: "Run"
+                onClicked: {
+                    if(stackView.currentItem === graphicsPage) {
+                        sharePng.triggered()
+                    } else {
+                        shareText.triggered()
+                    }
+                }
             }
             ToolSeparator {
                 visible: isShareSupported
