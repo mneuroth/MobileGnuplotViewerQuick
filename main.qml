@@ -731,7 +731,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonOpen
                 icon.source: "open-folder-with-document.svg"
-                enabled: stackView.currentItem === homePage
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Open"
                 onClicked: {
                     homePage.do_open_file()
@@ -740,7 +740,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonSave
                 icon.source: "floppy-disk.svg"
-                enabled: stackView.currentItem === homePage
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Open"
                 onClicked: {
                     homePage.do_save_file()
@@ -749,7 +749,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonRun
                 icon.source: "play-button-arrowhead.svg"
-                enabled: stackView.currentItem === homePage || stackView.currentItem === helpPage
+                enabled: (stackView.currentItem === homePage || stackView.currentItem === helpPage) && !isDialogOpen()
                 //text: "Run"
                 onClicked: {
                     if(stackView.currentItem === homePage) {
@@ -764,6 +764,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonShare
                 icon.source: "share.svg"
+                enabled: !isDialogOpen()
                 visible: isShareSupported
                 //text: "Run"
                 onClicked: {
@@ -780,6 +781,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonInput
                 icon.source: "document.svg"
+                enabled: !isDialogOpen()
                 //text: "Input"
                 onClicked: {
                     stackView.pop()
@@ -789,6 +791,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonOutput
                 icon.source: "log-format.svg"
+                enabled: !isDialogOpen()
                 //text: "Output"
                 onClicked: {
                     stackView.pop()
@@ -798,6 +801,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonGraphics
                 icon.source: "line-chart.svg"
+                enabled: !isDialogOpen()
                 //text: "Graphics"
                 onClicked: {
                     stackView.pop()
@@ -807,6 +811,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonHelp
                 icon.source: "information.svg"
+                enabled: !isDialogOpen()
                 //text: "Help"
                 onClicked: {
                     stackView.pop()
