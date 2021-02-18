@@ -11,8 +11,12 @@ import QtQuick 2.0
 import QtQuick.Controls 2.1
 
 MobileFileDialogForm {
+    id: root
+
     property bool isSaveAsModus: false
+    property bool isSaveACopyModus: false
     property bool isDeleteModus: false
+    property bool isDirectoryModus: false
     property bool isSaveAsImage: false
     property var textControl: null
 
@@ -24,53 +28,69 @@ MobileFileDialogForm {
             // update currently selected filename
             if( listView.currentItem !== null && listView.currentItem.isFile )
             {
-                mobileFileDialog.txtMFDInput.text = listView.currentItem.currentFileName
-                mobileFileDialog.setCurrentName(listView.currentItem.currentFileName)
+                root.txtMFDInput.text = listView.currentItem.currentFileName
+                root.setCurrentName(listView.currentItem.currentFileName)
             }
             else
             {
-                mobileFileDialog.txtMFDInput.text = ""
-                mobileFileDialog.setCurrentName("")
+                root.txtMFDInput.text = ""
+                root.setCurrentName("")
                 //listView.currentItem.currentFileName("")
             }
 
-            if( !mobileFileDialog.isSaveAsModus )
+            if( !root.isSaveAsModus )
             {
-                mobileFileDialog.btnOpen.enabled = listView.currentItem === null || listView.currentItem.isFile
+                root.btnOpen.enabled = listView.currentItem === null || listView.currentItem.isFile
             }
         }
     }
 
+    function setAdminModus(value) {
+        root.bIsAdminModus = value
+    }
+
     function setSaveAsModus(bAsImage) {
-        mobileFileDialog.isSaveAsImage = bAsImage
-        mobileFileDialog.isSaveAsModus = true
-        mobileFileDialog.isDeleteModus = false
-        mobileFileDialog.lblMFDInput.text = qsTr("new file name:")
-        mobileFileDialog.txtMFDInput.text = bAsImage ? qsTr("unknown.png") : qsTr("unknown.gpt")
-        mobileFileDialog.txtMFDInput.readOnly = false
-        mobileFileDialog.btnOpen.text = qsTr("Save as")
-        mobileFileDialog.btnOpen.enabled = true
+        root.isSaveAsImage = bAsImage
+        root.isSaveAsModus = true
+        root.isSaveACopyModus = false
+        root.isDeleteModus = false
+        root.isDirectoryModus = false
+        root.bShowFiles = true
+        root.lblMFDInput.text = qsTr("new file name:")
+        root.txtMFDInput.text = bAsImage ? qsTr("unknown.png") : qsTr("unknown.gpt")
+        root.txtMFDInput.readOnly = false
+        root.btnOpen.text = qsTr("Save as")
+        root.btnOpen.enabled = true
+        root.btnStorage.enabled = true
     }
 
     function setOpenModus() {
-        mobileFileDialog.isSaveAsImage = false
-        mobileFileDialog.isSaveAsModus = false
-        mobileFileDialog.isDeleteModus = false
-        mobileFileDialog.lblMFDInput.text = qsTr("open name:")
-        mobileFileDialog.txtMFDInput.readOnly = true
-        mobileFileDialog.btnOpen.text = qsTr("Open")
-        mobileFileDialog.btnOpen.enabled = false
+        root.isSaveAsImage = false
+        root.isSaveAsModus = false
+        root.isSaveACopyModus = false
+        root.isDeleteModus = false
+        root.isDirectoryModus = false
+        root.bShowFiles = true
+        root.lblMFDInput.text = qsTr("open name:")
+        root.txtMFDInput.readOnly = true
+        root.btnOpen.text = qsTr("Open")
+        root.btnOpen.enabled = false
+        root.btnStorage.enabled = true
     }
 
     function setDeleteModus() {
-        mobileFileDialog.isSaveAsImage = false
-        mobileFileDialog.isSaveAsModus = false
-        mobileFileDialog.isDeleteModus = true
-        mobileFileDialog.lblMFDInput.text = qsTr("current file name:")
-        mobileFileDialog.txtMFDInput.text = ""
-        mobileFileDialog.txtMFDInput.readOnly = true
-        mobileFileDialog.btnOpen.text = qsTr("Delete")
-        mobileFileDialog.btnOpen.enabled = false
+        root.isSaveAsImage = false
+        root.isSaveAsModus = false
+        root.isSaveACopyModus = false
+        root.isDeleteModus = true
+        root.isDirectoryModus = false
+        root.bShowFiles = true
+        root.lblMFDInput.text = qsTr("current file name:")
+        root.txtMFDInput.text = ""
+        root.txtMFDInput.readOnly = true
+        root.btnOpen.text = qsTr("Delete")
+        root.btnOpen.enabled = false
+        root.btnStorage.enabled = false
     }
 
     function setDirectory(newPath) {
@@ -104,7 +124,7 @@ MobileFileDialogForm {
     }
 
     function saveAsCurrentFileNow(fullPath) {
-        if( mobileFileDialog.isSaveAsImage )
+        if( root.isSaveAsImage )
         {
             window.saveAsImage(buildValidUrl(fullPath))
         }
@@ -123,8 +143,8 @@ MobileFileDialogForm {
 
         if( applicationData.hasAccessToSDCardPath() )
         {
-            mobileFileDialog.setDirectory(sdCardPath)
-            mobileFileDialog.setCurrentName("")
+            root.setDirectory(sdCardPath)
+            root.setCurrentName("")
         }
     }
 
@@ -141,13 +161,13 @@ MobileFileDialogForm {
                  if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                     if( fileIsDir )
                     {
-                        mobileFileDialog.setDirectory(filePath)
-                        mobileFileDialog.setCurrentName(fileName)
+                        root.setDirectory(filePath)
+                        root.setCurrentName(fileName)
                         event.accepted = true
                     }
                     else
                     {
-                        mobileFileDialog.openCurrentFileNow()
+                        root.openCurrentFileNow()
                         event.accepted = true
                     }
                  }
@@ -176,18 +196,18 @@ MobileFileDialogForm {
             MouseArea {
                 anchors.fill: parent;
                 onClicked: {
-                    mobileFileDialog.listView.currentIndex = index
+                    root.listView.currentIndex = index
                     if( fileIsDir )
                     {
-                        mobileFileDialog.setDirectory(filePath)
-                        mobileFileDialog.setCurrentName(fileName)
+                        root.setDirectory(filePath)
+                        root.setCurrentName(fileName)
                     }
                 }
                 onDoubleClicked: {
-                    mobileFileDialog.listView.currentIndex = index
+                    root.listView.currentIndex = index
                     if( !fileIsDir )
                     {
-                        mobileFileDialog.openCurrentFileNow()
+                        root.openCurrentFileNow()
                     }
                 }
             }
@@ -196,23 +216,23 @@ MobileFileDialogForm {
 
     btnOpen  {
         onClicked: {
-            if( mobileFileDialog.isDeleteModus )
+            if( root.isDeleteModus )
             {
-                mobileFileDialog.deleteCurrentFileNow()
+                root.deleteCurrentFileNow()
+            }
+            else if( root.isDirectoryModus )
+            {
+                root.selectCurrentDirectoryNow()
+            }
+            else if( root.isSaveAsModus )
+            {
+                var fullPath = currentDirectory + "/" + txtMFDInput.text
+                root.saveAsCurrentFileNow(fullPath)
             }
             else
             {
-                if( mobileFileDialog.isSaveAsModus )
-                {
-                    var fullPath = currentDirectory + "/" + txtMFDInput.text
-                    mobileFileDialog.saveAsCurrentFileNow(fullPath)
-                }
-                else
-                {
-                    mobileFileDialog.openCurrentFileNow()
-                }
+                root.openCurrentFileNow()
             }
-
         }
     }
 
@@ -223,20 +243,20 @@ MobileFileDialogForm {
     btnUp {
         onClicked: {
             // stop with moving up when home directory is reached
-            if( applicationData.isAdmin || (applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(applicationData.homePath)) )
+            if( root.bIsAdminModus || (applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(applicationData.homePath)) )
             {
-                mobileFileDialog.setDirectory(currentDirectory + "/..")
-                mobileFileDialog.setCurrentName("")
-                mobileFileDialog.listView.currentIndex = -1
+                root.setDirectory(currentDirectory + "/..")
+                root.setCurrentName("")
+                root.listView.currentIndex = -1
             }
         }
     }
 
     btnHome {
         onClicked: {
-            mobileFileDialog.setDirectory(applicationData.homePath)
-            mobileFileDialog.setCurrentName("")
-            mobileFileDialog.listView.currentIndex = -1
+            root.setDirectory(applicationData.homePath)
+            root.setCurrentName("")
+            root.listView.currentIndex = -1
         }
     }
 
@@ -247,7 +267,7 @@ MobileFileDialogForm {
                 MenuItem {
                     text: modelData
                     onTriggered: {
-                        mobileFileDialog.navigateToDirectory(modelData)
+                        root.navigateToDirectory(modelData)
                     }
                 }
         }
@@ -264,9 +284,9 @@ MobileFileDialogForm {
     btnStorage {
         visible: applicationData !== null ? applicationData.isShareSupported : false
         onClicked: {
-            if( mobileFileDialog.isSaveAsModus )
+            if( root.isSaveAsModus )
             {
-                storageAccess.createFile(mobileFileDialog.txtMFDInput.text)
+                storageAccess.createFile(root.txtMFDInput.text)
             }
             else
             {

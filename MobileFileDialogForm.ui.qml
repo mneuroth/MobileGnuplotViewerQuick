@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
@@ -14,6 +13,13 @@ import Qt.labs.folderlistmodel 2.1
 import QtQuick.Layouts 1.3
 
 Page {
+    id: root
+
+    focusPolicy: Qt.StrongFocus
+    focus: true
+
+    anchors.fill: parent
+
     property alias btnCancel: btnCancel
     property alias btnOpen: btnOpen
     property alias txtMFDInput: txtMFDInput
@@ -25,13 +31,10 @@ Page {
     property alias btnHome: btnHome
     property alias btnUp: btnUp
 
-    property string currentDirectory: ""
+    property string currentDirectory: "."
     property string currentFileName: ""
-
-    width: 450
-    height: 400
-    id: page
-    anchors.fill: parent
+    property bool bShowFiles: true
+    property bool bIsAdminModus: applicationData.isAdmin
 
     title: qsTr("Select file")
 
@@ -96,9 +99,6 @@ Page {
 
     Label {
         id: lblDirectoryName
-//        x: 16
-//        width: 418
-//        height: 40
         text: qsTr("Show current directory here")
         anchors.top: columnLayout.bottom
         anchors.topMargin: 5
@@ -108,6 +108,8 @@ Page {
 
     ListView {
         id: listView
+        orientation: ListView.Vertical
+        clip: true
         anchors.bottom: lblMFDInput.top
         anchors.bottomMargin: 10
         anchors.left: parent.left
@@ -119,6 +121,8 @@ Page {
 
         FolderListModel {
             id: folderModel
+            showFiles: bShowFiles
+            showHidden: bIsAdminModus
             nameFilters: ["*"]
         }
 
@@ -133,23 +137,29 @@ Page {
 
     Label {
         id: lblMFDInput
-//        width: 221
-//        height: 40
+        //width: 221
+        height: 40
         text: qsTr("Any input")
         anchors.left: parent.left
         anchors.leftMargin: 5
         anchors.bottom: btnOpen.top
         anchors.bottomMargin: 5
-        //anchors.top: listView.bottom
-        //anchors.topMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
     }
 
+    Rectangle {
+        color: "lightyellow"
+        height: txtMFDInput.height
+        width: txtMFDInput.width
+        visible: txtMFDInput.visible
+        x: txtMFDInput.x
+        y: txtMFDInput.y
+    }
+
     TextInput {
         id: txtMFDInput
-//        y: 323
-//        height: 40
+        height: lblMFDInput.height
         text: ""
         anchors.bottom: btnCancel.top
         anchors.bottomMargin: 5
@@ -157,7 +167,6 @@ Page {
         anchors.rightMargin: 5
         anchors.left: lblMFDInput.right
         anchors.leftMargin: 5
-        //anchors.top: listView.bottom
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
     }
