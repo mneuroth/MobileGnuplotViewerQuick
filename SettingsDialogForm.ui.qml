@@ -28,6 +28,7 @@ Page {
     property alias btnSelectFont: btnSelectFont
     property alias chbUseGnuplotBeta: chbUseGnuplotBeta
     property alias chbUseToolBar: chbUseToolBar
+    property alias chbShowLineNumbers: chbShowLineNumbers
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
 
     Rectangle {
@@ -76,6 +77,18 @@ Page {
             id: chbUseToolBar
             enabled: true
             text: qsTr("Show toolbar")
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: chbShowLineNumbers.bottom
+            anchors.topMargin: 5
+        }
+
+        CheckBox {
+            id: chbShowLineNumbers
+            enabled: true
+            text: qsTr("Show line numbers")
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left

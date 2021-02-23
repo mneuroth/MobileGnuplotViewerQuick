@@ -563,6 +563,7 @@ ApplicationWindow {
                         settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
                         settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
                         settingsDialog.chbUseToolBar.checked = settings.useToolBar
+                        settingsDialog.chbShowLineNumbers.checked = settings.showLineNumbers
                         settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
                         settingsDialog.lblExampleText.font = homePage.textArea.font
 
@@ -881,6 +882,7 @@ ApplicationWindow {
         property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : ":/default.gpt"
         property bool useGnuplotBeta: false
         property bool useToolBar: false
+        property bool showLineNumbers: true
         property int graphicsResolution: 1024
         property int graphicsFontSize: 28
         property var currentFont: null

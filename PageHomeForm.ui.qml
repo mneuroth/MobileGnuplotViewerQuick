@@ -20,6 +20,7 @@ Page {
     property alias btnRun: btnRun
     property alias btnOpen: btnOpen
     property alias textArea: textArea
+    property alias textLineNumbers: textLineNumbers
     property alias btnGraphics: btnGraphics
     property alias lblFileName: lblFileName
     property alias btnSave: btnSave
@@ -28,6 +29,8 @@ Page {
     property alias gridButtons: gridButtons
 
     property string fontName: "Courier"
+
+    property int numberColumnWidth: 50
 
     title: qsTr("Gnuplot Input")
 
@@ -55,16 +58,44 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        // TextArea problem: if switch to readoly --> cursor and view jumps to the end of the text ???
-        TextEdit/*Area*/ {
-            id: textArea
-            font.family: fontName
+        RowLayout {
+            id: textRow
             anchors.fill: parent
-            objectName: "textArea"
-            //placeholderText: qsTr("Enter gnuplot script here...")
-            //selectByMouse: !readOnly
-            text: "   "
-            inputMethodHints: Qt.ImhNoAutoUppercase
+
+            Rectangle {
+                id: lineNumbersBackground
+                color: "light grey"
+                visible: settings.showLineNumbers
+                Layout.fillHeight: true
+                Layout.minimumWidth: numberColumnWidth
+                Layout.preferredWidth: numberColumnWidth
+                Layout.maximumWidth: numberColumnWidth
+                height: textArea.height //scrollView.availableHeight
+
+                TextEdit {
+                    id: textLineNumbers
+                    font.family: fontName
+                    horizontalAlignment: TextEdit.AlignRight
+                    readOnly: true
+                    anchors.fill: parent
+                    text: ""
+                }
+            }
+
+            // TextArea problem: if switch to readoly --> cursor and view jumps to the end of the text ???
+            TextEdit/*Area*/ {
+                id: textArea
+                font.family: fontName
+                //anchors.fill: parent
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                objectName: "textArea"
+                //placeholderText: qsTr("Enter gnuplot script here...")
+                //selectByMouse: !readOnly
+                text: "   "
+                inputMethodHints: Qt.ImhNoAutoUppercase
+            }
         }
     }
 

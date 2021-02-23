@@ -117,6 +117,11 @@ PageHomeForm {
         }
     }
 
+    function count_lines(text) {
+        var lines = text.split(/\r\n|\r|\n/);
+        return lines.length
+    }
+
     textArea {
         //placeholderText: applicationData.defaultScript
         onTextChanged: {
@@ -166,6 +171,23 @@ PageHomeForm {
         onClicked: {
             stackView.pop()
             stackView.push(helpPage)
+        }
+    }
+
+    Connections {
+        target: textArea
+
+        onTextChanged: {
+            var linesInText = count_lines(textArea.text)
+            var linesInLineNumbers = count_lines(textLineNumbers.text)
+            if(linesInText != linesInLineNumbers) {
+                textLineNumbers.text = ""
+                var s = ""
+                for( var i=0; i<linesInText; i++ ) {
+                    s += "" + i + "\n"
+                }
+                textLineNumbers.text = s
+            }
         }
     }
 }
