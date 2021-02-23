@@ -28,6 +28,7 @@ Page {
     property alias btnSelectFont: btnSelectFont
     property alias chbUseGnuplotBeta: chbUseGnuplotBeta
     property alias chbUseToolBar: chbUseToolBar
+    property alias chbUseSyntaxHighlighter: chbUseSyntaxHighlighter
     property alias chbShowLineNumbers: chbShowLineNumbers
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
 
@@ -74,18 +75,6 @@ Page {
         }
 
         CheckBox {
-            id: chbUseToolBar
-            enabled: true
-            text: qsTr("Show toolbar")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: chbShowLineNumbers.bottom
-            anchors.topMargin: 5
-        }
-
-        CheckBox {
             id: chbShowLineNumbers
             enabled: true
             text: qsTr("Show line numbers")
@@ -98,6 +87,31 @@ Page {
         }
 
         CheckBox {
+            id: chbUseToolBar
+            enabled: true
+            text: qsTr("Show toolbar")
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: chbShowLineNumbers.bottom
+            anchors.topMargin: 5
+        }
+
+
+        CheckBox {
+            id: chbUseSyntaxHighlighter
+            enabled: true
+            text: qsTr("Use syntax highlighting")
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: chbUseToolBar.bottom
+            anchors.topMargin: 5
+        }
+
+        CheckBox {
             id: chbUseLocalFiledialog
             visible: applicationData !== null ? applicationData.isWASM : false
             height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
@@ -106,7 +120,7 @@ Page {
             anchors.rightMargin: 5
             anchors.left: parent.left
             anchors.leftMargin: 5
-            anchors.top: chbUseToolBar.bottom
+            anchors.top: chbUseSyntaxHighlighter.bottom
             anchors.topMargin: 5
         }
 

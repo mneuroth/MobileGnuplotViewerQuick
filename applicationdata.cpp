@@ -12,6 +12,7 @@
 #include "androidtasks.h"
 #include "shareutils.hpp"
 #include "storageaccess.h"
+#include "gnuplotsyntaxhighlighter.h"
 
 #if defined(Q_OS_ANDROID)
 #include "android/androidshareutils.hpp"
@@ -33,10 +34,15 @@
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QFileDialog>
+#include <QQuickTextDocument>
+#include <QTextDocument>
 
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
       m_aStorageAccess(aStorageAccess),
+      m_pShareUtils(0),
+      m_pTextDoc(0),
+      m_pSyntaxHighlighter(0),
       m_aEngine(aEngine),
       m_bUseLocalFileDialog(false),
       m_bIsAdmin(false)
@@ -55,6 +61,7 @@ ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, Stor
 
 ApplicationData::~ApplicationData()
 {
+    delete m_pSyntaxHighlighter;
 }
 
 QString ApplicationData::getAppInfos() const
@@ -141,10 +148,51 @@ void ApplicationData::setAdmin(bool value)
     }
 }
 
-
 bool ApplicationData::isAppInstalled(const QString & sAppName) const
 {
     return m_pShareUtils != 0 ? m_pShareUtils->isAppInstalled(sAppName) : false;
+}
+
+bool ApplicationData::setSyntaxHighlighting(bool enable)
+{
+    if( m_pTextDoc!=0 )
+    {
+        if( m_pSyntaxHighlighter!=0 )
+        {
+            if( !enable )
+            {
+                m_pSyntaxHighlighter->setDocument(0);
+                delete m_pSyntaxHighlighter;
+                m_pSyntaxHighlighter = 0;
+                return true;
+            }
+            else
+            {
+                // nothing to do ! syntax highlighter already available
+                return false;
+            }
+        }
+
+        if(enable)
+        {
+            // this call invokes a onTextChanged for the textArea !
+            m_pSyntaxHighlighter = new GnuplotSyntaxHighlighter(m_pTextDoc->textDocument());
+            m_pSyntaxHighlighter->rehighlight();
+
+            // simulate update of text to rehighlight text again
+            QTextDocument * pDoc = m_pTextDoc->textDocument();
+            QString txt = pDoc->toPlainText();
+            pDoc->setPlainText("");
+            pDoc->setPlainText(txt);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 }
 
 QString ApplicationData::getOnlyFileName(const QString & url) const
@@ -860,4 +908,9 @@ void ApplicationData::setOutputText(const QString & sText)
                 QGenericReturnArgument(),
                 Q_ARG(QVariant, sText));
     }
+}
+
+void ApplicationData::setTextDocument(QQuickTextDocument * pDoc)
+{
+    m_pTextDoc = pDoc;
 }

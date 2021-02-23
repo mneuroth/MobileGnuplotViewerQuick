@@ -148,23 +148,12 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    GnuplotSyntaxHighlighter * pHighlighter = 0;
-    QQuickTextDocument* doc = childObject<QQuickTextDocument*>(engine, "textArea", "textDocument");
-    if( doc!=0 )
-    {
-        // this call invokes a onTextChanged for the textArea !
-        pHighlighter = new GnuplotSyntaxHighlighter(doc->textDocument());
-        pHighlighter->rehighlight();
-    }
+    QQuickTextDocument* pDoc = childObject<QQuickTextDocument*>(engine, "textArea", "textDocument");
+    data.setTextDocument(pDoc);
 
     data.initDone();
 
     int result = app.exec();
-
-    if( pHighlighter )
-    {
-        delete pHighlighter;
-    }
 
 // TODO DEBUGGING: AddToLog(QString("###> SHUTDOWN result=%1").arg(result));
 

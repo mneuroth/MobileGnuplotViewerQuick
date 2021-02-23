@@ -17,6 +17,10 @@
 class ShareUtils;
 class StorageAccess;
 
+class QQuickTextDocument;
+
+class GnuplotSyntaxHighlighter;
+
 void AddToLog(const QString & msg);
 
 // **************************************************************************
@@ -100,6 +104,8 @@ public:
 
     Q_INVOKABLE bool isAppInstalled(const QString & sAppName) const;
 
+    Q_INVOKABLE bool setSyntaxHighlighting(bool enable);
+
     // for debugging only
     Q_INVOKABLE void logText(const QString & text);
 
@@ -117,6 +123,8 @@ public:
     void setScriptText(const QString & sScript);
     void setScriptName(const QString & sName);
     void setOutputText(const QString & sText);
+
+    void setTextDocument(QQuickTextDocument * pDoc);
 
     static QString simpleReadFileContent(const QString & fileName);
     static bool simpleWriteFileContent(const QString & fileName, const QString & content);
@@ -175,6 +183,10 @@ private:
     ShareUtils *                m_pShareUtils;      // not an owner !
 
     QQmlApplicationEngine &     m_aEngine;          // not an owner !
+
+    QQuickTextDocument *        m_pTextDoc;         // not an owner !
+
+    GnuplotSyntaxHighlighter *  m_pSyntaxHighlighter;
 
     bool                        m_bUseLocalFileDialog;
     bool                        m_bIsAdmin;

@@ -57,11 +57,18 @@ SettingsDialogForm {
             applicationData.isUseLocalFileDialog = chbUseLocalFiledialog.checked
             settings.useToolBar = chbUseToolBar.checked
             settings.showLineNumbers = chbShowLineNumbers.checked
+            settings.useSyntaxHighlighter = chbUseSyntaxHighlighter.checked
             var aFont = settingsDialog.lblExampleText.font
             homePage.textArea.font = aFont
             outputPage.txtOutput.font = aFont
             helpPage.txtHelp.font = aFont
             stackView.pop()
+            if( applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter) ) {
+                // simulate update of text to rehighlight text again
+                //var txt = homePage.textArea.text
+                //homePage.textArea.text = ""
+                //homePage.textArea.text = txt
+            }
         }
     }
 }
