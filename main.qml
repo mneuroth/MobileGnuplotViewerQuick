@@ -300,6 +300,21 @@ ApplicationWindow {
         stackView.push(outputPage)
     }
 
+    function openSettingsDialog()
+    {
+        settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
+        settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
+        settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
+        settingsDialog.chbUseToolBar.checked = settings.useToolBar
+        settingsDialog.chbUseSyntaxHighlighter.checked = settings.useSyntaxHighlighter
+        settingsDialog.chbShowLineNumbers.checked = settings.showLineNumbers
+        settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
+        settingsDialog.lblExampleText.font = homePage.textArea.font
+
+        stackView.pop()
+        stackView.push(settingsDialog)
+    }
+
     // **********************************************************************
     // *** some gui items for the application
     // **********************************************************************
@@ -561,17 +576,7 @@ ApplicationWindow {
                     text: qsTr("Settings")
                     enabled: !isDialogOpen()
                     onTriggered: {
-                        settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
-                        settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
-                        settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
-                        settingsDialog.chbUseToolBar.checked = settings.useToolBar
-                        settingsDialog.chbUseSyntaxHighlighter.checked = settings.useSyntaxHighlighter
-                        settingsDialog.chbShowLineNumbers.checked = settings.showLineNumbers                        
-                        settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
-                        settingsDialog.lblExampleText.font = homePage.textArea.font
-
-                        stackView.pop()
-                        stackView.push(settingsDialog)
+                        openSettingsDialog()
                     }
                 }
                 MenuItem {
@@ -805,6 +810,17 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Next"
                 onClicked: {
+                }
+            }
+            ToolSeparator {
+            }
+            ToolButton {
+                id: toolButtonSettings
+                icon.source: "settings.svg"
+                enabled: !isDialogOpen()
+                //text: "Settings"
+                onClicked: {
+                    openSettingsDialog()
                 }
             }
             ToolSeparator {

@@ -78,6 +78,8 @@ Page {
                     horizontalAlignment: TextEdit.AlignRight
                     readOnly: true
                     anchors.fill: parent
+                    anchors.leftMargin: 5
+                    anchors.rightMargin: 5
                     text: ""
                 }
             }
