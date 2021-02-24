@@ -9,16 +9,15 @@
  *
  ***************************************************************************/
 import QtQuick 2.0
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.15
 
 Page {
-    //id: aboutDialog
+    id: root
     anchors.fill: parent
 
     title: qsTr("About")
 
-    width: 400
-    height: 500
     property alias lblIconInfos: lblIconInfos
     property alias btnClose: btnClose
     property alias lblAppName: lblAppName
@@ -28,128 +27,86 @@ Page {
     property alias lblAppInfos: lblAppInfos
     property alias lblGithubPage: lblGithubPage
 
-    Rectangle {
-        id: rectangle
-        color: "#ffffff"
-        anchors.rightMargin: 0
-        anchors.bottomMargin: 1
-        anchors.leftMargin: 0
-        anchors.topMargin: -1
+    ScrollView {
+        id: scrollView
+
         anchors.fill: parent
+        anchors.margins: 10
 
-        Text {
-            id: lblAppInfos
-            x: 5
-            text: qsTr("App Infos")
-            anchors.top: lblIconInfos.bottom
-            anchors.topMargin: 15
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.rightMargin: 5
-            font.pixelSize: 12
-            horizontalAlignment: Text.AlignHCenter
-            anchors.right: parent.right
-        }
+        clip: true
 
-        Text {
-            id: lblAppAuthor
-            x: 5
-            y: 290
-            text: qsTr("Author: Michael Neuroth")
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.rightMargin: 5
-            font.pixelSize: 12
-            horizontalAlignment: Text.AlignHCenter
-            anchors.right: parent.right
-        }
+        ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-        Text {
-            id: lblAppDate
-            x: 5
-            y: 245
-            text: qsTr("from: 23.2.2021")
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.rightMargin: 5
-            font.pixelSize: 12
-            horizontalAlignment: Text.AlignHCenter
-            anchors.right: parent.right
-        }
+        ColumnLayout {
+            id: layout
 
-        Text {
-            id: lblAppVersion
-            x: 5
-            y: 219
-            text: qsTr("Version: 2.0.10")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 12
-        }
+            width: root.width
 
-        Text {
-            id: lblIconInfos
-            text: qsTr("<a href='http://www.flaticon.com'>Icons designed by Flaticon</a>")
-            anchors.top: lblGithubPage.bottom
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 12
-        }
+            Text {
+                id: lblAppName
+                text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick</a>"
+                fontSizeMode: Text.FixedSize
+                font.pixelSize: 18
+                Layout.alignment: Qt.AlignCenter
+            }
 
-        Text {
-            id: lblAppName
-            x: 5
-            y: 18
-            text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick</a>"
-            fontSizeMode: Text.FixedSize
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 18
-        }
+            Image {
+                id: image
+                //height: 40
+                //width: height
+                //fillMode: Image.PreserveAspectFit
+                source: "gnuplotviewer_flat_512x512.png"
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: 100
+                Layout.maximumHeight: 100
+            }
 
-        Text {
-            id: lblGithubPage
-            text: qsTr("<a href='https://github.com/mneuroth/MobileGnuplotViewerQuick'>Github page for MobileGnuplotViewerQuick</a>")
-            anchors.top: lblAppAuthor.bottom
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 12
-        }
+            Text {
+                id: lblAppVersion
+                text: qsTr("Version: 2.0.10")
+                Layout.alignment: Qt.AlignCenter
+            }
 
-        Image {
-            id: image
-            y: 46
-            height: 162
-            anchors.right: parent.right
-            anchors.rightMargin: 90
-            anchors.left: parent.left
-            anchors.leftMargin: 90
-            fillMode: Image.PreserveAspectFit
-            source: "gnuplotviewer_flat_512x512.png"
-        }
+            Text {
+                id: lblAppDate
+                text: qsTr("from: 23.2.2021")
+                Layout.alignment: Qt.AlignCenter
+                Layout.bottomMargin: 15
+            }
 
-        Button {
-            id: btnClose
-            x: 156
-            y: 352
-            text: qsTr("Close")
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
+            Text {
+                id: lblAppAuthor
+                text: qsTr("Author: Michael Neuroth")
+                Layout.alignment: Qt.AlignCenter
+                Layout.bottomMargin: 15
+            }
+
+            Text {
+                id: lblGithubPage
+                text: qsTr("<a href='https://github.com/mneuroth/MobileGnuplotViewerQuick'>Github page for MobileGnuplotViewerQuick</a>")
+                Layout.alignment: Qt.AlignCenter
+            }
+
+            Text {
+                id: lblIconInfos
+                text: qsTr("<a href='http://www.flaticon.com'>Icons designed by Flaticon</a>")
+                Layout.alignment: Qt.AlignCenter
+                Layout.bottomMargin: 15
+            }
+
+            Text {
+                id: lblAppInfos
+                text: qsTr("App Infos")
+                Layout.alignment: Qt.AlignCenter
+                Layout.bottomMargin: 15
+            }
+
+            Button {
+                id: btnClose
+                text: qsTr("Close")
+                Layout.alignment: Qt.AlignCenter
+            }
         }
     }
 }
