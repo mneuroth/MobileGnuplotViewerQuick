@@ -18,6 +18,9 @@ Page {
 
     width: 400
     height: 400
+
+    property int editFieldWidth: 75
+
     property alias txtGraphicsFontSize: txtGraphicsFontSize
     property alias lblExampleText: lblExampleText
     property alias btnOk: btnOk
@@ -43,8 +46,6 @@ Page {
 
         Button {
             id: btnCancel
-            x: 156
-            y: 352
             text: qsTr("Cancel")
             anchors.right: parent.right
             anchors.rightMargin: 5
@@ -54,7 +55,6 @@ Page {
 
         Button {
             id: btnOk
-            y: 355
             text: qsTr("Accept")
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -126,7 +126,8 @@ Page {
 
         TextField {
             id: txtGraphicsResolution
-            width: 100
+            validator: IntValidator {bottom: 1; top: 4096}
+            width: editFieldWidth
             height: 40
             anchors.top: chbUseLocalFiledialog.bottom
             anchors.topMargin: 5
@@ -137,7 +138,6 @@ Page {
 
         Label {
             id: lblGraphicsResolution
-            y: 118
             text: qsTr("Resolution for graphic area")
             anchors.verticalCenter: txtGraphicsResolution.verticalCenter
             anchors.right: parent.right
@@ -148,7 +148,8 @@ Page {
 
         TextField {
             id: txtGraphicsFontSize
-            width: 100
+            validator: IntValidator {bottom: 1; top: 256}
+            width: editFieldWidth
             height: 40
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -159,7 +160,6 @@ Page {
 
         Label {
             id: lblGraphicsFontSize
-            y: 172
             text: qsTr("Font size for graphic area")
             anchors.verticalCenter: txtGraphicsFontSize.verticalCenter
             anchors.left: txtGraphicsFontSize.right
@@ -171,7 +171,7 @@ Page {
         TextField {
             id: txtSupportLevel
             readOnly: true
-            width: 100
+            width: editFieldWidth
             height: 40
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -182,7 +182,6 @@ Page {
 
         Label {
             id: lblSupportLevel
-            y: 172
             text: qsTr("SupportLevel")
             anchors.verticalCenter: txtSupportLevel.verticalCenter
             anchors.left: txtSupportLevel.right
@@ -202,7 +201,6 @@ Page {
 
         Label {
             id: lblExampleText
-            y: 64
             text: qsTr("This is an example text for the current font")
             anchors.verticalCenter: btnSelectFont.verticalCenter
             anchors.right: parent.right

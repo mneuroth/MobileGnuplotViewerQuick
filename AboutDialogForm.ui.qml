@@ -47,7 +47,7 @@ Page {
                 id: lblAppName
                 text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick</a>"
                 fontSizeMode: Text.FixedSize
-                font.pixelSize: 18
+                font.pixelSize: 24
                 Layout.alignment: Qt.AlignCenter
             }
 

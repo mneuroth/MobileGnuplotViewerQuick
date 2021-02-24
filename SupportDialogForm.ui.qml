@@ -60,7 +60,7 @@ Page {
                 Button {
                     id: btnSupportLevel0
                     text: qsTr("Support Level Bronze")
-                    width: lblSupportInfo.contentWidth * 2 / 3
+                    width: lblSupportInfo.contentWidth * 0.5
                 }
 
                 Label {
@@ -78,7 +78,7 @@ Page {
                 Button {
                     id: btnSupportLevel1
                     text: qsTr("Support Level Silver")
-                    width: lblSupportInfo.contentWidth * 2 / 3
+                    width: lblSupportInfo.contentWidth * 0.5
                 }
 
                 Label {
@@ -96,7 +96,7 @@ Page {
                 Button {
                     id: btnSupportLevel2
                     text: qsTr("Support Level Gold")
-                    width: lblSupportInfo.contentWidth * 2 / 3
+                    width: lblSupportInfo.contentWidth * 0.5
                 }
 
                 Label {
