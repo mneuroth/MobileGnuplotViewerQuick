@@ -766,6 +766,50 @@ ApplicationWindow {
             ToolSeparator {
             }
             ToolButton {
+                id: toolButtonSearch
+                icon.source: "search.svg"
+                enabled: !isDialogOpen()
+                //text: "Search"
+                onClicked: {
+                    //homePage.textArea.textDocument
+// find --> scite find dialog
+// icons: find, replace, next, previous
+                    TextEdit
+                    var search = "plot"
+                    var l = search.length
+                    var pos = applicationData.findText(search)
+                    console.log("TEST "+homePage.textArea.textDocument+" "+pos)
+                    homePage.textArea.select(pos,pos+l)
+                    homePage.textArea.focus = true
+                }
+            }
+            ToolButton {
+                id: toolButtonReplace
+                icon.source: "replace.svg"
+                enabled: !isDialogOpen()
+                //text: "Replace"
+                onClicked: {
+                }
+            }
+            ToolButton {
+                id: toolButtonPrevious
+                icon.source: "left-arrow.svg"
+                enabled: !isDialogOpen()
+                //text: "Previous"
+                onClicked: {
+                }
+            }
+            ToolButton {
+                id: toolButtonNext
+                icon.source: "right-arrow.svg"
+                enabled: !isDialogOpen()
+                //text: "Next"
+                onClicked: {
+                }
+            }
+            ToolSeparator {
+            }
+            ToolButton {
                 id: toolButtonShare
                 icon.source: "share.svg"
                 enabled: !isDialogOpen()

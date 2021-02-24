@@ -34,6 +34,10 @@
         <file alias="play-button-arrowhead.svg">files/play-button-arrowhead.svg</file>
         <file alias="open-folder-with-document.svg">files/open-folder-with-document.svg</file>
         <file alias="log-format.svg">files/log-format.svg</file>
+        <file alias="search.svg">files/search.svg</file>
+        <file alias="replace.svg">files/replace.svg</file>
+        <file alias="left-arrow.svg">files/left-arrow.svg</file>
+        <file alias="right-arrow.svg">files/right-arrow.svg</file>
         <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
         <file>SupportDialog.qml</file>
         <file>SupportDialogForm.ui.qml</file>
