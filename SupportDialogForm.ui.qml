@@ -9,7 +9,8 @@
  *
  ***************************************************************************/
 import QtQuick 2.0
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.15
 
 Page {
     property alias btnSupportLevel0: btnSupportLevel0
@@ -26,136 +27,104 @@ Page {
 
     title: qsTr("Support")
 
-    Rectangle {
-        id: rectangle
-        color: "#ffffff"
+    ScrollView {
+        id: scrollView
+
         anchors.fill: parent
+        anchors.margins: 10
 
-        Row {
-            id: row0
+        contentWidth: lblSupportInfo.contentWidth // btnSupportLevel1.width //availableWidth
+        //contentHeight: 600
+        clip: true
 
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.top: lblSupportInfo.bottom
-            anchors.topMargin: 5
-            spacing: 10
+        ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+        ColumnLayout {
+            id: layout
+
+            Text {
+                id: lblSupportInfo
+                text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
+                //text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>usage of the latest Gnuplot (beta) version is enabled</li><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
+                wrapMode: Text.WordWrap
+                enabled: false
+                Layout.bottomMargin: 15
+            }
+
+            Row {
+                id: row0
+
+                spacing: 10
+
+                Button {
+                    id: btnSupportLevel0
+                    text: qsTr("Support Level Bronze")
+                    width: lblSupportInfo.contentWidth * 2 / 3
+                }
+
+                Label {
+                    id: lblLevel0
+                    text: "?"
+                    anchors.verticalCenter: btnSupportLevel0.verticalCenter
+                }
+            }
+
+            Row {
+                id: row1
+
+                spacing: 10
+
+                Button {
+                    id: btnSupportLevel1
+                    text: qsTr("Support Level Silver")
+                    width: lblSupportInfo.contentWidth * 2 / 3
+                }
+
+                Label {
+                    id: lblLevel1
+                    text: "?"
+                    anchors.verticalCenter: btnSupportLevel1.verticalCenter
+                }
+            }
+
+            Row {
+                id: row2
+
+                spacing: 10
+
+                Button {
+                    id: btnSupportLevel2
+                    text: qsTr("Support Level Gold")
+                    width: lblSupportInfo.contentWidth * 2 / 3
+                }
+
+                Label {
+                    id: lblLevel2
+                    text: "?"
+                    anchors.verticalCenter: btnSupportLevel2.verticalCenter
+                }
+            }
+
+            Text {
+                id: lblGooglePlay
+                text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick in Google Play</a>"
+                Layout.topMargin: 15
+            }
+
+            Text {
+                id: lblSupporterOfClassicVersion
+                text: qsTr("You already supported the predecessor of this application !")
+                visible: applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+            }
 
             Button {
-                id: btnSupportLevel0
-                x: 30
-                text: qsTr("Support Level Bronze")
-                width: parent.width * 2 / 3
+                id: btnClose
+                text: qsTr("Close")
+                Layout.topMargin: 25
             }
-
-            Label {
-                id: lblLevel0
-                y: 18
-                text: "?"
-                anchors.verticalCenter: btnSupportLevel0.verticalCenter
-            }
-        }
-
-        Row {
-            id: row1
-
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.top: row0.bottom
-            anchors.topMargin: 5
-            spacing: 10
-
-            Button {
-                id: btnSupportLevel1
-                text: qsTr("Support Level Silver")
-                width: parent.width * 2 / 3
-            }
-
-            Label {
-                id: lblLevel1
-                y: 18
-                text: "?"
-                anchors.verticalCenter: btnSupportLevel1.verticalCenter
-            }
-        }
-
-        Row {
-            id: row2
-
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.top: row1.bottom
-            anchors.topMargin: 5
-            spacing: 10
-
-            Button {
-                id: btnSupportLevel2
-                text: qsTr("Support Level Gold")
-                width: parent.width * 2 / 3
-            }
-
-            Label {
-                id: lblLevel2
-                y: 18
-                text: "?"
-                anchors.verticalCenter: btnSupportLevel2.verticalCenter
-            }
-        }
-
-        Button {
-            id: btnClose
-            x: 156
-            y: 352
-            text: qsTr("Close")
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
-        }
-
-        Text {
-            id: lblSupportInfo
-            text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
-            //text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>usage of the latest Gnuplot (beta) version is enabled</li><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
-            wrapMode: Text.WordWrap
-            enabled: false
-            //horizontalAlignment: Text.AlignHCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
-        }
-
-        Text {
-            id: lblGooglePlay
-            //y: 18
-            text: "<a href='https://play.google.com/store/apps/details?id=de.mneuroth.gnuplotviewerquick'>MobileGnuplotViewerQuick in Google Play</a>"
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.top: row2.bottom
-            anchors.topMargin: 15
-        }
-
-        Text {
-            id: lblSupporterOfClassicVersion
-            text: qsTr("You already supported the predecessor of this application !")
-            visible: applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: lblGooglePlay.bottom
-            anchors.topMargin: 15
         }
     }
 }
