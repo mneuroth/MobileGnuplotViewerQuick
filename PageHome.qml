@@ -183,7 +183,7 @@ PageHomeForm {
             if(linesInText != linesInLineNumbers) {
                 textLineNumbers.text = ""
                 var s = ""
-                for( var i=0; i<linesInText; i++ ) {
+                for( var i=1; i<=linesInText; i++ ) {
                     s += "" + i + "\n"
                 }
                 textLineNumbers.text = s
