@@ -195,7 +195,7 @@ bool ApplicationData::setSyntaxHighlighting(bool enable)
 
 }
 
-int ApplicationData::findText(const QString & searchText, int iSearchStartPos, bool bForward)
+int ApplicationData::findText(const QString & searchText, int iSearchStartPos, bool bForward, bool bMatchWholeWord, bool bCaseSensitive, bool bRegExpr)
 {
     if( m_pTextDoc!=0 )
     {
@@ -203,7 +203,15 @@ int ApplicationData::findText(const QString & searchText, int iSearchStartPos, b
         QTextDocument::FindFlags flags;
         if(  !bForward )
         {
-            flags = QTextDocument::FindBackward;
+            flags |= QTextDocument::FindBackward;
+        }
+        if( bMatchWholeWord )
+        {
+            flags |= QTextDocument::FindWholeWords;
+        }
+        if( bCaseSensitive )
+        {
+            flags |= QTextDocument::FindCaseSensitively;
         }
         QTextCursor cursor = pDoc->find(searchText, iSearchStartPos, flags);
         if( cursor.position()>=0 )

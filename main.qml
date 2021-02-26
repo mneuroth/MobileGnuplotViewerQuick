@@ -27,6 +27,9 @@ ApplicationWindow {
 
     property int currentSearchPos: 0
     property string currentSearchText: ""
+    property bool matchWholeWord: false
+    property bool caseSensitive: false
+    property bool regExpr: false
     property string emptyString: "      "
     property string urlPrefix: "file://"   
     property bool isAndroid: applicationData !== null ? applicationData.isAndroid : false
@@ -311,9 +314,8 @@ ApplicationWindow {
     {
         var l = currentSearchText.length
         var pos = bForward ?
-                    applicationData.findText(currentSearchText, currentSearchPos) :
-                    applicationData.findText(currentSearchText, currentSearchPos-l, false)
-        console.log("TEST "+homePage.textArea.textDocument+" "+pos)
+                    applicationData.findText(currentSearchText, currentSearchPos, true, matchWholeWord, caseSensitive, regExpr) :
+                    applicationData.findText(currentSearchText, currentSearchPos-l, false, matchWholeWord, caseSensitive, regExpr)
         if(pos>=0) {
             homePage.textArea.cursorPosition = pos+l
             homePage.textArea.select(pos,pos+l)
@@ -322,7 +324,8 @@ ApplicationWindow {
         }
         else
         {
-            // TODO --> not found message, start from begin !
+            askForSearchFromTop.open()
+
             currentSearchPos = bForward ? 0 : homePage.textArea.text.length
         }
     }
@@ -591,24 +594,28 @@ ApplicationWindow {
                         id: findMenu
                         text: qsTr("Find")
                         icon.source: "search.svg"
+                        enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                         onTriggered: toolButtonSearch.clicked()
                     }
                     MenuItem {
                         id: replaceMenu
-                        text: qsTr("Replace")
+                        text: qsTr("Replace")                        
                         icon.source: "replace.svg"
+                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                         onTriggered: toolButtonReplace.clicked()
                     }
                     MenuItem {
                         id: previousFindMenu
                         text: qsTr("Previous")
                         icon.source: "left-arrow.svg"
+                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                         onTriggered: toolButtonPrevious.clicked()
                     }
                     MenuItem {
                         id: nextFindMenu
                         text: qsTr("Next")
                         icon.source: "right-arrow.svg"
+                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                         onTriggered: toolButtonNext.clicked()
                     }
                 }
@@ -903,12 +910,15 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonSearch
                 icon.source: "search.svg"
-                enabled: !isDialogOpen()
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Search"
                 onClicked: {
+                    //var currentTextControl = getCurrentTextRef(stackView.currentItem) // needed to search in outputPage (maybe)
                     var search = getWordUnderCursor(homePage.textArea)
                     findDialog.findWhatInput.text = search
-// TODO: andere such eigenschften setzen
+                    findDialog.matchWholeWordCheckBox.checked = matchWholeWord
+                    findDialog.caseSensitiveCheckBox.checked = caseSensitive
+                    findDialog.regularExpressionCheckBox.checked = regExpr
 
                     stackView.pop()
                     stackView.push(findDialog)
@@ -919,12 +929,15 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonReplace
                 icon.source: "replace.svg"
-                enabled: !isDialogOpen()
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                 //text: "Replace"
                 onClicked: {
-                    var search = getWordUnderCursor(homePage.textArea)
+                    var currentTextControl = getCurrentTextRef(stackView.currentItem)
+                    var search = getWordUnderCursor(currentTextControl)
                     replaceDialog.findWhatInput.text = search
-// TODO: andere such eigenschften setzen
+                    replaceDialog.matchWholeWordCheckBox.checked = matchWholeWord
+                    replaceDialog.caseSensitiveCheckBox.checked = caseSensitive
+                    replaceDialog.regularExpressionCheckBox.checked = regExpr
 
                     stackView.pop()
                     stackView.push(replaceDialog)
@@ -935,7 +948,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonPrevious
                 icon.source: "left-arrow.svg"
-                enabled: !isDialogOpen()
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                 //text: "Previous"
                 onClicked: {
                     searchForCurrentSearchText(false)
@@ -944,7 +957,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonNext
                 icon.source: "right-arrow.svg"
-                enabled: !isDialogOpen()
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                 //text: "Next"
                 onClicked: {
                     searchForCurrentSearchText(true)
@@ -1266,6 +1279,21 @@ ApplicationWindow {
         }
     }
 
+    MessageDialog {
+        id: askForSearchFromTop
+        visible: false
+        title: qsTr("Question")
+        text: qsTr("Reached end of text, search again from the top?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            toolButtonNext.clicked()
+        }
+        onNo: {
+            // do nothing
+            homePage.textArea.forceActiveFocus()
+        }
+    }
+
     Loader
     {
         id: storeLoader
@@ -1284,13 +1312,12 @@ ApplicationWindow {
         }
         onAccepted: {
             stackView.pop()
-            var search = replaceDialog.findWhatInput.text
-            currentSearchText = search
-// TODO: andere such eingenschaften aus dialog auswerten
-// TODO start from current cursor position !!!???
-            if( currentSearchPos<0 ) {
-                currentSearchPos = 0
-            }
+            currentSearchPos = homePage.textArea.cursorPosition
+            currentSearchText = replaceDialog.findWhatInput.text
+            matchWholeWord = findDialog.matchWholeWordCheckBox.checked
+            caseSensitive = findDialog.caseSensitiveCheckBox.checked
+            regExpr = findDialog.regularExpressionCheckBox.checked
+
             searchForCurrentSearchText(true);
         }
     }
@@ -1304,14 +1331,14 @@ ApplicationWindow {
         }
         onAccepted: {
             stackView.pop()
-            var search = findDialog.findWhatInput.text
-            currentSearchText = search
-// TODO: andere such eingenschaften aus dialog auswerten
-// TODO start from current cursor position !!!???
-            if( currentSearchPos<0 ) {
-                currentSearchPos = 0
-            }
-            searchForCurrentSearchText(true);
+            currentSearchPos = homePage.textArea.cursorPosition
+            currentSearchText = findDialog.findWhatInput.text
+            matchWholeWord = findDialog.matchWholeWordCheckBox.checked
+            caseSensitive = findDialog.caseSensitiveCheckBox.checked
+            regExpr = findDialog.regularExpressionCheckBox.checked
+            var backward = findDialog.backwardDirectionCheckBox.checked
+
+            searchForCurrentSearchText(!backward);
         }
     }
 

@@ -23,7 +23,7 @@ Page {
     property alias cancelButton: cancelButton
     property alias findNextButton: findNextButton
     property alias findWhatInput: findWhatInput
-    property alias backwardDirection: backwardDirection
+    property alias backwardDirectionCheckBox: backwardDirectionCheckBox
     property alias matchWholeWordCheckBox: matchWholeWordCheckBox
     property alias caseSensitiveCheckBox: caseSensitiveCheckBox
     property alias regularExpressionCheckBox: regularExpressionCheckBox
@@ -44,7 +44,7 @@ Page {
             anchors.bottomMargin: 5
 
             columns: 3
-            rows: 8
+            rows: 6
 
             // ***** row 0
 
@@ -109,6 +109,7 @@ Page {
 
             CheckBox {
                 id: regularExpressionCheckBox
+                visible: false
                 Layout.columnSpan: 3
                 Layout.row: 3
                 Layout.column: 0
@@ -120,7 +121,7 @@ Page {
             // ***** row 4
 
             CheckBox {
-                id: backwardDirection
+                id: backwardDirectionCheckBox
                 Layout.columnSpan: 2
                 Layout.row: 4
                 Layout.column: 0
@@ -137,6 +138,7 @@ Page {
                 Layout.row: 5
                 Layout.column: 0
                 Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 spacing: 10
 
@@ -145,7 +147,7 @@ Page {
                     //Layout.fillWidth: true
                     //Layout.row: 6
                     //Layout.column: 0
-                    text: qsTr("&Find Next")
+                    text: qsTr("Find Next")
                     //highlighted: true
                     Keys.onEscapePressed: cancelButton.clicked()
                     Keys.onBackPressed: cancelButton.clicked()
@@ -163,10 +165,6 @@ Page {
                 }
 
             }
-
-            // ***** row 5
-
-            // ***** row 6
         }
     }
 }

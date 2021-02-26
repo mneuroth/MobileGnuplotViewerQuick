@@ -46,7 +46,7 @@ Page {
             anchors.bottomMargin: 5
 
             columns: 4
-            rows: 10
+            rows: 6
 
             // ***** row 0
 
@@ -147,6 +147,7 @@ Page {
 
             CheckBox {
                 id: regularExpressionCheckBox
+                visible: false
                 Layout.columnSpan: 3
                 Layout.row: 4
                 Layout.column: 0
@@ -157,18 +158,13 @@ Page {
 
             // ***** row 5
 
-            // ***** row 6
-
-            // ***** row 7
-
-            // ***** row 8
-
             Flow {
 
                 Layout.columnSpan: 4
-                Layout.row: 8
+                Layout.row: 5
                 Layout.column: 0
                 Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 spacing: 10
 
