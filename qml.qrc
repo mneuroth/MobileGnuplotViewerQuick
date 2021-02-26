@@ -15,6 +15,10 @@
         <file>AboutDialog.qml</file>
         <file>SettingsDialogForm.ui.qml</file>
         <file>SettingsDialog.qml</file>
+        <file>FindDialogForm.ui.qml</file>
+        <file>FindDialog.qml</file>
+        <file>ReplaceDialogForm.ui.qml</file>
+        <file>ReplaceDialog.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file alias="empty.svg">files/empty.svg</file>
         <file alias="share.svg">files/share.svg</file>

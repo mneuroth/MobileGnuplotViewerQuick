@@ -16,6 +16,9 @@ Page {
     width: 600
     height: 400
     anchors.fill: parent
+    focusPolicy: Qt.StrongFocus
+    focus: true
+    title: qsTr("Gnuplot Help")
 
     property alias btnOutput: btnOutput
     property alias btnInput: btnInput
@@ -23,8 +26,6 @@ Page {
     property alias txtHelp: txtHelp
 
     property string fontName: "Courier"
-
-    title: qsTr("Gnuplot Help")
 
     Label {
         id: lblHelp

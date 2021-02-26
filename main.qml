@@ -204,6 +204,7 @@ ApplicationWindow {
         homePage.textArea.text = applicationData.readFileContent(urlFileName)
         homePage.textArea.textDocument.modified = false
         homePage.lblFileName.text = applicationData.getOnlyFileName(urlFileName)
+        homePage.textArea.forceActiveFocus()
         // update the current directory after starting the application...
         mobileFileDialog.currentDirectory = applicationData.getLocalPathWithoutFileName(urlFileName)
     }
@@ -215,16 +216,6 @@ ApplicationWindow {
             stackView.pop()
             stackView.push(outputPage)
         }
-    }
-
-    function jumpToEndOfOutput() {
-        var bReadOnly = outputPage.txtOutput.text.readOnly;
-        outputPage.forceActiveFocus()
-        outputPage.txtOutput.forceActiveFocus()
-        outputPage.txtOutput.text.readOnly = false
-        outputPage.txtOutput.text.focus = true
-        outputPage.txtOutput.text.cursorPosition = outputPage.txtOutput.text.length
-        outputPage.txtOutput.text.readOnly = bReadOnly
     }
 
     function showFileContentInOutput(sOnlyFileName) {
@@ -303,7 +294,8 @@ ApplicationWindow {
         stackView.push(outputPage)
     }
 
-    function count_lines(text) {
+    function count_lines(text)
+    {
         var lines = text.split(/\r\n|\r|\n/);
         return lines.length
     }
@@ -312,8 +304,76 @@ ApplicationWindow {
     {
         var txt = textControl.text
         textControl.cursorPosition = txt.length
-        textControl.focus = true
-        //textControl.focus()
+        textControl.forceActiveFocus()
+    }
+
+    function searchForCurrentSearchText(bForward)
+    {
+        var l = currentSearchText.length
+        var pos = bForward ?
+                    applicationData.findText(currentSearchText, currentSearchPos) :
+                    applicationData.findText(currentSearchText, currentSearchPos-l, false)
+        console.log("TEST "+homePage.textArea.textDocument+" "+pos)
+        if(pos>=0) {
+            homePage.textArea.cursorPosition = pos+l
+            homePage.textArea.select(pos,pos+l)
+            currentSearchPos = pos+l
+            homePage.forceActiveFocus()
+        }
+        else
+        {
+            // TODO --> not found message, start from begin !
+            currentSearchPos = bForward ? 0 : homePage.textArea.text.length
+        }
+    }
+
+    function isWhitespace(ch)
+    {
+        return ch===" " || ch==="\t" || ch==="\r" || ch==="\n"
+    }
+
+    function indexOf(pos, txt, bForward)
+    {
+        if( isWhitespace(txt[pos]) && pos>0 )
+        {
+            pos--;
+        }
+
+        var i = 0;
+        var startPos = -1
+        var direction = bForward ? 1 : -1
+        var limit = bForward ? txt.length : 0
+        while( pos+direction*i >=0 && startPos<0 )
+        {
+            var ch = txt[pos+direction*i]
+            if( isWhitespace(ch) )
+            {
+                startPos = pos+direction*i + (bForward ? 0 : 1)
+            }
+            if( pos+direction*i==limit )
+            {
+                startPos = limit
+            }
+            i++;
+        }
+        return startPos;
+    }
+
+    function getWordUnderCursor(textControl)
+    {
+        if( textControl.selectedText.length>0 )
+        {
+            return textControl.selectedText
+        }
+
+        var txt = textControl.text
+        var pos = textControl.cursorPosition
+
+        var startPos = indexOf(pos, txt, false)
+        var endPos = indexOf(pos, txt, true)
+        var s = txt.substr(startPos, endPos-startPos)
+
+        return s
     }
 
     function openSettingsDialog()
@@ -610,22 +670,14 @@ ApplicationWindow {
                         text: qsTr("Gnuplot help")
                         onTriggered: {
                             var sContent = gnuplotInvoker.run("help")
-                            outputPage.txtOutput.text += sContent
-                            outputPage.txtOutput.text += gnuplotInvoker.lastError
-                            stackView.pop()
-                            stackView.push(outputPage)
-                            moveToEndOfText(outputPage.txtOutput)
+                            showInOutput(sContent+gnuplotInvoker.lastError, true)
                         }
                     }
                     MenuItem {
                         text: qsTr("Gnuplot version")
                         onTriggered: {
                             var sContent = gnuplotInvoker.run("show version")
-                            outputPage.txtOutput.text += sContent
-                            outputPage.txtOutput.text += gnuplotInvoker.lastError
-                            stackView.pop()
-                            stackView.push(outputPage)
-                            moveToEndOfText(outputPage.txtOutput)
+                            showInOutput(sContent+gnuplotInvoker.lastError, true)
                         }
                     }
                 }
@@ -720,6 +772,7 @@ ApplicationWindow {
             onClicked: {
                 if (stackView.depth > 1) {
                     stackView.pop()
+                    homePage.textArea.forceActiveFocus()
                 } else {
                     drawer.open()
                 }
@@ -824,6 +877,15 @@ ApplicationWindow {
                 }
             }
             ToolButton {
+                id: toolButtonClear
+                icon.source: "close.svg"
+                enabled: menuClear.enabled
+                //text: "Clear"
+                onClicked: {
+                    menuClear.clicked()
+                }
+            }
+            ToolButton {
                 id: toolButtonRun
                 icon.source: "play-button-arrowhead.svg"
                 enabled: (stackView.currentItem === homePage || stackView.currentItem === helpPage) && !isDialogOpen()
@@ -844,20 +906,14 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Search"
                 onClicked: {
-                    //homePage.textArea.textDocument
-// find --> scite find dialog
-// icons: find, replace, next, previous
-                    TextEdit
-                    var search = "plot"
-                    currentSearchText = search
-                    var l = currentSearchText.length
-                    var pos = applicationData.findText(currentSearchText, currentSearchPos)
-                    console.log("TEST "+homePage.textArea.textDocument+" "+pos)
-                    if(pos>=0) {
-                        homePage.textArea.select(pos,pos+l)
-                        currentSearchPos = pos+l
-                    }
-                    homePage.textArea.focus = true
+                    var search = getWordUnderCursor(homePage.textArea)
+                    findDialog.findWhatInput.text = search
+// TODO: andere such eigenschften setzen
+
+                    stackView.pop()
+                    stackView.push(findDialog)
+
+                    findDialog.findWhatInput.forceActiveFocus()
                 }
             }
             ToolButton {
@@ -866,6 +922,14 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Replace"
                 onClicked: {
+                    var search = getWordUnderCursor(homePage.textArea)
+                    replaceDialog.findWhatInput.text = search
+// TODO: andere such eigenschften setzen
+
+                    stackView.pop()
+                    stackView.push(replaceDialog)
+
+                    replaceDialog.findWhatInput.forceActiveFocus()
                 }
             }
             ToolButton {
@@ -874,13 +938,7 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Previous"
                 onClicked: {
-                    var l = currentSearchText.length
-                    var pos = applicationData.findText(currentSearchText, currentSearchPos-l, false)
-                    console.log("TEST "+homePage.textArea.textDocument+" "+pos)
-                    if(pos>=0) {
-                        homePage.textArea.select(pos,pos+l)
-                        currentSearchPos = pos+l
-                    }
+                    searchForCurrentSearchText(false)
                 }
             }
             ToolButton {
@@ -889,13 +947,7 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Next"
                 onClicked: {
-                    var l = currentSearchText.length
-                    var pos = applicationData.findText(currentSearchText, currentSearchPos)
-                    console.log("TEST "+homePage.textArea.textDocument+" "+pos)
-                    if(pos>=0) {
-                        homePage.textArea.select(pos,pos+l)
-                        currentSearchPos = pos+l
-                    }
+                    searchForCurrentSearchText(true)
                 }
             }
             ToolSeparator {
@@ -955,6 +1007,7 @@ ApplicationWindow {
                 onClicked: {
                     stackView.pop()
                     stackView.push(outputPage)
+                    outputPage.txtOutput.forceActiveFocus()
                 }
             }
             ToolButton {
@@ -975,6 +1028,7 @@ ApplicationWindow {
                 onClicked: {
                     stackView.pop()
                     stackView.push(helpPage)
+                    helpPage.txtHelp.forceActiveFocus()
                 }
             }
         }
@@ -1109,6 +1163,16 @@ ApplicationWindow {
         visible: false
     }
 
+    FindDialog {
+        id: findDialog
+        visible: false
+    }
+
+    ReplaceDialog {
+        id: replaceDialog
+        visible: false
+    }
+
     MobileFileDialog {
         id: mobileFileDialog
         visible: false
@@ -1213,6 +1277,45 @@ ApplicationWindow {
     // **********************************************************************
 
     Connections {
+        target: replaceDialog
+
+        onCanceled: {
+            stackView.pop()
+        }
+        onAccepted: {
+            stackView.pop()
+            var search = replaceDialog.findWhatInput.text
+            currentSearchText = search
+// TODO: andere such eingenschaften aus dialog auswerten
+// TODO start from current cursor position !!!???
+            if( currentSearchPos<0 ) {
+                currentSearchPos = 0
+            }
+            searchForCurrentSearchText(true);
+        }
+    }
+
+    Connections {
+        target: findDialog
+
+        onCanceled: {
+            stackView.pop()
+            homePage.textArea.forceActiveFocus()
+        }
+        onAccepted: {
+            stackView.pop()
+            var search = findDialog.findWhatInput.text
+            currentSearchText = search
+// TODO: andere such eingenschaften aus dialog auswerten
+// TODO start from current cursor position !!!???
+            if( currentSearchPos<0 ) {
+                currentSearchPos = 0
+            }
+            searchForCurrentSearchText(true);
+        }
+    }
+
+    Connections {
         target: applicationData
 
         onSendDummyData: {
@@ -1244,6 +1347,7 @@ ApplicationWindow {
             homePage.textArea.text = content // window.readCurrentDoc(fileUri)  //content
             homePage.textArea.textDocument.modified = false
             homePage.lblFileName.text = applicationData.getOnlyFileName(fileUri)
+// TODO --> update focus ?
             stackView.pop()
         }
         onOpenFileCanceled: {

@@ -12,10 +12,13 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
 Page {
-    id: page
+    id: root
     width: 600
     height: 400
     anchors.fill: parent
+    focusPolicy: Qt.StrongFocus
+    focus: true
+    title: qsTr("Gnuplot Input")
 
     property alias btnRun: btnRun
     property alias btnOpen: btnOpen
@@ -31,8 +34,6 @@ Page {
     property string fontName: "Courier"
 
     property int numberColumnWidth: 50
-
-    title: qsTr("Gnuplot Input")
 
     Label {
         id: lblFileName
@@ -56,6 +57,19 @@ Page {
         anchors.leftMargin: 5
         anchors.topMargin: 5
         anchors.bottomMargin: 5
+
+        // see Qt documentation TextEdit
+        function ensureVisible(r)
+        {
+            if (scrollView.contentItem.contentX >= r.x)
+                scrollView.contentItem.contentX = r.x;
+            else if (scrollView.contentItem.contentX+width <= r.x+r.width)
+                scrollView.contentItem.contentX = r.x+r.width-width;
+            if (scrollView.contentItem.contentY >= r.y)
+                scrollView.contentItem.contentY = r.y;
+            else if (scrollView.contentItem.contentY+height <= r.y+r.height)
+                scrollView.contentItem.contentY = r.y+r.height-height;
+        }
 
         RowLayout {
             id: textRow
@@ -96,6 +110,7 @@ Page {
                 //selectByMouse: !readOnly
                 text: "   "
                 inputMethodHints: Qt.ImhNoAutoUppercase
+                onCursorRectangleChanged: scrollView.ensureVisible(cursorRectangle)
             }
         }
     }

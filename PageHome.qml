@@ -81,7 +81,6 @@ PageHomeForm {
             var sErrorText = gnuplotInvoker.lastError
             outputPage.txtOutput.text += sErrorText   // not needed here, because error text will be updated in output via sigShowErrorText() asynchroniously !
             moveToEndOfText(outputPage.txtOutput)
-            jumpToEndOfOutput()
             if( sErrorText.length>0 )
             {
                 graphicsPage.lblShowGraphicsInfo.text = qsTr("There are informations or errors on the output page")

@@ -34,7 +34,7 @@ Page {
     property string currentDirectory: "."
     property string currentFileName: ""
     property bool bShowFiles: true
-    property bool bIsAdminModus: applicationData.isAdmin
+    property bool bIsAdminModus: applicationData!==null ? applicationData.isAdmin : false
 
     title: qsTr("Select file")
 

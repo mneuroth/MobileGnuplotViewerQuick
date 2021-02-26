@@ -21,7 +21,7 @@ PageHelpForm {
         outputPage.txtOutput.text += sErrorText
         stackView.pop()
         stackView.push(outputPage)
-        jumpToEndOfOutput()
+        moveToEndOfText(outputPage.txtOutput)
     }
 
     btnRunHelp {

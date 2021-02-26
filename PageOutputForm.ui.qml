@@ -12,17 +12,20 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
 Page {
+    id: root
     width: 600
     height: 400
+    anchors.fill: parent
+    focusPolicy: Qt.StrongFocus
+    focus: true
+    title: qsTr("Gnuplot Output")
+
     property alias btnGraphics: btnGraphics
     property alias btnHelp: btnHelp
     property alias btnInput: btnInput
     property alias txtOutput: txtOutput
 
     property string fontName: "Courier"
-
-    anchors.fill: parent
-    title: qsTr("Gnuplot Output")
 
     Label {
         id: lblOutput
@@ -47,17 +50,18 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-          function ensureVisible(r)
-          {
-              if (scrollView.contentItem.contentX >= r.x)
-                  scrollView.contentItem.contentX = r.x;
-              else if (scrollView.contentItem.contentX+width <= r.x+r.width)
-                  scrollView.contentItem.contentX = r.x+r.width-width;
-              if (scrollView.contentItem.contentY >= r.y)
-                  scrollView.contentItem.contentY = r.y;
-              else if (scrollView.contentItem.contentY+height <= r.y+r.height)
-                  scrollView.contentItem.contentY = r.y+r.height-height;
-          }
+        // see Qt documentation TextEdit
+        function ensureVisible(r)
+        {
+            if (scrollView.contentItem.contentX >= r.x)
+                scrollView.contentItem.contentX = r.x;
+            else if (scrollView.contentItem.contentX+width <= r.x+r.width)
+                scrollView.contentItem.contentX = r.x+r.width-width;
+            if (scrollView.contentItem.contentY >= r.y)
+                scrollView.contentItem.contentY = r.y;
+            else if (scrollView.contentItem.contentY+height <= r.y+r.height)
+                scrollView.contentItem.contentY = r.y+r.height-height;
+        }
 
         TextEdit/*Area*/ {
             id: txtOutput
