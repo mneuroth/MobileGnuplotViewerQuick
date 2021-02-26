@@ -857,7 +857,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="main.qml" line="595"/>
         <source>Find</source>
-        <translation>Finde</translation>
+        <translation>Finden</translation>
     </message>
     <message>
         <location filename="main.qml" line="602"/>
@@ -867,12 +867,12 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="main.qml" line="609"/>
         <source>Previous</source>
-        <translation>Vorgänger</translation>
+        <translation>Zurück</translation>
     </message>
     <message>
         <location filename="main.qml" line="616"/>
         <source>Next</source>
-        <translation>Nächster</translation>
+        <translation>Vorwärts</translation>
     </message>
     <message>
         <location filename="main.qml" line="628"/>

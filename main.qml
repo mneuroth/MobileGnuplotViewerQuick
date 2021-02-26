@@ -27,6 +27,8 @@ ApplicationWindow {
 
     property int currentSearchPos: 0
     property string currentSearchText: ""
+    property string currentReplaceText: ""
+    property bool currentIsReplace: false
     property bool matchWholeWord: false
     property bool caseSensitive: false
     property bool regExpr: false
@@ -128,6 +130,8 @@ ApplicationWindow {
         return stackView.currentItem === aboutDialog ||
                stackView.currentItem === mobileFileDialog ||
                stackView.currentItem === settingsDialog ||
+               stackView.currentItem === findDialog ||
+               stackView.currentItem === replaceDialog ||
                otherChecks
     }
 
@@ -310,7 +314,7 @@ ApplicationWindow {
         textControl.forceActiveFocus()
     }
 
-    function searchForCurrentSearchText(bForward)
+    function searchForCurrentSearchText(bForward,bReplace,bQuiet)
     {
         var l = currentSearchText.length
         var pos = bForward ?
@@ -318,15 +322,29 @@ ApplicationWindow {
                     applicationData.findText(currentSearchText, currentSearchPos-l, false, matchWholeWord, caseSensitive, regExpr)
         if(pos>=0) {
             homePage.textArea.cursorPosition = pos+l
-            homePage.textArea.select(pos,pos+l)
+            if( bReplace )
+            {
+                homePage.textArea.remove(pos,pos+l)
+                homePage.textArea.insert(pos,currentReplaceText)
+            }
+            else
+            {
+                homePage.textArea.select(pos,pos+l)
+            }
             currentSearchPos = pos+l
             homePage.forceActiveFocus()
+            return true
         }
         else
         {
-            askForSearchFromTop.open()
+            if( !bQuiet )
+            {
+                askForSearchFromTop.open()
+            }
 
             currentSearchPos = bForward ? 0 : homePage.textArea.text.length
+
+            return false
         }
     }
 
@@ -951,7 +969,7 @@ ApplicationWindow {
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                 //text: "Previous"
                 onClicked: {
-                    searchForCurrentSearchText(false)
+                    searchForCurrentSearchText(false,currentIsReplace,false)
                 }
             }
             ToolButton {
@@ -960,7 +978,7 @@ ApplicationWindow {
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                 //text: "Next"
                 onClicked: {
-                    searchForCurrentSearchText(true)
+                    searchForCurrentSearchText(true,currentIsReplace,false)
                 }
             }
             ToolSeparator {
@@ -1314,11 +1332,41 @@ ApplicationWindow {
             stackView.pop()
             currentSearchPos = homePage.textArea.cursorPosition
             currentSearchText = replaceDialog.findWhatInput.text
+            currentReplaceText = replaceDialog.replaceWithInput.text
             matchWholeWord = findDialog.matchWholeWordCheckBox.checked
             caseSensitive = findDialog.caseSensitiveCheckBox.checked
             regExpr = findDialog.regularExpressionCheckBox.checked
 
-            searchForCurrentSearchText(true);
+            currentIsReplace = true
+            searchForCurrentSearchText(true,false,false)
+        }
+        onReplace: {
+            stackView.pop()
+            currentSearchPos = homePage.textArea.cursorPosition
+            currentSearchText = replaceDialog.findWhatInput.text
+            currentReplaceText = replaceDialog.replaceWithInput.text
+            matchWholeWord = findDialog.matchWholeWordCheckBox.checked
+            caseSensitive = findDialog.caseSensitiveCheckBox.checked
+            regExpr = findDialog.regularExpressionCheckBox.checked
+
+            currentIsReplace = true
+            searchForCurrentSearchText(true,true,false)
+        }
+        onReplaceAll: {
+            stackView.pop()
+            currentSearchPos = homePage.textArea.cursorPosition
+            currentSearchText = replaceDialog.findWhatInput.text
+            currentReplaceText = replaceDialog.replaceWithInput.text
+            matchWholeWord = findDialog.matchWholeWordCheckBox.checked
+            caseSensitive = findDialog.caseSensitiveCheckBox.checked
+            regExpr = findDialog.regularExpressionCheckBox.checked
+
+            currentIsReplace = true
+            var finished = false
+            while(!finished)
+            {
+                finished = !searchForCurrentSearchText(true,true,true)
+            }
         }
     }
 
@@ -1338,7 +1386,8 @@ ApplicationWindow {
             regExpr = findDialog.regularExpressionCheckBox.checked
             var backward = findDialog.backwardDirectionCheckBox.checked
 
-            searchForCurrentSearchText(!backward);
+            currentIsReplace = false
+            searchForCurrentSearchText(!backward,false,false);
         }
     }
 

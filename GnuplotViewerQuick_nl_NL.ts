@@ -178,38 +178,38 @@ WorkingDir not valid</source>
     <message>
         <location filename="FindDialogForm.ui.qml" line="53"/>
         <source>Find what:</source>
-        <translation type="unfinished"></translation>
+        <translation>Vinden:</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="91"/>
         <source>Match whole word only</source>
-        <translation type="unfinished"></translation>
+        <translation>Alleen het hele woord</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="103"/>
         <source>Case sensitive</source>
-        <translation type="unfinished"></translation>
+        <translation>Hoofdlettergevoelig</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="116"/>
         <source>Regular expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Regular expression</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="128"/>
         <source>Search backward</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoek terug</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="150"/>
         <source>Find Next</source>
         <oldsource>&amp;Find Next</oldsource>
-        <translation type="unfinished"></translation>
+        <translation>Volgende zoeken</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="162"/>
         <source>Cancel</source>
-        <translation type="unfinished">Annuleren</translation>
+        <translation>Annuleren</translation>
     </message>
 </context>
 <context>
@@ -399,7 +399,7 @@ and activate &quot;Run help&quot; button</source>
     <message>
         <location filename="PageHelpForm.ui.qml" line="57"/>
         <source>help # enter any help command here and press the run button</source>
-        <translation type="unfinished"></translation>
+        <translation>help # voer hier een helpopdracht in en druk op de knop Uitvoeren</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="81"/>
@@ -555,42 +555,42 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="55"/>
         <source>Find what:</source>
-        <translation type="unfinished"></translation>
+        <translation>Vinden:</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="90"/>
         <source>Replace with:</source>
-        <translation type="unfinished"></translation>
+        <translation>Verfangen:</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="129"/>
         <source>Match whole word only</source>
-        <translation type="unfinished"></translation>
+        <translation>Alleen het hele woord</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="141"/>
         <source>Case sensitive</source>
-        <translation type="unfinished"></translation>
+        <translation>Hoofdlettergevoelig</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="154"/>
         <source>Regular expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Regular expression</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="173"/>
         <source>Find Next</source>
-        <translation type="unfinished"></translation>
+        <translation>Volgende zoeken</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="181"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Verfangen</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="188"/>
         <source>Replace All</source>
-        <translation type="unfinished"></translation>
+        <translation>Vervang alle</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="195"/>
@@ -807,27 +807,27 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="main.qml" line="591"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoek</translation>
     </message>
     <message>
         <location filename="main.qml" line="595"/>
         <source>Find</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoeken</translation>
     </message>
     <message>
         <location filename="main.qml" line="602"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Verfangen</translation>
     </message>
     <message>
         <location filename="main.qml" line="609"/>
         <source>Previous</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorige</translation>
     </message>
     <message>
         <location filename="main.qml" line="616"/>
         <source>Next</source>
-        <translation type="unfinished"></translation>
+        <translation>Volgende</translation>
     </message>
     <message>
         <location filename="main.qml" line="628"/>
@@ -887,7 +887,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="main.qml" line="1288"/>
         <source>Reached end of text, search again from the top?</source>
-        <translation type="unfinished"></translation>
+        <translation>Einde van de tekst bereikt, opnieuw zoeken vanaf de bovenkant?</translation>
     </message>
     <message>
         <location filename="main.qml" line="1061"/>
