@@ -79,7 +79,8 @@ PageHomeForm {
             outputPage.txtOutput.text += qsTr("Running gnuplot for file ")+homePage.currentFileUrl+"\n"
             var sData = gnuplotInvoker.run(homePage.textArea.text)
             var sErrorText = gnuplotInvoker.lastError
-            //outputPage.txtOutput.text += sErrorText   // not needed here, because error text will be updated in output via sigShowErrorText() asynchroniously !
+            outputPage.txtOutput.text += sErrorText   // not needed here, because error text will be updated in output via sigShowErrorText() asynchroniously !
+            moveToEndOfText(outputPage.txtOutput)
             jumpToEndOfOutput()
             if( sErrorText.length>0 )
             {
@@ -115,11 +116,6 @@ PageHomeForm {
 
             checkForUserNotification()
         }
-    }
-
-    function count_lines(text) {
-        var lines = text.split(/\r\n|\r|\n/);
-        return lines.length
     }
 
     textArea {

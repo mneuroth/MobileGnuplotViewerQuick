@@ -195,7 +195,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     qputenv("GNUHELP", sHelpFile.toLocal8Bit());
 
-    QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
+    QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"; ").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
                              + sScript
                              + QString("\nexit\n");
 

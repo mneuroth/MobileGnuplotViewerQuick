@@ -106,6 +106,8 @@ public:
 
     Q_INVOKABLE bool setSyntaxHighlighting(bool enable);
 
+    Q_INVOKABLE int findText(const QString & searchText, int iSearchStartPos, bool bForward = true);
+
     // for debugging only
     Q_INVOKABLE void logText(const QString & text);
 

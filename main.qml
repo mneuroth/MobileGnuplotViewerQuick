@@ -25,6 +25,8 @@ ApplicationWindow {
     height: 480
     title: qsTr("MobileGnuplotViewerQuick")
 
+    property int currentSearchPos: 0
+    property string currentSearchText: ""
     property string emptyString: "      "
     property string urlPrefix: "file://"   
     property bool isAndroid: applicationData !== null ? applicationData.isAndroid : false
@@ -208,6 +210,7 @@ ApplicationWindow {
 
     function showInOutput(sContent, bShowOutputPage) {
         outputPage.txtOutput.text += "\n" + sContent
+        moveToEndOfText(outputPage.txtOutput)
         if(bShowOutputPage) {
             stackView.pop()
             stackView.push(outputPage)
@@ -300,6 +303,19 @@ ApplicationWindow {
         stackView.push(outputPage)
     }
 
+    function count_lines(text) {
+        var lines = text.split(/\r\n|\r|\n/);
+        return lines.length
+    }
+
+    function moveToEndOfText(textControl)
+    {
+        var txt = textControl.text
+        textControl.cursorPosition = txt.length
+        textControl.focus = true
+        //textControl.focus()
+    }
+
     function openSettingsDialog()
     {
         settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
@@ -335,76 +351,84 @@ ApplicationWindow {
                 id: menu
                 y: menuButton.height
 
-                MenuItem {
-                    text: qsTr("Send")
-                    icon.source: "share.svg"
-                    enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
-                    visible: isShareSupported
-                    height: isShareSupported ? aboutMenuItem.height : 0
-                    onTriggered: {
-                        var s = getCurrentText(stackView.currentItem)
-                        var tempFileName = getTempFileNameForCurrent(stackView.currentItem)
-                        applicationData.shareText(tempFileName, s)
-                    }
-                }
-                MenuItem {
-                    id: shareText
-                    text: qsTr("Send as text")
-                    icon.source: "share.svg"
-                    enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
-                    visible: isShareSupported
-                    height: isShareSupported ? aboutMenuItem.height : 0
-                    onTriggered: {
-                        var s = getCurrentText(stackView.currentItem)
-                        applicationData.shareSimpleText(s);
-                    }
-                }
-                MenuItem {
-                    id: sharePng
-                    text: qsTr("Send as PDF/PNG")
-                    icon.source: "share.svg"
-                    enabled: !isDialogOpen() && isCurrentUserSupporter()
-                    visible: isShareSupported
-                    height: isShareSupported ? aboutMenuItem.height : 0
-                    onTriggered: {
-                        if( isGraphicsPage(stackView.currentItem) )
-                        {
-                            var ok = applicationData.shareSvgData(graphicsPage.svgdata)
-                        }
-                        else
-                        {
+                Menu {
+                    id: menuSend
+                    title: qsTr("Send")
+                    enabled: isShareSupported
+                    //visible: isShareSupported
+                    //height: isShareSupported ? aboutMenuItem.height : 0
+
+                    MenuItem {
+                        text: qsTr("Send")
+                        icon.source: "share.svg"
+                        enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
                             var s = getCurrentText(stackView.currentItem)
-                            if( s.length > 0 )
+                            var tempFileName = getTempFileNameForCurrent(stackView.currentItem)
+                            applicationData.shareText(tempFileName, s)
+                        }
+                    }
+                    MenuItem {
+                        id: shareText
+                        text: qsTr("Send as text")
+                        icon.source: "share.svg"
+                        enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            var s = getCurrentText(stackView.currentItem)
+                            applicationData.shareSimpleText(s);
+                        }
+                    }
+                    MenuItem {
+                        id: sharePng
+                        text: qsTr("Send as PDF/PNG")
+                        icon.source: "share.svg"
+                        enabled: !isDialogOpen() && isCurrentUserSupporter()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            if( isGraphicsPage(stackView.currentItem) )
                             {
-                                applicationData.shareTextAsPdf(s, true)
+                                var ok = applicationData.shareSvgData(graphicsPage.svgdata)
+                            }
+                            else
+                            {
+                                var s = getCurrentText(stackView.currentItem)
+                                if( s.length > 0 )
+                                {
+                                    applicationData.shareTextAsPdf(s, true)
+                                }
                             }
                         }
                     }
-                }       
-                MenuItem {
-                    text: qsTr("View as PDF/PNG")
-                    icon.source: "share.svg"
-                    enabled: !isDialogOpen()
-                    visible: isShareSupported
-                    height: isShareSupported ? aboutMenuItem.height : 0
-                    onTriggered: {
-                        if( isGraphicsPage(stackView.currentItem) )
-                        {
-                            var ok = applicationData.shareViewSvgData(graphicsPage.svgdata)
-                        }
-                        else
-                        {
-                            var s = getCurrentText(stackView.currentItem)
-                            if( s.length > 0 )
+                    MenuItem {
+                        text: qsTr("View as PDF/PNG")
+                        icon.source: "share.svg"
+                        enabled: !isDialogOpen()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            if( isGraphicsPage(stackView.currentItem) )
                             {
-                                applicationData.shareTextAsPdf(s, false)
+                                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata)
+                            }
+                            else
+                            {
+                                var s = getCurrentText(stackView.currentItem)
+                                if( s.length > 0 )
+                                {
+                                    applicationData.shareTextAsPdf(s, false)
+                                }
                             }
                         }
                     }
                 }
                 MenuSeparator {
-                    visible: isShareSupported
-                    height: isShareSupported ? menuSeparator.height : 0
+                    //visible: isShareSupported
+                    //height: isShareSupported ? menuSeparator.height : 0
                 }
                 MenuItem {
                     text: qsTr("Writable")
@@ -417,7 +441,9 @@ ApplicationWindow {
                     }
                 }
                 MenuItem {
+                    id: menuClear
                     text: qsTr("Clear/New")
+                    icon.source: "close.svg"
                     enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
@@ -497,6 +523,35 @@ ApplicationWindow {
                         stackView.push(mobileFileDialog)
                     }
                 }
+                Menu {
+                    id: searchMenu
+                    title: qsTr("Search")
+
+                    MenuItem {
+                        id: findMenu
+                        text: qsTr("Find")
+                        icon.source: "search.svg"
+                        onTriggered: toolButtonSearch.clicked()
+                    }
+                    MenuItem {
+                        id: replaceMenu
+                        text: qsTr("Replace")
+                        icon.source: "replace.svg"
+                        onTriggered: toolButtonReplace.clicked()
+                    }
+                    MenuItem {
+                        id: previousFindMenu
+                        text: qsTr("Previous")
+                        icon.source: "left-arrow.svg"
+                        onTriggered: toolButtonPrevious.clicked()
+                    }
+                    MenuItem {
+                        id: nextFindMenu
+                        text: qsTr("Next")
+                        icon.source: "right-arrow.svg"
+                        onTriggered: toolButtonNext.clicked()
+                    }
+                }
                 MenuSeparator {
                     id: menuSeparator
                 }
@@ -559,6 +614,7 @@ ApplicationWindow {
                             outputPage.txtOutput.text += gnuplotInvoker.lastError
                             stackView.pop()
                             stackView.push(outputPage)
+                            moveToEndOfText(outputPage.txtOutput)
                         }
                     }
                     MenuItem {
@@ -569,11 +625,13 @@ ApplicationWindow {
                             outputPage.txtOutput.text += gnuplotInvoker.lastError
                             stackView.pop()
                             stackView.push(outputPage)
+                            moveToEndOfText(outputPage.txtOutput)
                         }
                     }
                 }
                 MenuItem {
                     text: qsTr("Settings")
+                    icon.source: "settings.svg"
                     enabled: !isDialogOpen()
                     onTriggered: {
                         openSettingsDialog()
@@ -582,6 +640,7 @@ ApplicationWindow {
                 MenuItem {
                     id: supportMenuItem
                     text: qsTr("Support")
+                    icon.source: "coin.svg"
                     enabled: !isDialogOpen() && isAppStoreSupported
                     visible: isAppStoreSupported
                     height: isAppStoreSupported ? aboutMenuItem.height : 0
@@ -599,6 +658,15 @@ ApplicationWindow {
                         stackView.push(aboutDialog)
                     }
                 }
+                /*
+                MenuItem {
+                    id: testMenuItem
+                    text: qsTr("TEST")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                    }
+                }
+                */
                 /* for testing...
                 MenuItem {
                     text: qsTr("WASM Open")
@@ -781,10 +849,14 @@ ApplicationWindow {
 // icons: find, replace, next, previous
                     TextEdit
                     var search = "plot"
-                    var l = search.length
-                    var pos = applicationData.findText(search)
+                    currentSearchText = search
+                    var l = currentSearchText.length
+                    var pos = applicationData.findText(currentSearchText, currentSearchPos)
                     console.log("TEST "+homePage.textArea.textDocument+" "+pos)
-                    homePage.textArea.select(pos,pos+l)
+                    if(pos>=0) {
+                        homePage.textArea.select(pos,pos+l)
+                        currentSearchPos = pos+l
+                    }
                     homePage.textArea.focus = true
                 }
             }
@@ -802,6 +874,13 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Previous"
                 onClicked: {
+                    var l = currentSearchText.length
+                    var pos = applicationData.findText(currentSearchText, currentSearchPos-l, false)
+                    console.log("TEST "+homePage.textArea.textDocument+" "+pos)
+                    if(pos>=0) {
+                        homePage.textArea.select(pos,pos+l)
+                        currentSearchPos = pos+l
+                    }
                 }
             }
             ToolButton {
@@ -810,6 +889,13 @@ ApplicationWindow {
                 enabled: !isDialogOpen()
                 //text: "Next"
                 onClicked: {
+                    var l = currentSearchText.length
+                    var pos = applicationData.findText(currentSearchText, currentSearchPos)
+                    console.log("TEST "+homePage.textArea.textDocument+" "+pos)
+                    if(pos>=0) {
+                        homePage.textArea.select(pos,pos+l)
+                        currentSearchPos = pos+l
+                    }
                 }
             }
             ToolSeparator {
@@ -821,6 +907,15 @@ ApplicationWindow {
                 //text: "Settings"
                 onClicked: {
                     openSettingsDialog()
+                }
+            }
+            ToolButton {
+                id: toolButtonSettingsSupport
+                icon.source: "coin.svg"
+                enabled: !isDialogOpen()
+                //text: "Support/donate"
+                onClicked: {
+                    supportMenuItem.clicked()
                 }
             }
             ToolSeparator {
@@ -1135,7 +1230,7 @@ ApplicationWindow {
         target: gnuplotInvoker
 
         onSigShowErrorText: {
-            showInOutput(txt, bShowOutputPage)
+            //showInOutput(txt, bShowOutputPage)
         }
     }
 

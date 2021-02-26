@@ -20,7 +20,9 @@ Page {
     property alias lblLevel0: lblLevel0
     property alias lblLevel1: lblLevel1
     property alias lblLevel2: lblLevel2
+    property alias lblSupportInfo: lblSupportInfo
     property alias lblGooglePlay: lblGooglePlay
+    property alias lblGithubPage: lblGithubPage
     property alias lblSupporterOfClassicVersion: lblSupporterOfClassicVersion
 
     anchors.fill: parent
@@ -45,7 +47,7 @@ Page {
 
             Text {
                 id: lblSupportInfo
-                text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
+                text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play (see link below)</li><li>giving feedback on the github project page (see link below)</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>sharing as PDF/PNG is enabled</li><li>enable replace, previous and next menu items</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
                 //text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>usage of the latest Gnuplot (beta) version is enabled</li><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
                 wrapMode: Text.WordWrap
                 enabled: false
@@ -113,11 +115,17 @@ Page {
             }
 
             Text {
+                id: lblGithubPage
+                text: "<a href='https://github.com/mneuroth/MobileGnuplotViewerQuick'>MobileGnuplotViewerQuick Github project page</a>"
+            }
+
+            Text {
                 id: lblSupporterOfClassicVersion
                 text: qsTr("You already supported the predecessor of this application !")
                 visible: applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false
                 wrapMode: Text.WordWrap
                 horizontalAlignment: Text.AlignHCenter
+                Layout.topMargin: 15
             }
 
             Button {

@@ -39,6 +39,8 @@
         <file alias="left-arrow.svg">files/left-arrow.svg</file>
         <file alias="right-arrow.svg">files/right-arrow.svg</file>
         <file alias="settings.svg">files/settings.svg</file>
+        <file alias="close.svg">files/close.svg</file>
+        <file alias="coin.svg">files/coin.svg</file>
         <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
         <file>SupportDialog.qml</file>
         <file>SupportDialogForm.ui.qml</file>

@@ -47,9 +47,23 @@ Page {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
+          function ensureVisible(r)
+          {
+              if (scrollView.contentItem.contentX >= r.x)
+                  scrollView.contentItem.contentX = r.x;
+              else if (scrollView.contentItem.contentX+width <= r.x+r.width)
+                  scrollView.contentItem.contentX = r.x+r.width-width;
+              if (scrollView.contentItem.contentY >= r.y)
+                  scrollView.contentItem.contentY = r.y;
+              else if (scrollView.contentItem.contentY+height <= r.y+r.height)
+                  scrollView.contentItem.contentY = r.y+r.height-height;
+          }
+
         TextEdit/*Area*/ {
             id: txtOutput
             text: "   "
+            focus: true
+            onCursorRectangleChanged: scrollView.ensureVisible(cursorRectangle)
             //placeholderText: qsTr("Outputs from gnuplot commands are shown here")
             anchors.fill: parent
             /*

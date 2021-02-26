@@ -36,7 +36,6 @@ Page {
 
     Label {
         id: lblFileName
-//        height: 14
         text: qsTr("unknown")
         anchors.right: parent.right
         anchors.rightMargin: 5
@@ -70,7 +69,7 @@ Page {
                 Layout.minimumWidth: numberColumnWidth
                 Layout.preferredWidth: numberColumnWidth
                 Layout.maximumWidth: numberColumnWidth
-                height: textArea.height //scrollView.availableHeight
+                height: textArea.height
 
                 TextEdit {
                     id: textLineNumbers
@@ -84,7 +83,7 @@ Page {
                 }
             }
 
-            // TextArea problem: if switch to readoly --> cursor and view jumps to the end of the text ???
+            // TextArea problem: if switch to readonly --> cursor and view jumps to the end of the text ???
             TextEdit/*Area*/ {
                 id: textArea
                 font.family: fontName
@@ -103,8 +102,6 @@ Page {
 
     GridLayout {
         id: gridButtons
-        x: 44
-        y: 5
         height: !settings.useToolBar ? 95 : 0
         visible: !settings.useToolBar
         anchors.rightMargin: 5

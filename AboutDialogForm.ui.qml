@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *
  * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
@@ -31,7 +30,7 @@ Page {
         id: scrollView
 
         anchors.fill: parent
-        anchors.margins: 10
+        //anchors.margins: 10
 
         clip: true
 
@@ -49,6 +48,7 @@ Page {
                 fontSizeMode: Text.FixedSize
                 font.pixelSize: 24
                 Layout.alignment: Qt.AlignCenter
+                Layout.topMargin: 10
             }
 
             Image {

@@ -195,6 +195,25 @@ bool ApplicationData::setSyntaxHighlighting(bool enable)
 
 }
 
+int ApplicationData::findText(const QString & searchText, int iSearchStartPos, bool bForward)
+{
+    if( m_pTextDoc!=0 )
+    {
+        QTextDocument * pDoc = m_pTextDoc->textDocument();
+        QTextDocument::FindFlags flags;
+        if(  !bForward )
+        {
+            flags = QTextDocument::FindBackward;
+        }
+        QTextCursor cursor = pDoc->find(searchText, iSearchStartPos, flags);
+        if( cursor.position()>=0 )
+        {
+            return cursor.position() - searchText.length();
+        }
+    }
+    return -1;
+}
+
 QString ApplicationData::getOnlyFileName(const QString & url) const
 {
     QUrl aUrl(url);

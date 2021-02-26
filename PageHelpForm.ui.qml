@@ -53,7 +53,7 @@ Page {
             id: txtHelp
             anchors.fill: parent
             font.family: fontName
-            text: "   "
+            text: qsTr("help # enter any help command here and press the run button")
             inputMethodHints: Qt.ImhNoAutoUppercase
             //placeholderText: qsTr("Enter gnuplot help command here (e. g. help plot)\nand activate \"Run help\" button")
             //selectByMouse: readOnly
