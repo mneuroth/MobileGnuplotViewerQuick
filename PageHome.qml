@@ -29,7 +29,7 @@ PageHomeForm {
         var name = lblFileName.text
         if( name.endsWith(modifiedFlag))
         {
-            name = name.substring( 0, name.length-modifiedFlag.length )
+            name = name.substr( 0, name.length-modifiedFlag.length )
             lblFileName.text = name
         }
     }

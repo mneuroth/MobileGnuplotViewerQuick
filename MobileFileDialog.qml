@@ -9,6 +9,7 @@
  ***************************************************************************/
 import QtQuick 2.0
 import QtQuick.Controls 2.1
+import QtQuick.Layouts 1.3
 
 MobileFileDialogForm {
     id: root
@@ -18,6 +19,7 @@ MobileFileDialogForm {
     property bool isDeleteModus: false
     property bool isDirectoryModus: false
     property bool isSaveAsImage: false
+    property bool isExtendedInfos: true
     property var textControl: null
 
     listView {
@@ -150,6 +152,7 @@ MobileFileDialogForm {
 
     Component {
         id: fileDelegate
+
         Rectangle {
             property string currentFileName: fileName
             property bool isFile: !fileIsDir
@@ -172,25 +175,53 @@ MobileFileDialogForm {
                     }
                  }
             }
-            Row {
+
+            GridLayout {
                 anchors.fill: parent
-                spacing: 5
+
+                columns: 4
 
                 Image {
                     id: itemIcon
-                    anchors.left: parent.Left
-                    height: itemLabel.height - 8
-                    width: itemLabel.height - 8
                     source: fileIsDir ? "directory.svg" : "file.svg"
+
+                    Layout.row: 0
+                    Layout.column: 0
+                    Layout.maximumHeight: itemLabel.height
+                    Layout.maximumWidth: itemLabel.height
                 }
                 Label {
                     id: itemLabel
-                    anchors.left: itemIcon.Right
-                    anchors.right: parent.Right
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
+
                     verticalAlignment: Text.AlignVCenter
-                    text: /*(fileIsDir ? "DIR_" : "FILE") + " | " +*/ fileName
+                    text: /*(fileIsDir ? "DIR_" : "FILE") + " | " +*/ fileName //+ " (" + fileModified + ")"
+
+                    Layout.fillWidth: true
+                    Layout.row: 0
+                    Layout.column: 1
+
+                }
+                Label {
+                    id: itemDate
+                    visible: isExtendedInfos
+
+                    verticalAlignment: Text.AlignVCenter
+                    text: fileModified.toLocaleString(Qt.locale(),Locale.ShortFormat)
+
+                    Layout.row: 0
+                    Layout.column: 2
+                }
+                Label {
+                    id: itemSize
+                    visible: isExtendedInfos
+
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignRight
+                    text: fileIsDir ? "" : fileSize + " Bytes"
+
+                    Layout.row: 0
+                    Layout.column: 3
+                    Layout.minimumWidth: 200
                 }
             }
             MouseArea {
