@@ -1030,6 +1030,7 @@ ApplicationWindow {
                 onClicked: {
                     stackView.pop()
                     stackView.push(homePage)
+                    homePage.textArea.forceActiveFocus()
                 }
             }
             ToolButton {
