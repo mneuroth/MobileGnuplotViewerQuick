@@ -50,7 +50,7 @@ Page {
             anchors.left: btnOk.right
             anchors.leftMargin: 10
             anchors.top: txtSupportLevel.bottom
-            anchors.topMargin: 5
+            anchors.topMargin: 10
         }
 
         Button {
@@ -59,7 +59,7 @@ Page {
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.top: txtSupportLevel.bottom
-            anchors.topMargin: 5
+            anchors.topMargin: 10
         }
 
         CheckBox {

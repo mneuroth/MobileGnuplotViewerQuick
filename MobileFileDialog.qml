@@ -204,6 +204,7 @@ MobileFileDialogForm {
                 Label {
                     id: itemDate
                     visible: isExtendedInfos
+                    font.pointSize: itemLabel.font.pointSize*0.5
 
                     verticalAlignment: Text.AlignVCenter
                     text: fileModified.toLocaleString(Qt.locale(),Locale.ShortFormat)
@@ -214,6 +215,7 @@ MobileFileDialogForm {
                 Label {
                     id: itemSize
                     visible: isExtendedInfos
+                    font.pointSize: itemLabel.font.pointSize*0.5
 
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignRight
@@ -221,7 +223,7 @@ MobileFileDialogForm {
 
                     Layout.row: 0
                     Layout.column: 3
-                    Layout.minimumWidth: parent.width*0.2
+                    Layout.minimumWidth: parent.width*0.15
                 }
             }
             MouseArea {

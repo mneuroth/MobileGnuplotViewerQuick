@@ -77,9 +77,9 @@ Page {
                 text: "X"
 
                 Layout.columnSpan: 1
-                //Layout.fillWidth: true
                 Layout.row: 0
                 Layout.column: 2
+                Layout.maximumWidth: 0.1*parent.width
             }
 
             // ***** row 1

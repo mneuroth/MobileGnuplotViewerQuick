@@ -20,9 +20,9 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="73"/>
-        <source>from: 23.2.2021</source>
-        <oldsource>from: 4.2.2021</oldsource>
-        <translation>vom: 23.2.2021</translation>
+        <source>from: 28.2.2021</source>
+        <oldsource>from: 23.2.2021</oldsource>
+        <translation>vom: 28.2.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="67"/>
@@ -180,38 +180,38 @@ WorkingDir not valid</source>
 <context>
     <name>FindDialogForm.ui</name>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="53"/>
+        <location filename="FindDialogForm.ui.qml" line="54"/>
         <source>Find what:</source>
         <translation>Suchtext:</translation>
     </message>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="91"/>
+        <location filename="FindDialogForm.ui.qml" line="92"/>
         <source>Match whole word only</source>
         <translation>Nur ganze Wörter suchen</translation>
     </message>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="103"/>
+        <location filename="FindDialogForm.ui.qml" line="104"/>
         <source>Case sensitive</source>
         <translation>Groß-/Kleinschreibung</translation>
     </message>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="116"/>
+        <location filename="FindDialogForm.ui.qml" line="117"/>
         <source>Regular expression</source>
         <translation>Reguläre Ausdrücke</translation>
     </message>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="128"/>
+        <location filename="FindDialogForm.ui.qml" line="129"/>
         <source>Search backward</source>
         <translation>Rückwärts suchen</translation>
     </message>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="150"/>
+        <location filename="FindDialogForm.ui.qml" line="151"/>
         <source>Find Next</source>
         <oldsource>&amp;Find Next</oldsource>
         <translation>Weitersuchen</translation>
     </message>
     <message>
-        <location filename="FindDialogForm.ui.qml" line="162"/>
+        <location filename="FindDialogForm.ui.qml" line="163"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -262,47 +262,47 @@ errorMsg=%6
 <context>
     <name>MobileFileDialog</name>
     <message>
-        <location filename="MobileFileDialog.qml" line="59"/>
+        <location filename="MobileFileDialog.qml" line="61"/>
         <source>new file name:</source>
         <translation>neuer Datei Name:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="60"/>
+        <location filename="MobileFileDialog.qml" line="62"/>
         <source>unknown.gpt</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="60"/>
+        <location filename="MobileFileDialog.qml" line="62"/>
         <source>unknown.png</source>
         <translation>unbekannt.png</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="62"/>
+        <location filename="MobileFileDialog.qml" line="64"/>
         <source>Save as</source>
         <translation>Sichern unter</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="74"/>
+        <location filename="MobileFileDialog.qml" line="76"/>
         <source>open name:</source>
         <translation>Öffne Name:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="76"/>
+        <location filename="MobileFileDialog.qml" line="78"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="88"/>
+        <location filename="MobileFileDialog.qml" line="90"/>
         <source>current file name:</source>
         <translation>aktueller Datei Name:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="91"/>
+        <location filename="MobileFileDialog.qml" line="93"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="115"/>
+        <location filename="MobileFileDialog.qml" line="117"/>
         <source>can not delete file </source>
         <translation>Datei kann nicht gelöscht werden </translation>
     </message>
@@ -340,17 +340,22 @@ errorMsg=%6
         <translation>Zeige hier das aktuelle Verzeichnis</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="142"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="140"/>
+        <source>Show date and size</source>
+        <translation>Zeige Datum und Größe an</translation>
+    </message>
+    <message>
+        <location filename="MobileFileDialogForm.ui.qml" line="153"/>
         <source>Any input</source>
         <translation>Beliebige Eingabe</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="177"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="188"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="188"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="199"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -560,47 +565,47 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
 <context>
     <name>ReplaceDialogForm.ui</name>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="55"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="57"/>
         <source>Find what:</source>
         <translation>Suchtext:</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="90"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="92"/>
         <source>Replace with:</source>
         <translation>Ersetzen durch:</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="129"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="130"/>
         <source>Match whole word only</source>
         <translation>Nur ganze Wörter suchen</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="141"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="142"/>
         <source>Case sensitive</source>
         <translation>Groß-/Kleinschreibung</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="154"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="155"/>
         <source>Regular expression</source>
         <translation>Reguläre Ausdrücke</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="173"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="174"/>
         <source>Find Next</source>
         <translation>Weitersuchen</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="181"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="182"/>
         <source>Replace</source>
         <translation>Ersetzen</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="188"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="189"/>
         <source>Replace All</source>
         <translation>Alle ersetzen</translation>
     </message>
     <message>
-        <location filename="ReplaceDialogForm.ui.qml" line="195"/>
+        <location filename="ReplaceDialogForm.ui.qml" line="196"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
@@ -795,33 +800,33 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="106"/>
+        <location filename="main.qml" line="108"/>
         <source>Thank you for supporting the development of this application !</source>
         <translation>Vielen Dank für die Unterstüzung der Entwicklung dieser Anwendung !</translation>
     </message>
     <message>
-        <location filename="main.qml" line="106"/>
+        <location filename="main.qml" line="108"/>
         <source>Thank you !</source>
         <translation>Vielen Dank !</translation>
     </message>
     <message>
-        <location filename="main.qml" line="419"/>
-        <location filename="main.qml" line="425"/>
+        <location filename="main.qml" line="437"/>
+        <location filename="main.qml" line="443"/>
         <source>Send</source>
         <translation>Senden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="438"/>
+        <location filename="main.qml" line="456"/>
         <source>Send as text</source>
         <translation>Senden als Text</translation>
     </message>
     <message>
-        <location filename="main.qml" line="450"/>
+        <location filename="main.qml" line="468"/>
         <source>Send as PDF/PNG</source>
         <translation>Senden als PDF/PNG</translation>
     </message>
     <message>
-        <location filename="main.qml" line="471"/>
+        <location filename="main.qml" line="489"/>
         <source>View as PDF/PNG</source>
         <translation>Zeigen als PDF/PNG</translation>
     </message>
@@ -830,118 +835,118 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="497"/>
+        <location filename="main.qml" line="515"/>
         <source>Writable</source>
         <translation>Änderbar</translation>
     </message>
     <message>
-        <location filename="main.qml" line="93"/>
+        <location filename="main.qml" line="95"/>
         <source>unknown.gpt</source>
         <translation>unbekannt.gpt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="554"/>
+        <location filename="main.qml" line="572"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="main.qml" line="579"/>
+        <location filename="main.qml" line="597"/>
         <source>Delete files</source>
         <translation>Dateien löschen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="591"/>
+        <location filename="main.qml" line="609"/>
         <source>Search</source>
         <translation>Suchen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="595"/>
+        <location filename="main.qml" line="613"/>
         <source>Find</source>
         <translation>Finden</translation>
     </message>
     <message>
-        <location filename="main.qml" line="602"/>
+        <location filename="main.qml" line="620"/>
         <source>Replace</source>
         <translation>Ersetzen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="609"/>
+        <location filename="main.qml" line="627"/>
         <source>Previous</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="main.qml" line="616"/>
+        <location filename="main.qml" line="634"/>
         <source>Next</source>
         <translation>Vorwärts</translation>
     </message>
     <message>
-        <location filename="main.qml" line="628"/>
+        <location filename="main.qml" line="646"/>
         <source>Undo</source>
         <translation>Rückgängig</translation>
     </message>
     <message>
-        <location filename="main.qml" line="641"/>
+        <location filename="main.qml" line="659"/>
         <source>Redo</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="655"/>
+        <location filename="main.qml" line="673"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="main.qml" line="659"/>
+        <location filename="main.qml" line="677"/>
         <source>FAQ</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="main.qml" line="665"/>
+        <location filename="main.qml" line="683"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="671"/>
+        <location filename="main.qml" line="689"/>
         <source>Gnuplot license</source>
         <translation>Gnuplot Lizenz</translation>
     </message>
     <message>
-        <location filename="main.qml" line="677"/>
+        <location filename="main.qml" line="695"/>
         <source>Gnuplot help</source>
         <translation>Gnuplot Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="684"/>
+        <location filename="main.qml" line="702"/>
         <source>Gnuplot version</source>
         <translation>Gnuplot Version</translation>
     </message>
     <message>
-        <location filename="main.qml" line="692"/>
+        <location filename="main.qml" line="710"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="main.qml" line="701"/>
+        <location filename="main.qml" line="719"/>
         <source>Support</source>
         <translation>Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="713"/>
+        <location filename="main.qml" line="731"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1288"/>
+        <location filename="main.qml" line="1305"/>
         <source>Reached end of text, search again from the top?</source>
         <translation>Ende des Textes erreicht, Suche erneut von vorne starten?</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1273"/>
-        <location filename="main.qml" line="1287"/>
+        <location filename="main.qml" line="1290"/>
+        <location filename="main.qml" line="1304"/>
         <source>Question</source>
         <translation>Frage</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1274"/>
+        <location filename="main.qml" line="1291"/>
         <source>Current text is changed, really discard the changed text?</source>
         <translation>Aktueller Text wurde geändert, die Änderungen wirklich verwerfen?</translation>
     </message>
@@ -958,37 +963,37 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="main.qml" line="508"/>
+        <location filename="main.qml" line="526"/>
         <source>Clear/New</source>
         <translation>Löschen/Neu</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1061"/>
+        <location filename="main.qml" line="1078"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1070"/>
+        <location filename="main.qml" line="1087"/>
         <source>Output</source>
         <translation>Ausgabe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1079"/>
+        <location filename="main.qml" line="1096"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1248"/>
+        <location filename="main.qml" line="1265"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1258"/>
+        <location filename="main.qml" line="1275"/>
         <source>Request for support</source>
         <translation>Anfrage für Unterstützung</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1259"/>
+        <location filename="main.qml" line="1276"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Es sieht aus als ob dir die App gefällt.
