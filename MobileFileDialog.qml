@@ -212,7 +212,6 @@ MobileFileDialogForm {
                     Layout.fillWidth: true
                     Layout.row: 0
                     Layout.column: 1
-
                 }
                 Label {
                     id: itemDate
