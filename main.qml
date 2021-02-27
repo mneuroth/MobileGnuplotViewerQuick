@@ -117,7 +117,7 @@ ApplicationWindow {
     }
 
     function isCurrentUserSupporter() {
-        return settings.supportLevel>=0 || (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false)
+        return true //settings.supportLevel>=0 || (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false)
     }
 
     function isDialogOpen() {
@@ -626,14 +626,14 @@ ApplicationWindow {
                         id: previousFindMenu
                         text: qsTr("Previous")
                         icon.source: "left-arrow.svg"
-                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
+                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                         onTriggered: toolButtonPrevious.clicked()
                     }
                     MenuItem {
                         id: nextFindMenu
                         text: qsTr("Next")
                         icon.source: "right-arrow.svg"
-                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
+                        enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                         onTriggered: toolButtonNext.clicked()
                     }
                 }
@@ -956,6 +956,7 @@ ApplicationWindow {
                     replaceDialog.matchWholeWordCheckBox.checked = matchWholeWord
                     replaceDialog.caseSensitiveCheckBox.checked = caseSensitive
                     replaceDialog.regularExpressionCheckBox.checked = regExpr
+                    replaceDialog.replaceWithInput.text = currentReplaceText
 
                     stackView.pop()
                     stackView.push(replaceDialog)
@@ -966,7 +967,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonPrevious
                 icon.source: "left-arrow.svg"
-                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                 //text: "Previous"
                 onClicked: {
                     searchForCurrentSearchText(false,currentIsReplace,false)
@@ -975,7 +976,7 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonNext
                 icon.source: "right-arrow.svg"
-                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
+                enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                 //text: "Next"
                 onClicked: {
                     searchForCurrentSearchText(true,currentIsReplace,false)

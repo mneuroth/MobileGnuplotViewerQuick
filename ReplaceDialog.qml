@@ -25,10 +25,24 @@ ReplaceDialogForm {
         onAccepted: findNextButton.clicked()
     }
 
-    cancelButton {
+    replaceWithInput {
+        onAccepted: findNextButton.clicked()
+    }
+
+    clearfindWhatInputButton {
         onClicked: {
-            canceled()
+            findWhatInput.text = ""
         }
+    }
+
+    clearReplaceWithInputButton {
+        onClicked: {
+            replaceWithInput.text = ""
+        }
+    }
+
+    cancelButton {
+        onClicked: canceled()
     }
 
     findNextButton {

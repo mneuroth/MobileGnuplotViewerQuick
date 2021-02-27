@@ -23,15 +23,17 @@ FindDialogForm {
         onAccepted: findNextButton.clicked()
     }
 
-    cancelButton {
+    clearfindWhatInputButton {
         onClicked: {
-            canceled()
+            findWhatInput.text = ""
         }
     }
 
+    cancelButton {
+        onClicked: canceled()
+    }
+
     findNextButton {
-        onClicked: {
-            accepted()
-        }
+        onClicked: accepted()
     }
 }

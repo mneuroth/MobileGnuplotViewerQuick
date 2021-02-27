@@ -47,10 +47,10 @@ Page {
         Button {
             id: btnCancel
             text: qsTr("Cancel")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
+            anchors.left: btnOk.right
+            anchors.leftMargin: 10
+            anchors.top: txtSupportLevel.bottom
+            anchors.topMargin: 5
         }
 
         Button {
@@ -58,8 +58,8 @@ Page {
             text: qsTr("Accept")
             anchors.left: parent.left
             anchors.leftMargin: 5
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
+            anchors.top: txtSupportLevel.bottom
+            anchors.topMargin: 5
         }
 
         CheckBox {

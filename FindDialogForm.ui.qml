@@ -22,6 +22,7 @@ Page {
 
     property alias cancelButton: cancelButton
     property alias findNextButton: findNextButton
+    property alias clearfindWhatInputButton: clearfindWhatInputButton
     property alias findWhatInput: findWhatInput
     property alias backwardDirectionCheckBox: backwardDirectionCheckBox
     property alias matchWholeWordCheckBox: matchWholeWordCheckBox
@@ -55,30 +56,30 @@ Page {
                 Layout.column: 0
             }
 
-            Rectangle {
-                color: "light yellow"
-                border.color: "black"
-                border.width: 1
-                Layout.columnSpan: 2
+            TextField {
+                id: findWhatInput
+                //editable: true
+                //model: findWhatModel
+                focus: true
+
+                Layout.columnSpan: 1
                 Layout.fillWidth: true
                 Layout.row: 0
                 Layout.column: 1
-                width: findWhatInput.width+10
-                height: findWhatInput.height+10
 
-                TextInput {
-                    id: findWhatInput
-                    //editable: true
-                    //model: findWhatModel
-                    focus: true
-                    width: 2000
-                    x: 5
-                    y: 5
+                //font.pixelSize: 12
+                Keys.onEscapePressed: cancelButton.clicked()
+                Keys.onBackPressed: cancelButton.clicked()
+            }
 
-                    //font.pixelSize: 12
-                    Keys.onEscapePressed: cancelButton.clicked()
-                    Keys.onBackPressed: cancelButton.clicked()
-                }
+            Button {
+                id: clearfindWhatInputButton
+                text: "X"
+
+                Layout.columnSpan: 1
+                //Layout.fillWidth: true
+                Layout.row: 0
+                Layout.column: 2
             }
 
             // ***** row 1
