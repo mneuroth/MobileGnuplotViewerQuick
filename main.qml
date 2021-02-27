@@ -534,7 +534,7 @@ ApplicationWindow {
                         else
                         {
                             var textControl = getCurrentTextRef(stackView.currentItem)
-                            if( textControl.textDocument.modified )
+                            if( textControl.textDocument.modified && !applicationData.isWASM )
                             {
                                 askForClearDialog.open()
                             }
