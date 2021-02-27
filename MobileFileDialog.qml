@@ -20,6 +20,7 @@ MobileFileDialogForm {
     property bool isDirectoryModus: false
     property bool isSaveAsImage: false
     property bool isExtendedInfos: false
+    property bool isMobilePlatform: applicationData.isAndroid
     property var textControl: null
 
     listView {
@@ -150,6 +151,18 @@ MobileFileDialogForm {
         }
     }
 
+    function formatSize(fileSize) {
+        var value = Math.round(fileSize/1024*10)/10
+        if( value>1000 ) {
+            var valueMB = Math.round(fileSize/(1024*1024)*10)/10
+            return valueMB + " MBytes"
+        } else if( value>0 ) {
+            return value + " kBytes"
+        } else {
+            return fileSize + "  Bytes"
+        }
+    }
+
     Component {
         id: fileDelegate
 
@@ -204,7 +217,7 @@ MobileFileDialogForm {
                 Label {
                     id: itemDate
                     visible: isExtendedInfos
-                    font.pointSize: itemLabel.font.pointSize*0.5
+                    font.pointSize: isMobilePlatform ? itemLabel.font.pointSize*0.75 : itemLabel.font.pointSize
 
                     verticalAlignment: Text.AlignVCenter
                     text: fileModified.toLocaleString(Qt.locale(),Locale.ShortFormat)
@@ -215,15 +228,15 @@ MobileFileDialogForm {
                 Label {
                     id: itemSize
                     visible: isExtendedInfos
-                    font.pointSize: itemLabel.font.pointSize*0.5
+                    font.pointSize: isMobilePlatform ? itemLabel.font.pointSize*0.75 : itemLabel.font.pointSize
 
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignRight
-                    text: fileIsDir ? "" : fileSize + " Bytes"
+                    text: fileIsDir ? "" : formatSize(fileSize)
 
                     Layout.row: 0
                     Layout.column: 3
-                    Layout.minimumWidth: parent.width*0.15
+                    Layout.minimumWidth: parent.width*0.2  //(isMobilePlatform ? 0.2 : 0.2)
                 }
             }
             MouseArea {
