@@ -19,7 +19,7 @@ MobileFileDialogForm {
     property bool isDeleteModus: false
     property bool isDirectoryModus: false
     property bool isSaveAsImage: false
-    property bool isExtendedInfos: true
+    property bool isExtendedInfos: false
     property var textControl: null
 
     listView {
@@ -221,7 +221,7 @@ MobileFileDialogForm {
 
                     Layout.row: 0
                     Layout.column: 3
-                    Layout.minimumWidth: 200
+                    Layout.minimumWidth: parent.width*0.2
                 }
             }
             MouseArea {
