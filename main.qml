@@ -337,7 +337,7 @@ ApplicationWindow {
         }
         else
         {
-            if( !bQuiet )
+            if( !bQuiet && !applicationData.isWASM)
             {
                 askForSearchFromTop.open()
             }
@@ -996,7 +996,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonSettingsSupport
                 icon.source: "coin.svg"
-                enabled: !isDialogOpen()
+                visible: isAppStoreSupported
+                enabled: !isDialogOpen() && isAppStoreSupported
                 //text: "Support/donate"
                 onClicked: {
                     supportMenuItem.clicked()
@@ -1298,6 +1299,7 @@ ApplicationWindow {
         }
     }
 
+    // MessageDialogs does not work for WASM platform !
     MessageDialog {
         id: askForSearchFromTop
         visible: false
