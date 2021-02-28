@@ -317,34 +317,46 @@ ApplicationWindow {
     function searchForCurrentSearchText(bForward,bReplace,bQuiet)
     {
         var l = currentSearchText.length
-        var pos = bForward ?
-                    applicationData.findText(currentSearchText, currentSearchPos, true, matchWholeWord, caseSensitive, regExpr) :
-                    applicationData.findText(currentSearchText, currentSearchPos-l, false, matchWholeWord, caseSensitive, regExpr)
-        if(pos>=0) {
-            homePage.textArea.cursorPosition = pos+l
-            if( bReplace )
-            {
-                homePage.textArea.remove(pos,pos+l)
-                homePage.textArea.insert(pos,currentReplaceText)
-            }
-            else
-            {
-                homePage.textArea.select(pos,pos+l)
-            }
-            currentSearchPos = pos+l
-            homePage.forceActiveFocus()
-            return true
+
+        // could any search text be found in the current document?
+        var pos = applicationData.findText(currentSearchText, 0, true, matchWholeWord, caseSensitive, regExpr)
+        if(pos<0)
+        {
+            infoTextNotFound.open()
+            currentIsReplace = false
         }
         else
         {
-            if( !bQuiet && !applicationData.isWASM)
+            pos = bForward ?
+                        applicationData.findText(currentSearchText, currentSearchPos, true, matchWholeWord, caseSensitive, regExpr) :
+                        applicationData.findText(currentSearchText, currentSearchPos-l, false, matchWholeWord, caseSensitive, regExpr)
+            if(pos>=0)
             {
-                askForSearchFromTop.open()
+                homePage.textArea.cursorPosition = pos+l
+                if( bReplace )
+                {
+                    homePage.textArea.remove(pos,pos+l)
+                    homePage.textArea.insert(pos,currentReplaceText)
+                }
+                else
+                {
+                    homePage.textArea.select(pos,pos+l)
+                }
+                currentSearchPos = pos+l
+                homePage.forceActiveFocus()
+                return true
             }
+            else
+            {
+                if( !bQuiet && !applicationData.isWASM)
+                {
+                    askForSearchFromTop.open()
+                }
 
-            currentSearchPos = bForward ? 0 : homePage.textArea.text.length
+                currentSearchPos = bForward ? 0 : homePage.textArea.text.length
 
-            return false
+                return false
+            }
         }
     }
 
@@ -1300,6 +1312,16 @@ ApplicationWindow {
         }
     }
 
+    MessageDialog {
+        id: infoTextNotFound
+        visible: false
+        title: qsTr("Information")
+        text: qsTr("Search text not found!")
+        standardButtons: StandardButton.Ok
+        onAccepted: {
+        }
+    }
+
     // MessageDialogs does not work for WASM platform !
     MessageDialog {
         id: askForSearchFromTop
@@ -1341,7 +1363,7 @@ ApplicationWindow {
             caseSensitive = findDialog.caseSensitiveCheckBox.checked
             regExpr = findDialog.regularExpressionCheckBox.checked
 
-            currentIsReplace = true
+            currentIsReplace = false
             searchForCurrentSearchText(true,false,false)
         }
         onReplace: {
@@ -1371,6 +1393,7 @@ ApplicationWindow {
             {
                 finished = !searchForCurrentSearchText(true,true,true)
             }
+            currentIsReplace = false
         }
     }
 

@@ -144,6 +144,12 @@ deployment6.path=/assets/files
 deployment7.files=files/$$ARCH_PATH/gnuplot_android_beta
 deployment7.path=/assets/files/$$ARCH_PATH
 
+#deployment10.files=qm_de.qm
+#deployment10.path=/assets/files/qm_de.qm
+
+#deployment11.files=qm_nl.qm
+#deployment11.path=/assets/files/qm_nl.qm
+
 script1.files=files/scripts/simple.gpt
 script1.path=/assets/files/scripts
 
@@ -180,6 +186,14 @@ INSTALLS += script4
 INSTALLS += script5
 INSTALLS += script6
 INSTALLS += data2
+
+#INSTALLS += deployment10
+#INSTALLS += deployment11
+}
+
+android {
+#    QMAKE_POST_LINK +=$$quote($$escape_expand(\n\t)$${QMAKE_COPY} \"$${PWD}\files\arm64\gnuplot_android\" \"$${OUT_PWD}\android-build\build\intermediates\merged_native_libs\release\out\lib\arm64-v8a\libgnuplot_android.so\")
+#    QMAKE_POST_LINK +=$$quote($$escape_expand(\n\t)$${QMAKE_COPY} \"$${PWD}\files\arm64\gnuplot_android_beta\" \"$${OUT_PWD}\android-build\build\intermediates\merged_native_libs\release\out\lib\arm64-v8a\libgnuplot_android_beta.so\")
 }
 
 DISTFILES += \
@@ -231,4 +245,5 @@ ios {
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2
 }
 
-ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
+#ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
+ANDROID_ABIS = arm64-v8a

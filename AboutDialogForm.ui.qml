@@ -64,7 +64,7 @@ Page {
 
             Text {
                 id: lblAppVersion
-                text: qsTr("Version: 2.0.10")
+                text: qsTr("Version: 2.0.11")
                 Layout.alignment: Qt.AlignCenter
             }
 

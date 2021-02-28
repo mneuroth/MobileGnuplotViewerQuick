@@ -122,7 +122,14 @@ int main(int argc, char *argv[])
     //sLanguage = "nl";
     QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
     /*bool ok1 =*/ qtTranslator.load(sResource);
-    /*bool ok2 =*/ app.installTranslator(&qtTranslator);
+//#if defined(Q_OS_ANDROID)
+//    // see: https://stackoverflow.com/questions/31725995/how-to-translate-default-qstr-fields-e-g-messagedialog-yes-no-buttons/55248632#55248632
+//    /*bool ok2 =*/ qtTranslator.load("assets:/files/qt_"+sLanguage.toLower()+".qm");
+//#else
+//    /*bool ok2 =*/ qtTranslator.load("qt_"+sLanguage.toLower()+".qm");
+//#endif
+    /*bool ok3 =*/ app.installTranslator(&qtTranslator);
+
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
