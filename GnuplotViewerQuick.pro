@@ -35,7 +35,8 @@ RESOURCES += qml.qrc
 
 TRANSLATIONS += \
     GnuplotViewerQuick_de_DE.ts \
-    GnuplotViewerQuick_nl_NL.ts
+    GnuplotViewerQuick_nl_NL.ts \
+    GnuplotViewerQuick_fr_FR.ts
     //es_ES
     //pt_PT
     //fr_FR
@@ -245,5 +246,5 @@ ios {
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2
 }
 
-#ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
-ANDROID_ABIS = arm64-v8a
+ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
+#ANDROID_ABIS = arm64-v8a

@@ -389,7 +389,7 @@ errorMsg=%6
     <message>
         <location filename="PageHelpForm.ui.qml" line="21"/>
         <source>Gnuplot Help</source>
-        <translation></translation>
+        <translation>Gnuplot Hulp</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="32"/>
