@@ -23,7 +23,9 @@
 
 GnuplotInvoker::GnuplotInvoker()
     : m_bUseBeta(false),
-      m_iResolution(1024),
+      m_bSyncXandYResolution(true),
+      m_iResolutionX(1024),
+      m_iResolutionY(1024),
       m_iFontSize(28),
       m_iInvokeCount(0)
 {
@@ -54,7 +56,7 @@ QString GnuplotInvoker::run(const QString & sCmd)
 #ifdef Q_OS_WASM
     if( QString(m_aLastGnuplotResult).startsWith(QString("<?xml")) )
     {
-    ApplicationData::simpleWriteFileContent("temp.svg", m_aLastGnuplotResult);
+        ApplicationData::simpleWriteFileContent("temp.svg", m_aLastGnuplotResult);
     }
     else
     {
@@ -81,14 +83,34 @@ void GnuplotInvoker::setUseBeta(bool value)
     m_bUseBeta = value;
 }
 
-int GnuplotInvoker::getResolution() const
+bool GnuplotInvoker::getSyncXandYResolution() const
 {
-    return m_iResolution;
+    return m_bSyncXandYResolution;
 }
 
-void GnuplotInvoker::setResolution(int value)
+void GnuplotInvoker::setSyncXandYResolution(bool value)
 {
-    m_iResolution = value;
+    m_bSyncXandYResolution = value;
+}
+
+int GnuplotInvoker::getResolutionX() const
+{
+    return m_iResolutionX;
+}
+
+void GnuplotInvoker::setResolutionX(int value)
+{
+    m_iResolutionX = value;
+}
+
+int GnuplotInvoker::getResolutionY() const
+{
+    return m_iResolutionY;
+}
+
+void GnuplotInvoker::setResolutionY(int value)
+{
+    m_iResolutionY = value;
 }
 
 int GnuplotInvoker::getFontSize() const
@@ -195,7 +217,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     QString sHelpFile = QString(FILES_DIR)+QString(GNUPLOT_GIH);
     qputenv("GNUHELP", sHelpFile.toLocal8Bit());
 
-    QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"; ").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
+    QString sScriptContent = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"; ").arg(m_iResolutionX).arg(m_iResolutionY).arg(m_iFontSize)
                              + sScript
                              + QString("\nexit\n");
 
@@ -277,7 +299,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         return;
     }
 
-    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolution).arg(m_iResolution).arg(m_iFontSize)
+    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolutionX).arg(m_iResolutionY).arg(m_iFontSize)
                         + sScript
                         + QString("\nexit\n");
 

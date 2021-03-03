@@ -25,7 +25,8 @@ Page {
     property alias lblExampleText: lblExampleText
     property alias btnOk: btnOk
     property alias btnCancel: btnCancel
-    property alias txtGraphicsResolution: txtGraphicsResolution
+    property alias txtGraphicsResolutionX: txtGraphicsResolutionX
+    property alias txtGraphicsResolutionY: txtGraphicsResolutionY
     property alias txtSupportLevel: txtSupportLevel
     property alias lblSupportLevel: lblSupportLevel
     property alias btnSelectFont: btnSelectFont
@@ -34,6 +35,7 @@ Page {
     property alias chbUseSyntaxHighlighter: chbUseSyntaxHighlighter
     property alias chbShowLineNumbers: chbShowLineNumbers
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
+    property alias chbSyncXAndYResolution: chbSyncXAndYResolution
 
     Rectangle {
         id: rectangle
@@ -124,12 +126,24 @@ Page {
             anchors.topMargin: 5
         }
 
+        CheckBox {
+            id: chbSyncXAndYResolution
+            checked: true
+            text: qsTr("Synchronize x and x resolution")
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.top: chbUseLocalFiledialog.bottom
+            anchors.topMargin: 5
+        }
+
         TextField {
-            id: txtGraphicsResolution
+            id: txtGraphicsResolutionX
             validator: IntValidator {bottom: 1; top: 4096}
             width: editFieldWidth
             height: 40
-            anchors.top: chbUseLocalFiledialog.bottom
+            anchors.top: chbSyncXAndYResolution.bottom
             anchors.topMargin: 5
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -137,12 +151,35 @@ Page {
         }
 
         Label {
-            id: lblGraphicsResolution
-            text: qsTr("Resolution for graphic area")
-            anchors.verticalCenter: txtGraphicsResolution.verticalCenter
+            id: lblGraphicsResolutionX
+            text: qsTr("x resolution for graphic area")
+            anchors.verticalCenter: txtGraphicsResolutionX.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 5
-            anchors.left: txtGraphicsResolution.right
+            anchors.left: txtGraphicsResolutionX.right
+            anchors.leftMargin: 5
+        }
+
+        TextField {
+            id: txtGraphicsResolutionY
+            enabled: !chbSyncXAndYResolution.checked
+            validator: IntValidator {bottom: 1; top: 4096}
+            width: editFieldWidth
+            height: 40
+            anchors.top: txtGraphicsResolutionX.bottom
+            anchors.topMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            placeholderText: qsTr("")
+        }
+
+        Label {
+            id: lblGraphicsResolutionY
+            text: qsTr("y resolution for graphic area")
+            anchors.verticalCenter: txtGraphicsResolutionY.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.left: txtGraphicsResolutionY.right
             anchors.leftMargin: 5
         }
 
@@ -153,7 +190,7 @@ Page {
             height: 40
             anchors.left: parent.left
             anchors.leftMargin: 5
-            anchors.top: txtGraphicsResolution.bottom
+            anchors.top: txtGraphicsResolutionY.bottom
             anchors.topMargin: 5
             placeholderText: qsTr("")
         }

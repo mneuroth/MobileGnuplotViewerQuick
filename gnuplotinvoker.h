@@ -44,7 +44,9 @@ class GnuplotInvoker : public QObject
     Q_OBJECT
     Q_PROPERTY(QString lastError READ getLastError)
     Q_PROPERTY(bool useBeta READ getUseBeta WRITE setUseBeta)
-    Q_PROPERTY(int resolution READ getResolution WRITE setResolution)
+    Q_PROPERTY(bool syncXandYResolution READ getSyncXandYResolution WRITE setSyncXandYResolution)
+    Q_PROPERTY(int resolutionX READ getResolutionX WRITE setResolutionX)
+    Q_PROPERTY(int resolutionY READ getResolutionY WRITE setResolutionY)
     Q_PROPERTY(int fontSize READ getFontSize WRITE setFontSize)
     Q_PROPERTY(int invokeCount READ getInvokeCount WRITE setInvokeCount)
 
@@ -56,8 +58,12 @@ public:
     QString getLastError() const;
     bool getUseBeta() const;
     void setUseBeta(bool value);
-    int  getResolution() const;
-    void setResolution(int value);
+    bool getSyncXandYResolution() const;
+    void setSyncXandYResolution(bool value);
+    int  getResolutionX() const;
+    void setResolutionX(int value);
+    int  getResolutionY() const;
+    void setResolutionY(int value);
     int  getFontSize() const;
     void setFontSize(int value);
     int  getInvokeCount() const;
@@ -82,7 +88,9 @@ private:
     QString     m_aLastGnuplotResult;
     QString     m_aLastGnuplotError;
     bool        m_bUseBeta;
-    int         m_iResolution;
+    bool        m_bSyncXandYResolution;
+    int         m_iResolutionX;
+    int         m_iResolutionY;
     int         m_iFontSize;
     int         m_iInvokeCount;
 #ifndef _USE_BUILTIN_GNUPLOT

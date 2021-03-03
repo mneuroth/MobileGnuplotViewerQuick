@@ -17,7 +17,25 @@ SettingsDialogForm {
         settingsDialog.lblExampleText.visible = false
     }
 
-    txtGraphicsResolution {
+    chbSyncXAndYResolution {
+        onCheckedChanged: {
+            if( chbSyncXAndYResolution.checked ) {
+                txtGraphicsResolutionY.text = txtGraphicsResolutionX.text
+            }
+        }
+    }
+
+    txtGraphicsResolutionX {
+        validator: IntValidator { bottom: 128; top: 4096 }
+
+        onTextChanged: {
+            if( chbSyncXAndYResolution.checked ) {
+                txtGraphicsResolutionY.text = txtGraphicsResolutionX.text
+            }
+        }
+    }
+
+    txtGraphicsResolutionY {
         validator: IntValidator { bottom: 128; top: 4096 }
     }
 
@@ -51,7 +69,9 @@ SettingsDialogForm {
 
     btnOk {
         onClicked:  {
-            gnuplotInvoker.resolution = parseInt(txtGraphicsResolution.text)
+            gnuplotInvoker.resolutionX = parseInt(txtGraphicsResolutionX.text)
+            gnuplotInvoker.resolutionY = parseInt(txtGraphicsResolutionY.text)
+            gnuplotInvoker.syncXandYResolution = chbSyncXAndYResolution.checked
             gnuplotInvoker.useBeta = chbUseGnuplotBeta.checked
             gnuplotInvoker.fontSize = parseInt(txtGraphicsFontSize.text)
             applicationData.isUseLocalFileDialog = chbUseLocalFiledialog.checked

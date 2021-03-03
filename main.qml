@@ -41,7 +41,9 @@ ApplicationWindow {
     Component.onDestruction: {
         settings.currentFile = homePage.currentFileUrl
         settings.useGnuplotBeta = gnuplotInvoker.useBeta
-        settings.graphicsResolution = gnuplotInvoker.resolution
+        settings.syncXandYResolution = gnuplotInvoker.syncXandYResolution
+        settings.graphicsResolutionX = gnuplotInvoker.resolutionX
+        settings.graphicsResolutionY = gnuplotInvoker.resolutionY
         settings.graphicsFontSize = gnuplotInvoker.fontSize
         settings.invokeCount = gnuplotInvoker.invokeCount
         settings.currentFont = homePage.textArea.font
@@ -411,7 +413,9 @@ ApplicationWindow {
 
     function openSettingsDialog()
     {
-        settingsDialog.txtGraphicsResolution.text = gnuplotInvoker.resolution
+        settingsDialog.txtGraphicsResolutionX.text = gnuplotInvoker.resolutionX
+        settingsDialog.txtGraphicsResolutionY.text = gnuplotInvoker.resolutionY
+        settingsDialog.chbSyncXAndYResolution.checked = gnuplotInvoker.syncXandYResolution
         settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
         settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
         settingsDialog.chbUseToolBar.checked = settings.useToolBar
@@ -1142,7 +1146,9 @@ ApplicationWindow {
         property bool useToolBar: false
         property bool useSyntaxHighlighter: true
         property bool showLineNumbers: true
-        property int graphicsResolution: 1024
+        property bool syncXandYResolution: true
+        property int graphicsResolutionX: 1024
+        property int graphicsResolutionY: 1024
         property int graphicsFontSize: 28
         property var currentFont: null
         property int invokeCount: 0
@@ -1153,7 +1159,9 @@ ApplicationWindow {
     GnuplotInvoker {
         id: gnuplotInvoker
 
-        resolution: settings.graphicsResolution
+        syncXandYResolution: settings.syncXandYResolution
+        resolutionX: settings.graphicsResolutionX
+        resolutionY: settings.graphicsResolutionY
         fontSize: settings.graphicsFontSize
         useBeta: settings.useGnuplotBeta
         invokeCount: settings.invokeCount

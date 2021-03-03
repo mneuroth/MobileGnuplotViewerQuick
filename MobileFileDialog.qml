@@ -20,7 +20,7 @@ MobileFileDialogForm {
     property bool isDirectoryModus: false
     property bool isSaveAsImage: false
     property bool isExtendedInfos: false
-    property bool isMobilePlatform: applicationData.isAndroid
+    property bool isMobilePlatform: applicationData !== null ? applicationData.isAndroid : false
     property var textControl: null
 
     listView {
