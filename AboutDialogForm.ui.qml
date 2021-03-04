@@ -70,7 +70,7 @@ Page {
 
             Text {
                 id: lblAppDate
-                text: qsTr("from: 28.2.2021")
+                text: qsTr("from: 4.3.2021")
                 Layout.alignment: Qt.AlignCenter
                 Layout.bottomMargin: 15
             }

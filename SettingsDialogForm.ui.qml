@@ -80,6 +80,8 @@ Page {
             CheckBox {
                 id: chbUseLocalFiledialog
                 text: qsTr("Use local filedialog")
+                visible: applicationData !== null ? applicationData.isWASM : false
+                height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
             }
 
             CheckBox {
@@ -166,14 +168,20 @@ Page {
                 TextField {
                     id: txtSupportLevel
                     readOnly: true
+                    visible: isAppStoreSupported
                     width: editFieldWidth
-                    height: 40
+                    //height: 40
+                    //height: isAppStoreSupported ? implicitHeight : 0
+                    height: isAppStoreSupported ? txtGraphicsFontSize.height : 0
                     placeholderText: qsTr("")
+                    text: (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false) ? "99" : settings.supportLevel
                 }
 
                 Label {
                     id: lblSupportLevel
+                    visible: isAppStoreSupported
                     text: qsTr("SupportLevel")
+                    height: isAppStoreSupported ? lblGraphicsFontSize.height : 0
                     anchors.verticalCenter: txtSupportLevel.verticalCenter
                 }
             }

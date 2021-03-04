@@ -16,8 +16,9 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="73"/>
-        <source>from: 28.2.2021</source>
-        <translation>de: 28.2.2021</translation>
+        <source>from: 4.3.2021</source>
+        <oldsource>from: 28.2.2021</oldsource>
+        <translation type="unfinished">de: 4.3.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="80"/>
@@ -575,12 +576,12 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Gnuplot Paramètres</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="216"/>
+        <location filename="SettingsDialogForm.ui.qml" line="224"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="211"/>
+        <location filename="SettingsDialogForm.ui.qml" line="219"/>
         <source>Accept</source>
         <translation>Accepter</translation>
     </message>
@@ -610,7 +611,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Utiliser le dialogue de fichiers local</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="88"/>
+        <location filename="SettingsDialogForm.ui.qml" line="90"/>
         <source>Synchronize x and y resolution</source>
         <oldsource>Synchronize x and x resolution</oldsource>
         <translation>Synchronisation x et y résolution</translation>
@@ -621,17 +622,17 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="221"/>
+        <location filename="SettingsDialogForm.ui.qml" line="229"/>
         <source>Default Values</source>
         <translation>Valeurs par défaut</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="108"/>
+        <location filename="SettingsDialogForm.ui.qml" line="110"/>
         <source>x resolution for graphic area</source>
         <translation>x Résolution pour zone graphique</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="132"/>
+        <location filename="SettingsDialogForm.ui.qml" line="134"/>
         <source>y resolution for graphic area</source>
         <translation>y Résolution pour zone graphique</translation>
     </message>
@@ -640,22 +641,22 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Résolution pour zone graphique</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="154"/>
+        <location filename="SettingsDialogForm.ui.qml" line="156"/>
         <source>Font size for graphic area</source>
         <translation>Taille de police pour zone graphique</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="176"/>
+        <location filename="SettingsDialogForm.ui.qml" line="183"/>
         <source>SupportLevel</source>
         <translation>Niveau de soutien</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="192"/>
+        <location filename="SettingsDialogForm.ui.qml" line="200"/>
         <source>Text font</source>
         <translation>Police de texte</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="198"/>
+        <location filename="SettingsDialogForm.ui.qml" line="206"/>
         <source>This is an example text for the current font</source>
         <translation>Il s’agit d’un texte d’exemple pour la police actuelle</translation>
     </message>

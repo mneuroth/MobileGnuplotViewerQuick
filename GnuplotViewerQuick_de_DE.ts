@@ -20,9 +20,9 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="73"/>
-        <source>from: 28.2.2021</source>
-        <oldsource>from: 23.2.2021</oldsource>
-        <translation>vom: 28.2.2021</translation>
+        <source>from: 4.3.2021</source>
+        <oldsource>from: 28.2.2021</oldsource>
+        <translation type="unfinished">vom: 4.3.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="67"/>
@@ -618,7 +618,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Gnuplot Einstellungen</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="216"/>
+        <location filename="SettingsDialogForm.ui.qml" line="224"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -627,7 +627,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Ok</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="211"/>
+        <location filename="SettingsDialogForm.ui.qml" line="219"/>
         <source>Accept</source>
         <translation>Übernehmen</translation>
     </message>
@@ -648,23 +648,23 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Symbolleiste anzeigen</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="88"/>
+        <location filename="SettingsDialogForm.ui.qml" line="90"/>
         <source>Synchronize x and y resolution</source>
         <oldsource>Synchronize x and x resolution</oldsource>
         <translation>Synchronisiere x und y Auflösung</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="108"/>
+        <location filename="SettingsDialogForm.ui.qml" line="110"/>
         <source>x resolution for graphic area</source>
         <translation>x Auflösung für den Grafik Bereich</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="132"/>
+        <location filename="SettingsDialogForm.ui.qml" line="134"/>
         <source>y resolution for graphic area</source>
         <translation>y Auflösung für den Grafik Bereich</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="221"/>
+        <location filename="SettingsDialogForm.ui.qml" line="229"/>
         <source>Default Values</source>
         <translation>Standard Werte</translation>
     </message>
@@ -688,22 +688,22 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Auflösung für den Grafik Bereich</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="154"/>
+        <location filename="SettingsDialogForm.ui.qml" line="156"/>
         <source>Font size for graphic area</source>
         <translation>Zeichensatz Größe für den Grafik Bereich</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="176"/>
+        <location filename="SettingsDialogForm.ui.qml" line="183"/>
         <source>SupportLevel</source>
         <translation>Unterstützungsstufe</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="192"/>
+        <location filename="SettingsDialogForm.ui.qml" line="200"/>
         <source>Text font</source>
         <translation>Zeichensatz</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="198"/>
+        <location filename="SettingsDialogForm.ui.qml" line="206"/>
         <source>This is an example text for the current font</source>
         <translation>Dies ist ein Beispieltext für den aktuellen Zeichensatz</translation>
     </message>

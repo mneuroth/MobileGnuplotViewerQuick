@@ -27,11 +27,6 @@ SettingsDialogForm {
         }
     }
 
-    chbUseLocalFiledialog {
-        visible: applicationData !== null ? applicationData.isWASM : false
-        height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
-    }
-
     txtGraphicsResolutionX {
         validator: IntValidator { bottom: 128; top: 4096 }
 
@@ -48,17 +43,6 @@ SettingsDialogForm {
 
     txtGraphicsFontSize {
         validator: IntValidator { bottom: 6; top: 64 }
-    }
-
-    txtSupportLevel {
-        visible: isAppStoreSupported
-        height: isAppStoreSupported ? implicitHeight : 0
-        text: (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false) ? "99" : settings.supportLevel
-    }
-
-    lblSupportLevel {
-        visible: isAppStoreSupported
-        height: isAppStoreSupported ? implicitHeight : 0
     }
 
     btnSelectFont {
@@ -92,12 +76,12 @@ SettingsDialogForm {
             outputPage.txtOutput.font = aFont
             helpPage.txtHelp.font = aFont
             stackView.pop()
-            //if( applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter) ) {
+            if( applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter) ) {
                 // simulate update of text to rehighlight text again
                 //var txt = homePage.textArea.text
                 //homePage.textArea.text = ""
                 //homePage.textArea.text = txt
-            //}
+            }
         }
     }
 

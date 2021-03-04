@@ -908,8 +908,9 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         visible: settings.useToolBar
+        //height: settings.useToolBar ? implicitHeight : 0
         height: settings.useToolBar ? flow.implicitHeight/*implicitHeight*/ : 0
-/*
+
         onHeightChanged: {
             if( toolBar.height>2*iconSize+flow.spacing ) {
                 iconSize -= 2
@@ -919,7 +920,7 @@ ApplicationWindow {
                 }
             }
         }
-*/
+
         Flow {
             id: flow
             anchors.fill: parent

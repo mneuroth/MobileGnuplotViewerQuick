@@ -20,9 +20,9 @@
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="73"/>
-        <source>from: 28.2.2021</source>
-        <oldsource>from: 23.2.2021</oldsource>
-        <translation>van: 28.2.2021</translation>
+        <source>from: 4.3.2021</source>
+        <oldsource>from: 28.2.2021</oldsource>
+        <translation type="unfinished">van: 4.3.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="67"/>
@@ -611,12 +611,12 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Gnuplot Instellingen</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="216"/>
+        <location filename="SettingsDialogForm.ui.qml" line="224"/>
         <source>Cancel</source>
         <translation>Annuleren</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="211"/>
+        <location filename="SettingsDialogForm.ui.qml" line="219"/>
         <source>Accept</source>
         <translation>Overnemen</translation>
     </message>
@@ -632,23 +632,23 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Gebruik lokale bestand dialoogvenster</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="88"/>
+        <location filename="SettingsDialogForm.ui.qml" line="90"/>
         <source>Synchronize x and y resolution</source>
         <oldsource>Synchronize x and x resolution</oldsource>
         <translation>x- en y-resolutie synchroniseren</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="108"/>
+        <location filename="SettingsDialogForm.ui.qml" line="110"/>
         <source>x resolution for graphic area</source>
         <translation>x Resolutie voor grafiek</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="132"/>
+        <location filename="SettingsDialogForm.ui.qml" line="134"/>
         <source>y resolution for graphic area</source>
         <translation>y Resolutie voor grafiek</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="221"/>
+        <location filename="SettingsDialogForm.ui.qml" line="229"/>
         <source>Default Values</source>
         <translation>Standaardwaarden</translation>
     </message>
@@ -677,22 +677,22 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Resolutie voor grafiek</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="154"/>
+        <location filename="SettingsDialogForm.ui.qml" line="156"/>
         <source>Font size for graphic area</source>
         <translation>Lettergrootte voor grafiek</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="176"/>
+        <location filename="SettingsDialogForm.ui.qml" line="183"/>
         <source>SupportLevel</source>
         <translation>Ondersteuningsniveau</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="192"/>
+        <location filename="SettingsDialogForm.ui.qml" line="200"/>
         <source>Text font</source>
         <translation>Tekst lettertype</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="198"/>
+        <location filename="SettingsDialogForm.ui.qml" line="206"/>
         <source>This is an example text for the current font</source>
         <translation>Dit is een voorbeeldtekst voor het huidige lettertype</translation>
     </message>
