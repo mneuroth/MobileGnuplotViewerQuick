@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
     // for testing languages:
     //sLanguage = "nl";
     //sLanguage = "fr";
+    //sLanguage = "es";
     QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
     /*bool ok1 =*/ qtTranslator.load(sResource);
 //#if defined(Q_OS_ANDROID)

@@ -39,9 +39,8 @@ TRANSLATIONS += \
     GnuplotViewerQuick_fr_FR.ts \
     GnuplotViewerQuick_es_ES.ts
     //pt_PT
-    //fr_FR
-    //it_IT
     //ru_RU
+    //it_IT
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -246,5 +245,5 @@ ios {
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2
 }
 
-ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
-#ANDROID_ABIS = arm64-v8a
+#ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
+ANDROID_ABIS = arm64-v8a
