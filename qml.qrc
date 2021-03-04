@@ -55,5 +55,6 @@
         <file>GnuplotViewerQuick_de_DE.qm</file>
         <file>GnuplotViewerQuick_nl_NL.qm</file>
         <file>GnuplotViewerQuick_fr_FR.qm</file>
+        <file>GnuplotViewerQuick_es_ES.qm</file>
     </qresource>
 </RCC>

@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.1" language="es_ES">
 <context>
     <name>AboutDialogForm.ui</name>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="18"/>
         <source>About</source>
-        <translation>Über</translation>
+        <translation>Acerca</translation>
     </message>
     <message>
-        <location filename="AboutDialogForm.ui.qml" line="100"/>
-        <source>App Infos</source>
+        <location filename="AboutDialogForm.ui.qml" line="67"/>
+        <source>Version: 2.0.12</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="AboutDialogForm.ui.qml" line="73"/>
+        <source>from: 28.2.2021</source>
+        <translation>de: 28.2.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="80"/>
@@ -19,15 +24,8 @@
         <translation>Autor: Michael Neuroth</translation>
     </message>
     <message>
-        <location filename="AboutDialogForm.ui.qml" line="73"/>
-        <source>from: 28.2.2021</source>
-        <oldsource>from: 23.2.2021</oldsource>
-        <translation>vom: 28.2.2021</translation>
-    </message>
-    <message>
-        <location filename="AboutDialogForm.ui.qml" line="67"/>
-        <source>Version: 2.0.12</source>
-        <oldsource>Version: 2.0.11</oldsource>
+        <location filename="AboutDialogForm.ui.qml" line="87"/>
+        <source>&lt;a href=&apos;https://github.com/mneuroth/MobileGnuplotViewerQuick&apos;&gt;Github page for MobileGnuplotViewerQuick&lt;/a&gt;</source>
         <translation></translation>
     </message>
     <message>
@@ -36,31 +34,14 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="AboutDialogForm.ui.qml" line="87"/>
-        <source>&lt;a href=&apos;https://github.com/mneuroth/MobileGnuplotViewerQuick&apos;&gt;Github page for MobileGnuplotViewerQuick&lt;/a&gt;</source>
+        <location filename="AboutDialogForm.ui.qml" line="100"/>
+        <source>App Infos</source>
         <translation></translation>
-    </message>
-    <message>
-        <source>from: 9.1.2021</source>
-        <translation type="vanished">vom: 9.1.2021</translation>
-    </message>
-    <message>
-        <source>from: 6.1.2021</source>
-        <oldsource>from: 27.6.2020</oldsource>
-        <translation type="vanished">vom: 6.1.2021</translation>
-    </message>
-    <message>
-        <source>Icons designed by &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Flaticon&lt;/a&gt;</source>
-        <translation type="vanished">Icons entworfen von &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Flaticon&lt;/a&gt;</translation>
-    </message>
-    <message>
-        <source>Icons designed by &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Freepik&lt;/a&gt;</source>
-        <translation type="vanished">Icons entworfen von &lt;a href=&apos;http://www.flaticon.com&apos;&gt;Freepik&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="107"/>
         <source>Close</source>
-        <translation>Schließen</translation>
+        <translation>Cerrar</translation>
     </message>
 </context>
 <context>
@@ -130,7 +111,7 @@ WorkingDir not valid</source>
         <location filename="android/androidshareutils.cpp" line="542"/>
         <location filename="android/androidshareutils.cpp" line="574"/>
         <source>File does not exist: %1</source>
-        <translation>Datei existiert nicht: %1</translation>
+        <translation>El archivo no existe: %1</translation>
     </message>
 </context>
 <context>
@@ -139,32 +120,32 @@ WorkingDir not valid</source>
         <location filename="applicationdata.cpp" line="280"/>
         <location filename="applicationdata.cpp" line="322"/>
         <source>Error reading </source>
-        <translation>Fehler beim Lesen der Datei </translation>
+        <translation>No se pudo leer el archivo </translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="731"/>
         <source>Send file</source>
-        <translation>Sende Datei</translation>
+        <translation>Enviar archivo</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="735"/>
         <source>View file</source>
-        <translation>Zeige Date</translation>
+        <translation>Ver archivo</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="857"/>
         <source>Can not load file %1</source>
-        <translation>Datei %1 kann nicht gelesen werden</translation>
+        <translation>No se puede cargar el archivo %1</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="868"/>
         <source>File name is empty!</source>
-        <translation>Datei Name ist leer!</translation>
+        <translation>¡El nombre de archivo está vacío!</translation>
     </message>
     <message>
         <location filename="applicationdata.cpp" line="886"/>
         <source>Error writing file: </source>
-        <translation>Fehler beim Schreiben der Datei: </translation>
+        <translation>Archivo de escritura de errores: </translation>
     </message>
 </context>
 <context>
@@ -174,7 +155,7 @@ WorkingDir not valid</source>
         <location filename="ApplicationStore.qml" line="68"/>
         <location filename="ApplicationStore.qml" line="105"/>
         <source>Purchase not completed.</source>
-        <translation>Kauf wurde nicht abgeschlossen.</translation>
+        <translation>Compra no completada.</translation>
     </message>
 </context>
 <context>
@@ -182,38 +163,37 @@ WorkingDir not valid</source>
     <message>
         <location filename="FindDialogForm.ui.qml" line="54"/>
         <source>Find what:</source>
-        <translation>Suchtext:</translation>
+        <translation>Buscar:</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="92"/>
         <source>Match whole word only</source>
-        <translation>Nur ganze Wörter suchen</translation>
+        <translation>Solo palabra completa</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="104"/>
         <source>Case sensitive</source>
-        <translation>Groß-/Kleinschreibung</translation>
+        <translation>Coincidir mayúsculas y minúsculas</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="117"/>
         <source>Regular expression</source>
-        <translation>Reguläre Ausdrücke</translation>
+        <translation>Expresión regular</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="129"/>
         <source>Search backward</source>
-        <translation>Rückwärts suchen</translation>
+        <translation>Búsqueda hacia atrás</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="151"/>
         <source>Find Next</source>
-        <oldsource>&amp;Find Next</oldsource>
-        <translation>Weitersuchen</translation>
+        <translation>Buscar siguiente</translation>
     </message>
     <message>
         <location filename="FindDialogForm.ui.qml" line="163"/>
         <source>Cancel</source>
-        <translation>Abbrechen</translation>
+        <translation>Cancelar</translation>
     </message>
 </context>
 <context>
@@ -222,7 +202,7 @@ WorkingDir not valid</source>
         <location filename="gnuplotinvoker.cpp" line="63"/>
         <source>Warning: unexpected result running built-in gnuplot !
 </source>
-        <translation>Warnung: unerwartetes Resultat der eingebauten gnuplot Anwendung !\n</translation>
+        <translation>Advertencia: resultado inesperado ejecutando gnuplot incorporado !\n</translation>
     </message>
     <message>
         <location filename="gnuplotinvoker.cpp" line="165"/>
@@ -242,21 +222,13 @@ errorMsg=%6
         <location filename="gnuplotinvoker.cpp" line="254"/>
         <source>Error: executing built-in gnuplot ! return=%1
 </source>
-        <translation>Fehler: Ausführung eingebauter gnuplot ! return=%1\n
+        <translation>Error: ejecutar gnuplot incorporado ! return=%1\n
 </translation>
-    </message>
-    <message>
-        <source>Warning: unexpected result running built-in gnuplot !</source>
-        <translation type="vanished">Warnung: unerwartetes Resultat der eingebauten gnuplot Ausführung !</translation>
-    </message>
-    <message>
-        <source>Error: executing built-in gnuplot ! return=%1</source>
-        <translation type="vanished">Fehler: Ausführung eingebauter gnuplot ! return=%1</translation>
     </message>
     <message>
         <location filename="gnuplotinvoker.cpp" line="334"/>
         <source>Error: gnuplot not found ! path=%1</source>
-        <translation>Fehler: gnuplot nicht gefunden ! Pfad=%1</translation>
+        <translation>Error: gnuplot no encontrado ! path=%1</translation>
     </message>
 </context>
 <context>
@@ -264,47 +236,47 @@ errorMsg=%6
     <message>
         <location filename="MobileFileDialog.qml" line="62"/>
         <source>new file name:</source>
-        <translation>neuer Datei Name:</translation>
-    </message>
-    <message>
-        <location filename="MobileFileDialog.qml" line="63"/>
-        <source>unknown.gpt</source>
-        <translation>unbekannt.gpt</translation>
+        <translation>nuevo nombre de archivo:</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="63"/>
         <source>unknown.png</source>
-        <translation>unbekannt.png</translation>
+        <translation>desconocido.png</translation>
+    </message>
+    <message>
+        <location filename="MobileFileDialog.qml" line="63"/>
+        <source>unknown.gpt</source>
+        <translation>desconocido.gpt</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="65"/>
         <source>Save as</source>
-        <translation>Sichern unter</translation>
+        <translation>Guardar como</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="77"/>
         <source>open name:</source>
-        <translation>Öffne Name:</translation>
+        <translation>Nombre abierto:</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="79"/>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Abierto</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="91"/>
         <source>current file name:</source>
-        <translation>aktueller Datei Name:</translation>
+        <translation>nombre de archivo actual:</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="94"/>
         <source>Delete</source>
-        <translation>Löschen</translation>
+        <translation>Borrar</translation>
     </message>
     <message>
         <location filename="MobileFileDialog.qml" line="118"/>
         <source>can not delete file </source>
-        <translation>Datei kann nicht gelöscht werden </translation>
+        <translation>No puede eliminar el archivo </translation>
     </message>
 </context>
 <context>
@@ -312,7 +284,7 @@ errorMsg=%6
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="39"/>
         <source>Select file</source>
-        <translation>Datei auswählen</translation>
+        <translation>Seleccionar archivo</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="55"/>
@@ -327,37 +299,37 @@ errorMsg=%6
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="77"/>
         <source>SD Card</source>
-        <translation>SD Karte</translation>
+        <translation>Tarjeta SD</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="90"/>
         <source>Storage</source>
-        <translation>Speicher</translation>
+        <translation>Memoria</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="102"/>
         <source>Show current directory here</source>
-        <translation>Zeige hier das aktuelle Verzeichnis</translation>
+        <translation>Mostrar el directorio actual aquí</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="140"/>
         <source>Show date and size</source>
-        <translation>Zeige Datum und Größe an</translation>
+        <translation>Mostrar fecha y tamaño</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="153"/>
         <source>Any input</source>
-        <translation>Beliebige Eingabe</translation>
+        <translation>Cualquier entrada</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="188"/>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Abierto</translation>
     </message>
     <message>
         <location filename="MobileFileDialogForm.ui.qml" line="199"/>
         <source>Cancel</source>
-        <translation>Abbrechen</translation>
+        <translation>Cancelar</translation>
     </message>
 </context>
 <context>
@@ -365,28 +337,27 @@ errorMsg=%6
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="26"/>
         <source>Gnuplot Graphics</source>
-        <oldsource>Graphics</oldsource>
-        <translation>Gnuplot Grafik</translation>
+        <translation>Gnuplot Gráfico</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="70"/>
         <source>Infos...</source>
-        <translation>Infos...</translation>
+        <translation>Información...</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="96"/>
         <source>Input</source>
-        <translation>Eingabe</translation>
+        <translation>Entrada</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="103"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Ayuda</translation>
     </message>
     <message>
         <location filename="PageGraphicsForm.ui.qml" line="110"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Panel de resultados</translation>
     </message>
 </context>
 <context>
@@ -394,38 +365,32 @@ errorMsg=%6
     <message>
         <location filename="PageHelpForm.ui.qml" line="21"/>
         <source>Gnuplot Help</source>
-        <translation>Gnuplot Hilfe</translation>
+        <translation>Gnuplot Ayuda</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="32"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
-    </message>
-    <message>
-        <source>Enter gnuplot help command here (e. g. help plot)
-and activate &quot;Run help&quot; button</source>
-        <translation type="vanished">Hier gnuplot Hilfe Kommandos eingeben (z. B. help plot)
-und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
+        <translation>Ayuda</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="57"/>
         <source>help # enter any help command here and press the run button</source>
-        <translation>help # gebe hier ein Hilfe Kommando an und drücke die Ausführen Schaltfläche</translation>
+        <translation>help # entrar en cualquier comando de ayuda aquí y pulse el botón de ejecución</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="81"/>
         <source>Input</source>
-        <translation>Eingabe</translation>
+        <translation>Entrada</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="88"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Panel de resultados</translation>
     </message>
     <message>
         <location filename="PageHelpForm.ui.qml" line="95"/>
         <source>Run help</source>
-        <translation>Hilfe ausführen</translation>
+        <translation>Ayuda ejecutar</translation>
     </message>
 </context>
 <context>
@@ -433,12 +398,12 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     <message>
         <location filename="PageHome.qml" line="79"/>
         <source>Running gnuplot for file </source>
-        <translation>gnuplot ausführen für Datei </translation>
+        <translation>Ejecución de gnuplot para archivo </translation>
     </message>
     <message>
         <location filename="PageHome.qml" line="86"/>
         <source>There are informations or errors on the output page</source>
-        <translation>Es gibt Informationen oder Fehler auf der Ausgabe Seite</translation>
+        <translation>Hay información o errores en la página de salida</translation>
     </message>
 </context>
 <context>
@@ -446,47 +411,42 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     <message>
         <location filename="PageHomeForm.ui.qml" line="21"/>
         <source>Gnuplot Input</source>
-        <oldsource>Gnuplot</oldsource>
-        <translation>Gnuplot Eingabe</translation>
+        <translation>Gnuplot Entrada</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="40"/>
         <source>unknown</source>
-        <translation>unbekannt</translation>
-    </message>
-    <message>
-        <source>Enter gnuplot script here...</source>
-        <translation type="vanished">gnuplot Skript hier eingeben...</translation>
+        <translation>desconocido</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="133"/>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Abierto</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="140"/>
         <source>Save</source>
-        <translation>Speichern</translation>
+        <translation>Guardar</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="147"/>
         <source>Run</source>
-        <translation>Ausführen</translation>
+        <translation>Ejecutar</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="154"/>
         <source>Graphics</source>
-        <translation>Grafik</translation>
+        <translation>Gráfico</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="161"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Ayuda</translation>
     </message>
     <message>
         <location filename="PageHomeForm.ui.qml" line="168"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Panel de resultados</translation>
     </message>
 </context>
 <context>
@@ -494,31 +454,27 @@ und aktiviere &quot;Hilfe ausführen&quot; Button</translation>
     <message>
         <location filename="PageOutputForm.ui.qml" line="21"/>
         <source>Gnuplot Output</source>
-        <translation>Gnuplot Ausgabe</translation>
+        <translation>Gnuplot Panel de resultados</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="32"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
-    </message>
-    <message>
-        <source>Outputs from gnuplot commands are shown here</source>
-        <translation type="vanished">Ausgabe der gnuplot Kommandos werden hier angezeigt</translation>
+        <translation>Panel de resultados</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="107"/>
         <source>Input</source>
-        <translation>Eingabe</translation>
+        <translation>Entrada</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="114"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Ayuda</translation>
     </message>
     <message>
         <location filename="PageOutputForm.ui.qml" line="121"/>
         <source>Graphics</source>
-        <translation>Grafik</translation>
+        <translation>Gráfico</translation>
     </message>
 </context>
 <context>
@@ -567,47 +523,47 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="57"/>
         <source>Find what:</source>
-        <translation>Suchtext:</translation>
+        <translation>Buscar:</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="92"/>
         <source>Replace with:</source>
-        <translation>Ersetzen durch:</translation>
+        <translation>Reemplazar con:</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="130"/>
         <source>Match whole word only</source>
-        <translation>Nur ganze Wörter suchen</translation>
+        <translation>Solo palabra completa</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="142"/>
         <source>Case sensitive</source>
-        <translation>Groß-/Kleinschreibung</translation>
+        <translation>Coincidir mayúsculas y minúsculas</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="155"/>
         <source>Regular expression</source>
-        <translation>Reguläre Ausdrücke</translation>
+        <translation>Expresión regular</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="174"/>
         <source>Find Next</source>
-        <translation>Weitersuchen</translation>
+        <translation>Buscar siguiente</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="182"/>
         <source>Replace</source>
-        <translation>Ersetzen</translation>
+        <translation>Reemplazar</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="189"/>
         <source>Replace All</source>
-        <translation>Alle ersetzen</translation>
+        <translation>Reemplazar a todos</translation>
     </message>
     <message>
         <location filename="ReplaceDialogForm.ui.qml" line="196"/>
         <source>Close</source>
-        <translation>Schließen</translation>
+        <translation>Cerrar</translation>
     </message>
 </context>
 <context>
@@ -615,97 +571,88 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="18"/>
         <source>Gnuplot Settings</source>
-        <translation>Gnuplot Einstellungen</translation>
-    </message>
-    <message>
-        <location filename="SettingsDialogForm.ui.qml" line="216"/>
-        <source>Cancel</source>
-        <translation>Abbrechen</translation>
-    </message>
-    <message>
-        <source>Ok</source>
-        <translation type="vanished">Ok</translation>
-    </message>
-    <message>
-        <location filename="SettingsDialogForm.ui.qml" line="211"/>
-        <source>Accept</source>
-        <translation>Übernehmen</translation>
+        <translation>Gnuplot Configuración</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="58"/>
         <source>Use latest Gnuplot (beta) version</source>
-        <oldsource>Use gnuplot beta version</oldsource>
-        <translation>Verwende aktuellste Gnuplot (Beta) Version</translation>
+        <translation>Utilice la última versión de Gnuplot (beta)</translation>
     </message>
     <message>
-        <location filename="SettingsDialogForm.ui.qml" line="77"/>
-        <source></source>
-        <translation></translation>
+        <location filename="SettingsDialogForm.ui.qml" line="64"/>
+        <source>Show line numbers</source>
+        <translation>Mostrar números de línea</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="70"/>
         <source>Show toolbar</source>
-        <translation>Symbolleiste anzeigen</translation>
+        <translation>Mostrar la barra de herramientas</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="77"/>
+        <source>Use syntax highlighting</source>
+        <translation>Usar resaltado de sintaxis</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="82"/>
+        <source>Use local filedialog</source>
+        <translation>Utilice el cuadro de diálogo de archivos local</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="88"/>
         <source>Synchronize x and y resolution</source>
         <oldsource>Synchronize x and x resolution</oldsource>
-        <translation>Synchronisiere x und y Auflösung</translation>
+        <translation>Sincronizar resolución x y y</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="103"/>
+        <source></source>
+        <translation></translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="108"/>
         <source>x resolution for graphic area</source>
-        <translation>x Auflösung für den Grafik Bereich</translation>
+        <translation>x resolución para área gráfica</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="132"/>
         <source>y resolution for graphic area</source>
-        <translation>y Auflösung für den Grafik Bereich</translation>
-    </message>
-    <message>
-        <location filename="SettingsDialogForm.ui.qml" line="221"/>
-        <source>Default Values</source>
-        <translation>Standard Werte</translation>
-    </message>
-    <message>
-        <location filename="SettingsDialogForm.ui.qml" line="64"/>
-        <source>Show line numbers</source>
-        <translation>Zeige Zeilennummern</translation>
-    </message>
-    <message>
-        <location filename="SettingsDialogForm.ui.qml" line="77"/>
-        <source>Use syntax highlighting</source>
-        <translation>Verwende Syntaxhervorhebung</translation>
-    </message>
-    <message>
-        <location filename="SettingsDialogForm.ui.qml" line="82"/>
-        <source>Use local filedialog</source>
-        <translation>Verwende lokalen Datei Dialog</translation>
-    </message>
-    <message>
-        <source>Resolution for graphic area</source>
-        <translation type="vanished">Auflösung für den Grafik Bereich</translation>
+        <translation>y resolución para área gráfica</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="154"/>
         <source>Font size for graphic area</source>
-        <translation>Zeichensatz Größe für den Grafik Bereich</translation>
+        <translation>Tamaño de fuente para el área gráfica</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="176"/>
         <source>SupportLevel</source>
-        <translation>Unterstützungsstufe</translation>
+        <translation>Nivel de soporte</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="192"/>
         <source>Text font</source>
-        <translation>Zeichensatz</translation>
+        <translation>Fuente de texto</translation>
     </message>
     <message>
         <location filename="SettingsDialogForm.ui.qml" line="198"/>
         <source>This is an example text for the current font</source>
-        <translation>Dies ist ein Beispieltext für den aktuellen Zeichensatz</translation>
+        <translation>Este es un texto de ejemplo para la fuente actual</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="211"/>
+        <source>Accept</source>
+        <translation>Aceptar</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="216"/>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+    <message>
+        <location filename="SettingsDialogForm.ui.qml" line="221"/>
+        <source>Default Values</source>
+        <translation>Valores predeterminados</translation>
     </message>
 </context>
 <context>
@@ -724,15 +671,11 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
 <context>
     <name>SupportDialog</name>
     <message>
-        <source>Status=</source>
-        <translation type="vanished">Status=</translation>
-    </message>
-    <message>
         <location filename="SupportDialog.qml" line="55"/>
         <location filename="SupportDialog.qml" line="56"/>
         <location filename="SupportDialog.qml" line="57"/>
         <source>Price: </source>
-        <translation>Preis: </translation>
+        <translation>Precio: </translation>
     </message>
 </context>
 <context>
@@ -740,7 +683,7 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="30"/>
         <source>Support</source>
-        <translation>Unterstützung</translation>
+        <translation>Apoyo</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="50"/>
@@ -750,66 +693,27 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="64"/>
         <source>Support Level Bronze</source>
-        <translation>Unterstützung Bronze Stufe</translation>
+        <translation>Nivel de soporte Bronce</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="82"/>
         <source>Support Level Silver</source>
-        <translation>Unterstützung Silber Stufe</translation>
+        <translation>Nivel de soporte Plata</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="100"/>
         <source>Support Level Gold</source>
-        <translation>Unterstützung Gold Stufe</translation>
-    </message>
-    <message>
-        <source>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;</source>
-        <oldsource>&lt;body&gt;The development of this app can be supported in various ways:&lt;br&gt;&lt;ul&gt;&lt;li&gt;giving feedback and rating via the store enty in Google Play&lt;/li&gt;&lt;li&gt;purchasing a support level item via in app purchase (see buttons below)&lt;/li&gt;&lt;/ul&gt;&lt;br&gt;Purchasing any support level will give you some more features:&lt;br&gt;&lt;ul&gt;&lt;li&gt;usage of the latest Gnuplot (beta) version is enabled&lt;/li&gt;&lt;li&gt;sharing as PDF/PNG is enabled&lt;/li&gt;&lt;li&gt;nice support icon is visible in title bar of the application&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;</oldsource>
-        <translation type="vanished">&lt;body&gt;Die Entwicklung dieser Anwendung kann auf unterschiedliche Weise unterstützt werden:
-&lt;br&gt;&lt;ul&gt;&lt;li&gt;Rückmeldung und Bewertungen im Google Play Store geben&lt;/li&gt;
-&lt;li&gt;Erwerben einer Unterstützungsstufe über einen In-App Kauf (Button unten)&lt;/li&gt;
-&lt;/ul&gt;&lt;br&gt;Der Erwerb einer Unterstützungsstufe erlaubt den Zugriff auf weitere Funktionen:&lt;br&gt;&lt;ul&gt;
-&lt;li&gt;Teilen als PDF/PNG wird ermöglicht&lt;/li&gt;
-&lt;li&gt;schönes Unterstützungs Icon wird in der Titelzeile der Anwendung eingeblendet&lt;/li&gt;&lt;/ul&gt;
-&lt;/body&gt;</translation>
+        <translation>Nivel de soporte Oro</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="124"/>
         <source>You already supported the predecessor of this application !</source>
-        <translation>Du hast den Vorgänger dieser Anwendung schon unterstützt !</translation>
-    </message>
-    <message>
-        <source>Support Level Entry</source>
-        <translation type="vanished">Unterstützungsstufe Eingangsstufe</translation>
-    </message>
-    <message>
-        <source>Support Level Standard</source>
-        <translation type="vanished">Unterstützungsstufe Standard</translation>
-    </message>
-    <message>
-        <source>Support Level Premium</source>
-        <translation type="vanished">Unterstützungsstufe Premium</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation type="vanished">Status</translation>
-    </message>
-    <message>
-        <source>Support Level 0</source>
-        <translation type="vanished">Unterstützungsstufe 0</translation>
-    </message>
-    <message>
-        <source>Support Level 1</source>
-        <translation type="vanished">Unterstützungsstufe 1</translation>
-    </message>
-    <message>
-        <source>Support Level 2</source>
-        <translation type="vanished">Unterstützungsstufe 2</translation>
+        <translation>You already supported the predecessor of this application !</translation>
     </message>
     <message>
         <location filename="SupportDialogForm.ui.qml" line="133"/>
         <source>Close</source>
-        <translation>Schließen</translation>
+        <translation>Cerrar</translation>
     </message>
 </context>
 <context>
@@ -820,99 +724,100 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation></translation>
     </message>
     <message>
+        <location filename="main.qml" line="99"/>
+        <source>unknown.gpt</source>
+        <translation>desconocido.gpt</translation>
+    </message>
+    <message>
         <location filename="main.qml" line="112"/>
         <source>Thank you for supporting the development of this application !</source>
-        <translation>Vielen Dank für die Unterstüzung der Entwicklung dieser Anwendung !</translation>
+        <translation>Gracias por apoyar el desarrollo de esta aplicación!</translation>
     </message>
     <message>
         <location filename="main.qml" line="112"/>
         <source>Thank you !</source>
-        <translation>Vielen Dank !</translation>
+        <translation>Gracias !</translation>
     </message>
     <message>
         <location filename="main.qml" line="469"/>
         <location filename="main.qml" line="475"/>
         <source>Send</source>
-        <translation>Senden</translation>
+        <translation>Enviar</translation>
     </message>
     <message>
         <location filename="main.qml" line="488"/>
         <source>Send as text</source>
-        <translation>Senden als Text</translation>
+        <translation>Enviar como texto</translation>
     </message>
     <message>
         <location filename="main.qml" line="500"/>
         <source>Send as PDF/PNG</source>
-        <translation>Senden als PDF/PNG</translation>
+        <translation>enviar como PDF/PNG</translation>
     </message>
     <message>
         <location filename="main.qml" line="521"/>
         <source>View as PDF/PNG</source>
-        <translation>Zeigen als PDF/PNG</translation>
-    </message>
-    <message>
-        <source>Clear</source>
-        <translation type="vanished">Löschen</translation>
+        <translation>Vista como PDF/PNG</translation>
     </message>
     <message>
         <location filename="main.qml" line="547"/>
         <source>Writable</source>
-        <translation>Änderbar</translation>
+        <translation>Cambiable</translation>
     </message>
     <message>
-        <location filename="main.qml" line="99"/>
-        <source>unknown.gpt</source>
-        <translation>unbekannt.gpt</translation>
+        <location filename="main.qml" line="558"/>
+        <source>Clear/New</source>
+        <translation>Claro/Nuevo</translation>
     </message>
     <message>
         <location filename="main.qml" line="604"/>
         <source>Save as</source>
-        <translation>Speichern unter</translation>
+        <translation>Guardar como</translation>
     </message>
     <message>
         <location filename="main.qml" line="629"/>
         <source>Delete files</source>
-        <translation>Dateien löschen</translation>
+        <translation>Borrar Archivos</translation>
     </message>
     <message>
         <location filename="main.qml" line="641"/>
         <source>Search</source>
-        <translation>Suchen</translation>
+        <translation>Búsqueda</translation>
     </message>
     <message>
         <location filename="main.qml" line="645"/>
         <source>Find</source>
-        <translation>Finden</translation>
+        <translation>Buscar</translation>
     </message>
     <message>
         <location filename="main.qml" line="652"/>
         <source>Replace</source>
-        <translation>Ersetzen</translation>
+        <translation>Reemplazar</translation>
     </message>
     <message>
         <location filename="main.qml" line="659"/>
         <source>Previous</source>
-        <translation>Zurück</translation>
+        <translation>Anterior</translation>
     </message>
     <message>
         <location filename="main.qml" line="666"/>
         <source>Next</source>
-        <translation>Vorwärts</translation>
+        <translation>Siguiente</translation>
     </message>
     <message>
         <location filename="main.qml" line="678"/>
         <source>Undo</source>
-        <translation>Rückgängig</translation>
+        <translation>Deshacer</translation>
     </message>
     <message>
         <location filename="main.qml" line="691"/>
         <source>Redo</source>
-        <translation>Wiederherstellen</translation>
+        <translation>Rehacer</translation>
     </message>
     <message>
         <location filename="main.qml" line="705"/>
         <source>Documentation</source>
-        <translation>Dokumentation</translation>
+        <translation>Documentación</translation>
     </message>
     <message>
         <location filename="main.qml" line="709"/>
@@ -922,120 +827,95 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
     <message>
         <location filename="main.qml" line="715"/>
         <source>License</source>
-        <translation>Lizenz</translation>
+        <translation>Licencia</translation>
     </message>
     <message>
         <location filename="main.qml" line="721"/>
         <source>Gnuplot license</source>
-        <translation>Gnuplot Lizenz</translation>
+        <translation>Gnuplot Licencia</translation>
     </message>
     <message>
         <location filename="main.qml" line="727"/>
         <source>Gnuplot help</source>
-        <translation>Gnuplot Hilfe</translation>
+        <translation>Gnuplot Ayuda</translation>
     </message>
     <message>
         <location filename="main.qml" line="734"/>
         <source>Gnuplot version</source>
-        <translation>Gnuplot Version</translation>
+        <translation>Gnuplot Versión</translation>
     </message>
     <message>
         <location filename="main.qml" line="742"/>
         <source>Settings</source>
-        <translation>Einstellungen</translation>
+        <translation>Configuración</translation>
     </message>
     <message>
         <location filename="main.qml" line="751"/>
         <source>Support</source>
-        <translation>Unterstützung</translation>
+        <translation>Apoyo</translation>
     </message>
     <message>
         <location filename="main.qml" line="763"/>
         <source>About</source>
-        <translation>Über</translation>
-    </message>
-    <message>
-        <location filename="main.qml" line="1387"/>
-        <source>Information</source>
-        <translation>Information</translation>
-    </message>
-    <message>
-        <location filename="main.qml" line="1388"/>
-        <source>Search text not found!</source>
-        <translation>Suchtext nicht gefunden!</translation>
-    </message>
-    <message>
-        <location filename="main.qml" line="1399"/>
-        <source>Reached end of text, search again from the top?</source>
-        <translation>Ende des Textes erreicht, Suche erneut von vorne starten?</translation>
-    </message>
-    <message>
-        <location filename="main.qml" line="1373"/>
-        <location filename="main.qml" line="1398"/>
-        <source>Question</source>
-        <translation>Frage</translation>
-    </message>
-    <message>
-        <location filename="main.qml" line="1374"/>
-        <source>Current text is changed, really discard the changed text?</source>
-        <translation>Aktueller Text wurde geändert, die Änderungen wirklich verwerfen?</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation type="vanished">Test</translation>
-    </message>
-    <message>
-        <source>Purchase restored.</source>
-        <translation type="vanished">Einkauf wiederhergestellt.</translation>
-    </message>
-    <message>
-        <source>Readonly</source>
-        <translation type="vanished">Schreibgeschützt</translation>
-    </message>
-    <message>
-        <location filename="main.qml" line="558"/>
-        <source>Clear/New</source>
-        <translation>Löschen/Neu</translation>
+        <translation>Acerca de</translation>
     </message>
     <message>
         <location filename="main.qml" line="1157"/>
         <source>Graphics</source>
-        <translation>Grafik</translation>
+        <translation>Gráfico</translation>
     </message>
     <message>
         <location filename="main.qml" line="1166"/>
         <source>Output</source>
-        <translation>Ausgabe</translation>
+        <translation>Panel de resultados</translation>
     </message>
     <message>
         <location filename="main.qml" line="1175"/>
         <source>Help</source>
-        <translation>Hilfe</translation>
+        <translation>Ayuda</translation>
     </message>
     <message>
         <location filename="main.qml" line="1348"/>
         <source>Error</source>
-        <translation>Fehler</translation>
+        <translation>Error</translation>
     </message>
     <message>
         <location filename="main.qml" line="1358"/>
         <source>Request for support</source>
-        <translation>Anfrage für Unterstützung</translation>
+        <translation>Solicitud de apoyo</translation>
     </message>
     <message>
         <location filename="main.qml" line="1359"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
-        <translation>Es sieht aus als ob dir die App gefällt.
-Vielleicht möchtest du die Entwicklung dieser App unterstützten indem du eine Unterstützungs Stufe erwirbst?</translation>
+        <translation>Parecía que te gustaba esta aplicación.
+Tal vez le gustaría apoyar el desarrollo de esta aplicación con la compra de un nivel de soporte?</translation>
     </message>
     <message>
-        <source>Purchase successfull.</source>
-        <translation type="vanished">Einkauf erfolgreich.</translation>
+        <location filename="main.qml" line="1373"/>
+        <location filename="main.qml" line="1398"/>
+        <source>Question</source>
+        <translation>Pregunta</translation>
     </message>
     <message>
-        <source>Purchase not completed.</source>
-        <translation type="vanished">Kauf wurde nicht abgeschlossen.</translation>
+        <location filename="main.qml" line="1374"/>
+        <source>Current text is changed, really discard the changed text?</source>
+        <translation>Se cambia el texto actual, ¿realmente se descarta el texto modificado?</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="1387"/>
+        <source>Information</source>
+        <translation>Información</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="1388"/>
+        <source>Search text not found!</source>
+        <translation>¡Texto de búsqueda no encontrado!</translation>
+    </message>
+    <message>
+        <location filename="main.qml" line="1399"/>
+        <source>Reached end of text, search again from the top?</source>
+        <translation>¿Ha llegado al final del texto, buscar de nuevo desde la parte superior?</translation>
     </message>
 </context>
 </TS>

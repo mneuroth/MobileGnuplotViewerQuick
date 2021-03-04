@@ -25,6 +25,8 @@ ApplicationWindow {
     height: 480
     title: qsTr("MobileGnuplotViewerQuick")
 
+    property int defaultIconSize: 40
+    property int iconSize: 40
     property int currentSearchPos: 0
     property string currentSearchText: ""
     property string currentReplaceText: ""
@@ -426,6 +428,20 @@ ApplicationWindow {
 
         stackView.pop()
         stackView.push(settingsDialog)
+    }
+
+    function restoreDefaultSettings()
+    {
+        settingsDialog.txtGraphicsResolutionX.text = 1024
+        settingsDialog.txtGraphicsResolutionY.text = 1024
+        settingsDialog.chbSyncXAndYResolution.checked = true
+        settingsDialog.txtGraphicsFontSize.text = 28
+        settingsDialog.chbUseGnuplotBeta.checked = false
+        settingsDialog.chbUseToolBar.checked = false
+        settingsDialog.chbUseSyntaxHighlighter.checked = true
+        settingsDialog.chbShowLineNumbers.checked = true
+        settingsDialog.chbUseLocalFiledialog.checked = false
+        //settingsDialog.lblExampleText.font = homePage.textArea.font
     }
 
     // **********************************************************************
@@ -892,16 +908,29 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         visible: settings.useToolBar
-        height: settings.useToolBar ? implicitHeight : 0
+        height: settings.useToolBar ? flow.implicitHeight/*implicitHeight*/ : 0
+
+        onHeightChanged: {
+            if( toolBar.height>2*iconSize+flow.spacing ) {
+                iconSize -= 2
+            } else if ( toolBar.height<defaultIconSize ) {
+                if( iconSize<defaultIconSize ) {
+                    iconSize += 1
+                }
+            }
+        }
 
         Flow {
             id: flow
             anchors.fill: parent
             spacing: 5
+            //height: iconSize
 
             ToolButton {
                 id: toolButtonOpen
                 icon.source: "open-folder-with-document.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Open"
                 onClicked: {
@@ -911,6 +940,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonSave
                 icon.source: "floppy-disk.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Open"
                 onClicked: {
@@ -920,6 +951,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonClear
                 icon.source: "close.svg"
+                height: iconSize
+                width: height
                 enabled: menuClear.enabled
                 //text: "Clear"
                 onClicked: {
@@ -929,6 +962,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonRun
                 icon.source: "play-button-arrowhead.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage || stackView.currentItem === helpPage) && !isDialogOpen()
                 //text: "Run"
                 onClicked: {
@@ -940,10 +975,13 @@ ApplicationWindow {
                 }
             }
             ToolSeparator {
+                height: iconSize
             }
             ToolButton {
                 id: toolButtonSearch
                 icon.source: "search.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Search"
                 onClicked: {
@@ -963,6 +1001,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonReplace
                 icon.source: "replace.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                 //text: "Replace"
                 onClicked: {
@@ -983,6 +1023,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonPrevious
                 icon.source: "left-arrow.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                 //text: "Previous"
                 onClicked: {
@@ -992,6 +1034,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonNext
                 icon.source: "right-arrow.svg"
+                height: iconSize
+                width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                 //text: "Next"
                 onClicked: {
@@ -999,10 +1043,13 @@ ApplicationWindow {
                 }
             }
             ToolSeparator {
+                height: iconSize
             }
             ToolButton {
                 id: toolButtonSettings
                 icon.source: "settings.svg"
+                height: iconSize
+                width: height
                 enabled: !isDialogOpen()
                 //text: "Settings"
                 onClicked: {
@@ -1012,6 +1059,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonSettingsSupport
                 icon.source: "coin.svg"
+                height: iconSize
+                width: height
                 visible: isAppStoreSupported
                 enabled: !isDialogOpen() && isAppStoreSupported
                 //text: "Support/donate"
@@ -1020,10 +1069,13 @@ ApplicationWindow {
                 }
             }
             ToolSeparator {
+                height: iconSize
             }
             ToolButton {
                 id: toolButtonShare
                 icon.source: "share.svg"
+                height: iconSize
+                width: height
                 enabled: !isDialogOpen()
                 visible: isShareSupported
                 //text: "Run"
@@ -1036,11 +1088,14 @@ ApplicationWindow {
                 }
             }
             ToolSeparator {
+                height: iconSize
                 visible: isShareSupported
             }
             ToolButton {
                 id: toolButtonInput
                 icon.source: "document.svg"
+                height: iconSize
+                width: height
                 enabled: !isDialogOpen()
                 //text: "Input"
                 onClicked: {
@@ -1052,6 +1107,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonOutput
                 icon.source: "log-format.svg"
+                height: iconSize
+                width: height
                 enabled: !isDialogOpen()
                 //text: "Output"
                 onClicked: {
@@ -1063,6 +1120,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonGraphics
                 icon.source: "line-chart.svg"
+                height: iconSize
+                width: height
                 enabled: !isDialogOpen()
                 //text: "Graphics"
                 onClicked: {
@@ -1073,6 +1132,8 @@ ApplicationWindow {
             ToolButton {
                 id: toolButtonHelp
                 icon.source: "information.svg"
+                height: iconSize
+                width: height
                 enabled: !isDialogOpen()
                 //text: "Help"
                 onClicked: {
@@ -1423,6 +1484,14 @@ ApplicationWindow {
 
             currentIsReplace = false
             searchForCurrentSearchText(!backward,false,false);
+        }
+    }
+
+    Connections {
+        target: settingsDialog
+
+        onRestoreDefaultSettings: {
+            restoreDefaultSettings()
         }
     }
 

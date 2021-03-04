@@ -8,16 +8,14 @@
  *
  ***************************************************************************/
 import QtQuick 2.0
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.15
 
 Page {
-    //id: settingsDialog
+    id: root
     anchors.fill: parent
 
     title: qsTr("Gnuplot Settings")
-
-    width: 400
-    height: 400
 
     property int editFieldWidth: 75
 
@@ -25,6 +23,7 @@ Page {
     property alias lblExampleText: lblExampleText
     property alias btnOk: btnOk
     property alias btnCancel: btnCancel
+    property alias btnRestoreDefaultSettings: btnRestoreDefaultSettings
     property alias txtGraphicsResolutionX: txtGraphicsResolutionX
     property alias txtGraphicsResolutionY: txtGraphicsResolutionY
     property alias txtSupportLevel: txtSupportLevel
@@ -37,213 +36,191 @@ Page {
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
     property alias chbSyncXAndYResolution: chbSyncXAndYResolution
 
-    Rectangle {
-        id: rectangle
-        color: "#ffffff"
-        anchors.rightMargin: 0
-        anchors.bottomMargin: 1
-        anchors.leftMargin: 0
-        anchors.topMargin: -1
+    ScrollView {
+        id: scrollView
+
         anchors.fill: parent
+        anchors.margins: 10
 
-        Button {
-            id: btnCancel
-            text: qsTr("Cancel")
-            anchors.left: btnOk.right
-            anchors.leftMargin: 10
-            anchors.top: txtSupportLevel.bottom
-            anchors.topMargin: 10
-        }
+        //contentWidth: lblSupportInfo.contentWidth // btnSupportLevel1.width //availableWidth
+        contentHeight: layout.implicitHeight + 50
+        clip: true
 
-        Button {
-            id: btnOk
-            text: qsTr("Accept")
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: txtSupportLevel.bottom
-            anchors.topMargin: 10
-        }
+        ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-        CheckBox {
-            id: chbUseGnuplotBeta
-            enabled: /*not available for embedded gnuplot*/false && settings.supportLevel>=0
-            text: qsTr("Use latest Gnuplot (beta) version")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: parent.top
-            anchors.topMargin: 5
-        }
+        ColumnLayout {
+            id: layout
 
-        CheckBox {
-            id: chbShowLineNumbers
-            enabled: true
-            text: qsTr("Show line numbers")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: chbUseGnuplotBeta.bottom
-            anchors.topMargin: 5
-        }
+            CheckBox {
+                id: chbUseGnuplotBeta
+                enabled: /*not available for embedded gnuplot*/false && settings.supportLevel>=0
+                text: qsTr("Use latest Gnuplot (beta) version")
+            }
 
-        CheckBox {
-            id: chbUseToolBar
-            enabled: true
-            text: qsTr("Show toolbar")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: chbShowLineNumbers.bottom
-            anchors.topMargin: 5
-        }
+            CheckBox {
+                id: chbShowLineNumbers
+                enabled: true
+                text: qsTr("Show line numbers")
+            }
+
+            CheckBox {
+                id: chbUseToolBar
+                enabled: true
+                text: qsTr("Show toolbar")
+            }
 
 
-        CheckBox {
-            id: chbUseSyntaxHighlighter
-            enabled: true
-            text: qsTr("Use syntax highlighting")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: chbUseToolBar.bottom
-            anchors.topMargin: 5
-        }
+            CheckBox {
+                id: chbUseSyntaxHighlighter
+                enabled: true
+                text: qsTr("Use syntax highlighting")
+            }
 
-        CheckBox {
-            id: chbUseLocalFiledialog
-            visible: applicationData !== null ? applicationData.isWASM : false
-            height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
-            text: qsTr("Use local filedialog")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: chbUseSyntaxHighlighter.bottom
-            anchors.topMargin: 5
-        }
+            CheckBox {
+                id: chbUseLocalFiledialog
+                text: qsTr("Use local filedialog")
+            }
 
-        CheckBox {
-            id: chbSyncXAndYResolution
-            checked: true
-            text: qsTr("Synchronize x and x resolution")
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: chbUseLocalFiledialog.bottom
-            anchors.topMargin: 5
-        }
+            CheckBox {
+                id: chbSyncXAndYResolution
+                checked: true
+                text: qsTr("Synchronize x and y resolution")
+            }
 
-        TextField {
-            id: txtGraphicsResolutionX
-            validator: IntValidator {bottom: 1; top: 4096}
-            width: editFieldWidth
-            height: 40
-            anchors.top: chbSyncXAndYResolution.bottom
-            anchors.topMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            placeholderText: qsTr("")
-        }
+            Row {
+                id: rowSyncXAndYResolution
+                spacing: 5
 
-        Label {
-            id: lblGraphicsResolutionX
-            text: qsTr("x resolution for graphic area")
-            anchors.verticalCenter: txtGraphicsResolutionX.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: txtGraphicsResolutionX.right
-            anchors.leftMargin: 5
-        }
+                anchors.top: chbSyncXAndYResolution.bottom
+                anchors.topMargin: 10
 
-        TextField {
-            id: txtGraphicsResolutionY
-            enabled: !chbSyncXAndYResolution.checked
-            validator: IntValidator {bottom: 1; top: 4096}
-            width: editFieldWidth
-            height: 40
-            anchors.top: txtGraphicsResolutionX.bottom
-            anchors.topMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            placeholderText: qsTr("")
-        }
+                TextField {
+                    id: txtGraphicsResolutionX
+                    validator: IntValidator {bottom: 1; top: 4096}
+                    width: editFieldWidth
+                    height: 40
+                    placeholderText: qsTr("")
+                }
 
-        Label {
-            id: lblGraphicsResolutionY
-            text: qsTr("y resolution for graphic area")
-            anchors.verticalCenter: txtGraphicsResolutionY.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: txtGraphicsResolutionY.right
-            anchors.leftMargin: 5
-        }
+                Label {
+                    id: lblGraphicsResolutionX
+                    text: qsTr("x resolution for graphic area")
+                    anchors.verticalCenter: txtGraphicsResolutionX.verticalCenter
+                }
 
-        TextField {
-            id: txtGraphicsFontSize
-            validator: IntValidator {bottom: 1; top: 256}
-            width: editFieldWidth
-            height: 40
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: txtGraphicsResolutionY.bottom
-            anchors.topMargin: 5
-            placeholderText: qsTr("")
-        }
+            }
 
-        Label {
-            id: lblGraphicsFontSize
-            text: qsTr("Font size for graphic area")
-            anchors.verticalCenter: txtGraphicsFontSize.verticalCenter
-            anchors.left: txtGraphicsFontSize.right
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-        }
+            Row {
+                id: rowResolutionY
+                spacing: 5
 
-        TextField {
-            id: txtSupportLevel
-            readOnly: true
-            width: editFieldWidth
-            height: 40
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.top: txtGraphicsFontSize.bottom
-            anchors.topMargin: 5
-            placeholderText: qsTr("")
-        }
+                anchors.top: rowSyncXAndYResolution.bottom
+                anchors.topMargin: 10
 
-        Label {
-            id: lblSupportLevel
-            text: qsTr("SupportLevel")
-            anchors.verticalCenter: txtSupportLevel.verticalCenter
-            anchors.left: txtSupportLevel.right
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-        }
+                TextField {
+                    id: txtGraphicsResolutionY
+                    enabled: !chbSyncXAndYResolution.checked
+                    validator: IntValidator {bottom: 1; top: 4096}
+                    width: editFieldWidth
+                    height: 40
+                    placeholderText: qsTr("")
+                }
 
-        Button {
-            id: btnSelectFont
-            text: qsTr("Text font")
-            anchors.top: txtSupportLevel.bottom
-            anchors.topMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-        }
+                Label {
+                    id: lblGraphicsResolutionY
+                    text: qsTr("y resolution for graphic area")
+                    anchors.verticalCenter: txtGraphicsResolutionY.verticalCenter
+                }
+            }
 
-        Label {
-            id: lblExampleText
-            text: qsTr("This is an example text for the current font")
-            anchors.verticalCenter: btnSelectFont.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            anchors.left: btnSelectFont.right
-            anchors.leftMargin: 5
+            Row {
+                id: rowGraphicsFontSize
+                spacing: 5
+
+                anchors.top: rowResolutionY.bottom
+                anchors.topMargin: 10
+
+                TextField {
+                    id: txtGraphicsFontSize
+                    validator: IntValidator {bottom: 1; top: 256}
+                    width: editFieldWidth
+                    height: 40
+                    placeholderText: qsTr("")
+                }
+
+                Label {
+                    id: lblGraphicsFontSize
+                    text: qsTr("Font size for graphic area")
+                    anchors.verticalCenter: txtGraphicsFontSize.verticalCenter
+                }
+            }
+
+            Row {
+                id: rowSupportLevel
+                spacing: 5
+
+                anchors.top: rowGraphicsFontSize.bottom
+                anchors.topMargin: 10
+
+                TextField {
+                    id: txtSupportLevel
+                    readOnly: true
+                    width: editFieldWidth
+                    height: 40
+                    placeholderText: qsTr("")
+                }
+
+                Label {
+                    id: lblSupportLevel
+                    text: qsTr("SupportLevel")
+                    anchors.verticalCenter: txtSupportLevel.verticalCenter
+                }
+            }
+
+            Row {
+                id: rowSelectFont
+                spacing: 5
+                height: btnSelectFont.visible ? implicitHeight : 0
+
+                anchors.top: rowSupportLevel.bottom
+                anchors.topMargin: 10
+
+                Button {
+                    id: btnSelectFont
+                    height: btnSelectFont.visible ? implicitHeight : 0
+                    text: qsTr("Text font")
+                }
+
+                Label {
+                    id: lblExampleText
+                    height: btnSelectFont.visible ? implicitHeight : 0
+                    text: qsTr("This is an example text for the current font")
+                    anchors.verticalCenter: btnSelectFont.verticalCenter
+                }
+            }
+
+            Row {
+                spacing: 10
+
+                anchors.top: rowSelectFont.bottom
+                anchors.topMargin: 10
+
+                Button {
+                    id: btnOk
+                    text: qsTr("Accept")
+                }
+
+                Button {
+                    id: btnCancel
+                    text: qsTr("Cancel")
+                }
+
+                Button {
+                    id: btnRestoreDefaultSettings
+                    text: qsTr("Default Values")
+                }
+            }
         }
     }
 }

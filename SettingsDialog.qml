@@ -12,6 +12,8 @@ import QtQuick.Controls 2.1
 
 SettingsDialogForm {
 
+    signal restoreDefaultSettings()
+
     Component.onCompleted: {
         settingsDialog.btnSelectFont.visible = false
         settingsDialog.lblExampleText.visible = false
@@ -23,6 +25,11 @@ SettingsDialogForm {
                 txtGraphicsResolutionY.text = txtGraphicsResolutionX.text
             }
         }
+    }
+
+    chbUseLocalFiledialog {
+        visible: applicationData !== null ? applicationData.isWASM : false
+        height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
     }
 
     txtGraphicsResolutionX {
@@ -45,11 +52,13 @@ SettingsDialogForm {
 
     txtSupportLevel {
         visible: isAppStoreSupported
+        height: isAppStoreSupported ? implicitHeight : 0
         text: (applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false) ? "99" : settings.supportLevel
     }
 
     lblSupportLevel {
         visible: isAppStoreSupported
+        height: isAppStoreSupported ? implicitHeight : 0
     }
 
     btnSelectFont {
@@ -83,12 +92,18 @@ SettingsDialogForm {
             outputPage.txtOutput.font = aFont
             helpPage.txtHelp.font = aFont
             stackView.pop()
-            if( applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter) ) {
+            //if( applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter) ) {
                 // simulate update of text to rehighlight text again
                 //var txt = homePage.textArea.text
                 //homePage.textArea.text = ""
                 //homePage.textArea.text = txt
-            }
+            //}
+        }
+    }
+
+    btnRestoreDefaultSettings {
+        onClicked: {
+            restoreDefaultSettings()
         }
     }
 }

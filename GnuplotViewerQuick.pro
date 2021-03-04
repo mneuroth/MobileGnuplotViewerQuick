@@ -36,8 +36,8 @@ RESOURCES += qml.qrc
 TRANSLATIONS += \
     GnuplotViewerQuick_de_DE.ts \
     GnuplotViewerQuick_nl_NL.ts \
-    GnuplotViewerQuick_fr_FR.ts
-    //es_ES
+    GnuplotViewerQuick_fr_FR.ts \
+    GnuplotViewerQuick_es_ES.ts
     //pt_PT
     //fr_FR
     //it_IT
