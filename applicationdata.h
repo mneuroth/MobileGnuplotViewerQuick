@@ -95,12 +95,12 @@ public:
     Q_INVOKABLE bool shareSimpleText(const QString & text);
     Q_INVOKABLE bool shareText(const QString & tempFileName, const QString & text);
     Q_INVOKABLE bool shareImage(const QImage & image);
-    Q_INVOKABLE bool shareSvgData(const QVariant & data);
-    Q_INVOKABLE bool shareViewSvgData(const QVariant & data);
+    Q_INVOKABLE bool shareSvgData(const QVariant & data, int resolutionX, int resolutionY);
+    Q_INVOKABLE bool shareViewSvgData(const QVariant & data, int resolutionX, int resolutionY);
     Q_INVOKABLE bool shareTextAsPdf(const QString & text, bool bSendFile);
 
     Q_INVOKABLE void writePdfFile(const QString & sFileName, const QString & text);
-    Q_INVOKABLE bool saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data);
+    Q_INVOKABLE bool saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data, int resolutionX, int resolutionY);
 
     Q_INVOKABLE bool isAppInstalled(const QString & sAppName) const;
 

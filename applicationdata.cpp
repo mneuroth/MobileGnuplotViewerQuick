@@ -563,12 +563,12 @@ bool ApplicationData::shareImage(const QImage & image)
     });
 }
 
-bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data)
+bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QByteArray & data, int resolutionX, int resolutionY)
 {
     QString translatedFileName = GetTranslatedFileName(sUrlFileName);
 
     QSvgRenderer aRenderer(data);
-    QImage aImg(1024,1024, QImage::Format_ARGB32);
+    QImage aImg(resolutionX, resolutionY, QImage::Format_ARGB32);
 
     aImg.fill(0xFFFFFFFF);  // white background
 
@@ -597,21 +597,21 @@ bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QBy
     }
 }
 
-bool ApplicationData::shareSvgData(const QVariant & data)
+bool ApplicationData::shareSvgData(const QVariant & data, int resolutionX, int resolutionY)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data, resolutionX, resolutionY](QString name) -> bool
     {
         QByteArray arrData = qvariant_cast<QByteArray>(data);
-        return saveDataAsPngImage(name, arrData);
+        return saveDataAsPngImage(name, arrData, resolutionX, resolutionY);
     });
 }
 
-bool ApplicationData::shareViewSvgData(const QVariant & data)
+bool ApplicationData::shareViewSvgData(const QVariant & data, int resolutionX, int resolutionY)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data](QString name) -> bool
+    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data, resolutionX, resolutionY](QString name) -> bool
     {
         QByteArray arrData = qvariant_cast<QByteArray>(data);
-        return saveDataAsPngImage(name, arrData);
+        return saveDataAsPngImage(name, arrData, resolutionX, resolutionY);
     }, false);
 }
 

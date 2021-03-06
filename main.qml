@@ -193,7 +193,7 @@ ApplicationWindow {
     }
 
     function saveCurrentGraptics(fileName) {
-        applicationData.saveDataAsPngImage(fileName,graphicsPage.svgdata)
+        applicationData.saveDataAsPngImage(fileName, graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
     }
 
     function saveAsImage(fullName) {
@@ -505,7 +505,7 @@ ApplicationWindow {
                         onTriggered: {
                             if( isGraphicsPage(stackView.currentItem) )
                             {
-                                var ok = applicationData.shareSvgData(graphicsPage.svgdata)
+                                var ok = applicationData.shareSvgData(graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
                             }
                             else
                             {
@@ -526,7 +526,7 @@ ApplicationWindow {
                         onTriggered: {
                             if( isGraphicsPage(stackView.currentItem) )
                             {
-                                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata)
+                                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
                             }
                             else
                             {
