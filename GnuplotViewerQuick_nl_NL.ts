@@ -22,12 +22,12 @@
         <location filename="AboutDialogForm.ui.qml" line="73"/>
         <source>from: 4.3.2021</source>
         <oldsource>from: 28.2.2021</oldsource>
-        <translation type="unfinished">van: 4.3.2021</translation>
+        <translation>van: 4.3.2021</translation>
     </message>
     <message>
         <location filename="AboutDialogForm.ui.qml" line="67"/>
-        <source>Version: 2.0.12</source>
-        <oldsource>Version: 2.0.11</oldsource>
+        <source>Version: 2.0.13</source>
+        <oldsource>Version: 2.0.12</oldsource>
         <translation></translation>
     </message>
     <message>
@@ -258,49 +258,60 @@ errorMsg=%6
 <context>
     <name>MobileFileDialog</name>
     <message>
-        <location filename="MobileFileDialog.qml" line="62"/>
+        <location filename="MobileFileDialog.qml" line="65"/>
         <source>new file name:</source>
         <translation>nieuwe bestandsnaam:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="63"/>
+        <location filename="MobileFileDialog.qml" line="66"/>
         <source>unknown.png</source>
         <translation>onbekend.png</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="63"/>
+        <location filename="MobileFileDialog.qml" line="66"/>
         <source>unknown.gpt</source>
         <translation>onbekend.gpt</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="65"/>
+        <location filename="MobileFileDialog.qml" line="68"/>
         <source>Save as</source>
         <translation>Opslaan als</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="77"/>
+        <location filename="MobileFileDialog.qml" line="80"/>
         <source>open name:</source>
         <translation>open naam:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="79"/>
+        <location filename="MobileFileDialog.qml" line="82"/>
         <source>Open</source>
         <translation>Openen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="91"/>
+        <location filename="MobileFileDialog.qml" line="94"/>
         <source>current file name:</source>
         <translation>huidige bestandsnaam:</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="94"/>
+        <location filename="MobileFileDialog.qml" line="97"/>
         <source>Delete</source>
         <translation>Verwijderen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialog.qml" line="118"/>
+        <location filename="MobileFileDialog.qml" line="121"/>
         <source>can not delete file </source>
         <translation>kan bestand niet verwijderen </translation>
+    </message>
+    <message>
+        <location filename="MobileFileDialog.qml" line="361"/>
+        <source>Information</source>
+        <translation>Informatie</translation>
+    </message>
+    <message>
+        <location filename="MobileFileDialog.qml" line="362"/>
+        <source>Reading files from SD card should work, but writing and deleting files might not work on some Android versions!</source>
+        <oldsource>Reading files from SD card should work but writing and deleting files might not work on some Android versions!</oldsource>
+        <translation>Het lezen van bestanden van de SD-kaart zou moeten werken, maar het schrijven en verwijderen van bestanden werkt mogelijk niet op sommige Android-versies!</translation>
     </message>
 </context>
 <context>
@@ -336,22 +347,22 @@ errorMsg=%6
         <translation>Toon hier de huidige directory</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="140"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="142"/>
         <source>Show date and size</source>
         <translation>Datum en grootte weergeven</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="153"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="155"/>
         <source>Any input</source>
         <translation>elke input</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="188"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="190"/>
         <source>Open</source>
         <translation>Openen</translation>
     </message>
     <message>
-        <location filename="MobileFileDialogForm.ui.qml" line="199"/>
+        <location filename="MobileFileDialogForm.ui.qml" line="201"/>
         <source>Cancel</source>
         <translation>Annuleren</translation>
     </message>
@@ -910,43 +921,43 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation>Over</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1387"/>
+        <location filename="main.qml" line="1398"/>
         <source>Information</source>
         <translation>Informatie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1388"/>
+        <location filename="main.qml" line="1399"/>
         <source>Search text not found!</source>
         <translation>Zoektekst niet gevonden!</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1399"/>
+        <location filename="main.qml" line="1410"/>
         <source>Reached end of text, search again from the top?</source>
         <translation>Einde van de tekst bereikt, opnieuw zoeken vanaf de bovenkant?</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1157"/>
+        <location filename="main.qml" line="1165"/>
         <source>Graphics</source>
         <translation>Grafiek</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1166"/>
+        <location filename="main.qml" line="1174"/>
         <source>Output</source>
         <translation>Output</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1175"/>
+        <location filename="main.qml" line="1183"/>
         <source>Help</source>
         <translation>Hulp</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1373"/>
-        <location filename="main.qml" line="1398"/>
+        <location filename="main.qml" line="1384"/>
+        <location filename="main.qml" line="1409"/>
         <source>Question</source>
         <translation>Kwestie</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1374"/>
+        <location filename="main.qml" line="1385"/>
         <source>Current text is changed, really discard the changed text?</source>
         <translation>Huidige tekst is gewijzigd, echt de wijzigingen negeren?</translation>
     </message>
@@ -955,17 +966,17 @@ REPLACEMENT OR REFUND OF PURCHASE PRICE.</source>
         <translation type="vanished">Kies een bestand</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1348"/>
+        <location filename="main.qml" line="1359"/>
         <source>Error</source>
         <translation>Fout</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1358"/>
+        <location filename="main.qml" line="1369"/>
         <source>Request for support</source>
         <translation>Verzoek om ondersteuning</translation>
     </message>
     <message>
-        <location filename="main.qml" line="1359"/>
+        <location filename="main.qml" line="1370"/>
         <source>It seemed you like this app.
 Maybe you would like to support the development of this app with buying a support level?</source>
         <translation>Het leek erop dat je deze app leuk vond.

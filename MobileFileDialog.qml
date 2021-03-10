@@ -10,6 +10,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.2
 
 MobileFileDialogForm {
     id: root
@@ -20,6 +21,8 @@ MobileFileDialogForm {
     property bool isDirectoryModus: false
     property bool isSaveAsImage: false
     property bool isExtendedInfos: false
+    property bool isSDCardInfoShown: false
+    property bool isWASM: false
     property bool isMobilePlatform: applicationData !== null ? applicationData.isAndroid : false
     property var textControl: null
 
@@ -161,6 +164,12 @@ MobileFileDialogForm {
         } else {
             return fileSize + "  Bytes"
         }
+    }
+
+    function showSDCardMenu() {
+        menuSDCard.x = btnSDCard.x
+        menuSDCard.y = btnSDCard.height
+        menuSDCard.open()
     }
 
     Component {
@@ -320,9 +329,15 @@ MobileFileDialogForm {
 
     btnSDCard {
         onClicked: {
-            menuSDCard.x = btnSDCard.x
-            menuSDCard.y = btnSDCard.height
-            menuSDCard.open()
+            if( !isSDCardInfoShown && !isWASM )
+            {
+                isSDCardInfoShown = true
+                infoSDCardAccess.open()
+            }
+            else
+            {
+                showSDCardMenu()
+            }
         }
     }
 
@@ -338,5 +353,14 @@ MobileFileDialogForm {
                 storageAccess.openFile()
             }
         }
+    }
+
+    MessageDialog {
+        id: infoSDCardAccess
+        visible: false
+        title: qsTr("Information")
+        text: qsTr("Reading files from SD card should work, but writing and deleting files might not work on some Android versions!")
+        standardButtons: StandardButton.Ok
+        onAccepted: showSDCardMenu()
     }
 }

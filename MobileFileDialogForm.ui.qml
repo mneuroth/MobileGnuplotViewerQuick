@@ -102,6 +102,8 @@ Page {
         text: qsTr("Show current directory here")
         anchors.top: columnLayout.bottom
         anchors.topMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 5
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
     }

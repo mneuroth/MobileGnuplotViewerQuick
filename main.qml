@@ -1097,6 +1097,8 @@ ApplicationWindow {
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
+                checkable: true
+                checked: stackView.currentItem === homePage
                 //text: "Input"
                 onClicked: {
                     stackView.pop()
@@ -1110,6 +1112,8 @@ ApplicationWindow {
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
+                checkable: true
+                checked: stackView.currentItem === outputPage
                 //text: "Output"
                 onClicked: {
                     stackView.pop()
@@ -1123,6 +1127,8 @@ ApplicationWindow {
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
+                checkable: true
+                checked: stackView.currentItem === graphicsPage
                 //text: "Graphics"
                 onClicked: {
                     stackView.pop()
@@ -1135,6 +1141,8 @@ ApplicationWindow {
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
+                checkable: true
+                checked: stackView.currentItem === helpPage
                 //text: "Help"
                 onClicked: {
                     stackView.pop()
@@ -1291,6 +1299,9 @@ ApplicationWindow {
     MobileFileDialog {
         id: mobileFileDialog
         visible: false
+        Component.onCompleted: {
+            mobileFileDialog.isWASM = applicationData.isWASM
+        }
     }
 /*
     FontDialog {
