@@ -76,8 +76,9 @@ void StorageAccess::openFile()
 jbyteArray QByteArray2jbyteArray(const QByteArray & buf)
 {
     QAndroidJniEnvironment env;
-    jbyteArray array = env->NewByteArray(buf.length());
-    env->SetByteArrayRegion(array, 0, buf.length(), reinterpret_cast<jbyte*>((char *)buf.data()));
+    // Bugfix 12.3.2021: copy terminating 0 to buffer
+    jbyteArray array = env->NewByteArray(buf.size()+1);
+    env->SetByteArrayRegion(array, 0, buf.size()+1, reinterpret_cast<jbyte*>((char *)buf.data()));
     return array;
 }
 
