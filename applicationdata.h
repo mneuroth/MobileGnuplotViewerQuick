@@ -23,6 +23,8 @@ class GnuplotSyntaxHighlighter;
 
 void AddToLog(const QString & msg);
 
+#define READ_ERROR_OUTPUT "<#READ_ERROR#>"
+
 // **************************************************************************
 
 // see: https://stackoverflow.com/questions/14791360/qt5-syntax-highlighting-in-qml
@@ -64,6 +66,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(QString sdCardPath READ getSDCardPath)
     Q_PROPERTY(QString defaultScript READ getDefaultScript)
     Q_PROPERTY(QString appInfos READ getAppInfos)
+    Q_PROPERTY(QString errorContent READ getErrorContent)
     Q_PROPERTY(bool isAppStoreSupported READ isAppStoreSupported NOTIFY isAppStoreSupportedChanged)
     Q_PROPERTY(bool isShareSupported READ isShareSupported NOTIFY isShareSupportedChanged)
     Q_PROPERTY(bool isAndroid READ isAndroid NOTIFY isAndroidChanged)
@@ -121,6 +124,7 @@ public:
     QString getHomePath() const;
 
     QString getDefaultScript() const;
+    QString getErrorContent() const;
 
     void setScriptText(const QString & sScript);
     void setScriptName(const QString & sName);
@@ -128,7 +132,7 @@ public:
 
     void setTextDocument(QQuickTextDocument * pDoc);
 
-    static QString simpleReadFileContent(const QString & fileName);
+    static bool simpleReadFileContent(const QString & fileName, QString & content);
     static bool simpleWriteFileContent(const QString & fileName, const QString & content);
 
     bool isAppStoreSupported() const;
@@ -154,6 +158,8 @@ signals:
     void isMobileGnuplotViewerInstalledChanged();
     void isUseLocalFileDialogChanged();
     void isAdminChanged();
+
+    void showErrorMsg(const QString & message) const;
 
     void receiveOpenFileContent(const QString & fileName, const QByteArray & fileContent);
 

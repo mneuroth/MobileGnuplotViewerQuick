@@ -237,12 +237,12 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     fclose(temperr);
 
     // read temporary files for stdout and stderr
-    m_aLastGnuplotError = ApplicationData::simpleReadFileContent(TEMP_STDERR);
+    ApplicationData::simpleReadFileContent(TEMP_STDERR, m_aLastGnuplotError);
     if( m_aLastGnuplotError.length()>0 )
     {
         emit sigShowErrorText(m_aLastGnuplotError);
     }
-    m_aLastGnuplotResult = ApplicationData::simpleReadFileContent(TEMP_STDOUT);
+    ApplicationData::simpleReadFileContent(TEMP_STDOUT, m_aLastGnuplotResult);
     if( m_aLastGnuplotResult.length()>0 )
     {
         emit sigResultReady(m_aLastGnuplotResult);

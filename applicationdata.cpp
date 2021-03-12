@@ -271,21 +271,22 @@ QString GetTranslatedFileName(const QString & fileName)
 }
 
 
-QString ApplicationData::simpleReadFileContent(const QString & fileName)
+bool ApplicationData::simpleReadFileContent(const QString & fileName, QString & content)
 {
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        return QString(tr("Error reading ") + fileName);
+        content = "";
+        return false;
     }
 
     QTextStream stream(&file);
-    auto text = stream.readAll();
+    content = stream.readAll();
 
     file.close();
 
-    return text;
+    return true;
 }
 
 bool ApplicationData::simpleWriteFileContent(const QString & fileName, const QString & content)
@@ -319,12 +320,21 @@ QString ApplicationData::readFileContent(const QString & fileName) const
         }
         else
         {
-            return QString(tr("Error reading ") + fileName);
+            return QString(READ_ERROR_OUTPUT);
         }
     }
     else
     {
-        return simpleReadFileContent(translatedFileName);
+        QString content;
+        bool ok = simpleReadFileContent(translatedFileName, content);
+        if( ok )
+        {
+            return content;
+        }
+        else
+        {
+            return QString(READ_ERROR_OUTPUT);
+        }
     }
 }
 
@@ -538,6 +548,11 @@ QStringList ApplicationData::getSDCardPaths() const
 QString ApplicationData::getDefaultScript() const
 {
     return DEFAULT_SCRIPT;
+}
+
+QString ApplicationData::getErrorContent() const
+{
+    return READ_ERROR_OUTPUT;
 }
 
 bool ApplicationData::shareSimpleText(const QString & text)

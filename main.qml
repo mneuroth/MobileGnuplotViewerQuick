@@ -182,7 +182,7 @@ ApplicationWindow {
         {
             var sErr = qsTr("Error writing file: "+homePage.currentFileUrl+"\n")
             applicationData.logText(sErr)
-            outputPage.txtOutput.text = sErr
+            outputPage.txtOutput.text += sErr
             stackView.push(outputPage)
         }
         else
@@ -192,12 +192,12 @@ ApplicationWindow {
         }
     }
 
-    function saveCurrentGraptics(fileName) {
+    function saveCurrentGraphics(fileName) {
         applicationData.saveDataAsPngImage(fileName, graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
     }
 
     function saveAsImage(fullName) {
-        saveCurrentGraptics(fullName)
+        saveCurrentGraphics(fullName)
     }
 
     function saveAsCurrentDoc(fullName, textControl) {
@@ -211,13 +211,23 @@ ApplicationWindow {
         checkForModified()
         // then read new document
         var urlFileName = buildValidUrl(url)
-        homePage.currentFileUrl = urlFileName        
-        homePage.textArea.text = applicationData.readFileContent(urlFileName)
-        homePage.textArea.textDocument.modified = false
-        homePage.lblFileName.text = applicationData.getOnlyFileName(urlFileName)
-        homePage.textArea.forceActiveFocus()
-        // update the current directory after starting the application...
-        mobileFileDialog.currentDirectory = applicationData.getLocalPathWithoutFileName(urlFileName)
+        homePage.currentFileUrl = urlFileName
+        // do not update content of edit control in the case of an error !
+        var content = applicationData.readFileContent(urlFileName)
+        if( content !== applicationData.errorContent)
+        {
+            homePage.textArea.text = content
+            homePage.textArea.textDocument.modified = false
+            homePage.lblFileName.text = applicationData.getOnlyFileName(urlFileName)
+            homePage.textArea.forceActiveFocus()
+            // update the current directory after starting the application...
+            mobileFileDialog.currentDirectory = applicationData.getLocalPathWithoutFileName(urlFileName)
+        }
+        else
+        {
+            var errorMessage = qsTr("Error reading ") + urlFileName;
+            showInOutput(errorMessage, true)
+        }
     }
 
     function showInOutput(sContent, bShowOutputPage) {
@@ -232,7 +242,10 @@ ApplicationWindow {
     function showFileContentInOutput(sOnlyFileName) {
         var sFileName = applicationData.filesPath + sOnlyFileName
         var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
-        showInOutput(sContent, true)
+        if( sContent !== applicationData.errorContent)
+        {
+            showInOutput(sContent, true)
+        }
     }
 
     function getCurrentTextRef(currentPage) {
@@ -1511,6 +1524,12 @@ ApplicationWindow {
 
         onSendDummyData: {
             console.log("========> Dummy Data !!! "+txt+" "+value)
+        }
+
+        onShowErrorMsg: {
+            stackView.pop()
+            outputPage.txtOutput.text += message + "\n"
+            stackView.push(outputPage)
         }
 
         // used for WASM platform:

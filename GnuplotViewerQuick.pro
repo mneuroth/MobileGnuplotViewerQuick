@@ -8,7 +8,7 @@ greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 
 #QT += quickdialogs
 
-CONFIG += c++11
+CONFIG += c++1z
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -208,7 +208,8 @@ DISTFILES += \
     android/src/de/mneuroth/activity/sharex/QShareActivity.java \
     android/src/de/mneuroth/utils/QSharePathResolver.java \
     android/src/de/mneuroth/utils/QShareUtils.java \
-    android/src/de/mneuroth/utils/QStorageAccess.java
+    android/src/de/mneuroth/utils/QStorageAccess.java \
+    android/src/de/mneuroth/utils/Tuple.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 

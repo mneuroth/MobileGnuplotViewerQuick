@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if defined(Q_OS_ANDROID)
-    AddToLog("Starting ApplicationUI");
+    //AddToLog("Starting ApplicationUI");
 
     ApplicationUI appui;
 #endif
