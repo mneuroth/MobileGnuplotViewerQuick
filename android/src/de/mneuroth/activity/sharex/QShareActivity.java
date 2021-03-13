@@ -47,6 +47,10 @@ public class QShareActivity extends QtActivity
     // InputStream from 'content' scheme:
     public static native void setFileReceivedAndSaved(String url);
     //
+    public static native void setTextContentReceived(String text);
+    //
+    public static native void setUnknownContentReceived(String errorMsg);
+    //
     public static native void fireActivityResult(int requestCode, int resultCode, String uriTxt);
     //
     public static native void fireFileOpenActivityResult(int resultCode, String fileUri, String decodedFileUri, byte[] fileContent);
@@ -70,18 +74,23 @@ public class QShareActivity extends QtActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
+//qDebugOutput("--> onCreate");
           Log.d("ekkescorner", "onCreate QShareActivity");
           // now we're checking if the App was started from another Android App via Intent
           Intent theIntent = getIntent();
           if (theIntent != null){
+//qDebugOutput("--> onCreate (1)");
               String theAction = theIntent.getAction();
+//qDebugOutput("--> onCreate (2) "+theAction);
               if (theAction != null){
                   Log.d("ekkescorner onCreate ", theAction);
+//qDebugOutput("--> onCreate (3)");
                   // QML UI not ready yet
                   // delay processIntent();
                   isIntentPending = true;
               }
           }
+//qDebugOutput("--> onCreate (4)");
     } // onCreate
 
 
@@ -194,6 +203,7 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
     // if we are opened from other apps:
     @Override
     public void onNewIntent(Intent intent) {
+//qDebugOutput("--> onNewIntent");
       //Log.d("ekkescorner", "onNewIntent");
       super.onNewIntent(intent);
       setIntent(intent);
@@ -235,17 +245,29 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
              intentUri = intent.getData();
       } else if (intent.getAction().equals("android.intent.action.SEND")){
 //qDebugOutput("--> PROCESS_INTENT SEND");
+//             String type = intent.getType();
+//qDebugOutput(type);
              intentAction = "SEND";
-              Bundle bundle = intent.getExtras();
-              intentUri = (Uri)bundle.get(Intent.EXTRA_STREAM);
-      } else {
+             Bundle bundle = intent.getExtras();
+             intentUri = (Uri)bundle.get(Intent.EXTRA_STREAM);
+       } else if (intent.getAction().equals("android.intent.action.MAIN")){
+             // ignore main intent of this application !
+             return;
+       } else {
 //qDebugOutput("--> PROCESS_INTENT UNKNOWN");
+//qDebugOutput(intent.getAction().toString());
               //Log.d("ekkescorner Intent unknown action:", intent.getAction());
+              setUnknownContentReceived("Warning: Intent unknown action:"+intent.getAction());
               return;
       }
       //Log.d("ekkescorner action:", intentAction);
       if (intentUri == null){
-//qDebugOutput("--> PROCESS_INTENT URI is NULL");
+            //qDebugOutput("--> PROCESS_INTENT URI is NULL");
+            Bundle bundle = intent.getExtras();
+            String txt = bundle.getCharSequence(Intent.EXTRA_TEXT).toString();
+            //qDebugOutput("TXT=");
+            //qDebugOutput(txt);
+            setTextContentReceived(txt);
             //Log.d("ekkescorner Intent URI:", "is null");
             return;
       }
@@ -257,9 +279,11 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
       if (intentScheme == null){
 //qDebugOutput("--> PROCESS_INTENT URI is NULL (2)");
             //Log.d("ekkescorner Intent URI Scheme:", "is null");
+            setUnknownContentReceived("Warning: Intent URI Scheme is null");
             return;
       }
       if(intentScheme.equals("file")){
+//qDebugOutput("--> PROCESS_INTENT file ok (2)");
             // URI as encoded string
             //Log.d("ekkescorner Intent File URI: ", intentUri.toString());
             setFileUrlReceived(intentUri.toString());
@@ -269,6 +293,7 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
       if(!intentScheme.equals("content")){
 //qDebugOutput("--> PROCESS_INTENT no CONTENT");
               //Log.d("ekkescorner Intent URI unknown scheme: ", intentScheme);
+              setUnknownContentReceived("Warning: Intent URI Scheme is "+intentScheme.toString());
               return;
       }
       // ok - it's a content scheme URI
@@ -277,6 +302,7 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
       // we'll try to copy the file into our App working dir via InputStream
       // hopefully in most cases PathResolver will give a path
 
+//qDebugOutput("--> PROCESS_INTENT <<CONTINUE>>");
       // you need the file extension, MimeType or Name from ContentResolver ?
       // here's HowTo get it:
       //Log.d("ekkescorner Intent Content URI: ", intentUri.toString());
@@ -301,6 +327,7 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
             //Log.d("ekkescorner QSharePathResolver:", filePath);
             // to be safe check if this File Url really can be opened by Qt
             // there were problems with MS office apps on Android 7
+//qDebugOutput("--> PROCESS_INTENT exit file exists");
             if (checkFileExits(filePath)) {
                 setFileUrlReceived(filePath);
                 // we are done Qt can deal with file scheme
@@ -313,10 +340,10 @@ private byte[] readBinaryFileFromUri(Uri uri) throws IOException {
       if(filePath == null) {
 //qDebugOutput("--> PROCESS_INTENT URI is NULL (3)");
            //Log.d("ekkescorner Intent FilePath:", "is NULL");
+           setUnknownContentReceived("Warning: Intent URI Scheme is really null");
            return;
       }
 //qDebugOutput("--> PROCESS_INTENT NORMAL EXIT "+filePath);
       setFileReceivedAndSaved(filePath);
     } // processIntent
-
 } // class QShareActivity

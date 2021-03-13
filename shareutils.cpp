@@ -41,6 +41,9 @@ ShareUtils::ShareUtils(QObject *parent)
     connectResult = connect(mPlatformShareUtils, &PlatformShareUtils::fileReceivedAndSaved, this, &ShareUtils::onFileReceivedAndSaved);
     Q_ASSERT(connectResult);
 
+    connectResult = connect(mPlatformShareUtils, &PlatformShareUtils::textReceived, this, &ShareUtils::onTextReceived);
+    Q_ASSERT(connectResult);
+
     Q_UNUSED(connectResult);
 }
 
@@ -135,3 +138,7 @@ void ShareUtils::onFileReceivedAndSaved(QString url)
     emit fileReceivedAndSaved(url);
 }
 
+void ShareUtils::onTextReceived(QString text)
+{
+    emit textReceived(text);
+}

@@ -224,7 +224,7 @@ bool StorageAccess::readFile(const QString & fileUri, QByteArray & fileContent)
 
 
         fileContent = qContent;
-    //    env->ReleaseByteArrayElements(contentArray, icon, JNI_ABORT);
+    //TODO working: check if release is needed:       env->ReleaseByteArrayElements(contentArray, icon, JNI_ABORT);
     // WARNING: this makes problems with files of length 0 !!!! --> use new implementation above
         return qContent.length()>0;
     }

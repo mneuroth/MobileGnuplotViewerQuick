@@ -159,13 +159,13 @@ signals:
     void isUseLocalFileDialogChanged();
     void isAdminChanged();
 
+    void receiveOpenFileContent(const QString & fileName, const QString & fileContent);
     void showErrorMsg(const QString & message) const;
-
-    void receiveOpenFileContent(const QString & fileName, const QByteArray & fileContent);
 
 public slots:
     void sltFileUrlReceived(const QString & sUrl);
     void sltFileReceivedAndSaved(const QString & sUrl);
+    void sltTextReceived(const QString &sContent);
     void sltShareError(int requestCode, const QString & message);
     void sltShareEditDone(int requestCode, const QString & urlTxt);
     void sltShareFinished(int requestCode);

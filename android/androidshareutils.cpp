@@ -452,7 +452,7 @@ void AndroidShareUtils::editFile(const QString &filePath, const QString &title, 
 void AndroidShareUtils::handleActivityResult(int receiverRequestCode, int resultCode, const QAndroidJniObject &data)
 {
     Q_UNUSED(data);
-AddToLog("*** handleActivityResult");
+//AddToLog("*** handleActivityResult");
     //qDebug() << "From JNI QAndroidActivityResultReceiver: " << receiverRequestCode << "ResultCode:" << resultCode;
     processActivityResult(receiverRequestCode, resultCode, "");
 }
@@ -460,14 +460,14 @@ AddToLog("*** handleActivityResult");
 // used from Activity.java onActivityResult()
 void AndroidShareUtils::onActivityResult(int requestCode, int resultCode, const QString & urlTxt)
 {
-AddToLog("*** onActivityResult "+urlTxt);
+//AddToLog("*** onActivityResult "+urlTxt);
     //qDebug() << "From Java Activity onActivityResult: " << requestCode << "ResultCode:" << resultCode;
     processActivityResult(requestCode, resultCode, urlTxt);
 }
 
 void AndroidShareUtils::processActivityResult(int requestCode, int resultCode, const QString & urlTxt)
 {
-AddToLog("*** processActivityResult "+urlTxt+" "+QString("%1 %2").arg(requestCode).arg(resultCode));
+//AddToLog("*** processActivityResult "+urlTxt+" "+QString("%1 %2").arg(requestCode).arg(resultCode));
     // we're getting RESULT_OK only if edit is done
     if(resultCode == RESULT_OK) {
         emit shareEditDone(requestCode, urlTxt);
@@ -495,7 +495,7 @@ AddToLog("*** processActivityResult "+urlTxt+" "+QString("%1 %2").arg(requestCod
 
 void AndroidShareUtils::checkPendingIntents(const QString workingDirPath)
 {
-AddToLog("*** checkPendingIntents "+workingDirPath);
+//AddToLog("*** checkPendingIntents "+workingDirPath);
     QAndroidJniObject activity = QtAndroid::androidActivity();
     if(activity.isValid()) {
         // create a Java String for the Working Dir Path
@@ -514,7 +514,7 @@ AddToLog("*** checkPendingIntents "+workingDirPath);
 
 void AndroidShareUtils::setFileUrlReceived(const QString &url)
 {
-AddToLog("*** setFileUrlReceived "+url);
+//AddToLog("*** setFileUrlReceived "+url);
 
     if(url.isEmpty()) {
         //qWarning() << "setFileUrlReceived: we got an empty URL";
@@ -530,14 +530,14 @@ AddToLog("*** setFileUrlReceived "+url);
         myUrl= url;
     }
 
-AddToLog("*** (2+) "+myUrl);
+//AddToLog("*** (2+) "+myUrl);
     // check if File exists
     QFileInfo fileInfo = QFileInfo(myUrl);
     if(fileInfo.exists()) {
-AddToLog("*** (3+) ");
+//AddToLog("*** (3+) ");
         emit fileUrlReceived(myUrl);
     } else {
-AddToLog("*** (4+) ");
+//AddToLog("*** (4+) ");
         //qDebug() << "setFileUrlReceived: FILE does NOT exist ";
         emit shareError(0, tr("File does not exist: %1").arg(myUrl));
     }
@@ -545,10 +545,10 @@ AddToLog("*** (4+) ");
 
 void AndroidShareUtils::setFileReceivedAndSaved(const QString &url)
 {
-AddToLog("*** setFileReceivedAndSaved "+url);
+//AddToLog("*** setFileReceivedAndSaved "+url);
 
     if(url.isEmpty()) {
-AddToLog("*** (1)");
+//AddToLog("*** (1)");
         //qWarning() << "setFileReceivedAndSaved: we got an empty URL";
         emit shareError(0, tr("Empty URL received"));
         return;
@@ -562,17 +562,27 @@ AddToLog("*** (1)");
         myUrl= url;
     }
 
-AddToLog("*** (2) "+myUrl);
+//AddToLog("*** (2) "+myUrl);
     // check if File exists
     QFileInfo fileInfo = QFileInfo(myUrl);
     if(fileInfo.exists()) {
-AddToLog(QString("*** (3) %1").arg((unsigned long)this));
+//AddToLog(QString("*** (3) %1").arg((unsigned long)this));
         emit fileReceivedAndSaved(myUrl);
     } else {
         //qDebug() << "setFileReceivedAndSaved: FILE does NOT exist ";
-AddToLog("*** (4)");
+//AddToLog("*** (4)");
         emit shareError(0, tr("File does not exist: %1").arg(myUrl));
     }
+}
+
+void AndroidShareUtils::setTextContentReceived(const QString &text)
+{
+    emit textReceived(text);
+}
+
+void AndroidShareUtils::setUnknownContentReceived(const QString &errMsg)
+{
+    emit shareError(0, errMsg);
 }
 
 // to be safe we check if a File Url from java really exists for Qt
@@ -642,6 +652,30 @@ JNIEXPORT void JNICALL
     Q_UNUSED (obj)
     AndroidShareUtils::getInstance()->setFileReceivedAndSaved(urlStr);
     env->ReleaseStringUTFChars(url, urlStr);
+    return;
+}
+
+JNIEXPORT void JNICALL
+  Java_de_mneuroth_activity_sharex_QShareActivity_setTextContentReceived(JNIEnv *env,
+                                        jobject obj,
+                                        jstring text)
+{
+    const char *textStr = env->GetStringUTFChars(text, NULL);
+    Q_UNUSED (obj)
+    AndroidShareUtils::getInstance()->setTextContentReceived(textStr);
+    env->ReleaseStringUTFChars(text, textStr);
+    return;
+}
+
+JNIEXPORT void JNICALL
+  Java_de_mneuroth_activity_sharex_QShareActivity_setUnknownContentReceived(JNIEnv *env,
+                                        jobject obj,
+                                        jstring errMsg)
+{
+    const char *errMsgStr = env->GetStringUTFChars(errMsg, NULL);
+    Q_UNUSED (obj)
+    AndroidShareUtils::getInstance()->setUnknownContentReceived(errMsgStr);
+    env->ReleaseStringUTFChars(errMsg, errMsgStr);
     return;
 }
 

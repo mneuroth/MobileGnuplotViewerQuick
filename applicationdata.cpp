@@ -52,6 +52,7 @@ ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, Stor
     QMetaObject::Connection result;
     result = connect(m_pShareUtils, SIGNAL(fileUrlReceived(QString)), this, SLOT(sltFileUrlReceived(QString)));
     result = connect(m_pShareUtils, SIGNAL(fileReceivedAndSaved(QString)), this, SLOT(sltFileReceivedAndSaved(QString)));
+    result = connect(m_pShareUtils, SIGNAL(textReceived(QString)), this, SLOT(sltTextReceived(QString)));
     result = connect(m_pShareUtils, SIGNAL(shareError(int, QString)), this, SLOT(sltShareError(int, QString)));
     connect(m_pShareUtils, SIGNAL(shareFinished(int)), this, SLOT(sltShareFinished(int)));
     connect(m_pShareUtils, SIGNAL(shareEditDone(int, QString)), this, SLOT(sltShareEditDone(int, QString)));
@@ -690,7 +691,7 @@ void ApplicationData::getOpenFileContentAsync(const QString & nameFilter)
              // No file was selected
          } else {
              // Use fileName and fileContent
-             emit this->receiveOpenFileContent(fileName, fileContent);
+             emit this->receiveOpenFileContent(fileName, QString::fromLocal8Bit(fileContent));
          }
      };
 
@@ -801,6 +802,12 @@ void ApplicationData::sltFileReceivedAndSaved(const QString & sUrl)
     /*bool ok =*/ loadAndShowFileContent(sUrl);
 }
 
+void ApplicationData::sltTextReceived(const QString &sContent)
+{
+    QString sTempFileName = "./shared_text.txt";
+    emit receiveOpenFileContent(sTempFileName, sContent);
+}
+
 void ApplicationData::sltShareError(int requestCode, const QString & message)
 {
     Q_UNUSED(requestCode);
@@ -874,6 +881,7 @@ bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
         else
         {
 // TODO hier ggf. direkt signale an QML senden anstatt JavaScript methode aufrufen !!!???
+// TODO: improve !!!
             setScriptText(sScript);
             setScriptName(sFileName);
         }
