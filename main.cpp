@@ -15,6 +15,7 @@
 #include <QQmlContext>
 
 #include <QDateTime>
+#include <QIcon>
 
 #include "gnuplotinvoker.h"
 #include "gnuplotsyntaxhighlighter.h"
@@ -94,6 +95,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("mneuroth.de");     // Computer/HKEY_CURRENT_USER/Software/mneuroth.de
     app.setOrganizationDomain("mneuroth.de");
     app.setApplicationName("MobileGnuplotViewerQuick");
+    app.setWindowIcon(QIcon(":/gnuplotviewer_flat_512x512.png"));
 
 // TODO DEBUGGING: AddToLog("Starting APP");
 
