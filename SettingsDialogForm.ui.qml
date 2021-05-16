@@ -18,8 +18,15 @@ Page {
     title: qsTr("Gnuplot Settings")
 
     property int editFieldWidth: 75
+    property int minFontSize: 6
+    property int maxFontSize: 64
+    property int minGraphicSize: 128
+    property int maxGraphicSize: 4096
 
     property alias txtGraphicsFontSize: txtGraphicsFontSize
+    property alias txtTextFontSize: txtTextFontSize
+    property alias btnDecTextFontSize: btnDecTextFontSize
+    property alias btnIncTextFontSize: btnIncTextFontSize
     property alias lblExampleText: lblExampleText
     property alias btnOk: btnOk
     property alias btnCancel: btnCancel
@@ -99,7 +106,7 @@ Page {
 
                 TextField {
                     id: txtGraphicsResolutionX
-                    validator: IntValidator {bottom: 1; top: 4096}
+                    validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
                     width: editFieldWidth
                     height: 40
                     placeholderText: qsTr("")
@@ -123,7 +130,7 @@ Page {
                 TextField {
                     id: txtGraphicsResolutionY
                     enabled: !chbSyncXAndYResolution.checked
-                    validator: IntValidator {bottom: 1; top: 4096}
+                    validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
                     width: editFieldWidth
                     height: 40
                     placeholderText: qsTr("")
@@ -145,7 +152,7 @@ Page {
 
                 TextField {
                     id: txtGraphicsFontSize
-                    validator: IntValidator {bottom: 1; top: 256}
+                    validator: IntValidator { bottom: minFontSize; top: maxFontSize }
                     width: editFieldWidth
                     height: 40
                     placeholderText: qsTr("")
@@ -159,10 +166,44 @@ Page {
             }
 
             Row {
-                id: rowSupportLevel
+                id: rowTextFontSize
                 spacing: 5
 
                 anchors.top: rowGraphicsFontSize.bottom
+                anchors.topMargin: 10
+
+                TextField {
+                    id: txtTextFontSize
+                    validator: IntValidator { bottom: minFontSize; top: maxFontSize }
+                    width: editFieldWidth
+                    height: 40
+                    placeholderText: qsTr("")
+                }
+
+                Button {
+                    id: btnIncTextFontSize
+                    text: "+"
+                    width: 40
+                }
+
+                Button {
+                    id: btnDecTextFontSize
+                    text: "-"
+                    width: 40
+                }
+
+                Label {
+                    id: lblTextFontSize
+                    text: qsTr("Font size for text area")
+                    anchors.verticalCenter: txtTextFontSize.verticalCenter
+                }
+            }
+
+            Row {
+                id: rowSupportLevel
+                spacing: 5
+
+                anchors.top: rowTextFontSize.bottom
                 anchors.topMargin: 10
 
                 TextField {

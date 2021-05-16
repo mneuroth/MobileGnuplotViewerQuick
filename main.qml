@@ -56,9 +56,15 @@ ApplicationWindow {
         if( settings.currentFont !== null )
         {
             homePage.textArea.font = settings.currentFont
+            homePage.textLineNumbers.font = settings.currentFont
             outputPage.txtOutput.font = settings.currentFont
             helpPage.txtHelp.font = settings.currentFont
         }
+
+        homePage.textArea.font.pixelSize = settings.textFontSize
+        homePage.textLineNumbers.font.pixelSize = settings.textFontSize
+        outputPage.txtOutput.font.pixelSize = settings.textFontSize
+        helpPage.txtHelp.font.pixelSize = settings.textFontSize
 
         if(homePage.currentFileUrl.length>0)
         {
@@ -326,8 +332,7 @@ ApplicationWindow {
 
     function moveToEndOfText(textControl)
     {
-        var txt = textControl.text
-        textControl.cursorPosition = txt.length
+        textControl.cursorPosition = textControl.text.length
         textControl.forceActiveFocus()
     }
 
@@ -432,6 +437,7 @@ ApplicationWindow {
         settingsDialog.txtGraphicsResolutionY.text = gnuplotInvoker.resolutionY
         settingsDialog.chbSyncXAndYResolution.checked = gnuplotInvoker.syncXandYResolution
         settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
+        settingsDialog.txtTextFontSize.text = settings.textFontSize
         settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
         settingsDialog.chbUseToolBar.checked = settings.useToolBar
         settingsDialog.chbUseSyntaxHighlighter.checked = settings.useSyntaxHighlighter
@@ -449,6 +455,7 @@ ApplicationWindow {
         settingsDialog.txtGraphicsResolutionY.text = 1024
         settingsDialog.chbSyncXAndYResolution.checked = true
         settingsDialog.txtGraphicsFontSize.text = 28
+        settingsDialog.txtTextFontSize.text = 14
         settingsDialog.chbUseGnuplotBeta.checked = false
         settingsDialog.chbUseToolBar.checked = false
         settingsDialog.chbUseSyntaxHighlighter.checked = true
@@ -1232,6 +1239,7 @@ ApplicationWindow {
         property int graphicsResolutionX: 1024
         property int graphicsResolutionY: 1024
         property int graphicsFontSize: 28
+        property int textFontSize: 14
         property var currentFont: null
         property int invokeCount: 0
 

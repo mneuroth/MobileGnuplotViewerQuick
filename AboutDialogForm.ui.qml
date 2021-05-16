@@ -64,13 +64,13 @@ Page {
 
             Text {
                 id: lblAppVersion
-                text: qsTr("Version: 2.0.13")
+                text: qsTr("Version: 2.0.14")
                 Layout.alignment: Qt.AlignCenter
             }
 
             Text {
                 id: lblAppDate
-                text: qsTr("from: 12.3.2021")
+                text: qsTr("from: 16.5.2021")
                 Layout.alignment: Qt.AlignCenter
                 Layout.bottomMargin: 15
             }

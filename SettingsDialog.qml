@@ -28,8 +28,6 @@ SettingsDialogForm {
     }
 
     txtGraphicsResolutionX {
-        validator: IntValidator { bottom: 128; top: 4096 }
-
         onTextChanged: {
             if( chbSyncXAndYResolution.checked ) {
                 txtGraphicsResolutionY.text = txtGraphicsResolutionX.text
@@ -37,12 +35,24 @@ SettingsDialogForm {
         }
     }
 
-    txtGraphicsResolutionY {
-        validator: IntValidator { bottom: 128; top: 4096 }
+    btnIncTextFontSize {
+        onClicked: {
+            var val = parseInt(txtTextFontSize.text)
+            if(val < maxFontSize) {
+                val += 1
+            }
+            txtTextFontSize.text = val
+        }
     }
 
-    txtGraphicsFontSize {
-        validator: IntValidator { bottom: 6; top: 64 }
+    btnDecTextFontSize {
+        onClicked: {
+            var val = parseInt(txtTextFontSize.text)
+            if(val > minFontSize) {
+                val -= 1
+            }
+            txtTextFontSize.text = val
+        }
     }
 
     btnSelectFont {
@@ -69,10 +79,13 @@ SettingsDialogForm {
             gnuplotInvoker.fontSize = parseInt(txtGraphicsFontSize.text)
             applicationData.isUseLocalFileDialog = chbUseLocalFiledialog.checked
             settings.useToolBar = chbUseToolBar.checked
+            settings.textFontSize = parseInt(txtTextFontSize.text)
             settings.showLineNumbers = chbShowLineNumbers.checked
             settings.useSyntaxHighlighter = chbUseSyntaxHighlighter.checked
+            settingsDialog.lblExampleText.font.pixelSize = settings.textFontSize
             var aFont = settingsDialog.lblExampleText.font
             homePage.textArea.font = aFont
+            homePage.textLineNumbers.font = aFont
             outputPage.txtOutput.font = aFont
             helpPage.txtHelp.font = aFont
             stackView.pop()
