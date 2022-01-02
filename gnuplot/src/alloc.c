@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: alloc.c,v 1.17 2011/09/04 11:08:33 markisch Exp $"); }
-#endif
-
 /* GNUPLOT - alloc.c */
 
 /*[
@@ -44,20 +40,6 @@ static char *RCSid() { return RCSid("$Id: alloc.c,v 1.17 2011/09/04 11:08:33 mar
 #include "alloc.h"
 #include "util.h"	/* for int_error() */
 
-#ifndef GP_FARMALLOC
-# ifdef FARALLOC
-#  define GP_FARMALLOC(size) farmalloc ((size))
-#  define GP_FARREALLOC(p,size) farrealloc ((p), (size))
-# else
-#  ifdef MALLOC_ZERO_RETURNS_ZERO
-#   define GP_FARMALLOC(size) malloc ((size_t)((size==0)?1:size))
-#  else
-#   define GP_FARMALLOC(size) malloc ((size_t)(size))
-#  endif
-#  define GP_FARREALLOC(p,size) realloc ((p), (size_t)(size))
-# endif
-#endif
-
 /* gp_alloc:
  * allocate memory
  * This is a protected version of malloc. It causes an int_error
@@ -71,7 +53,7 @@ gp_alloc(size_t size, const char *message)
 {
     char *p;			/* the new allocation */
 
-	p = GP_FARMALLOC(size);	/* try again */
+	p = malloc(size);	/* try again */
 	if (p == NULL) {
 	    /* really out of memory */
 	    if (message != NULL) {
@@ -86,7 +68,7 @@ gp_alloc(size_t size, const char *message)
 
 /*
  * note gp_realloc assumes that failed realloc calls leave the original mem
- * block allocated. If this is not the case with any C compiler, a substitue
+ * block allocated. If this is not the case with any C compiler, a substitute
  * realloc function has to be used.
  */
 
@@ -99,7 +81,7 @@ gp_realloc(generic *p, size_t size, const char *message)
     if (!p)
 	return gp_alloc(size, message);
 
-    res = GP_FARREALLOC(p, size);
+    res = realloc(p, size);
     if (res == (char *) NULL) {
 	if (message != NULL) {
 	    int_error(NO_CARET, "out of memory for %s", message);
@@ -111,18 +93,3 @@ gp_realloc(generic *p, size_t size, const char *message)
     return (res);
 }
 
-
-#ifdef FARALLOC
-void
-gpfree(generic *p)
-{
-#ifdef _Windows
-    HGLOBAL hGlobal = GlobalHandle(p);
-    GlobalUnlock(hGlobal);
-    GlobalFree(hGlobal);
-#else
-    farfree(p);
-#endif
-}
-
-#endif

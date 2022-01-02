@@ -1,7 +1,3 @@
-/*
- * $Id: post.h,v 1.11 2010/03/18 04:52:53 sfeam Exp $
- */
-
 /* GNUPLOT - post.h */
 
 /*[
@@ -42,10 +38,10 @@
  */
 
 #ifdef PSLATEX_DRIVER
-TERM_PUBLIC void PSTEX_common_init __PROTO((void));
-TERM_PUBLIC void PSTEX_reopen_output __PROTO((void));
-TERM_PUBLIC void EPSLATEX_common_init __PROTO((void));
-TERM_PUBLIC void EPSLATEX_reopen_output __PROTO((char *));
+TERM_PUBLIC void PSTEX_common_init(void);
+TERM_PUBLIC void PSTEX_reopen_output(void);
+TERM_PUBLIC void EPSLATEX_common_init(void);
+TERM_PUBLIC void EPSLATEX_reopen_output(char *);
 #endif
 
 #define PS_POINT_TYPES 8

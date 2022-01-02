@@ -1,7 +1,3 @@
-/*
- * $Id: winmain.c,v 1.101.2.2 2017/07/30 07:52:31 markisch Exp $
- */
-
 /* GNUPLOT - win/winmain.c */
 /*[
  * Copyright 1992, 1993, 1998, 2004   Maurice Castro, Russell Lang
@@ -72,6 +68,7 @@
 #include "setshow.h"
 #include "version.h"
 #include "command.h"
+#include "encoding.h"
 #include "winmain.h"
 #include "wtext.h"
 #include "wcommon.h"
@@ -123,12 +120,12 @@ char *authors[]={
 
 void WinExit(void);
 static void WinCloseHelp(void);
-int CALLBACK ShutDown();
+int CALLBACK ShutDown(void);
 #ifdef WGP_CONSOLE
 static int ConsolePutS(const char *str);
 static int ConsolePutCh(int ch);
-static BOOL WINAPI ConsoleHandler(DWORD dwType);
 #endif
+
 
 static void
 CheckMemory(LPTSTR str)
@@ -153,7 +150,7 @@ Pause(LPSTR str)
 
 
 void
-kill_pending_Pause_dialog()
+kill_pending_Pause_dialog(void)
 {
     if (!pausewin.bPause) /* no Pause dialog displayed */
 	return;
@@ -205,7 +202,7 @@ WinExit(void)
 
 /* call back function from Text Window WM_CLOSE */
 int CALLBACK
-ShutDown()
+ShutDown(void)
 {
     /* First chance for wgnuplot to close help system. */
     WinCloseHelp();
@@ -253,7 +250,7 @@ GetDllVersion(LPCTSTR lpszDllName)
 }
 
 
-BOOL 
+BOOL
 IsWindowsXPorLater(void)
 {
     OSVERSIONINFO versionInfo;
@@ -338,7 +335,7 @@ WinCloseHelp(void)
 
 
 static LPTSTR
-GetLanguageCode()
+GetLanguageCode(void)
 {
     static TCHAR lang[6] = TEXT("");
 
@@ -429,29 +426,42 @@ ReadMainIni(LPTSTR file, LPTSTR section)
 
 
 #ifndef WGP_CONSOLE
+#ifndef __WATCOMC__
 int WINAPI
-WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
+_tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
+#else
+int WINAPI
+WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#endif
 #else
 int
-main(int argc, char **argv)
+_tmain(int argc, TCHAR **argv)
 #endif
 {
     LPTSTR tail;
+    int i;
 #ifdef WGP_CONSOLE
     HINSTANCE hInstance = GetModuleHandle(NULL), hPrevInstance = NULL;
-#else
-    int i;
 #endif
 
-#ifndef WGP_CONSOLE
-# if defined( __MINGW32__) && !defined(_W64)
-#  define argc _argc
-#  define argv _argv
-# else /* MSVC, WATCOM, MINGW-W64 */
+#ifndef _UNICODE
+# ifndef WGP_CONSOLE
+#  if defined(__MINGW32__) && !defined(_W64)
+#   define argc _argc
+#   define argv _argv
+#  else /* MSVC, WATCOM, MINGW-W64 */
+#   define argc __argc
+#   define argv __argv
+#  endif
+# endif /* WGP_CONSOLE */
+#else
 #  define argc __argc
-#  define argv __argv
-# endif
-#endif /* WGP_CONSOLE */
+#  define argv argv_u8
+    /* create an UTF-8 encoded copy of all arguments */
+    char ** argv_u8 = calloc(__argc, sizeof(char *));
+    for (i = 0; i < __argc; i++)
+	argv_u8[i] = AnsiText(__wargv[i], S_ENC_UTF8);
+#endif
 
     szModuleName = (LPTSTR) malloc((MAXSTR + 1) * sizeof(TCHAR));
     CheckMemory(szModuleName);
@@ -608,6 +618,7 @@ main(int argc, char **argv)
 	GetConsoleMode(handle, &mode);
 	SetConsoleMode(handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     }
+
     // set console mode handler to catch "abort" signals
     SetConsoleCtrlHandler(ConsoleHandler, TRUE);
 #endif
@@ -760,19 +771,19 @@ MyPutCh(int ch)
 
 #ifndef WGP_CONSOLE
 int
-MyKBHit()
+MyKBHit(void)
 {
     return TextKBHit(&textwin);
 }
 
 int
-MyGetCh()
+MyGetCh(void)
 {
     return TextGetCh(&textwin);
 }
 
 int
-MyGetChE()
+MyGetChE(void)
 {
     return TextGetChE(&textwin);
 }
@@ -994,7 +1005,7 @@ fake_popen(const char * command, const char * type)
 	LPWSTR wcmd;
 	pipe_type = *type;
 	/* Execute command with redirection of stdout to temporary file. */
-#ifndef __WATCOMC__
+#ifndef HAVE_BROKEN_WSYSTEM
 	cmd = (char *) malloc(strlen(command) + strlen(pipe_filename) + 5);
 	sprintf(cmd, "%s > %s", command, pipe_filename);
 	wcmd = UnicodeText(cmd, encoding);
@@ -1003,7 +1014,7 @@ fake_popen(const char * command, const char * type)
 #else
 	cmd = (char *) malloc(strlen(command) + strlen(pipe_filename) + 15);
 	sprintf(cmd, "cmd /c %s > %s", command, pipe_filename);
-	system(cmd);
+	rc = system(cmd);
 #endif
 	free(cmd);
 	/* Now open temporary file. */
@@ -1045,7 +1056,7 @@ fake_pclose(FILE *stream)
 	char * cmd;
 	LPWSTR wcmd;
 
-#ifndef __WATCOMC__
+#ifndef HAVE_BROKEN_WSYSTEM
 	cmd = (char *) gp_alloc(strlen(pipe_command) + strlen(pipe_filename) + 10, "fake_pclose");
 	/* FIXME: this won't work for binary data. We need a proper `cat` replacement. */
 	sprintf(cmd, "type %s | %s", pipe_filename, pipe_command);
@@ -1055,7 +1066,7 @@ fake_pclose(FILE *stream)
 #else
 	cmd = (char *) gp_alloc(strlen(pipe_command) + strlen(pipe_filename) + 20, "fake_pclose");
 	sprintf(cmd, "cmd/c type %s | %s", pipe_filename, pipe_command);
-	system(cmd);
+	rc = system(cmd);
 #endif
 	free(cmd);
     }
@@ -1080,51 +1091,33 @@ fake_pclose(FILE *stream)
 }
 #endif
 
+
 #ifdef WGP_CONSOLE
 
-DWORD WINAPI
-stdin_pipe_reader(LPVOID param)
-{
-#if 0
-    HANDLE h = (HANDLE)_get_osfhandle(fileno(stdin));
-    char c;
-    DWORD cRead;
-
-    if (ReadFile(h, &c, 1, &cRead, NULL))
-        return c;
-#else
-    unsigned char c;
-    if (fread(&c, 1, 1, stdin) == 1)
-	return (DWORD)c;
-    return EOF;
-#endif
-}
-
-
 int
-ConsoleGetch()
+ConsoleGetch(void)
 {
     int fd = _fileno(stdin);
     HANDLE h;
     DWORD waitResult;
 
-    if (!_isatty(fd))
-	h = CreateThread(NULL, 0, stdin_pipe_reader, NULL, 0, NULL);
-    else
-	h = (HANDLE)_get_osfhandle(fd);
+    h = (HANDLE)_get_osfhandle(fd);
+    if (h == INVALID_HANDLE_VALUE)
+	fprintf(stderr, "ERROR: Invalid stdin handle value!\n");
 
     do {
 	waitResult = MsgWaitForMultipleObjects(1, &h, FALSE, INFINITE, QS_ALLINPUT);
 	if (waitResult == WAIT_OBJECT_0) {
-	    DWORD c;
 	    if (_isatty(fd)) {
-		c = ConsoleReadCh();
+		DWORD c = ConsoleReadCh();
 		if (c != NUL)
 		    return c;
 	    } else {
-		GetExitCodeThread(h, &c);
-		CloseHandle(h);
-		return c;
+		unsigned char c;
+		if (fread(&c, 1, 1, stdin) == 1)
+		    return c;
+		else
+		    return EOF;
 	    }
 	} else if (waitResult == WAIT_OBJECT_0+1) {
 	    WinMessageLoop();
@@ -1141,7 +1134,7 @@ ConsoleGetch()
 
 
 int
-ConsoleReadCh()
+ConsoleReadCh(void)
 {
     const int max_input = 8;
     static char console_input[8];
@@ -1236,9 +1229,10 @@ ConsolePutCh(int ch)
     }
     return ch;
 }
+#endif
 
 
-/* This is called by the system to signal various events. 
+/* This is called by the system to signal various events.
    Note that it is executed in a separate thread.  */
 BOOL WINAPI
 ConsoleHandler(DWORD dwType)
@@ -1247,13 +1241,19 @@ ConsoleHandler(DWORD dwType)
     case CTRL_CLOSE_EVENT:
     case CTRL_LOGOFF_EVENT:
     case CTRL_SHUTDOWN_EVENT: {
+#ifdef WGP_CONSOLE
 	HANDLE h;
 	INPUT_RECORD rec;
 	DWORD written;
+#endif
 
 	// NOTE: returning from this handler terminates the application.
 	// Instead, we signal the main thread to clean up and exit and
 	// then idle by sleeping.
+#ifndef WGP_CONSOLE
+	// close the main window to exit gnuplot
+	PostMessage(textwin.hWndParent, WM_CLOSE, 0, 0);
+#else
 	terminate_flag = TRUE;
 	// send ^D to main thread input queue
 	h = GetStdHandle(STD_INPUT_HANDLE);
@@ -1263,6 +1263,7 @@ ConsoleHandler(DWORD dwType)
 	rec.Event.KeyEvent.wRepeatCount = 1;
 	rec.Event.KeyEvent.uChar.AsciiChar = 004;
 	WriteConsoleInput(h, &rec, 1, &written);
+#endif
 	// give the main thread time to exit
 	Sleep(10000);
 	return TRUE;
@@ -1272,7 +1273,6 @@ ConsoleHandler(DWORD dwType)
     }
     return FALSE;
 }
-#endif
 
 
 /* public interface to printer routines : Windows PRN emulation
@@ -1283,7 +1283,7 @@ ConsoleHandler(DWORD dwType)
 static char win_prntmp[MAX_PRT_LEN+1];
 
 FILE *
-open_printer()
+open_printer(void)
 {
     char *temp;
 
@@ -1336,7 +1336,7 @@ close_printer(FILE *outfile)
 
 
 void
-screen_dump()
+screen_dump(void)
 {
     if (term == NULL) {
 	int_error(c_token, "");
@@ -1463,6 +1463,23 @@ WinMessageLoop(void)
 }
 
 
+#ifndef WGP_CONSOLE
+void
+WinOpenConsole(void)
+{
+    /* Try to attach to an existing console window. */
+    if (AttachConsole(ATTACH_PARENT_PROCESS) == 0) {
+	if (GetLastError() != ERROR_ACCESS_DENIED) {
+	    /* Open new console if we are are not attached to one already.
+	       Note that closing this console window will end wgnuplot, too. */
+	    AllocConsole();
+	}
+    }
+    SetConsoleCtrlHandler(ConsoleHandler, TRUE);
+}
+#endif
+
+
 void
 WinRaiseConsole(void)
 {
@@ -1521,39 +1538,6 @@ WinGetCodepage(enum set_encoding_id encoding)
 }
 
 
-enum set_encoding_id
-WinGetEncoding(UINT cp)
-{
-    enum set_encoding_id encoding;
-
-    /* The code below is the inverse to the code found in UnicodeText().
-       For a list of code page identifiers see
-       http://msdn.microsoft.com/en-us/library/dd317756%28v=vs.85%29.aspx
-    */
-    switch (cp) {
-    case 437:   encoding = S_ENC_CP437; break;
-    case 850:   encoding = S_ENC_CP850; break;
-    case 852:   encoding = S_ENC_CP852; break;
-    case 932:   encoding = S_ENC_SJIS; break;
-    case 950:   encoding = S_ENC_CP950; break;
-    case 1250:  encoding = S_ENC_CP1250; break;
-    case 1251:  encoding = S_ENC_CP1251; break;
-    case 1252:  encoding = S_ENC_CP1252; break;
-    case 1254:  encoding = S_ENC_CP1254; break;
-    case 20866: encoding = S_ENC_KOI8_R; break;
-    case 21866: encoding = S_ENC_KOI8_U; break;
-    case 28591: encoding = S_ENC_ISO8859_1; break;
-    case 28592: encoding = S_ENC_ISO8859_2; break;
-    case 28599: encoding = S_ENC_ISO8859_9; break;
-    case 28605: encoding = S_ENC_ISO8859_15; break;
-    case 65001: encoding = S_ENC_UTF8; break;
-    default:
-	encoding = S_ENC_DEFAULT;
-    }
-    return encoding;
-}
-
-
 LPWSTR
 UnicodeText(LPCSTR str, enum set_encoding_id encoding)
 {
@@ -1601,6 +1585,12 @@ win_fopen(const char *filename, const char *mode)
     LPWSTR wfilename = UnicodeText(filename, encoding);
     LPWSTR wmode = UnicodeText(mode, encoding);
     file = _wfopen(wfilename, wmode);
+    if (file == NULL) {
+	/* "encoding" didn't work, try UTF-8 instead */
+	free(wfilename);
+	wfilename = UnicodeText(filename, S_ENC_UTF8);
+	file = _wfopen(wfilename, wmode);
+    }
     free(wfilename);
     free(wmode);
     return file;
@@ -1623,7 +1613,7 @@ win_popen(const char *filename, const char *mode)
 
 
 UINT
-GetDPI()
+GetDPI(void)
 {
     HDC hdc_screen = GetDC(NULL);
     if (hdc_screen) {

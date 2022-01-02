@@ -74,8 +74,8 @@ pgf.DEFAULT_FONT_V_CHAR = 308
 
 pgf.STYLE_FILE_BASENAME = "gnuplot-lua-tikz"  -- \usepackage{gnuplot-lua-tikz}
 
-pgf.REVISION = "108"
-pgf.REVISION_DATE = "2019/06/10 03:12:00"
+pgf.REVISION = "114"
+pgf.REVISION_DATE = "2020/06/07 19:26:00"
 
 pgf.styles = {}
 
@@ -252,7 +252,10 @@ pgf.write_doc_end = function()
 end
 
 pgf.write_graph_begin = function (font, noenv)
-  local global_opt = "" -- unused
+  local global_opt = ""
+  if gfx.opt.butt then
+    global_opt = ",cap=butt,join=miter"
+  end
   if gfx.opt.full_doc then
     gp.write(gfx.format[gfx.opt.tex_format].beforetikzpicture)
   end
@@ -366,7 +369,11 @@ end
 
 
 pgf.draw_points = function(t, pm)
-  gp.write("\\gppoint{"..pm.."}{")
+  local style_options = ""
+  if gfx.opacity < 1.0 then
+    style_options = string.format(",opacity=%.3f", gfx.opacity)
+  end
+  gp.write("\\gp3point{"..pm.."}{"..style_options.."}{")
   for i,v in ipairs(t) do
       gp.write("("..pgf.format_coord(v[1], v[2])..")")
   end
@@ -665,26 +672,29 @@ f:write([[
 \fi}
 \expandafter\gpchecktikzversion\pgfversion\relax
 
-% FIXME: is there a more elegant way to determine the output format?
+\def\gnuplot@output@ps{ps} % required for comparison in \gprawimage
 
-\newif\ifgppdfout\gppdfoutfalse
-\newif\ifgppsout\gppsoutfalse
-
-\expandafter\def\csname gnuplot@select@driver@pgfsys-dvi.def\endcsname     {\gppsouttrue}  % ps
-\expandafter\def\csname gnuplot@select@driver@pgfsys-dvipdfm.def\endcsname {\gppdfouttrue} % pdf
-\expandafter\def\csname gnuplot@select@driver@pgfsys-dvipdfmx.def\endcsname{\gppdfouttrue} % pdf
-\expandafter\def\csname gnuplot@select@driver@pgfsys-dvips.def\endcsname   {\gppsouttrue}  % ps
-\expandafter\def\csname gnuplot@select@driver@pgfsys-pdftex.def\endcsname  {\gppdfouttrue} % pdf
-\expandafter\def\csname gnuplot@select@driver@pgfsys-tex4ht.def\endcsname  {}              % html
-\expandafter\def\csname gnuplot@select@driver@pgfsys-textures.def\endcsname{\gppsouttrue}  % ps
-\expandafter\def\csname gnuplot@select@driver@pgfsys-vtex.def\endcsname    {\gppsouttrue}  % ps
-\expandafter\def\csname gnuplot@select@driver@pgfsys-xetex.def\endcsname   {\gppdfouttrue} % pdf
-\expandafter\def\csname gnuplot@select@driver@pgfsys-luatex.def\endcsname  {\gppdfouttrue} % pdf
+\expandafter\def\csname gnuplot@select@driver@pgfsys-dvi.def\endcsname     {ps}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-dvipdfm.def\endcsname {pdf}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-dvipdfmx.def\endcsname{pdf}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-dvips.def\endcsname   {ps}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-pdftex.def\endcsname  {pdf}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-luatex.def\endcsname  {pdf}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-tex4ht.def\endcsname  {html}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-textures.def\endcsname{ps}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-vtex.def\endcsname    {ps}
+\expandafter\def\csname gnuplot@select@driver@pgfsys-xetex.def\endcsname   {pdf}
 
 \ifcsname gnuplot@select@driver@\pgfsysdriver\endcsname
-  \csname gnuplot@select@driver@\pgfsysdriver\endcsname
+  \edef\gnuplot@output@mode{\csname gnuplot@select@driver@\pgfsysdriver\endcsname}
 \else
   \errmessage{The driver \pgfsysdriver\space is not supported by gnuplot-lua-tikz}%
+\fi
+
+\ifcsname PackageWarning\endcsname
+  \let\gnuplot@packagewarning\PackageWarning
+\else
+  \def\gnuplot@packagewarning#1#2{\immediate\write-1{Package #1 Warning: #2}}
 \fi
 
 % uncomment the following lines to make font values "appendable"
@@ -726,19 +736,13 @@ f:write([[
   \pgfsysprotocol@literal{#6 >}%
 }
 \def\gp@rawimage@html#1#2#3#4#5#6{%
-% FIXME: print a warning message here
+  \gnuplot@packagewarning{gnuplot-lua-tikz}{%
+    \noexpand\gp@rawimage is not implemented for \gnuplot@output@mode\space output.%
+  }%
 }
 
-\ifgppdfout
-  \def\gp@rawimage{\gp@rawimage@pdf}
-\else
-  \ifgppsout
-    \def\gp@rawimage{\gp@rawimage@ps}
-  \else
-    \def\gp@rawimage{\gp@rawimage@html}
-  \fi
-\fi
-
+% Select \gp@rawimage depending on the output mode
+\expandafter\let\expandafter\gp@rawimage\csname gp@rawimage@\gnuplot@output@mode\endcsname
 
 \def\gploadimage#1#2#3#4#5{%
   \pgftext[left,bottom,x=#1cm,y=#2cm] {\pgfimage[interpolate=false,width=#3cm,height=#4cm]{#5}};%
@@ -748,10 +752,10 @@ f:write([[
   \def\gp@image@size{#1}%
 }
 
-\def\gp@rawimage@#1#2#3#4#5#6#7#8{
+\def\gp@rawimage@#1#2#3#4#5#6#7#8{%
   \tikz@scan@one@point\gp@set@size(#6,#7)\relax%
   \tikz@scan@one@point\pgftransformshift(#2,#3)\relax%
-  \pgftext {%
+  \pgftext{%
     \pgfsys@beginpurepicture%
     \gp@image@size% fill \pgf@x and \pgf@y
     \gp@rawimage{#1}{#4}{#5}{\pgf@x}{\pgf@y}{#8}%
@@ -763,18 +767,18 @@ f:write([[
 %% color model is 'cmyk' or 'rgb' (default)
 \def\gprawimage#1#2#3#4#5#6#7#8#9{%
   \ifx&#9&%
-    \gp@rawimage@{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}
+    \gp@rawimage@{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
   \else
-    \ifgppsout
-      \gp@rawimage@{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}
+    \ifx\gnuplot@output@mode\gnuplot@output@ps
+      \gp@rawimage@{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
     \else
-      \gploadimage{#2}{#3}{#6}{#7}{#9}
+      \gploadimage{#2}{#3}{#6}{#7}{#9}%
     \fi
   \fi
 }
 
 %
-% gnuplottex comapatibility
+% gnuplottex compatibility
 % (see http://www.ctan.org/tex-archive/help/Catalogue/entries/gnuplottex.html)
 %
 
@@ -821,6 +825,7 @@ f:write([[
 % prevent plot mark distortions due to changes in the PGF transformation matrix
 % use `\gpscalepointstrue' and `\gpscalepointsfalse' for enabling and disabling
 % point scaling
+% 3-parameter variant gp3point passes style options as well as point type and coordinates
 %
 \newif\ifgpscalepoints
 \tikzset{gp shift only/.style={%
@@ -828,6 +833,9 @@ f:write([[
 }}
 \def\gppoint#1#2{%
   \path[solid] plot[only marks,gp point,mark options={gp shift only},#1] coordinates {#2};%
+}
+\def\gp3point#1#2#3{%
+  \path[solid#2] plot[only marks,gp point,mark options={gp shift only},#1] coordinates {#3};%
 }
 
 
@@ -875,11 +883,11 @@ f:write([[
 %  #3 coordinate of "north east"
 %
 \def\gpdefrectangularnode#1#2#3{%
-  \expandafter\gdef\csname pgf@sh@ns@#1\endcsname{rectangle}
+  \expandafter\gdef\csname pgf@sh@ns@#1\endcsname{rectangle}%
   \expandafter\gdef\csname pgf@sh@np@#1\endcsname{%
     \def\southwest{#2}%
     \def\northeast{#3}%
-  }
+  }%
   \pgfgettransform\pgf@temp%
   % once it is defined, no more transformations will be applied, I hope
   \expandafter\xdef\csname pgf@sh@nt@#1\endcsname{\pgf@temp}%
@@ -902,9 +910,9 @@ f:write([[
   line join=round,%
 }}
 
-\tikzset{gp node left/.style={anchor=mid west,yshift=-.12ex}}
-\tikzset{gp node center/.style={anchor=mid,yshift=-.12ex}}
-\tikzset{gp node right/.style={anchor=mid east,yshift=-.12ex}}
+\tikzset{gp node left/.style={anchor=mid west,yshift=-.12ex,line width=0pt}}
+\tikzset{gp node center/.style={anchor=mid,yshift=-.12ex,line width=0pt}}
+\tikzset{gp node right/.style={anchor=mid east,yshift=-.12ex,line width=0pt}}
 
 % basic plot mark size (points)
 \newdimen\gpbasems
@@ -1037,6 +1045,7 @@ pgf.print_help = function(fwrite)
       {nogppoints | gppoints}
       {picenvironment | nopicenvironment}
       {noclip | clip}
+      {butt}
       {notightboundingbox | tightboundingbox}
       {background "<colorpec>"}
       {size <x>{unit},<y>{unit}}
@@ -1087,6 +1096,9 @@ pgf.print_help = function(fwrite)
  is set. Neither a fixed bounding box nor a crop box is set if the
  'plotsize' or 'tightboundingbox' option is used.
 
+ 'butt' changes the linecap property to "butt" and the linejoin
+ property to "miter".  The defaults are "round" and "round".
+
  If 'tightboundingbox' is set the 'clip' option is ignored and the
  final bounding box is the natural bounding box calculated by tikz.
 
@@ -1096,7 +1108,7 @@ pgf.print_help = function(fwrite)
  sign ('#'). E.g. '#ff0000' specifies pure red. If omitted the
  background is transparent.
 
- The 'size' option expects two lenghts <x> and <y> as the canvas
+ The 'size' option expects two lengths <x> and <y> as the canvas
  size. The default size of the canvas is ]]..pgf.DEFAULT_CANVAS_SIZE_X..[[cm x ]]..pgf.DEFAULT_CANVAS_SIZE_Y..[[cm.
 
  The 'scale' option works similar to the 'size' option but expects
@@ -1167,7 +1179,7 @@ pgf.print_help = function(fwrite)
  images are externalized.
 
  The 'providevars' options makes gnuplot's internal and user variables
- available by using the '\gpgetvar{<var name>}' commmand within the TeX
+ available by using the '\gpgetvar{<var name>}' command within the TeX
  script. Use gnuplot's 'show variables all' command to see the list
  of valid variables.
 
@@ -1472,9 +1484,9 @@ gfx.adjust_plotbox = function()
       gfx.scalex = gfx.scalex*gfx.opt.plotsize_x * pgf.DEFAULT_RESOLUTION/(t.xright - t.xleft)
       gfx.scaley = gfx.scaley*gfx.opt.plotsize_y * pgf.DEFAULT_RESOLUTION/(t.ytop - t.ybot)
     else
-      -- could not determin a valid bounding box, so keep using the
+      -- could not determine a valid bounding box, so keep using the
       -- plotsize as the canvas size
-      gp.term_out("WARNING: PGF/TikZ Terminal: `plotsize' option used, but I could not determin the plot area!\n")
+      gp.term_out("WARNING: PGF/TikZ Terminal: `plotsize' option used, but I could not determine the plot area!\n")
     end
   elseif not gfx.opt.tightboundingbox then
     if gfx.opt.clip then
@@ -1814,6 +1826,8 @@ term.options = function(opt_str, initial, t_count)
     elseif almost_equals(o_next, "c$olor") or almost_equals(o_next, "c$olour") then
       -- colored lines
       gfx.opt.lines_colored = true
+    elseif almost_equals(o_next, "butt") then
+      gfx.opt.butt = true
     elseif almost_equals(o_next, "notime$stamp") then
       -- omit output of the timestamp
       gfx.opt.notimestamp = true
@@ -1921,7 +1935,7 @@ term.options = function(opt_str, initial, t_count)
       -- produce full tex document
       gfx.opt.full_doc = true
     elseif almost_equals(o_next, "create$style") then
-      -- creates the coresponding LaTeX style from the script
+      -- creates the corresponding LaTeX style from the script
       pgf.create_style()
     elseif almost_equals(o_next, "backg$round") then
       -- set background color
@@ -2087,6 +2101,7 @@ term.options = function(opt_str, initial, t_count)
   tf(gfx.opt.set_origin, 'originreset', 'nooriginreset')
   tf(gfx.opt.direct_image, 'bitmap', 'nobitmap')
   tf(gfx.opt.cmykimage, 'cmykimage', 'rgbimage')
+  tf(gfx.opt.butt,'butt', '')
   tf(gfx.opt.clip, 'clip', 'noclip')
   tf(gfx.opt.tightboundingbox, 'tightboundingbox', 'notightboundingbox')
   if term.external_images ~= nil then
@@ -2376,7 +2391,7 @@ term.filled_polygon = function(style, fillpar, t)
       color = 'gpbgfillcolor'
       saturation = 100
       opacity = 100
-  elseif style == 'DEFAULT' or style == 'OPAQUE' then -- FIXME: not shure about the opaque style
+  elseif style == 'DEFAULT' or style == 'OPAQUE' then -- FIXME: not sure about the opaque style
       pattern = ''
       color = gfx.color
       saturation = 100

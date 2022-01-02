@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: matrix.c,v 1.13 2014/02/28 10:20:53 markisch Exp $"); }
-#endif
-
 /*  NOTICE: Change of Copyright Status
  *
  *  The author of this module, Carsten Grammes, has expressed in
@@ -43,7 +39,7 @@ static char *RCSid() { return RCSid("$Id: matrix.c,v 1.13 2014/02/28 10:20:53 ma
     internal prototypes
 *****************************************************************/
 
-static GP_INLINE int fsign __PROTO((double x));
+static GP_INLINE int fsign(double x);
 
 /*****************************************************************
     first straightforward vector and matrix allocation functions
@@ -116,7 +112,7 @@ fsign(double x)
      (QR-decomposition). Direct implementation of the algorithm
      presented in H.R.Schwarz: Numerische Mathematik, Equation 7.33
 
-     If 'd == NULL', d is not accesed: the routine just computes the QR
+     If 'd == NULL', d is not accessed: the routine just computes the QR
      decomposition of C and exits.
 
 *****************************************************************/
@@ -235,11 +231,6 @@ Invert_RtR(double **R, double **I, int n)
 	}
     }
 }
-
-/* HBB 20010424: Functions that used to be here in matrix.c, but were
- * replaced by others and deleted, later.  But the
- * THIN_PLATE_SPLINES_GRID needed them, later, so they appeared in
- * plot3d.c, where they don't belong --> moved them back here. */
 
 void
 lu_decomp(double **a, int n, int *indx, double *d)

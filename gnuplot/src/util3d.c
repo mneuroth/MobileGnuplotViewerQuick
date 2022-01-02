@@ -52,19 +52,12 @@
 #define AXIS_ACTUAL_MAX(axis) GPMAX(axis_array[axis].max, axis_array[axis].min)
 
 /* Prototypes for local functions */
-static void mat_unit __PROTO((transform_matrix mat));
-static GP_INLINE void draw3d_point_unconditional __PROTO((p_vertex, struct lp_style_type *));
+static void mat_unit(transform_matrix mat);
+static GP_INLINE void draw3d_point_unconditional(p_vertex, struct lp_style_type *);
 
-#ifdef NONLINEAR_AXES
-static double map_x3d __PROTO((double));
-static double map_y3d __PROTO((double));
-static double map_z3d __PROTO((double));
-#else
-/* Function macros to map from user 3D space into normalized -1..1 */
-#define map_x3d(x) ((x-X_AXIS.min)*xscale3d + xcenter3d - 1.0)
-#define map_y3d(y) ((y-Y_AXIS.min)*yscale3d + ycenter3d - 1.0)
-#define map_z3d(z) ((z-floor_z)*zscale3d + zcenter3d - 1.0)
-#endif
+static double map_x3d(double);
+static double map_y3d(double);
+static double map_z3d(double);
 
 static void
 mat_unit(transform_matrix mat)
@@ -909,7 +902,7 @@ map3d_xy_double(
 static GP_INLINE void
 draw3d_point_unconditional(p_vertex v, struct lp_style_type *lp)
 {
-    unsigned int x, y;
+    int x, y;
 
     TERMCOORD(v, x, y);
     /* Jul 2010 EAM - is it safe to overwrite like this? Make a copy instead? */
@@ -928,7 +921,7 @@ draw3d_line_unconditional(
     struct lp_style_type *lp,
     t_colorspec color)
 {
-    unsigned int x1, y1, x2, y2;
+    double x1, y1, x2, y2;
     struct lp_style_type ls = *lp;
 
     /* HBB 20020312: v2 can be NULL, if this call is coming from
@@ -938,8 +931,8 @@ draw3d_line_unconditional(
 	return;
     }
 
-    TERMCOORD(v1, x1, y1);
-    TERMCOORD(v2, x2, y2);
+    TERMCOORD_DOUBLE(v1, x1, y1);
+    TERMCOORD_DOUBLE(v2, x2, y2);
 
     /* Replace original color with the one passed in */
     ls.pm3d_color = color;
@@ -1003,7 +996,7 @@ static vertex polyline3d_previous_vertex;
 void
 polyline3d_start(p_vertex v1)
 {
-    unsigned int x1, y1;
+    int x1, y1;
 
     polyline3d_previous_vertex = *v1;
     if (hidden3d && draw_surface)
@@ -1031,7 +1024,6 @@ polyline3d_next(p_vertex v2, struct lp_style_type *lp)
     polyline3d_previous_vertex = *v2;
 }
 
-#ifdef NONLINEAR_AXES
 static double
 map_x3d(double x)
 {
@@ -1070,4 +1062,3 @@ map_z3d(double z)
 
     return ((z - floor_z1)*zscale3d + zcenter3d - 1.0);
 }
-#endif

@@ -1,6 +1,3 @@
-/*
- * $Id: external.c,v 1.2 2016/05/08 13:19:44 markisch Exp $
- */
 /* GNUPLOT - external.c */
 
 /*[
@@ -111,7 +108,7 @@ dll_open_w(const char *f)
 
 
 /*
-  Parse the sring argument for a dll filename and function.  Create a
+  Parse the string argument for a dll filename and function.  Create a
   one-item action list that calls a plugin function.  Call the _init,
   if present.  _init may return a pointer to private data that is
   handed over to the external function for each call.

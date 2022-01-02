@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: fit.c,v 1.170.2.1 2017/07/22 22:07:58 sfeam Exp $"); }
-#endif
-
 /*  NOTICE: Change of Copyright Status
  *
  *  The author of this module, Carsten Grammes, has expressed in
@@ -38,9 +34,6 @@ static char *RCSid() { return RCSid("$Id: fit.c,v 1.170.2.1 2017/07/22 22:07:58 
  *
  * drd: allow 3d fitting. Data value is now called fit_z internally,
  * ie a 2d fit is z vs x, and a 3d fit is z vs x and y.
- *
- * Lars Hecking : review update command, for VMS in particular, where
- * it is not necessary to rename the old file.
  *
  * HBB, 971023: lifted fixed limit on number of datapoints, and number
  * of parameters.
@@ -100,6 +93,7 @@ static char *RCSid() { return RCSid("$Id: fit.c,v 1.170.2.1 2017/07/22 22:07:58 
 #include "alloc.h"
 #include "axis.h"
 #include "command.h"
+#include "datablock.h"
 #include "datafile.h"
 #include "eval.h"
 #include "gp_time.h"
@@ -115,9 +109,9 @@ static char *RCSid() { return RCSid("$Id: fit.c,v 1.170.2.1 2017/07/22 22:07:58 
 
 /* Just temporary */
 #if defined(VA_START) && defined(STDC_HEADERS)
-static void Dblfn __PROTO((const char *fmt, ...));
+static void Dblfn(const char *fmt, ...);
 #else
-static void Dblfn __PROTO(());
+static void Dblfn();
 #endif
 #define Dblf  Dblfn
 #define Dblf2 Dblfn
@@ -129,10 +123,9 @@ static void Dblfn __PROTO(());
 # include <io.h>
 # include <conio.h>
 # include <dos.h>
-#elif !defined(VMS)
-#  include <fcntl.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
+# include <fcntl.h>
 # include "win/winmain.h"
 #endif
 
@@ -213,6 +206,7 @@ static double lambda_up_factor = LAMBDA_UP_FACTOR;
 static const char fitlogfile_default[] = "fit.log";
 static const char GNUFITLOG[] = "FIT_LOG";
 static FILE *log_f = NULL;
+static FILE *via_f = NULL;
 static TBOOLEAN fit_show_lambda = TRUE;
 static const char *GP_FIXED = "# FIXED";
 static const char *FITSCRIPT = "FIT_SCRIPT";
@@ -237,6 +231,7 @@ static TBOOLEAN user_stop = FALSE;
 static double *scale_params = 0; /* scaling values for parameters */
 static struct udft_entry func;
 static fixstr *par_name;
+static t_value **par_udv;	/* array of pointers to the "via" variables */
 
 static fixstr *last_par_name = NULL;
 static int last_num_params = 0;
@@ -253,37 +248,35 @@ static udvt_entry *fit_dummy_udvs[MAX_NUM_VAR];
 			 internal Prototypes
 *****************************************************************/
 
-#if !defined(WIN32) || defined(WGP_CONSOLE)
-static RETSIGTYPE ctrlc_handle __PROTO((int an_int));
+#if !defined(_WIN32) || defined(WGP_CONSOLE)
+static RETSIGTYPE ctrlc_handle(int an_int);
 #endif
-static void ctrlc_setup __PROTO((void));
-static marq_res_t marquardt __PROTO((double a[], double **alpha, double *chisq,
-				     double *lambda));
+static void ctrlc_setup(void);
+static marq_res_t marquardt(double a[], double **alpha, double *chisq, double *lambda);
 static void analyze(double a[], double **alpha, double beta[],
 				 double *chisq, double **deriv);
-static void calculate __PROTO((double *zfunc, double **dzda, double a[]));
+static void calculate(double *zfunc, double **dzda, double a[]);
 static void calc_derivatives(const double *par, double *data, double **deriv);
-static TBOOLEAN fit_interrupt __PROTO((void));
-static TBOOLEAN regress __PROTO((double a[]));
+static TBOOLEAN fit_interrupt(void);
+static TBOOLEAN regress(double a[]);
 static void regress_init(void);
 static void regress_finalize(int iter, double chisq, double last_chisq, double lambda, double **covar);
 static void fit_show(int i, double chisq, double last_chisq, double *a,
                           double lambda, FILE * device);
 static void fit_show_brief(int iter, double chisq, double last_chisq, double *parms,
                           double lambda, FILE * device);
-static void show_results __PROTO((double chisq, double last_chisq, double* a, double* dpar, double** corel));
-static void log_axis_restriction __PROTO((FILE *log_f, int param,
-			    double min, double max, int autoscale, char *name));
+static void show_results(double chisq, double last_chisq, double* a, double* dpar, double** corel);
+static void log_axis_restriction(FILE *log_f, int param,
+			    double min, double max, int autoscale, char *name);
 static void print_function_definitions(struct at_type *at, FILE * device);
-static TBOOLEAN is_empty __PROTO((char *s));
-static int getivar __PROTO((const char *varname));
-static double getdvar __PROTO((const char *varname));
-static double createdvar __PROTO((char *varname, double value));
-static void setvar __PROTO((char *varname, double value));
-static void setvarerr __PROTO((char *varname, double value));
+static TBOOLEAN is_empty(char *s);
+static intgr_t getivar(const char *varname);
+static double getdvar(const char *varname);
+static double createdvar(char *varname, double value);
+static void setvar(char *varname, double value);
+static void setvarerr(char *varname, double value);
 static void setvarcovar(char *varname1, char *varname2, double value);
-static char *get_next_word __PROTO((char **s, char *subst));
-static void backup_file __PROTO((char *, const char *));
+static char *get_next_word(char **s, char *subst);
 
 
 /*****************************************************************
@@ -308,7 +301,7 @@ wri_to_fil_last_fit_cmd(FILE *fp)
     This is called when a SIGINT occurs during fit
 *****************************************************************/
 
-#if !defined(WIN32) || defined(WGP_CONSOLE)
+#if !defined(_WIN32) || defined(WGP_CONSOLE)
 static RETSIGTYPE
 ctrlc_handle(int an_int)
 {
@@ -335,7 +328,7 @@ ctrlc_setup()
  *
  *  I hope that other OSes do it better, if not... add #ifdefs :-(
  */
-#if (defined(__EMX__) || !defined(MSDOS)) && (!defined(WIN32) || defined(WGP_CONSOLE))
+#if (defined(__EMX__) || !defined(MSDOS)) && (!defined(_WIN32) || defined(WGP_CONSOLE))
     (void) signal(SIGINT, (sigfunc) ctrlc_handle);
 #endif
 }
@@ -346,8 +339,7 @@ ctrlc_setup()
 *****************************************************************/
 #if defined(MSDOS)
 
-/* HBB 980317: added a prototype... */
-int getchx __PROTO((void));
+int getchx(void);
 
 int
 getchx()
@@ -380,6 +372,10 @@ error_ex(int t_num, const char *str, ...)
 	fprintf(log_f, "BREAK: %s", buf);
 	fclose(log_f);
 	log_f = NULL;
+    }
+    if (via_f) {
+	fclose(via_f);
+	via_f = NULL;
     }
     free(fit_x);
     free(fit_z);
@@ -645,7 +641,7 @@ call_gnuplot(const double *par, double *data)
 
     /* set parameters first */
     for (i = 0; i < num_params; i++)
-	setvar(par_name[i], par[i] * scale_params[i]);
+	Gcomplex(par_udv[i], par[i] * scale_params[i], 0.0);
 
     for (i = 0; i < num_data; i++) {
 	/* calculate fit-function value */
@@ -706,7 +702,7 @@ calc_derivatives(const double *par, double *data, double **deriv)
 
     /* set parameters first */
     for (i = 0; i < num_params; i++)
-	setvar(par_name[i], par[i] * scale_params[i]);
+	Gcomplex(par_udv[i], par[i] * scale_params[i], 0.0);
 
     for (i = 0; i < num_data; i++) { /* loop over data points */
 	for (j = 0, m = 0; j < num_indep; j++) { /* loop over indep. variables */
@@ -753,7 +749,7 @@ fit_interrupt()
 {
     while (TRUE) {
 	fputs("\n\n(S)top fit, (C)ontinue, (E)xecute FIT_SCRIPT:  ", STANDARD);
-#ifdef WIN32
+#ifdef _WIN32
 	WinRaiseConsole();
 #endif
 	switch (getchar()) {
@@ -773,16 +769,14 @@ fit_interrupt()
 	case 'e':
 	case 'E':{
 		int i;
-		char *tmp;
+		const char *tmp = getfitscript();
 
-		tmp = getfitscript();
 		fprintf(STANDARD, "executing: %s\n", tmp);
 		/* FIXME: Shouldn't we also set FIT_STDFIT etc? */
 		/* set parameters visible to gnuplot */
 		for (i = 0; i < num_params; i++)
-		    setvar(par_name[i], a[i] * scale_params[i]);
+		    Gcomplex(par_udv[i], a[i] * scale_params[i], 0.0);
 		do_string(tmp);
-		free(tmp);
 	    }
 	}
     }
@@ -793,17 +787,17 @@ fit_interrupt()
 /*****************************************************************
     determine current setting of FIT_SCRIPT
 *****************************************************************/
-char *
+const char *
 getfitscript(void)
 {
     char *tmp;
 
     if (fit_script != NULL)
-	return gp_strdup(fit_script);
+	return fit_script;
     if ((tmp = getenv(FITSCRIPT)) != NULL)
-	return gp_strdup(tmp);
+	return tmp;
     else
-	return gp_strdup(DEFAULT_CMD);
+	return DEFAULT_CMD;
 }
 
 
@@ -907,7 +901,7 @@ regress_finalize(int iter, double chisq, double last_chisq, double lambda, doubl
        its internal state, the last call_gnuplot may not have been
        at the minimum */
     for (i = 0; i < num_params; i++)
-	setvar(par_name[i], a[i] * scale_params[i]);
+	Gcomplex(par_udv[i], a[i] * scale_params[i], 0.0);
 
     /* Set error and covariance variables to zero, 
        thus making sure they are created. */
@@ -1011,7 +1005,7 @@ regress_check_stop(int iter, double chisq, double last_chisq, double lambda)
 	ctrlc_flag = TRUE;
     }
 #endif
-#ifdef WIN32
+#ifdef _WIN32
     /* This call makes the Windows GUI functional during fits.
        Pressing Ctrl-Break now finally has an effect. */
     WinMessageLoop();
@@ -1363,7 +1357,7 @@ get_next_word(char **s, char *subst)
 	tmp++;
     if (*tmp == '\n' || *tmp == '\r' || *tmp == '\0')	/* not found */
 	return NULL;
-    if ((*s = strpbrk(tmp, " =\t\n\r")) == NULL)
+    if ((*s = strpbrk(tmp, " =\t\n\r[")) == NULL)
 	*s = tmp + strlen(tmp);
     *subst = **s;
     *(*s)++ = '\0';
@@ -1388,7 +1382,13 @@ init_fit()
 static void
 setvar(char *varname, double data)
 {
-    /* Despite its name it is actually usable for any variable. */
+    char *c;
+
+    /* Sanitize name to remove square brackets from array variables */
+    for (c = varname; *c; c++) {
+	if (*c == '[' || *c == ']')
+	    *c = '_';
+    }
     fill_gpval_float(varname, data);
 }
 
@@ -1428,12 +1428,12 @@ setvarcovar(char *varname1, char *varname2, double value)
 /*****************************************************************
     Get integer variable value
 *****************************************************************/
-static int
+static intgr_t
 getivar(const char *varname)
 {
     struct udvt_entry * v = get_udv_by_name((char *)varname);
     if ((v != NULL) && (v->udv_value.type != NOTDEFINED))
-	return real_int(&(v->udv_value));
+	return (intgr_t)real(&(v->udv_value));
     else
 	return 0;
 }
@@ -1470,229 +1470,6 @@ createdvar(char *varname, double value)
     return real(&(udv_ptr->udv_value));
 }
 
-
-/* Begin DEPRECATED section */
-
-/* argument: char *fn */
-#define VALID_FILENAME(fn) ((fn) != NULL && (*fn) != '\0')
-
-/*****************************************************************
-    write the actual parameters to start parameter file
-*****************************************************************/
-void
-update(char *pfile, char *npfile)
-{
-    char ifilename[PATH_MAX];
-    char *ofilename;
-    TBOOLEAN createfile = FALSE;
-
-    if (existfile(pfile)) {
-	/* update pfile npfile:
-	   if npfile is a valid file name, take pfile as input file and
-	   npfile as output file
-	*/
-	if (VALID_FILENAME(npfile)) {
-	    safe_strncpy(ifilename, pfile, sizeof(ifilename));
-	    ofilename = npfile;
-	} else {
-#ifdef BACKUP_FILESYSTEM
-	    /* filesystem will keep original as previous version */
-	    safe_strncpy(ifilename, pfile, sizeof(ifilename));
-#else
-	    backup_file(ifilename, pfile);	/* will Eex if it fails */
-#endif
-	    ofilename = pfile;
-	}
-    } else {
-	/* input file does not exists; will create new file */
-	createfile = TRUE;
-	if (VALID_FILENAME(npfile))
-	    ofilename = npfile;
-	else
-	    ofilename = pfile;
-    }
-
-    if (createfile) {
-	/* The input file does not exists and--strictly speaking--there is
-	   nothing to 'update'.  Instead of bailing out we guess the intended use:
-	   We output all INTGR/CMPLX user variables and mark them as '# FIXED' if
-	   they were not used during the last fit command. */
-	struct udvt_entry *udv = first_udv;
-	FILE *nf;
-
-	if ((last_fit_command == NULL) || (strlen(last_fit_command) == 0)) {
-	    /* Technically, a prior fit command isn't really required.  But since
-	    all variables in the parameter file would be marked '# FIXED' in that
-	    case, it cannot be directly used in a subsequent fit command. */
-	    Eex("Nothing to update!");
-	}
-
-	if (!(nf = fopen(ofilename, "w")))
-	    Eex2("new parameter file %s could not be created", ofilename);
-
-	fputs("# Parameter file created by 'update' from current variables\n", nf);
-	if ((last_fit_command != NULL) && (strlen(last_fit_command) > 0))
-	    fprintf(nf, "## %s\n", last_fit_command);
-
-	while (udv) {
-	    if ((strncmp(udv->udv_name, "GPVAL_", 6) == 0) ||
-	        (strncmp(udv->udv_name, "MOUSE_", 6) == 0) ||
-	        (strncmp(udv->udv_name, "FIT_", 4) == 0) ||
-	        (strcmp(udv->udv_name, "NaN") == 0) ||
-	        (strcmp(udv->udv_name, "pi") == 0)) {
-		/* skip GPVAL_, MOUSE_, FIT_ and builtin variables */
-		udv = udv->next_udv;
-		continue;
-	    }
-	    if ((udv->udv_value.type == INTGR) || (udv->udv_value.type == CMPLX)) {
-		int k;
-
-		/* ignore indep. variables */
-		for (k = 0; k < MAX_NUM_VAR; k++) {
-		    if (last_dummy_var[k] && strcmp(last_dummy_var[k], udv->udv_name) == 0)
-			break;
-		}
-		if (k != MAX_NUM_VAR) {
-		    udv = udv->next_udv;
-		    continue;
-		}
-
-		if (udv->udv_value.type == INTGR)
-		    fprintf(nf, "%-15s = %-22i", udv->udv_name, udv->udv_value.v.int_val);
-		else /* CMPLX */
-		    fprintf(nf, "%-15s = %-22s", udv->udv_name, num_to_str(udv->udv_value.v.cmplx_val.real));
-		/* mark variables not used for the last fit as fixed */
-		for (k = 0; k < last_num_params; k++) {
-		    if (strcmp(last_par_name[k], udv->udv_name) == 0)
-			break;
-		}
-		if (k == last_num_params)
-		    fprintf(nf, "   %s", GP_FIXED);
-		putc('\n', nf);
-	    }
-	    udv = udv->next_udv;
-	}
-
-	if (fclose(nf))
-	    Eex("I/O error during update");
-
-    } else { /* !createfile */
-
-	/* input file exists - this is the originally intended case of
-	   the update command: update an existing parameter file */
-	char sstr[256];
-	char *s = sstr;
-	char * fnam;
-	FILE *of, *nf;
-
-	if (!(of = loadpath_fopen(ifilename, "r")))
-	    Eex2("parameter file %s could not be read", ifilename);
-
-	if (!(nf = fopen(ofilename, "w")))
-	    Eex2("new parameter file %s could not be created", ofilename);
-
-	fnam = gp_basename(ifilename); /* strip off the path */
-	if (fnam == NULL)
-	    fnam = ifilename;
-
-	while (fgets(s = sstr, sizeof(sstr), of) != NULL) {
-	    char pname[64]; /* name of parameter */
-	    double pval;    /* parameter value */
-	    char tail[127]; /* trailing characters */
-	    char * tmp;
-	    char c;
-
-	    if (is_empty(s)) {
-		fputs(s, nf);	/* preserve comments */
-		continue;
-	    }
-	    if ((tmp = strchr(s, '#')) != NULL) {
-		safe_strncpy(tail, tmp, sizeof(tail));
-		*tmp = NUL;
-	    } else
-		strcpy(tail, "\n");
-
-	    tmp = get_next_word(&s, &c);
-	    if (!legal_identifier(tmp) || strlen(tmp) > MAX_ID_LEN) {
-		fclose(nf);
-		fclose(of);
-		Eex2("syntax error in parameter file %s", fnam);
-	    }
-	    safe_strncpy(pname, tmp, sizeof(pname));
-	    /* next must be '=' */
-	    if (c != '=') {
-		tmp = strchr(s, '=');
-		if (tmp == NULL) {
-		    fclose(nf);
-		    fclose(of);
-		    Eex2("syntax error in parameter file %s", fnam);
-		}
-		s = tmp + 1;
-	    }
-	    tmp = get_next_word(&s, &c);
-	    if (!sscanf(tmp, "%lf", &pval)) {
-		fclose(nf);
-		fclose(of);
-		Eex2("syntax error in parameter file %s", fnam);
-	    }
-	    if ((tmp = get_next_word(&s, &c)) != NULL) {
-		fclose(nf);
-		fclose(of);
-		Eex2("syntax error in parameter file %s", fnam);
-	    }
-
-	    /* now modify */
-	    pval = getdvar(pname);
-	    fprintf(nf, "%-15s = %-22s   %s", pname, num_to_str(pval), tail);
-	}
-
-	if (fclose(nf) || fclose(of))
-	    Eex("I/O error during update");
-    }
-}
-
-
-/*****************************************************************
-    Backup a file by renaming it to something useful.
-    Return the new name in tofile.
-    NB: tofile must point to a char array[] or allocated data.
-	See update()
-*****************************************************************/
-#ifdef MSDOS
-static void
-backup_file(char *tofile, const char *fromfile)
-{
-    char *tmpn;
-
-    /* Copy only the first 8 characters of the filename, to comply
-     * with the restrictions of FAT filesystems. */
-    safe_strncpy(tofile, fromfile, 8 + 1);
-
-    while ((tmpn = strchr(tofile, '.')) != NULL)
-	*tmpn = '_';
-
-    strcat(tofile, BACKUP_SUFFIX);
-
-    if (rename(fromfile, tofile) == 0)
-	return;			/* success */
-
-    /* get here => rename failed. */
-    Eex3("Could not rename file %s to %s", fromfile, tofile);
-}
-#endif /* MSDOS */
-
-#ifndef MSDOS
-static void
-backup_file(char *tofile, const char *fromfile)
-{
-    strcpy(tofile, fromfile);
-    strcat(tofile, BACKUP_SUFFIX);
-    if (rename(fromfile, tofile) != 0)
-	Eex2("Error writing backup file %s", tofile);
-}
-#endif /* not MSDOS */
-
-/* End DEPRECATED section */
 
 /* Modified from save.c:save_range() */
 static void
@@ -1795,9 +1572,6 @@ print_function_definitions(struct at_type *at, FILE * device)
 void
 fit_command()
 {
-/* HBB 20000430: revised this completely, to make it more similar to
- * what plot3drequest() does */
-
     /* Backwards compatibility - these were the default names in 4.4 and 4.6	*/
     static const char *dummy_old_default[5] = {"x","y","t","u","v"};
 
@@ -1908,6 +1682,10 @@ fit_command()
     else
 	Eexc(token2, "missing filename or datablock");
 
+    /* We accept a datablock but not a voxel grid */
+    if (*file_name == '$' && !get_datablock(file_name))
+	int_error(c_token-1, "cannot fit voxel data");
+
     /* use datafile module to parse the datafile and qualifiers */
     df_set_plot_mode(MODE_QUERY);  /* Does nothing except for binary datafiles */
 
@@ -2002,7 +1780,7 @@ fit_command()
 	err_cols[iz] = TRUE;
 	c_token++;
     } else if (almost_equals(c_token, "xyerr$ors")) {
-	/* convienience alias, x:z:sx:sz (or x:y:sx:sy) */
+	/* convenience alias, x:z:sx:sz (or x:y:sx:sy) */
 	if ((columns != 0) && (columns != 4))
 	    Eexc(c_token, "xyerror requires exactly 4 columns");
 	num_indep = 1;
@@ -2081,7 +1859,7 @@ fit_command()
     /* tsm patchset 230: new absolute convergence variable */
     FPRINTF((STANDARD, "epsilon_abs=%e\n", epsilon_abs));
 
-    /* HBB 970304: maxiter patch */
+    /* maximum number of iterations */
     maxiter = getivar(FITMAXITER);
     if (maxiter < 0)
 	maxiter = 0;
@@ -2204,7 +1982,7 @@ fit_command()
 	    break;
 	default:	/* June 2013 - allow more than 7 data columns */
 	    if (i<0)
-		int_error(NO_CARET, "unexpected value returned by df_readline");
+		Eex("unexpected value returned by df_readline");
 	    break;
 	}
 	num_points++;
@@ -2333,36 +2111,39 @@ fit_command()
     }
 
     /* read in parameters */
-    max_params = MAX_PARAMS;	/* HBB 971023: make this resizeable */
+    max_params = MAX_PARAMS;
 
     if (!equals(c_token++, "via"))
 	Eexc(c_token, "Need via and either parameter list or file");
 
     /* allocate arrays for parameter values, names */
     a = vec(max_params);
-    par_name = (fixstr *) gp_alloc((max_params + 1) * sizeof(fixstr),
-				   "fit param");
+    par_name = (fixstr *) gp_alloc((max_params + 1) * sizeof(fixstr), "fit param name");
+    par_udv = gp_realloc(par_udv, (max_params + 1) * sizeof(t_value *), "fit param pointer");
     num_params = 0;
 
+    /*
+     * FIXME: This is all done by character-by-character inspection of the
+     * input line.  If it were wrapped in lf_push()/lf_pop() we could use
+     * the normal gnuplot parsing routines keyed off c_token.
+     */
     if (isstringvalue(c_token)) {	/* It's a parameter *file* */
 	TBOOLEAN fixed;
 	double tmp_par;
-	char c, *s;
+	char c='\0', *s;
 	char sstr[MAX_LINE_LEN + 1];
-	FILE *f;
 
-	static char *viafile = NULL;
-	free(viafile);			/* Free previous name, if any */
-	viafile = try_to_get_string();
-	if (!viafile || !(f = loadpath_fopen(viafile, "r")))
+	char *viafile = try_to_get_string();
+	if (!viafile || !(via_f = loadpath_fopen(viafile, "r")))
 	    Eex2("could not read parameter-file \"%s\"", viafile);
 	if (!fit_suppress_log)
 	    fprintf(log_f, "fitted parameters and initial values from file: %s\n\n", viafile);
+	free(viafile);			/* Free previous name, if any */
 
 	/* get parameters and values out of file and ignore fixed ones */
 
 	while (TRUE) {
-	    if (!fgets(s = sstr, sizeof(sstr), f))	/* EOF found */
+	    if (!fgets(s = sstr, sizeof(sstr), via_f))	/* EOF found */
 		break;
 	    if ((tmp = strstr(s, GP_FIXED)) != NULL) {	/* ignore fixed params */
 		*tmp = NUL;
@@ -2376,49 +2157,47 @@ fit_command()
 	    if (is_empty(s))
 		continue;
 	    tmp = get_next_word(&s, &c);
-	    if (!legal_identifier(tmp) || strlen(tmp) > MAX_ID_LEN) {
-		(void) fclose(f);
+	    if (!legal_identifier(tmp) || strlen(tmp) > MAX_ID_LEN)
 		Eex("syntax error in parameter file");
+	    if (c == '[') {
+		/* Special case: array element */
+		udvt_entry *udv = get_udv_by_name(tmp);
+		int index;
+		if (udv->udv_value.type != ARRAY)
+		    Eex("no such array");
+		if ((1 != sscanf(s, "%d]", &index))
+		||  (index <= 0 || index > udv->udv_value.v.value_array[0].v.int_val))
+		    Eex("bad array index");
+		snprintf(par_name[num_params], sizeof(par_name[0]), "%40.40s[%d]", tmp, (short)index);
+		par_udv[num_params] = &(udv->udv_value.v.value_array[index]);
+	    } else {
+		/* Normal case */
+		safe_strncpy(par_name[num_params], tmp, sizeof(fixstr));
+		par_udv[num_params] = &(add_udv_by_name(tmp)->udv_value);
 	    }
-	    safe_strncpy(par_name[num_params], tmp, sizeof(fixstr));
 	    /* next must be '=' */
 	    if (c != '=') {
 		tmp = strchr(s, '=');
-		if (tmp == NULL) {
-		    (void) fclose(f);
+		if (tmp == NULL)
 		    Eex("syntax error in parameter file");
-		}
 		s = tmp + 1;
 	    }
 	    tmp = get_next_word(&s, &c);
-	    if (sscanf(tmp, "%lf", &tmp_par) != 1) {
-		(void) fclose(f);
+	    if (sscanf(tmp, "%lf", &tmp_par) != 1)
 		Eex("syntax error in parameter file");
-	    }
-	    /* make fixed params visible to GNUPLOT */
-	    if (fixed) {
-		/* use parname as temp */
-		setvar(par_name[num_params], tmp_par);
-	    } else {
-		if (num_params >= max_params) {
-		    max_params = (max_params * 3) / 2;
-		    if (0
-			|| !redim_vec(&a, max_params)
-			|| !(par_name = (fixstr *) gp_realloc(par_name, (max_params + 1) * sizeof(fixstr), "fit param resize"))
-			) {
-			(void) fclose(f);
-			Eex("Out of memory in fit: too many parameters?");
-		    }
-		}
+	    Gcomplex(par_udv[num_params], tmp_par, 0.0);
+	    /* Fixed parameters are updated but not counted against num_params */
+	    if (!fixed) {
+		if (num_params >= max_params)
+		    Eex("too many fit parameters");
 		a[num_params++] = tmp_par;
 	    }
 
-	    if ((tmp = get_next_word(&s, &c)) != NULL) {
-		(void) fclose(f);
-		Eex2("syntax error in parameter file %s", viafile);
-	    }
+	    if ((tmp = get_next_word(&s, &c)) != NULL)
+		Eex("syntax error in parameter file");
 	}
-	(void) fclose(f);
+	(void) fclose(via_f);
+	via_f = NULL;
 
     } else {
 	/* not a string after via: it's a variable listing */
@@ -2428,19 +2207,36 @@ fit_command()
 	do {
 	    if (!isletter(c_token))
 		Eex("no parameter specified");
-	    capture(par_name[num_params], c_token, c_token, (int) sizeof(par_name[0]));
-	    if (num_params >= max_params) {
-		max_params = (max_params * 3) / 2;
-		if (0
-		    || !redim_vec(&a, max_params)
-		    || !(par_name = (fixstr *) gp_realloc(par_name, (max_params + 1) * sizeof(fixstr), "fit param resize"))
-		    ) {
-		    Eex("Out of memory in fit: too many parameters?");
-		}
+
+	    if (num_params >= max_params)
+		Eex("too many fit parameters");
+
+	    if (equals(c_token+1, "[")) {
+		/* Special case:  via Array[n]
+		 *	created variables will be of the form Array_n_*
+		 */
+		udvt_entry *udv = add_udv(c_token);
+		int index;
+		if (udv->udv_value.type != ARRAY)
+		    Eexc(c_token, "No such array");
+		c_token += 2;
+		index = int_expression();
+		if (index <= 0 || index > udv->udv_value.v.value_array[0].v.int_val)
+		    Eexc(c_token, "array index out of range");
+		if (!equals(c_token, "]"))
+		    Eexc(c_token, "not an array index");
+		snprintf(par_name[num_params], sizeof(par_name[0]), "%s[%d]", udv->udv_name, index);
+		a[num_params] = real( &(udv->udv_value.v.value_array[index]) );
+		par_udv[num_params] = &(udv->udv_value.v.value_array[index]);
+	    } else {
+		/* Normal case: via param_name */
+		capture(par_name[num_params], c_token, c_token, (int) sizeof(par_name[0]));
+		/* create variable if it doesn't exist */
+		a[num_params] = createdvar(par_name[num_params], INITIAL_VALUE);
+		par_udv[num_params] = &(get_udv_by_name(par_name[num_params])->udv_value);
 	    }
-	    /* create variable if it doesn't exist */
-	    a[num_params] = createdvar(par_name[num_params], INITIAL_VALUE);
-	    ++num_params;
+
+	    num_params++;
 	} while (equals(++c_token, ",") && ++c_token);
     }
 
@@ -2619,14 +2415,8 @@ save_fit(FILE *fp)
 			udv->udv_value.v.cmplx_val.real);
     }
 
-    for (k = 0; k < last_num_params; k++) {
-	udv = get_udv_by_name(last_par_name[k]);
-	if (udv->udv_value.type == INTGR)
-	    fprintf(fp, "%-15s = %-22i\n", udv->udv_name, udv->udv_value.v.int_val);
-	else if (udv->udv_value.type == CMPLX)
-	    fprintf(fp, "%-15s = %-22s\n", udv->udv_name, num_to_str(udv->udv_value.v.cmplx_val.real));
-	else
-	    int_warn(NO_CARET, "Parameter %s is not INTGR or CMPLX", udv->udv_name);
-    }
+    for (k = 0; k < last_num_params; k++)
+	fprintf(fp, "%-15s = %-22s\n", last_par_name[k], value_to_str(par_udv[k], FALSE));
+
     return;
 }

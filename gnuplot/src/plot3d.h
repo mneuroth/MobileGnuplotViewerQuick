@@ -1,7 +1,3 @@
-/*
- * $Id: plot3d.h,v 1.18 2008/05/18 03:31:17 janert Exp $
- */
-
 /* GNUPLOT - plot3d.h */
 
 /*[
@@ -62,11 +58,12 @@ extern double dgrid3d_x_scale;
 extern double dgrid3d_y_scale;
 extern TBOOLEAN	dgrid3d;
 extern TBOOLEAN dgrid3d_kdensity;
+extern double boxdepth;
 
 /* prototypes from plot3d.c */
 
-void plot3drequest __PROTO((void));
-void refresh_3dbounds __PROTO((struct surface_points *first_plot, int nplots));
-void sp_free __PROTO((struct surface_points *sp));
+void plot3drequest(void);
+void refresh_3dbounds(struct surface_points *first_plot, int nplots);
+void sp_free(struct surface_points *sp);
 
 #endif /* GNUPLOT_PLOT3D_H */

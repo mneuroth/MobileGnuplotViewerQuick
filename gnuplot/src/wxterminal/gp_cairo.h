@@ -1,7 +1,3 @@
-/*
- * $Id: gp_cairo.h,v 1.21 2013/05/19 23:46:34 sfeam Exp $
- */
-
 /* GNUPLOT - gp_cairo.h */
 
 /*[
@@ -122,10 +118,15 @@ typedef struct plot_struct {
 	/* either GP_CAIRO_SCALE or 1, depending on rendering */
 	int oversampling_scale;
 
+	/* The caiolatex performs upsampling of the canvas to achieve
+	 * higher pixel density.  We have to account for that when
+	 * applying OPERATOR_SATURATE. */
+	double upsampling_rate;
+
 	/* handle vertical/horizontal lines properly */
 	double current_x, current_y;
 	double orig_current_x, orig_current_y;
-	
+
 	/* style data used while processing gnuplot commands */
 	JUSTIFY justify_mode;
 	int linetype;
@@ -185,7 +186,7 @@ GP_CAIRO_DASH,
 GP_CAIRO_DOTS
 };
 
-/* correspondance between gnuplot's linetypes and colors */
+/* correspondence between gnuplot's linetypes and colors */
 rgb_color gp_cairo_linetype2color( int linetype );
 void gp_cairo_set_background(rgb_color background);
 
@@ -241,12 +242,16 @@ const char* gp_cairo_get_encoding(plot_struct *plot);
 /* determine default font to use */
 const char * gp_cairo_default_font(void);
 
-#ifdef EAM_BOXED_TEXT
+/* work-around for "bold font gets stuck" bug */
+void gp_cairo_clear_bold_font(plot_struct *plot);
+
 /* Text boxes */
 void gp_cairo_boxed_text(plot_struct *plot, int x, int y, int option);
-#endif
 
 void gp_cairo_set_dashtype(plot_struct *plot, int type, t_dashtype *custom_dash_pattern);
+
+/* explicitly set resolution */
+void gp_cairo_set_resolution(int dpi);
 
 #ifdef __cplusplus
 }

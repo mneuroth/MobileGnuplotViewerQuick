@@ -1,3 +1,5 @@
+/* Hello, Emacs, this is -*-C-*- */
+
 /* GNUPLOT - tkcanvas.trm */
 
 /*[
@@ -58,7 +60,7 @@
  * the window manager (the canvas itself doesn't report its real size).
  *   Matt Willis, October 1999, mattbwillis@my-deja.com
  *
- * cleaned up and generalized in order to accomodate an increasing
+ * cleaned up and generalized in order to accommodate an increasing
  * number of scripting languages; added support for Python and Ruby.
  * based on a patch dated October 2002.
  *   Joachim Wuttke, November 2014, jwuttke@users.sourceforge.net
@@ -100,13 +102,13 @@ register_term(tkcanvas)
 #endif
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void TK_options __PROTO((void));
-TERM_PUBLIC void TK_init __PROTO((void));
-TERM_PUBLIC void TK_graphics __PROTO((void));
-TERM_PUBLIC void TK_text __PROTO((void));
-TERM_PUBLIC void TK_linetype __PROTO((int linetype));
-TERM_PUBLIC void TK_move __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void TK_vector __PROTO((unsigned int x, unsigned int y));
+TERM_PUBLIC void TK_options(void);
+TERM_PUBLIC void TK_init(void);
+TERM_PUBLIC void TK_graphics(void);
+TERM_PUBLIC void TK_text(void);
+TERM_PUBLIC void TK_linetype(int linetype);
+TERM_PUBLIC void TK_move(unsigned int x, unsigned int y);
+TERM_PUBLIC void TK_vector(unsigned int x, unsigned int y);
 TERM_PUBLIC int  TK_text_angle(int ang);
 TERM_PUBLIC void TK_put_text(unsigned int x, unsigned int y, const char *str);
 TERM_PUBLIC void TK_reset(void);
@@ -128,9 +130,7 @@ TERM_PUBLIC void TK_filled_polygon(int points, gpiPoint *corners);
 TERM_PUBLIC void TK_image(unsigned m, unsigned n, coordval *image, gpiPoint *corner, t_imagecolor color_mode);
 #endif
 TERM_PUBLIC void TK_dashtype(int dt, t_dashtype *custom_dash_pattern);
-#ifdef EAM_BOXED_TEXT
 TERM_PUBLIC void TK_boxed_text(unsigned int x, unsigned int y, int option);
-#endif
 
 /* nominal canvas size */
 #define TK_XMAX 1000
@@ -148,8 +148,8 @@ TERM_PUBLIC void TK_boxed_text(unsigned int x, unsigned int y, int option);
 #ifdef TERM_BODY
 
 /* FIXME HBB 20000725: This needs to be fixed.  As is, this driver causes
- * the terminal layer to depend on several other core modules. This is a 
- * design bug. "term" is supposed as 'frontier' layer: it should not be 
+ * the terminal layer to depend on several other core modules. This is a
+ * design bug. "term" is supposed as 'frontier' layer: it should not be
  * dependent on any other code inside gnuplot */
 
 #include "axis.h" /* axis_array */
@@ -207,7 +207,7 @@ static void TK_put_noenhanced_text(unsigned int x, unsigned int y, const char *s
 static void TK_put_enhanced_text(unsigned int x, unsigned int y, const char *str);
 static void TK_rectangle(int x1, int y1, int x2, int y2, char * color, char * stipple);
 static void TK_add_path_point(int x, int y); /* add a new point to current path or line */
-static void TK_flush_line(); /* finish a poly-line */
+static void TK_flush_line(void); /* finish a poly-line */
 
 
 enum TK_id {
@@ -558,7 +558,7 @@ TK_graphics()
 	    int_warn(NO_CARET,"Error re-writing output file: %s", strerror(errno));
     }
 
-    if (!tk_standalone && 
+    if (!tk_standalone &&
 	((tk_script_language == TK_LANG_PERL) || (tk_script_language == TK_LANG_PERLTKX)))
 	tk_function = "";
     if (tk_standalone && (tk_script_language == TK_LANG_REXX))
@@ -570,7 +570,6 @@ TK_graphics()
 
     /* set background */
     if (tk_background[0] != NUL) {
-	//TK_rectangle(0, 0, TK_XMAX, TK_YMAX, tk_background, "");
 	fprintf(gpoutfile, tk_set_background[tk_script_language], tk_background);
     }
 }
@@ -647,6 +646,8 @@ TK_color(t_colorspec *colorspec)
 	    snprintf(tmp_color, sizeof(tk_color), "#%02x%02x%02x", red, green, blue);
 	    break;
 	}
+    default:
+	    break;
     }
 
     if (strcmp(tk_color, tmp_color) != 0) {
@@ -673,7 +674,6 @@ TK_dashtype(int dt, t_dashtype *custom_dash_pattern)
     TBOOLEAN preserve = FALSE;
 
     if (dt >= 0) {
-	// {PS_SOLID, PS_DASH, PS_DOT, PS_DASHDOT, PS_DASHDOTDOT};
 	dt %= 5;
 	dt += 2;
 	strcpy(tmp_dashpattern, tk_dashtypes[dt]);
@@ -690,7 +690,7 @@ TK_dashtype(int dt, t_dashtype *custom_dash_pattern)
 	    tmp_dashpattern[0] = NUL;
 	    for (i = 0; (i < DASHPATTERN_LENGTH/2) && (fabs(custom_dash_pattern->pattern[2*i]) > FLT_EPSILON); i++) {
 		char buf[32];
-		snprintf(buf, sizeof(buf), "%d %d ", 
+		snprintf(buf, sizeof(buf), "%d %d ",
 		    (int) (custom_dash_pattern->pattern[2*i] * tk_linewidth),
 		    (int) (custom_dash_pattern->pattern[2*i + 1] * tk_linewidth));
 		strncat(tmp_dashpattern, buf, sizeof(tmp_dashpattern) - strlen(tmp_dashpattern)-1);
@@ -924,7 +924,7 @@ TERM_PUBLIC void
 TK_vector(unsigned int x, unsigned int y)
 {
     if ((x != tk_lastx) || (TK_YMAX - y != tk_lasty)) {
-	/* vector without preceeding move as e.g. in "with line lc variable" */
+	/* vector without preceding move as e.g. in "with line lc variable" */
 	if (tk_polygon_points == 0)
 	    TK_add_path_point(tk_lastx, tk_lasty);
 	TK_add_path_point(x, TK_YMAX - y);
@@ -1121,24 +1121,7 @@ TK_put_noenhanced_text(unsigned int x, unsigned int y, const char *str)
 
     TK_flush_line();
     if (tk_script_language == TK_LANG_TCL) {
-	/* Have to escape several characters: []{}"$; */
-	for (i = 0; str[i] != '\0'; i++) {
-	    if ((str[i] == '[') || (str[i] == ']') ||
-		(str[i] == '{') || (str[i] == '}') ||
-		(str[i] == '$') || (str[i] == ';'))
-		newsize++;
-	    newsize++;
-	}
-	quoted_str = (char *) gp_alloc(newsize + 1, "TK_put_text: quoted string");
-
-	for (i = 0, newsize = 0; str[i] != '\0'; i++) {
-	    if ((str[i] == '[') || (str[i] == ']') ||
-		(str[i] == '{') || (str[i] == '}') ||
-		(str[i] == '$') || (str[i] == ';'))
-		quoted_str[newsize++] = '\\';
-	    quoted_str[newsize++] = str[i];
-	}
-	quoted_str[newsize] = '\0';
+	quoted_str = escape_reserved_chars(str, "[]{}$;");
     }
     if ((tk_script_language == TK_LANG_REXX) ||
 	(tk_script_language == TK_LANG_RUBY) ||
@@ -1428,13 +1411,13 @@ TK_enhanced_flush()
 	;
     else if (tk_enhanced_overprint == 1) {
 	/* First pass of overprint, leave position in center of fragment */
-	//fprintf(gpoutfile, "incr xenh [expr ([lindex [$cv bbox $et] 2] - [lindex [$cv bbox $et] 0]) / 2]\n");
+	/* fprintf(gpoutfile, "incr xenh [expr ([lindex [$cv bbox $et] 2] - [lindex [$cv bbox $et] 0]) / 2]\n"); */
 	fprintf(gpoutfile, "set width [expr ([lindex [$cv bbox $et] 2] - [lindex [$cv bbox $et] 0])]\n");
 	fprintf(gpoutfile, "incr xenhb [expr int($width * %f)]\n", + cos(tk_angle * DEG2RAD) / 2);
 	fprintf(gpoutfile, "incr yenhb [expr int($width * %f)]\n", - sin(tk_angle * DEG2RAD) / 2);
     } else {
 	/* Normal case is to update position to end of fragment */
-	//fprintf(gpoutfile, "set xenh [lindex [$cv bbox $et] 2]\n");
+	/* fprintf(gpoutfile, "set xenh [lindex [$cv bbox $et] 2]\n"); */
 	fprintf(gpoutfile, "set width [expr ([lindex [$cv bbox $et] 2] - [lindex [$cv bbox $et] 0])]\n");
 	fprintf(gpoutfile, "incr xenhb [expr int($width * %f)]\n", + cos(tk_angle * DEG2RAD));
 	fprintf(gpoutfile, "incr yenhb [expr int($width * %f)]\n", - sin(tk_angle * DEG2RAD));
@@ -1538,7 +1521,7 @@ TK_justify_text(enum JUSTIFY anchor)
 }
 
 
-TERM_PUBLIC void 
+TERM_PUBLIC void
 TK_point(unsigned int x, unsigned int y, int point)
 {
     TK_flush_line();
@@ -1683,7 +1666,7 @@ static char *tk_info_procs[TK_LANG_MAX] = {
     "def gnuplot_axisranges():\n"
     "\treturn (%f, %f, %f, %f,\\\n"
     "\t        %f, %f, %f, %f)\n",
-  
+
   /* Ruby */
     "def gnuplot_plotarea()\n"
     "  return [%d, %d, %d, %d]\n"
@@ -1754,17 +1737,11 @@ static char *tk_gnuplot_xy[] = {
   /* Ruby */
     "def gnuplot_xy(x1s, y1s, x2s, y2s, x1e, y1e, x2e, y2e,\n"
     "      x1m, y1m, x2m, y2m)\n"
-//  "  if (defined &user_gnuplot_coordinates)\n"
-//  "    id = win->find('withtag', 'current')\n"
-//  "    user_gnuplot_coordinates (win, id, x1s, y1s, x2s, y2s,\\\n"
-//  "      x1e, y1e, x2e, y2e, x1m, y1m, x2m, y2m)\n"
-//  "  else\n"
     "    print \" \", x1m!='' ? x1m : 0.5*(x1s+x1e)\n"
     "    print \" \", y1m!='' ? y1m : 0.5*(y1s+y1e)\n"
     "    print \" \", x2m!='' ? x2m : 0.5*(x2s+x2e)\n"
     "    print \" \", y2m!='' ? y2m : 0.5*(y2s+y2e)\n"
     "    print \"\\n\""
-//    "  end\n"
     "end\n",
 
   /* Rexx */
@@ -1919,7 +1896,7 @@ TK_fillbox(int style, unsigned int x, unsigned int y, unsigned int w, unsigned i
 	default:
 	    break;
     }
-    TK_rectangle(x, TK_YMAX - y, x + w, TK_YMAX - y - h, color, stipple); 
+    TK_rectangle(x, TK_YMAX - y, x + w, TK_YMAX - y - h, color, stipple);
 }
 
 
@@ -1963,10 +1940,10 @@ TK_filled_polygon(int points, gpiPoint *corners)
     if ((points > 2) && (corners[0].x == corners[points-1].x)  && (corners[0].y == corners[points-1].y))
 	points--;
 
-    fputs(tk_poly_begin[tk_script_language], gpoutfile); 
+    fputs(tk_poly_begin[tk_script_language], gpoutfile);
     for (i = 0; i < points; i++)
-	fprintf(gpoutfile, tk_poly_point[tk_script_language], corners[i].x, TK_YMAX - corners[i].y); 
-    fprintf(gpoutfile, tk_poly_end[tk_script_language], tk_color); 
+	fprintf(gpoutfile, tk_poly_point[tk_script_language], corners[i].x, TK_YMAX - corners[i].y);
+    fprintf(gpoutfile, tk_poly_end[tk_script_language], tk_color);
 }
 
 
@@ -2016,7 +1993,7 @@ TK_add_path_point(int x, int y)
 
 #ifdef WRITE_PNG_IMAGE
 TERM_PUBLIC void
-TK_image(unsigned m, unsigned n, coordval * image, gpiPoint * corner, t_imagecolor color_mode) 
+TK_image(unsigned m, unsigned n, coordval * image, gpiPoint * corner, t_imagecolor color_mode)
 {
     int width  = ABS(corner[0].x - corner[1].x);
     int height = ABS(corner[0].y - corner[1].y);
@@ -2076,7 +2053,6 @@ static char *tk_box_finish[TK_LANG_MAX] = {
 };
 
 
-#ifdef EAM_BOXED_TEXT
 TERM_PUBLIC void
 TK_boxed_text(unsigned int x, unsigned int y, int option)
 {
@@ -2102,7 +2078,6 @@ TK_boxed_text(unsigned int x, unsigned int y, int option)
 	break;
     }
 }
-#endif
 
 #endif /* TERM_BODY */
 
@@ -2130,9 +2105,7 @@ TERM_TABLE_START(tkcanvas)
     NULL /* layer */, TK_path,
     0.0,
     NULL /* hypertext */,
-#ifdef EAM_BOXED_TEXT
-    TK_boxed_text, 
-#endif
+    TK_boxed_text,
     NULL, TK_dashtype
 TERM_TABLE_END(tkcanvas)
 #undef LAST_TERM

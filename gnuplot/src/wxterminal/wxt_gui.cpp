@@ -61,7 +61,7 @@
  * Here is the interactive part :
  * - rescaling according to the window's size,
  * - mouse support (cursor position, zoom, rotation, ruler, clipboard...),
- * - a toolbar to give additionnal capabilities (similar to the OS/2 terminal),
+ * - a toolbar to give additional capabilities (similar to the OS/2 terminal),
  * - multiple plot windows.
  *
  * ------------------------------------------------------*/
@@ -90,6 +90,8 @@
 
 
 /* define DEBUG here to have debugging messages in stderr */
+/* #define DEBUG */
+
 #include "wxt_gui.h"
 
 /* frame icon composed of three icons of different resolutions */
@@ -154,6 +156,10 @@ int wxt_max_anchors = 0;
 TBOOLEAN pending_href = FALSE;
 const char *wxt_display_hypertext = NULL;
 wxtAnchorPoint wxt_display_anchor = {0,0,0};
+char * wxt_hypertext_fontname = NULL;
+double wxt_hypertext_fontsize = 10;
+int    wxt_hypertext_fontstyle = 10;
+int    wxt_hypertext_fontweight = 10;
 
 #else
 #define wxt_update_key_box(x,y)
@@ -446,7 +452,7 @@ wxtFrame::wxtFrame( const wxString& title, wxWindowID id )
 	SetIcons(icon);
 
 	/* set up the status bar, and fill it with an empty
-	 * string. It will be immediately overriden by gnuplot. */
+	 * string. It will be immediately overridden by gnuplot. */
 	CreateStatusBar();
 	SetStatusText( wxT("") );
 
@@ -527,7 +533,7 @@ wxtFrame::~wxtFrame()
 
 
 /* toolbar event : Export to file
- * We will create a file dialog, using platform-independant wxWidgets functions
+ * We will create a file dialog, using platform-independent wxWidgets functions
  */
 void wxtFrame::OnExport( wxCommandEvent& WXUNUSED( event ) )
 {
@@ -872,8 +878,10 @@ void wxtFrame::OnSize( wxSizeEvent& event )
 	PositionStatusBar();
 #endif
 
-	/* Note: On some platforms OnSize() might get called before the settings have been initialized in wxt_init(). */
-	if (wxt_redraw == yes)
+	/* Note: On some platforms OnSize() might get called before
+	 * settings have been initialized in wxt_init().
+	 */
+	if (wxt_redraw == yes && term_initialised)
 		wxt_exec_event(GE_replot, 0, 0, 0 , 0, this->GetId());
 }
 
@@ -915,6 +923,7 @@ wxtPanel::wxtPanel( wxWindow *parent, wxWindowID id, const wxSize& size )
 	zoom_string2 = wxT("");
 
 	wxt_ruler = false;
+	wxt_ruler_lineto = false;
 	wxt_ruler_x = 0;
 	wxt_ruler_y = 0;
 
@@ -991,6 +1000,8 @@ void wxtPanel::ClearCommandlist()
 		if ( iter->command == command_put_text ||
 			iter->command == command_hypertext ||
 			iter->command == command_set_font)
+			delete[] iter->string;
+		if (iter->command == command_enhanced_open)
 			delete[] iter->string;
 		if (iter->command == command_filled_polygon)
 			delete[] iter->corners;
@@ -1082,7 +1093,9 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		dc.SetPen( tmp_pen );
 #ifndef __WXOSX_COCOA__
 		/* wx 2.9 Cocoa bug workaround, which has no logical functions support */
+#if (GTK_MAJOR_VERSION < 3)
 		dc.SetLogicalFunction( wxINVERT );
+#endif
 #endif
 		dc.DrawLine( zoom_x1, zoom_y1, mouse_x, zoom_y1 );
 		dc.DrawLine( mouse_x, zoom_y1, mouse_x, mouse_y );
@@ -1119,9 +1132,16 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		dc.SetPen( tmp_pen );
 #ifndef __WXOSX_COCOA__
 		/* wx 2.9 Cocoa bug workaround, which has no logical functions support */
+#if (GTK_MAJOR_VERSION < 3)
 		dc.SetLogicalFunction( wxINVERT );
 #endif
+#endif
+#ifdef __WXMSW__
+		dc.DrawLine(0, (int)wxt_ruler_y, plot.device_xmax, (int)wxt_ruler_y);
+		dc.DrawLine((int)wxt_ruler_x, 0, (int)wxt_ruler_x, plot.device_ymax);
+#else
 		dc.CrossHair( (int)wxt_ruler_x, (int)wxt_ruler_y );
+#endif
 		dc.SetLogicalFunction( wxCOPY );
 	}
 
@@ -1131,7 +1151,9 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		dc.SetPen( tmp_pen );
 #ifndef __WXOSX_COCOA__
 		/* wx 2.9 Cocoa bug workaround, which has no logical functions support */
+#if (GTK_MAJOR_VERSION < 3)
 		dc.SetLogicalFunction( wxINVERT );
+#endif
 #endif
 		dc.DrawLine((int)wxt_ruler_x, (int)wxt_ruler_y, mouse_x, mouse_y);
 		dc.SetLogicalFunction( wxCOPY );
@@ -1238,6 +1260,10 @@ void wxtPanel::OnLeftUp( wxMouseEvent& event )
 				(int) left_button_sw.Time(), this->GetId()) ) {
 		/* start a watch to send the time elapsed between up and down */
 		left_button_sw.Start();
+
+		/* EXPERIMENTAL: send associated hypertext to clipboard */
+		if (wxt_display_hypertext)
+			wxt_set_clipboard(wxt_display_hypertext);
 	}
 }
 
@@ -1805,7 +1831,7 @@ wxtConfigDialog::wxtConfigDialog(wxWindow* parent)
 	wxStaticBoxSizer *wrapping_sizer = new wxStaticBoxSizer( sb, wxVERTICAL );
 	wxStaticText *text1 = new wxStaticText(this, wxID_ANY,
 		wxT("Options remembered between sessions, ")
-		wxT("overriden by `set term wxt <options>`.\n\n"),
+		wxT("overridden by `set term wxt <options>`.\n\n"),
 		wxDefaultPosition, wxSize(300, wxDefaultCoord));
 	wrapping_sizer->Add(text1,wxSizerFlags(0).Align(0).Expand().Border(wxALL) );*/
 
@@ -2111,7 +2137,7 @@ void wxt_init()
 	/* when wxGTK was initialised above, GTK+ also set the locale of the
 	 * program itself;  we must revert it */
 	setlocale(LC_NUMERIC, "C");
-	setlocale(LC_TIME, current_locale);
+	setlocale(LC_TIME, time_locale);
 #endif
 
 	/* accept the following commands from gnuplot */
@@ -2156,6 +2182,12 @@ void wxt_graphics()
 	/* set the transformation matrix of the context, and other details */
 	/* depends on plot->xscale and plot->yscale */
 	gp_cairo_initialize_context(wxt_current_plot);
+
+#ifdef _WIN32
+	/* On Windows, we set the resolution to the screen resolution, i.e. taking
+	   the "text scaling" factor into account. */
+	gp_cairo_set_resolution(GetDPI());
+#endif
 
 	/* set or refresh terminal size according to the window size */
 	/* oversampling_scale is updated in gp_cairo_initialize_context */
@@ -2910,7 +2942,6 @@ void wxt_set_clipboard(const char s[])
 }
 #endif /*USE_MOUSE*/
 
-#ifdef EAM_BOXED_TEXT
 /* Pass through the boxed text options to cairo */
 void wxt_boxed_text(unsigned int x, unsigned int y, int option)
 {
@@ -2923,7 +2954,6 @@ void wxt_boxed_text(unsigned int x, unsigned int y, int option)
 	temp_command.integer_value = option;
 	wxt_command_push(temp_command);
 }
-#endif
 
 void wxt_modify_plots(unsigned int ops, int plotno)
 {
@@ -2998,6 +3028,8 @@ void wxtPanel::wxt_cairo_refresh()
 	wxt_display_hypertext = NULL;
 	wxt_display_anchor.x = 0;
 	wxt_display_anchor.y = 0;
+	free(wxt_hypertext_fontname);
+	wxt_hypertext_fontname = NULL;
 
 	command_list_mutex.Lock();
 	command_list_t::iterator wxt_iter; /*declare the iterator*/
@@ -3094,6 +3126,11 @@ void wxtPanel::wxt_cairo_exec_command(gp_command command)
 		return;
 	case command_hypertext :
 		current_href = command.string;
+		free(wxt_hypertext_fontname);
+		wxt_hypertext_fontname = strdup(plot.fontname);
+		wxt_hypertext_fontsize = plot.fontsize;
+		wxt_hypertext_fontstyle = plot.fontstyle;
+		wxt_hypertext_fontweight = plot.fontweight;
 		return;
 	case command_point :
 		if (wxt_in_key_sample) {
@@ -3178,11 +3215,9 @@ void wxtPanel::wxt_cairo_exec_command(gp_command command)
 				command.x4, command.y4,
 				command.integer_value, command.integer_value2);
 		return;
-#ifdef EAM_BOXED_TEXT
 	case command_boxed_text :
 		gp_cairo_boxed_text(&plot, command.x1, command.y1, command.integer_value);
 		return;
-#endif /*EAM_BOXED_TEXT */
 	case command_layer :
 		switch (command.integer_value)
 		{
@@ -3214,8 +3249,12 @@ void wxtPanel::wxt_cairo_exec_command(gp_command command)
 
 void wxtPanel::wxt_cairo_draw_hypertext()
 {
-	/* FIXME: Properly, we should save and restore the plot properties, */
+	/* FIXME: Properly, we should save and restore all plot properties, */
 	/* but since this box is the very last thing in the plot....        */
+	double save_fontsize = plot.fontsize;
+	int save_fontstyle = plot.fontstyle;
+	int save_fontweight = plot.fontweight;
+
 	rgb_color grey = {.9, .9, .9};
 	int width = 0;
 	int height = 0;
@@ -3228,6 +3267,12 @@ void wxtPanel::wxt_cairo_draw_hypertext()
 		    wxt_cairo_draw_hyperimage();
 		    display_text = imagefile+1;
 		}
+	}
+
+	if (wxt_hypertext_fontname) {
+	    gp_cairo_set_font(&plot, wxt_hypertext_fontname, wxt_hypertext_fontsize);
+	    plot.fontstyle = wxt_hypertext_fontstyle;
+	    plot.fontweight = wxt_hypertext_fontweight;
 	}
 
 	plot.justify_mode = LEFT;
@@ -3247,6 +3292,11 @@ void wxtPanel::wxt_cairo_draw_hypertext()
 		wxt_display_anchor.x + term->h_char,
 		wxt_display_anchor.y + term->v_char / 2,
 		display_text, NULL, NULL);
+
+	/* FIXME: Incomplete restoration of previous state */
+	plot.fontsize = save_fontsize;
+	plot.fontstyle = save_fontstyle;
+	plot.fontweight = save_fontweight;
 }
 
 void wxtPanel::wxt_cairo_draw_hyperimage()
@@ -3899,9 +3949,7 @@ bool wxt_exec_event(int type, int mx, int my, int par1, int par2, wxWindowID id)
 	return true;
 #elif defined(WXT_MONOTHREADED)
 	if (wxt_process_one_event(&event))
-	    /* FIXME: No longer be needed? */
-	    /* ungetc('\n',stdin) */
-	    ;
+	    if (debug == 44) ungetc('\n',stdin);
 	return true;
 #else
 	if (!wxt_handling_persist)
@@ -3928,7 +3976,7 @@ bool wxt_exec_event(int type, int mx, int my, int par1, int par2, wxWindowID id)
 
 #ifdef WXT_MULTITHREADED
 /* Implements waitforinput used in wxt.trm
- * Returns the next input charachter, meanwhile treats terminal events */
+ * Returns the next input character, meanwhile treats terminal events */
 int wxt_waitforinput(int options)
 {
 	/* wxt_waitforinput *is* launched immediately after the wxWidgets terminal
@@ -4074,7 +4122,7 @@ int wxt_waitforinput(int options)
 		if (retval == -1)
 			int_error(NO_CARET, "input select error");
 		else if (was_paused_for_mouse && !paused_for_mouse)
-			/* The App event loop caught a signal */
+			/* The wxTheApp event loop caught a signal */
 			return '\0';
 		else if (paused_for_mouse && !isatty(0))
 			/* We are still paused for mouse but input is from a pipe */
@@ -4364,7 +4412,7 @@ void wxt_sigint_return()
 }
 
 /* A critical function should call this from a safe zone (no locked mutex, objects destroyed).
- * If the interrupt is asked, this fonction will not return (longjmp) */
+ * If the interrupt is asked, this function will not return (longjmp) */
 void wxt_sigint_check()
 {
 	FPRINTF2((stderr,"checking interrupt status\n"));

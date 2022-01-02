@@ -101,33 +101,41 @@ int paused_for_mouse = 0;
 #define PROMPT "gnuplot> "
 
 #ifdef OS2_IPC
-#  define INCL_DOSMEMMGR
-#  define INCL_DOSPROCESS
-#  define INCL_DOSSEMAPHORES
-#  include <os2.h>
-PVOID input_from_PM_Terminal = NULL;
-char mouseSharedMemName[40] = "";
-HEV semInputReady = 0;      /* semaphore to be created in plot.c */
-int thread_rl_Running = 0;  /* running status */
-int thread_rl_RetCode = -1; /* return code from readline in a thread */
+# define INCL_DOSMEMMGR
+# define INCL_DOSPROCESS
+# define INCL_DOSSEMAPHORES
+# include <os2.h>
+static char *input_line_SharedMem = NULL; /* pointer to the shared memory for mouse messages */
+static HEV semInputReady = 0;      /* mouse event semaphore */
+static TBOOLEAN thread_rl_Running = FALSE;  /* running status */
+static int thread_rl_RetCode = -1; /* return code from readline input thread */
 #endif /* OS2_IPC */
 
-
-#ifndef _Windows
+#ifndef _WIN32
 # include "help.h"
-#endif /* _Windows */
+#endif
 
-#ifdef _Windows
+#ifdef _WIN32
+# define WIN32_LEAN_AND_MEAN
 # include <windows.h>
-# ifdef __MSC__
+# ifdef _MSC_VER
 #  include <malloc.h>
 #  include <direct.h>          /* getcwd() */
 # else
 #  include <alloc.h>
-# endif				/* !MSC */
+# endif
 # include <htmlhelp.h>
 # include "win/winmain.h"
-#endif /* _Windows */
+#endif /* _WIN32 */
+
+#ifdef __DJGPP__
+# include <pc.h>		/* getkey() */
+# define useconds_t unsigned
+#endif
+
+#ifdef __WATCOMC__
+# include <conio.h>		/* for getch() */
+#endif
 
 #ifdef VMS
 int vms_vkid;			/* Virtual keyboard id */
@@ -136,18 +144,18 @@ int vms_ktid;			/* key table id, for translating keystrokes */
 
 
 /* static prototypes */
-static void command __PROTO((void));
-static TBOOLEAN is_array_assignment __PROTO((void));
-static int changedir __PROTO((char *path));
-static char* fgets_ipc __PROTO((char* dest, int len));
-static char* gp_get_string __PROTO((char *, size_t, const char *));
-static int read_line __PROTO((const char *prompt, int start));
-static void do_system __PROTO((const char *));
-static void test_palette_subcommand __PROTO((void));
-static int find_clause __PROTO((int *, int *));
-static int report_error __PROTO((int ierr));
+static void command(void);
+static TBOOLEAN is_array_assignment(void);
+static int changedir(char *path);
+static char* fgets_ipc(char* dest, int len);
+static char* gp_get_string(char *, size_t, const char *);
+static int read_line(const char *prompt, int start);
+static void do_system(const char *);
+static void test_palette_subcommand(void);
+static int find_clause(int *, int *);
+static int report_error(int ierr);
 
-static int expand_1level_macros __PROTO((void));
+static int expand_1level_macros(void);
 
 struct lexical_unit *token;
 int token_table_size;
@@ -186,7 +194,8 @@ static int iteration_depth = 0;
 static TBOOLEAN requested_break = FALSE;
 static TBOOLEAN requested_continue = FALSE;
 
-static int command_exit_status = 0;
+/* set when an "exit" command is encountered */
+static int command_exit_requested = 0;
 
 /* support for dynamic size of input line */
 void
@@ -197,19 +206,11 @@ extend_input_line()
 	gp_input_line = gp_alloc(MAX_LINE_LEN, "gp_input_line");
 	gp_input_line_len = MAX_LINE_LEN;
 	gp_input_line[0] = NUL;
-
-#ifdef OS2_IPC
-	sprintf( mouseSharedMemName, "\\SHAREMEM\\GP%i_Mouse_Input", getpid() );
-	if (DosAllocSharedMem((PVOID) & input_from_PM_Terminal,
-		mouseSharedMemName, MAX_LINE_LEN, PAG_WRITE | PAG_COMMIT))
-        fputs("command.c: DosAllocSharedMem ERROR\n",_stderr);
-#endif /* OS2_IPC */
-
     } else {
 	gp_input_line = gp_realloc(gp_input_line, gp_input_line_len + MAX_LINE_LEN,
 				"extend input line");
 	gp_input_line_len += MAX_LINE_LEN;
-    FPRINTF((_stderr, "extending input line to %d chars\n",
+	FPRINTF((_stderr, "extending input line to %d chars\n",
 		 gp_input_line_len));
     }
 }
@@ -230,18 +231,92 @@ extend_token_table()
 	token = gp_realloc(token, (token_table_size + MAX_TOKENS) * sizeof(struct lexical_unit), "extend token table");
 	memset(token+token_table_size, 0, MAX_TOKENS * sizeof(*token));
 	token_table_size += MAX_TOKENS;
-    FPRINTF((_stderr, "extending token table to %d elements\n", token_table_size));
+	FPRINTF((_stderr, "extending token table to %d elements\n", token_table_size));
     }
 }
 
 
 #ifdef OS2_IPC
-void thread_read_line()
+void
+thread_read_line(void *arg)
 {
-   thread_rl_Running = 1;
-   thread_rl_RetCode = ( read_line(PROMPT, 0) );
-   thread_rl_Running = 0;
-   DosPostEventSem(semInputReady);
+    (void) arg;
+    thread_rl_Running = TRUE;
+    thread_rl_RetCode = read_line(PROMPT, 0);
+    thread_rl_Running = FALSE;
+    DosPostEventSem(semInputReady);
+}
+
+
+void
+os2_ipc_setup(void)
+{
+    APIRET rc;
+    char semInputReadyName[40];
+    char mouseSharedMemName[40];
+
+    /* create input event semaphore */
+    sprintf(semInputReadyName, "\\SEM32\\GP%i_Input_Ready", getpid());
+    rc = DosCreateEventSem(semInputReadyName, &semInputReady, 0, 0);
+    if (rc != 0)
+	fputs("DosCreateEventSem error\n", _stderr);
+
+    /* allocate shared memory */
+    sprintf(mouseSharedMemName, "\\SHAREMEM\\GP%i_Mouse_Input", getpid());
+    rc = DosAllocSharedMem((PPVOID) &input_line_SharedMem,
+		mouseSharedMemName, MAX_LINE_LEN,
+		PAG_READ | PAG_WRITE | PAG_COMMIT);
+    if (rc != 0)
+	fputs("DosAllocSharedMem ERROR\n", _stderr);
+    else
+	*input_line_SharedMem = 0;
+}
+
+
+int
+os2_ipc_dispatch_event(void)
+{
+    if (input_line_SharedMem == NULL || !*input_line_SharedMem)
+	return 0;
+
+    if (*input_line_SharedMem == '%') {
+	struct gp_event_t ge;
+
+	/* copy event data immediately */
+	memcpy(&ge, input_line_SharedMem + 1, sizeof(ge));
+	*input_line_SharedMem = 0; /* discard the event data */
+	thread_rl_RetCode = 0;
+
+	/* process event */
+	do_event(&ge);
+
+	/* end pause mouse? */
+	if ((ge.type == GE_buttonrelease) && (paused_for_mouse & PAUSE_CLICK) &&
+	    (((ge.par1 == 1) && (paused_for_mouse & PAUSE_BUTTON1)) ||
+	     ((ge.par1 == 2) && (paused_for_mouse & PAUSE_BUTTON2)) ||
+	     ((ge.par1 == 3) && (paused_for_mouse & PAUSE_BUTTON3)))) {
+	    paused_for_mouse = 0;
+	}
+	if ((ge.type == GE_keypress) && (paused_for_mouse & PAUSE_KEYSTROKE) &&
+	    (ge.par1 != NUL)) {
+	    paused_for_mouse = 0;
+	}
+	return 0;
+    }
+    if (*input_line_SharedMem &&
+        strstr(input_line_SharedMem, "plot") != NULL &&
+        (strcmp(term->name, "pm") != 0 && strcmp(term->name, "x11") != 0)) {
+	/* avoid plotting if terminal is not PM or X11 */
+	fprintf(_stderr, "\n\tCommand(s) ignored for other than PM and X11 terminals\a\n");
+	if (interactive)
+	    fputs(PROMPT, _stderr);
+	*input_line_SharedMem = 0; /* discard the event data */
+	return 0;
+    }
+    strcpy(gp_input_line, input_line_SharedMem);
+    input_line_SharedMem[0] = 0;
+    thread_rl_RetCode = 0;
+    return 1;
 }
 #endif /* OS2_IPC */
 
@@ -249,18 +324,6 @@ void thread_read_line()
 int
 com_line()
 {
-#ifdef OS2_IPC
-static char *input_line_SharedMem = NULL;
-
-    if (input_line_SharedMem == NULL) {  /* get shared mem only once */
-    if (DosGetNamedSharedMem((PVOID) &input_line_SharedMem,
-		mouseSharedMemName, PAG_WRITE | PAG_READ))
-    fputs("readline.c: DosGetNamedSharedMem ERROR\n", _stderr);
-    else
-	*input_line_SharedMem = 0;
-    }
-#endif /* OS2_IPC */
-
     if (multiplot) {
 	/* calls int_error() if it is not happy */
 	term_check_multiplot_okay(interactive);
@@ -271,42 +334,33 @@ static char *input_line_SharedMem = NULL;
 
 #if defined(OS2_IPC) && defined(USE_MOUSE)
 	ULONG u;
-        if (thread_rl_Running == 0) {
-	    int res = _beginthread(thread_read_line,NULL,32768,NULL);
+
+	if (!thread_rl_Running) {
+	    int res;
+
+	    // Discard pending mouse events to avoid spurious side effects.
+	    // This seems only necessary since we do no handle mouse events
+	    // anywhere else (like in pause, during load, etc.).
+	    input_line_SharedMem[0] = 0;
+	    DosResetEventSem(semInputReady, &u);
+
+	    res = _beginthread(thread_read_line, NULL, 32768, NULL);
 	    if (res == -1)
-        fputs("error command.c could not begin thread\n",_stderr);
+		fputs("error command.c could not begin thread\n", _stderr);
 	}
 	/* wait until a line is read or gnupmdrv makes shared mem available */
-	DosWaitEventSem(semInputReady,SEM_INDEFINITE_WAIT);
-	DosResetEventSem(semInputReady,&u);
+	DosWaitEventSem(semInputReady, SEM_INDEFINITE_WAIT);
+	DosResetEventSem(semInputReady, &u);
 	if (thread_rl_Running) {
-	    if (input_line_SharedMem == NULL || !*input_line_SharedMem)
-		return (0);
-	    if (*input_line_SharedMem=='%') {
-		do_event( (struct gp_event_t*)(input_line_SharedMem+1) ); /* pass terminal's event */
-		input_line_SharedMem[0] = 0; /* discard the whole command line */
-		thread_rl_RetCode = 0;
-		return (0);
-	    }
-	    if (*input_line_SharedMem &&
-	        strstr(input_line_SharedMem,"plot") != NULL &&
-		(strcmp(term->name,"pm") && strcmp(term->name,"x11"))) {
-		/* avoid plotting if terminal is not PM or X11 */
-        fprintf(_stderr,"\n\tCommand(s) ignored for other than PM and X11 terminals\a\n");
-        if (interactive) fputs(PROMPT,_stderr);
-		input_line_SharedMem[0] = 0; /* discard the whole command line */
-		return (0);
-	    }
-	    strcpy(gp_input_line, input_line_SharedMem);
-	    input_line_SharedMem[0] = 0;
-	    thread_rl_RetCode = 0;
+	    /* input thread still running, this must be a "mouse" event */
+	    if (os2_ipc_dispatch_event() == 0)
+		return 0;
 	}
 	if (thread_rl_RetCode)
-	    return (1);
-
+	    return 1;
 #else	/* The normal case */
 	if (read_line(PROMPT, 0))
-	    return (1);
+	    return 1;
 #endif	/* defined(OS2_IPC) && defined(USE_MOUSE) */
     }
 
@@ -328,44 +382,39 @@ static char *input_line_SharedMem = NULL;
 int
 do_line()
 {
-    /* Line continuation has already been handled by read_line() */
-    char *inlptr;
-
-    /* Expand any string variables in the current input line */
+    /* Line continuation has already been handled by read_line().
+     * Expand any string variables in the current input line.
+     */
     string_expand_macros();
 
-    /* Skip leading whitespace */
-    inlptr = gp_input_line;
-    while (isspace((unsigned char) *inlptr))
-	inlptr++;
+    /* Remove leading whitespace */
+    {
+	char *inlptr = gp_input_line;
+	while (isspace((unsigned char) *inlptr))
+	    inlptr++;
+	if (inlptr != gp_input_line) {
+	    memmove(gp_input_line, inlptr, strlen(inlptr));
+	    gp_input_line[strlen(inlptr)] = NUL;
+	}
+    }
 
     /* Leading '!' indicates a shell command that bypasses normal gnuplot
      * tokenization and parsing.  This doesn't work inside a bracketed clause.
      */
-    if (is_system(*inlptr)) {
-	do_system(inlptr + 1);
+    if (is_system(*gp_input_line)) {
+	do_system(gp_input_line + 1);
 	return (0);
     }
 
     /* Strip off trailing comment */
-    FPRINTF((_stderr,"doline( \"%s\" )\n", gp_input_line));
-    if (strchr(inlptr, '#')) {
-        num_tokens = scanner(&gp_input_line, &gp_input_line_len);
+    if (strchr(gp_input_line, '#')) {
+	num_tokens = scanner(&gp_input_line, &gp_input_line_len);
 	if (gp_input_line[token[num_tokens].start_index] == '#')
 	    gp_input_line[token[num_tokens].start_index] = NUL;
     }
 
-    if (inlptr != gp_input_line) {
-	/* If there was leading whitespace, copy the actual
-	 * command string to the front. use memmove() because
-	 * source and target may overlap */
-	memmove(gp_input_line, inlptr, strlen(inlptr));
-	/* Terminate resulting string */
-	gp_input_line[strlen(inlptr)] = NUL;
-    }
-    FPRINTF((_stderr, "  echo: \"%s\"\n", gp_input_line));
-
     if_depth = 0;
+
     num_tokens = scanner(&gp_input_line, &gp_input_line_len);
 
     /*
@@ -382,7 +431,7 @@ do_line()
 	     * and therefore requesting interactive input is not an option.
 	     * FIXME: or is it?
 	     */
-        int_error(NO_CARET, "Syntax error: missing block terminator }");
+	    int_error(NO_CARET, "Syntax error: missing block terminator }");
 	}
 	else if (interactive || noinputfiles) {
 	    /* If we are really in interactive mode and there are unterminated blocks,
@@ -393,7 +442,7 @@ do_line()
 	     * as a slave process. The test for noinputfiles is for the latter case.
 	     * If we didn't have that test here, unterminated blocks sent via a pipe
 	     * would trigger the error message in the else branch below. */
-        int retval;
+	    int retval;
 	    strcat(gp_input_line,";");
 	    retval = read_line("more> ", strlen(gp_input_line));
 	    if (retval)
@@ -406,7 +455,7 @@ do_line()
 		gp_input_line[token[num_tokens].start_index] = NUL;
 	}
 	else {
-        /* Non-interactive mode here means that we got a string from -e.
+	    /* Non-interactive mode here means that we got a string from -e.
 	     * Having curly_brace_count > 0 means that there are at least one
 	     * unterminated blocks in the string.
 	     * Likely user error, so we die with an error message. */
@@ -416,24 +465,25 @@ do_line()
 
     c_token = 0;
     while (c_token < num_tokens) {
-    command();
-    if (iteration_early_exit()) {
-        c_token = num_tokens;
-	    break;
-	}
-	if (command_exit_status) {
-	    command_exit_status = 0;
+	command();
+	if (command_exit_requested) {
+	    command_exit_requested = 0;	/* yes this is necessary */
 	    return 1;
 	}
+	if (iteration_early_exit()) {
+	    c_token = num_tokens;
+	    break;
+	}
 	if (c_token < num_tokens) {	/* something after command */
-        if (equals(c_token, ";")) {
+	    if (equals(c_token, ";")) {
 		c_token++;
 	    } else if (equals(c_token, "{")) {
 		begin_clause();
 	    } else if (equals(c_token, "}")) {
 		end_clause();
 	    } else
-		int_error(c_token, "unexpected or unrecognized token");
+		int_error(c_token, "unexpected or unrecognized token: %s",
+		    token_to_string(c_token));
 	}
     }
 
@@ -455,7 +505,7 @@ do_string_and_free(char *cmdline)
 {
 #ifdef USE_MOUSE
     if (display_ipc_commands())
-    fprintf(_stderr, "%s\n", cmdline);
+	fprintf(_stderr, "%s\n", cmdline);
 #endif
 
     lf_push(NULL, NULL, cmdline); /* save state for errors and recursion */
@@ -463,10 +513,20 @@ do_string_and_free(char *cmdline)
 	extend_input_line();
     strcpy(gp_input_line, cmdline);
     screen_ok = FALSE;
-    command_exit_status = do_line();
+    command_exit_requested = do_line();
 
-    /* We don't know if screen_ok is appropriate so leave it FALSE. */
-    lf_pop();
+    /* "exit" is supposed to take us out of the current file from a
+     * "load <file>" command.  But the LFS stack holds both files and
+     * bracketed clauses, so we have to keep popping until we hit an
+     * actual file.
+     */
+    if (command_exit_requested) {
+	while (lf_head && !lf_head->name) {
+	    FPRINTF((_stderr,"pop one level of non-file LFS\n"));
+	    lf_pop();
+	}
+    } else
+	lf_pop();
 }
 
 
@@ -493,7 +553,7 @@ do_string_replot(const char *s)
 
     if (volatile_data && (E_REFRESH_NOT_OK != refresh_ok)) {
 	if (display_ipc_commands())
-        fprintf(_stderr, "refresh\n");
+	    fprintf(_stderr, "refresh\n");
 	refresh_request();
 
     } else if (!replot_disabled)
@@ -514,8 +574,8 @@ restore_prompt()
 	rl_redisplay();
 #  endif
 #else
-    fputs(PROMPT, _stderr);
-    fflush(_stderr);
+	fputs(PROMPT, _stderr);
+	fflush(_stderr);
 #endif
     }
 }
@@ -568,15 +628,16 @@ define()
     } else {
 	/* variable ! */
 	char *varname = gp_input_line + token[c_token].start_index;
-	if (!strncmp(varname, "GPVAL_", 6) || !strncmp(varname, "MOUSE_", 6))
-	    int_error(c_token, "Cannot set internal variables GPVAL_ and MOUSE_");
+	if (!strncmp(varname, "GPVAL_", 6)
+	||  !strncmp(varname, "GPFUN_", 6)
+	||  !strncmp(varname, "MOUSE_", 6))
+	    int_error(c_token, "Cannot set internal variables GPVAL_ GPFUN_ MOUSE_");
 	start_token = c_token;
 	c_token += 2;
 	udv = add_udv(start_token);
 	(void) const_express(&result);
 	/* Prevents memory leak if the variable name is re-used */
-	gpfree_array(&udv->udv_value);
-	gpfree_string(&udv->udv_value);
+	free_value(&udv->udv_value);
 	udv->udv_value = result;
     }
 }
@@ -591,8 +652,8 @@ undefine_command()
     c_token++;               /* consume the command name */
 
     while (!END_OF_COMMAND) {
-        /* copy next var name into key */
-        copy_str(key, c_token, MAX_ID_LEN);
+	/* copy next var name into key */
+	copy_str(key, c_token, MAX_ID_LEN);
 
 	/* Peek ahead - must do this, because a '*' is returned as a
 	   separate token, not as part of the 'key' */
@@ -604,7 +665,15 @@ undefine_command()
 	else if (*key == '$')
 	    copy_str(&key[1], ++c_token, MAX_ID_LEN-1);
 
-        /* ignore internal variables */
+	/* Other strange stuff on command line */
+	else if (!isletter(c_token))
+	    int_error(c_token, "Not a variable name");
+
+	/* This command cannot deal with array elements or functions */
+	if (equals(c_token+1, "[") || equals(c_token+1, "("))
+	    int_error(c_token, "Cannot undefine function or array element");
+
+	/* ignore internal variables */
 	if (strncmp(key, "GPVAL_", 6) && strncmp(key, "MOUSE_", 6))
 	    del_udv_by_name( key, wildcard );
 
@@ -646,7 +715,7 @@ raise_lower_command(int lower)
 #ifdef X11
 	    x11_lower_terminal_group();
 #endif
-#ifdef _Windows
+#ifdef _WIN32
 	    win_lower_terminal_group();
 #endif
 #ifdef WXWIDGETS
@@ -659,7 +728,7 @@ raise_lower_command(int lower)
 #ifdef X11
 	    x11_raise_terminal_group();
 #endif
-#ifdef _Windows
+#ifdef _WIN32
 	    win_raise_terminal_group();
 #endif
 #ifdef WXWIDGETS
@@ -683,7 +752,7 @@ raise_lower_command(int lower)
 #ifdef X11
 		x11_lower_terminal_window(number);
 #endif
-#ifdef _Windows
+#ifdef _WIN32
 		win_lower_terminal_window(number);
 #endif
 #ifdef WXWIDGETS
@@ -696,7 +765,7 @@ raise_lower_command(int lower)
 #ifdef X11
 		x11_raise_terminal_window(number);
 #endif
-#ifdef _Windows
+#ifdef _WIN32
 		win_raise_terminal_window(number);
 #endif
 #ifdef WXWIDGETS
@@ -750,8 +819,7 @@ array_command()
     if (!isletter(++c_token))
 	int_error(c_token, "illegal variable name");
     array = add_udv(c_token);
-    gpfree_array(&array->udv_value);
-    gpfree_string(&array->udv_value);
+    free_value(&array->udv_value);
     c_token++;
 
     if (equals(c_token, "[")) {
@@ -892,20 +960,20 @@ bind_command()
     }
 
     /* get left hand side: the key or key sequence
-     * either (1) entire sequence is in quotes 
+     * either (1) entire sequence is in quotes
      * or (2) sequence goes until the first whitespace
      */
     if (END_OF_COMMAND) {
 	; /* Fall through */
     } else if (isstringvalue(c_token) && (lhs = try_to_get_string())) {
-    FPRINTF((_stderr,"Got bind quoted lhs = \"%s\"\n",lhs));
+	FPRINTF((_stderr,"Got bind quoted lhs = \"%s\"\n",lhs));
     } else {
 	char *first = gp_input_line + token[c_token].start_index;
 	int size = strcspn(first, " \";");
 	lhs = gp_alloc(size + 1, "bind_command->lhs");
 	strncpy(lhs, first, size);
 	lhs[size] = '\0';
-    FPRINTF((_stderr,"Got bind unquoted lhs = \"%s\"\n",lhs));
+	FPRINTF((_stderr,"Got bind unquoted lhs = \"%s\"\n",lhs));
 	while (gp_input_line + token[c_token].start_index < first+size)
 	    c_token++;
     }
@@ -917,13 +985,13 @@ bind_command()
     if (END_OF_COMMAND) {
 	; /* Fall through */
     } else if (isstringvalue(c_token) && (rhs = try_to_get_string())) {
-        FPRINTF((_stderr,"Got bind quoted rhs = \"%s\"\n",rhs));
+	FPRINTF((_stderr,"Got bind quoted rhs = \"%s\"\n",rhs));
     } else {
 	int save_token = c_token;
 	while (!END_OF_COMMAND)
 	    c_token++;
 	m_capture( &rhs, save_token, c_token-1 );
-        FPRINTF((_stderr,"Got bind unquoted rhs = \"%s\"\n",rhs));
+	FPRINTF((_stderr,"Got bind unquoted rhs = \"%s\"\n",rhs));
     }
 
     /* bind_process() will eventually free lhs / rhs ! */
@@ -1017,10 +1085,10 @@ clear_command()
     term_start_plot();
 
     if (multiplot && term->fillbox) {
-	unsigned int xx1 = (unsigned int) (xoffset * term->xmax);
-	unsigned int yy1 = (unsigned int) (yoffset * term->ymax);
-	unsigned int width = (unsigned int) (xsize * term->xmax);
-	unsigned int height = (unsigned int) (ysize * term->ymax);
+	int xx1 = xoffset * term->xmax;
+	int yy1 = yoffset * term->ymax;
+	unsigned int width = xsize * term->xmax;
+	unsigned int height = ysize * term->ymax;
 	(*term->fillbox) (0, xx1, yy1, width, height);
     }
     term_end_plot();
@@ -1056,7 +1124,7 @@ exit_command()
 	c_token += 2;
 	status = int_expression();
 	gp_exit(status);
-    }	
+    }
 
     /* exit error 'error message'  returns to the top command line */
     if (equals(c_token+1,"error")) {
@@ -1065,7 +1133,7 @@ exit_command()
     }
 
     /* else graphics will be tidied up in main */
-    command_exit_status = 1;
+    command_exit_requested = 1;
 }
 
 
@@ -1121,7 +1189,7 @@ history_command()
 	int n = 0;		   /* print only <last> entries */
 	char *tmp;
 	TBOOLEAN append = FALSE;   /* rewrite output file or append it */
-	static char *name = NULL;  /* name of the output file; NULL for _stdout */
+	static char *name = NULL;  /* name of the output file; NULL for stdout */
 
 	TBOOLEAN quiet = history_quiet;
 	if (!END_OF_COMMAND && almost_equals(c_token,"q$uiet")) {
@@ -1159,19 +1227,6 @@ do {                                  \
     gp_input_line[idx++] = ' '; /* s */  \
     gp_input_line[idx++] = ' '; /* e */  \
 } while (0)
-
-#if 0
-#define PRINT_TOKEN(tok)                                                    \
-do {                                                                        \
-    int i;                                                                  \
-    int end_index = token[tok].start_index + token[tok].length;             \
-    for (i = token[tok].start_index; i < end_index && gp_input_line[i]; i++) { \
-    fputc(gp_input_line[i], _stderr);                                       \
-    }                                                                       \
-    fputc('\n', _stderr);                                                    \
-    fflush(_stderr);                                                         \
-} while (0)
-#endif
 
 /* Make a copy of an input line substring delimited by { and } */
 static char *
@@ -1344,6 +1399,10 @@ do_command()
 
     c_token++;
     do_iterator = check_for_iteration();
+    if (forever_iteration(do_iterator)) {
+	cleanup_iteration(do_iterator);
+	int_error(c_token-2, "unbounded iteration not accepted here");
+    }
 
     if (!equals(c_token,"{")) {
 	cleanup_iteration(do_iterator);
@@ -1368,6 +1427,9 @@ do_command()
     do {
 	requested_continue = FALSE;
 	do_string(clause);
+
+	if (command_exit_requested != 0)
+	    requested_break = TRUE;
 	if (requested_break)
 	    break;
     } while (next_iteration(do_iterator));
@@ -1386,7 +1448,7 @@ do_command()
 }
 
 /* process commands of the form 'while (foo) {...}' */
-/* FIXME:  For consistency there should be an iterator associated 
+/* FIXME:  For consistency there should be an iterator associated
  * with this statement.
  */
 void
@@ -1412,6 +1474,8 @@ while_command()
     while (exprval != 0) {
 	requested_continue = FALSE;
 	do_string(clause);
+	if (command_exit_requested)
+	    requested_break = TRUE;
 	if (requested_break)
 	    break;
 	c_token = save_token;
@@ -1454,7 +1518,6 @@ link_command()
      * "set nonlinear" currently supports axes x x2 y y2 z r cb
      */
     if (equals(command_token,"nonlinear")) {
-#ifdef NONLINEAR_AXES
 	AXIS_INDEX axis;
 	if ((axis = lookup_table(axisname_tbl, c_token)) >= 0)
 	    secondary_axis = &axis_array[axis];
@@ -1470,9 +1533,6 @@ link_command()
 	/* Clear previous log status */
 	secondary_axis->log = FALSE;
 	secondary_axis->ticdef.logscaling = FALSE;
-#else
-	int_error(command_token, "This copy of gnuplot does not support nonlinear axes");
-#endif
 
     /*
      * "set link" applies to either x|x2 or y|y2
@@ -1532,7 +1592,6 @@ link_command()
 	}
     }
 
-#ifdef NONLINEAR_AXES
     else if (equals(command_token,"nonlinear") && linked) {
 	int_warn(c_token,"via mapping function required");
 	linked = FALSE;
@@ -1546,11 +1605,8 @@ link_command()
 	secondary_axis->linked_to_primary = primary_axis;
 	primary_axis->linked_to_secondary = secondary_axis;
 	clone_linked_axes(secondary_axis, primary_axis);
-    } else 
-#endif
-
-    /* Clone the range information */
-    if (linked) {
+    } else if (linked) {
+	/* Clone the range information */
 	secondary_axis->linked_to_primary = primary_axis;
 	primary_axis->linked_to_secondary = secondary_axis;
 	clone_linked_axes(primary_axis, secondary_axis);
@@ -1572,6 +1628,8 @@ link_command()
 void
 load_command()
 {
+    /* These need to be local so that recursion works. */
+    /* They will eventually be freed by lf_pop(). */
     FILE *fp;
     char *save_file;
 
@@ -1580,11 +1638,9 @@ load_command()
     if (!save_file)
 	int_error(c_token, "expecting filename");
     gp_expand_tilde(&save_file);
-
-    fp = strcmp(save_file, "-") ? loadpath_fopen(save_file, "r") : _stdout;
+    fp = strcmp(save_file, "-") ? loadpath_fopen(save_file, "r") : stdout;
     load_file(fp, save_file, 1);
 }
-
 
 
 /* null command */
@@ -1651,7 +1707,7 @@ void
 clause_reset_after_error()
 {
     if (clause_depth)
-    FPRINTF((_stderr,"CLAUSE RESET after error at depth %d\n",clause_depth));
+	FPRINTF((_stderr,"CLAUSE RESET after error at depth %d\n",clause_depth));
     clause_depth = 0;
     iteration_depth = 0;
 }
@@ -1726,9 +1782,9 @@ pause_command()
 	    }
 
 	    if (end_condition)
-	        paused_for_mouse = end_condition;
+		paused_for_mouse = end_condition;
 	    else
-	        paused_for_mouse = PAUSE_CLICK;
+		paused_for_mouse = PAUSE_CLICK;
 
 	    /* Set the pause mouse return codes to -1 */
 	    current = add_udv_by_name("MOUSE_KEY");
@@ -1753,17 +1809,17 @@ pause_command()
 	    free(buf);
 	    buf = tmp;
 	    if (sleep_time >= 0) {
-        fputs(buf, _stderr);
+		fputs(buf, _stderr);
 	    }
 #elif defined(OS2)
 	    free(buf);
 	    buf = tmp;
 	    if (strcmp(term->name, "pm") != 0 || sleep_time >= 0)
-        fputs(buf, _stderr);
-#else /* Not WIN32 or OS2 */
+		fputs(buf, _stderr);
+#else /* Not _WIN32 or OS2 */
 	    free(buf);
 	    buf = tmp;
-        fputs(buf, _stderr);
+	    fputs(buf, _stderr);
 #endif
 	    text = 1;
 	}
@@ -1777,7 +1833,7 @@ pause_command()
 	    int junk = 0;
 	    if (buf) {
 		/* Use of fprintf() triggers a bug in MinGW + SJIS encoding */
-        fputs(buf, _stderr); fputs("\n",_stderr);
+		fputs(buf, _stderr); fputs("\n", _stderr);
 	    }
 	    /* cannot use EAT_INPUT_WITH here */
 	    do {
@@ -1792,21 +1848,24 @@ pause_command()
 		bail_to_command_line();
 	}
 #elif defined(OS2) && defined(USE_MOUSE)
-	if (strcmp(term->name, "pm") == 0) {
-	    int rc;
-	    if ((rc = PM_pause(buf)) == 0) {
+	if (isatty(fileno(stdin)) && strcmp(term->name, "pm") == 0) {
+	    int rc = PM_pause(buf);
+	    if (rc == 0) {
 		/* if (!CallFromRexx)
 		 * would help to stop REXX programs w/o raising an error message
 		 * in RexxInterface() ...
 		 */
 		bail_to_command_line();
 	    } else if (rc == 2) {
-        fputs(buf, _stderr);
+		fputs(buf, _stderr);
 		text = 1;
 		EAT_INPUT_WITH(fgetc(stdin));
 	    }
 	} else {
+	    if (strcmp(term->name, "pm") == 0)
+		fputs(buf, _stderr);
 	    EAT_INPUT_WITH(fgetc(stdin));
+	    fputc('\n', _stderr);
 	}
 #else /* !(_WIN32 || OS2) */
 # ifdef USE_MOUSE
@@ -1815,7 +1874,27 @@ pause_command()
 	    term->waitforinput(0);
 	} else
 # endif /* USE_MOUSE */
+# ifdef MSDOS
+	{
+	    int junk;
+	    /* cannot use EAT_INPUT_WITH here */
+	    do {
+#  ifdef __DJGPP__
+		/* We use getkey() since with DJGPP 2.05 and gcc 7.2,
+		   getchar() requires two keystrokes. */
+		junk = getkey();
+#  else
+		junk = getch();
+#  endif
+		/* Check if Ctrl-C was pressed */
+		if (junk == 0x03)
+		    bail_to_command_line();
+	    } while (junk != EOF && junk != '\n' && junk != '\r');
+	    fputc('\n', _stderr);
+	}
+# else
 	    EAT_INPUT_WITH(fgetc(stdin));
+# endif
 
 #endif /* !(_WIN32 || OS2) */
     }
@@ -1823,8 +1902,9 @@ pause_command()
 	timed_pause(sleep_time);
 
     if (text != 0 && sleep_time >= 0)
-    fputc('\n', _stderr);
+	fputc('\n', _stderr);
     screen_ok = FALSE;
+
 }
 
 
@@ -1858,7 +1938,7 @@ plot_command()
 void
 print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 {
-    if (print_out && print_out != _stderr && print_out != _stdout) {
+    if (print_out && print_out != _stderr && print_out != stdout) {
 #ifdef PIPES
 	if (print_out_name[0] == '|') {
 	    if (0 > pclose(print_out))
@@ -1867,6 +1947,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 #endif
 	    if (0 > fclose(print_out))
 		perror(print_out_name);
+	print_out = _stderr;
     }
 
     free(print_out_name);
@@ -1874,12 +1955,12 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
     print_out_var = NULL;
 
     if (! name) {
-    print_out = _stderr;
+	print_out = _stderr;
 	return;
     }
 
     if (strcmp(name, "-") == 0) {
-	print_out = _stdout;
+	print_out = stdout;
 	return;
     }
 
@@ -1904,7 +1985,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
     } else {
 	print_out_var = add_udv_by_name(name);
 	if (print_out_var == NULL) {
-        fprintf(_stderr, "Error allocating datablock \"%s\"\n", name);
+	    fprintf(_stderr, "Error allocating datablock \"%s\"\n", name);
 	    return;
 	}
 	if (print_out_var->udv_value.type != NOTDEFINED) {
@@ -1912,7 +1993,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 	    if (!append_p)
 		gpfree_datablock(&print_out_var->udv_value);
 	    if (print_out_var->udv_value.type != DATABLOCK)
-	        print_out_var->udv_value.v.data_array = NULL;
+		print_out_var->udv_value.v.data_array = NULL;
 	} else {
 	    print_out_var->udv_value.v.data_array = NULL;
 	}
@@ -1927,10 +2008,10 @@ print_show_output()
 {
     if (print_out_name)
 	return print_out_name;
-    if (print_out == _stdout)
-	return "<_stdout>";
+    if (print_out == stdout)
+	return "<stdout>";
     if (!print_out || print_out == _stderr || !print_out_name)
-    return "<stderr>";
+	return "<_stderr>";
     return print_out_name;
 }
 
@@ -1957,7 +2038,7 @@ print_command()
     size_t len = 0;
 
     if (!print_out)
-    print_out = _stderr;
+	print_out = _stderr;
     if (print_out_var != NULL) { /* print to datablock */
 	dataline = (char *) gp_alloc(size, "dataline");
 	*dataline = NUL;
@@ -2007,16 +2088,12 @@ print_command()
 	    else
 		disp_value(print_out, &a, FALSE);
 	    need_space = TRUE;
-#ifdef ARRAY_COPY_ON_REFERENCE
-	    /* Prevents memory leakage for ARRAY variables */
-	    gpfree_string(&a);
-#endif
 	}
 
     } while (!END_OF_COMMAND && equals(c_token, ","));
 
     if (dataline != NULL) {
-	append_to_datablock(&print_out_var->udv_value, dataline);
+	append_multiline_to_datablock(&print_out_var->udv_value, dataline);
     } else {
 	(void) putc('\n', print_out);
 	fflush(print_out);
@@ -2032,9 +2109,9 @@ pwd_command()
 
     save_file = gp_alloc(PATH_MAX, "print current dir");
     if (GP_GETCWD(save_file, PATH_MAX) == NULL)
-    fprintf(_stderr, "<invalid>\n");
+	fprintf(_stderr, "<invalid>\n");
     else
-    fprintf(_stderr, "%s\n", save_file);
+	fprintf(_stderr, "%s\n", save_file);
     free(save_file);
     c_token++;
 }
@@ -2058,7 +2135,7 @@ refresh_request()
     AXIS_INDEX axis;
 
     if (   ((first_plot == NULL) && (refresh_ok == E_REFRESH_OK_2D))
-        || ((first_3dplot == NULL) && (refresh_ok == E_REFRESH_OK_3D))
+	|| ((first_3dplot == NULL) && (refresh_ok == E_REFRESH_OK_3D))
 	|| (!*replot_line && (refresh_ok == E_REFRESH_NOT_OK))
        )
 	int_error(NO_CARET, "no active plot; cannot refresh");
@@ -2068,6 +2145,11 @@ refresh_request()
 	replotrequest();
 	return;
     }
+
+    /* The margins from "set offset" were already applied;
+     * don't reapply them here
+     */
+    retain_offsets = TRUE;
 
     /* Restore the axis range/scaling state from original plot
      * Dima Kogan April 2018
@@ -2087,8 +2169,10 @@ refresh_request()
 
 	if (this_axis->linked_to_secondary)
 	    clone_linked_axes(this_axis, this_axis->linked_to_secondary);
-	else if (this_axis->linked_to_primary)
+	else if (this_axis->linked_to_primary) {
+	    if (this_axis->linked_to_primary->autoscale != AUTOSCALE_BOTH)
 	    clone_linked_axes(this_axis, this_axis->linked_to_primary);
+	}
     }
 
     if (refresh_ok == E_REFRESH_OK_2D) {
@@ -2112,7 +2196,7 @@ replot_command()
 	int_error(c_token, "no previous plot");
 
     if (volatile_data && (refresh_ok != E_REFRESH_NOT_OK) && !replot_disabled) {
-    FPRINTF((_stderr,"volatile_data %d refresh_ok %d plotted_data_from_stdin %d\n",
+	FPRINTF((_stderr,"volatile_data %d refresh_ok %d plotted_data_from_stdin %d\n",
 		volatile_data, refresh_ok, plotted_data_from_stdin));
 	refresh_command();
 	return;
@@ -2185,9 +2269,9 @@ save_command()
     {
     gp_expand_tilde(&save_file);
 #ifdef _WIN32
-    fp = strcmp(save_file,"-") ? loadpath_fopen(save_file,"w") : _stdout;
+    fp = strcmp(save_file,"-") ? loadpath_fopen(save_file,"w") : stdout;
 #else
-    fp = strcmp(save_file,"-") ? fopen(save_file,"w") : _stdout;
+    fp = strcmp(save_file,"-") ? fopen(save_file,"w") : stdout;
 #endif
     }
 
@@ -2214,7 +2298,7 @@ save_command()
 	    save_all(fp);
     }
 
-    if (_stdout != fp) {
+    if (stdout != fp) {
 #ifdef PIPES
 	if (save_file[0] == '|')
 	    (void) pclose(fp);
@@ -2232,7 +2316,7 @@ void
 screendump_command()
 {
     c_token++;
-#ifdef _Windows
+#ifdef _WIN32
     screen_dump();
 #else
     fputs("screendump not implemented\n", _stderr);
@@ -2442,20 +2526,23 @@ toggle_command()
 
     } else if ((plottitle = try_to_get_string()) != NULL) {
 	struct curve_points *plot;
-	int length = strlen(plottitle);
+	int last = strlen(plottitle) - 1;
 	if (refresh_ok == E_REFRESH_OK_2D)
 	    plot = first_plot;
 	else if (refresh_ok == E_REFRESH_OK_3D)
 	    plot = (struct curve_points *)first_3dplot;
 	else
 	    plot = NULL;
-	for (plotno = 0; plot != NULL; plot = plot->next, plotno++) {
-	    if (plot->title)
-		if (!strcmp(plot->title, plottitle)
-		||  (plottitle[length-1] == '*' && !strncmp(plot->title, plottitle, length-1))) {
-		    foundit = TRUE;
-		    break;
-		}
+	if (last >= 0) {
+	    for (plotno = 0; plot != NULL; plot = plot->next, plotno++) {
+		if (plot->title)
+		    if (!strcmp(plot->title, plottitle)
+		    ||  (plottitle[last] == '*'
+			&& !strncmp(plot->title, plottitle, last))) {
+			foundit = TRUE;
+			break;
+		    }
+	    }
 	}
 	free(plottitle);
 	if (!foundit) {
@@ -2471,30 +2558,11 @@ toggle_command()
 	term->modify_plots(MODPLOTS_INVERT_VISIBILITIES, plotno);
 }
 
-/* Begin DEPRECATED section */
-/* process the 'update' command */
 void
 update_command()
 {
-    /* old parameter filename */
-    char *opfname = NULL;
-    /* new parameter filename */
-    char *npfname = NULL;
-
-    /* 5.2 gets a warning; after that the command goes away */
-    int_warn(NO_CARET, "DEPRECATED command 'update', please use 'save fit' instead");
-
-    c_token++;
-    if (!(opfname = try_to_get_string()))
-	int_error(c_token, "Parameter filename expected");
-    if (!END_OF_COMMAND && !(npfname = try_to_get_string()))
-	int_error(c_token, "New parameter filename expected");
-
-    update(opfname, npfname);
-    free(npfname);
-    free(opfname);
+    int_error(NO_CARET, "DEPRECATED command 'update', please use 'save fit' instead");
 }
-/* End DEPRECATED section */
 
 /* the "import" command is only implemented if support is configured for */
 /* using functions from external shared objects as plugins. */
@@ -2586,7 +2654,7 @@ changedir(char *path)
     if (isalpha((unsigned char)path[0]) && (path[1] == ':')) {
 	int driveno = toupper((unsigned char)path[0]) - 'A';	/* 0=A, 1=B, ... */
 
-# if defined(__EMX__)
+# if defined(__EMX__) || defined(__WATCOMC__)
 	(void) _chdrive(driveno + 1);
 # elif defined(__DJGPP__)
 	(void) setdisk(driveno);
@@ -2656,7 +2724,7 @@ replotrequest()
 	free(replot_args);
     }
     plot_token = 0;		/* whole line to be saved as replot line */
-    SET_REFRESH_OK(E_REFRESH_NOT_OK, 0);		/* start of replot will destory existing data */
+    SET_REFRESH_OK(E_REFRESH_NOT_OK, 0);		/* start of replot will destroy existing data */
 
     screen_ok = FALSE;
     num_tokens = scanner(&gp_input_line, &gp_input_line_len);
@@ -2669,77 +2737,6 @@ replotrequest()
 	plot3drequest();
     else
 	plotrequest();
-}
-
-
-/* Is 'set view map' currently working inside 'splot' or not? Calculation of
- * mouse coordinates and the corresponding routines must know it, because
- * 'splot' can be either true 3D plot or a 2D map.
- * This flag is set when entering splot command and 'set view map', i.e. by
- * splot_map_activate(), and reset when calling splot_map_deactivate().
- */
-static int splot_map_active = 0;
-/* Store values reset by 'set view map' during splot, used by those two
- * routines below.
- */
-static float splot_map_surface_rot_x;
-static float splot_map_surface_rot_z;
-static float splot_map_surface_scale;
-
-/* utility routine for splot_map_activate/deactivate */
-static void
-flip_y_axis()
-{
-    struct axis *yaxis = &axis_array[FIRST_Y_AXIS];
-    double temp = yaxis->min;
-    yaxis->min = yaxis->max;
-    yaxis->max = temp;
-    if (yaxis->linked_to_primary) {
-	yaxis = yaxis->linked_to_primary;
-	temp = yaxis->min;
-	yaxis->min = yaxis->max;
-	yaxis->max = temp;
-    }
-}
-
-/* This routine is called at the beginning of 'splot'. It sets up some splot
- * parameters needed to present the 'set view map'.
- */
-void
-splot_map_activate()
-{
-    if (splot_map_active)
-	return;
-    splot_map_active = 1;
-    /* save current values */
-    splot_map_surface_rot_x = surface_rot_x;
-    splot_map_surface_rot_z = surface_rot_z ;
-    splot_map_surface_scale = surface_scale;
-    /* set new values */
-    surface_rot_x = 180;
-    surface_rot_z = 0;
-    /* version 4 had constant value surface_scale = 1.3 */
-    surface_scale = 1.425 * mapview_scale;
-    /* The Y axis runs backwards from a normal 2D plot */
-    flip_y_axis();
-}
-
-
-/* This routine is called at the end of 3D plot evaluation to undo the
- * changes needed for 'set view map'.
- */
-void
-splot_map_deactivate()
-{
-    if (!splot_map_active)
-	return;
-    splot_map_active = 0;
-    /* restore the original values */
-    surface_rot_x = splot_map_surface_rot_x;
-    surface_rot_z = splot_map_surface_rot_z;
-    surface_scale = splot_map_surface_scale;
-    /* The Y axis runs backwards from a normal 2D plot */
-    flip_y_axis();
 }
 
 
@@ -2888,7 +2885,7 @@ do_system(const char *cmd)
 
 
 #ifdef NO_GIH
-#if defined(_Windows)
+#ifdef _WIN32
 void
 help_command()
 {
@@ -2902,7 +2899,7 @@ help_command()
     if (help_window == NULL) {
 	help_window = HtmlHelp(parent, winhelpname, HH_DISPLAY_TOPIC, (DWORD_PTR)NULL);
 	if (help_window == NULL) {
-        fprintf(_stderr, "Error: Could not open help file \"" TCHARFMT "\"\n", winhelpname);
+	    fprintf(_stderr, "Error: Could not open help file \"" TCHARFMT "\"\n", winhelpname);
 	    return;
 	}
     }
@@ -2936,7 +2933,7 @@ help_command()
 	HtmlHelp(parent, winhelpname, HH_KEYWORD_LOOKUP, (DWORD_PTR)&link);
     }
 }
-#else  /* !_Windows */
+#else  /* !_WIN32 */
 #ifndef VMS
 void
 help_command()
@@ -2946,7 +2943,7 @@ help_command()
     fputs("This gnuplot was not built with inline help\n", _stderr);
 }
 #endif /* VMS */
-#endif /* _Windows */
+#endif /* _WIN32 */
 #endif /* NO_GIH */
 
 
@@ -2989,32 +2986,11 @@ help_command()
     if ((help_ptr = getenv("GNUHELP")) == (char *) NULL)
 # ifndef SHELFIND
 	/* if can't find environment variable then just use HELPFILE */
-
-/* patch by David J. Liu for getting GNUHELP from home directory */
-#  ifdef __DJGPP__
+#  if defined(MSDOS) || defined(OS2)
 	help_ptr = HelpFile;
 #  else
 	help_ptr = HELPFILE;
 #  endif
-#ifdef OS2
-  {
-  /* look in the path where the executable lives */
-  static char buf[MAXPATHLEN];
-  char *ptr;
-
-  _execname(buf, sizeof(buf));
-  _fnslashify(buf);
-  ptr=strrchr(buf, '/');
-  if (ptr) {
-     *(ptr+1)='\0';
-     strcat(buf, HELPFILE);
-     help_ptr=&buf[0];
-  }
-  else
-     help_ptr = HELPFILE;
-  }
-#endif
-/* end of patch  - DJL */
 
 # else				/* !SHELFIND */
     /* try whether we can find the helpfile via shell_find. If not, just
@@ -3140,7 +3116,11 @@ do_system(const char *cmd)
     if (!cmd)
 	return;
     restrict_popen();
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WGP_CONSOLE)
+    /* Open a console so we can see the command's output */
+    WinOpenConsole();
+#endif
+#if defined(_WIN32) && !defined(HAVE_BROKEN_WSYSTEM)
     {
 	LPWSTR wcmd = UnicodeText(cmd, encoding);
 	ierr = _wsystem(wcmd);
@@ -3166,11 +3146,11 @@ is_history_command(const char *line)
     const char str[] = "hi$story";
 
     /* skip leading whitespace */
-    while (isspace((unsigned char) line[start]))
+    while (isblank((unsigned char) line[start]))
 	start++;
 
     /* find end of "token" */
-    while ((line[start + length] != NUL) && !isspace((unsigned char) line[start + length]))
+    while ((line[start + length] != NUL) && !isblank((unsigned char) line[start + length]))
 	length++;
 
     for (i = 0; i < length + after; i++) {
@@ -3192,7 +3172,7 @@ is_history_command(const char *line)
 
 # ifdef USE_READLINE
 /* keep some compilers happy */
-static char *rlgets __PROTO((char *s, size_t n, const char *prompt));
+static char *rlgets(char *s, size_t n, const char *prompt);
 
 static char *
 rlgets(char *s, size_t n, const char *prompt)
@@ -3274,11 +3254,11 @@ do_shell()
     if (user_shell) {
 #  if defined(_WIN32)
 	if (WinExec(user_shell, SW_SHOWNORMAL) <= 32)
-#  elif defined(DJGPP)
+#  elif defined(__DJGPP__)
 	if (system(user_shell) == -1)
 #  else
 	if (spawnl(P_WAIT, user_shell, NULL) == -1)
-#  endif /* !(_WIN32 || DJGPP) */
+#  endif /* !(_WIN32 || __DJGPP__) */
 	    os_error(NO_CARET, "unable to spawn shell");
     }
 }
@@ -3324,7 +3304,7 @@ do_shell()
 /* read from stdin, everything except VMS */
 
 # ifndef USE_READLINE
-#  if defined(MSDOS) && !defined(_Windows) && !defined(__EMX__) && !defined(DJGPP)
+#  if defined(MSDOS) && !defined(__EMX__) && !defined(__DJGPP__)
 
 /* if interactive use console IO so CED will work */
 
@@ -3342,7 +3322,7 @@ cgets_emu(char *str, int len)
     if (buffer[leftover] == NUL) {
 	buffer[0] = 126;
 	cgets(buffer);
-    fputc('\n', _stderr);
+	fputc('\n', _stderr);
 	if (buffer[2] == 26)
 	    return NULL;
 	leftover = 2;
@@ -3430,7 +3410,6 @@ read_line(const char *prompt, int start)
     /* line are no longer valid.  We used to _not_ clear things here, but */
     /* that lead to errors when a mouse-triggered replot request came in  */
     /* while a new line was being read.   Bug 3602388 Feb 2013.           */
-    /* FIXME: If this causes problems, push it down into fgets_ipc().     */
     if (start == 0) {
 	c_token = num_tokens = 0;
 	gp_input_line[0] = '\0';
@@ -3439,12 +3418,12 @@ read_line(const char *prompt, int start)
     do {
 	/* grab some input */
 	if (gp_get_string(gp_input_line + start, gp_input_line_len - start,
-                         ((more) ? ">" : prompt))
+		         ((more) ? ">" : prompt))
 	    == (char *) NULL)
 	{
 	    /* end-of-file */
 	    if (interactive)
-        (void) putc('\n', _stderr);
+		(void) putc('\n', _stderr);
 	    gp_input_line[start] = NUL;
 	    inline_num++;
 	    if (start > 0 && curly_brace_count == 0)	/* don't quit yet - process what we have */
@@ -3459,9 +3438,8 @@ read_line(const char *prompt, int start)
 	    if (last >= 0) {
 		if (gp_input_line[last] == '\n') {	/* remove any newline */
 		    gp_input_line[last] = NUL;
-		    if (last > 0 && gp_input_line[last-1] == '\r') {
-		        gp_input_line[--last] = NUL;
-		    }
+		    if (last > 0 && gp_input_line[last-1] == '\r')
+			gp_input_line[--last] = NUL;
 		    /* Watch out that we don't backup beyond 0 (1-1-1) */
 		    if (last > 0)
 			--last;
@@ -3503,8 +3481,9 @@ string_expand_macros()
 	    int_error(NO_CARET, "Macros nested too deeply");
 }
 
-#define COPY_CHAR do { gp_input_line[o++] = *c; \
-                  after_backslash = FALSE; } while (0)
+#define COPY_CHAR do {gp_input_line[o++] = *c; \
+		  after_backslash = FALSE; } while (0)
+
 int
 expand_1level_macros()
 {
@@ -3544,12 +3523,13 @@ expand_1level_macros()
 		    if (udv && udv->udv_value.type == STRING) {
 			nfound++;
 			m = udv->udv_value.v.string_val;
-            FPRINTF((_stderr,"Replacing @%s with \"%s\"\n",udv->udv_name,m));
+			FPRINTF((_stderr,"Replacing @%s with \"%s\"\n",udv->udv_name,m));
 			while (strlen(m) + o + len > gp_input_line_len)
 			    extend_input_line();
 			while (*m)
 			    gp_input_line[o++] = (*m++);
 		    } else {
+			gp_input_line[o] = '\0';
 			int_warn( NO_CARET, "%s is not a string variable",m);
 		    }
 		    *c-- = temp_char;
@@ -3558,28 +3538,28 @@ expand_1level_macros()
 		break;
 
 	case '"':
-                if (!after_backslash)
+		if (!after_backslash)
 		    in_dquote = !in_dquote;
 		COPY_CHAR; break;
 	case '\'':
 		in_squote = !in_squote;
 		COPY_CHAR; break;
-        case '\\':
-                if (in_dquote)
-                    after_backslash = !after_backslash;
-                gp_input_line[o++] = *c; break;
+	case '\\':
+		if (in_dquote)
+		    after_backslash = !after_backslash;
+		gp_input_line[o++] = *c; break;
 	case '#':
 		if (!in_squote && !in_dquote)
 		    in_comment = TRUE;
 	default :
-	        COPY_CHAR; break;
+		COPY_CHAR; break;
 	}
     }
     gp_input_line[o] = '\0';
     free(temp_string);
 
     if (nfound)
-    FPRINTF((_stderr,
+	FPRINTF((_stderr,
 		 "After string substitution command line is:\n\t%s\n",
 		 gp_input_line));
 
@@ -3679,7 +3659,7 @@ report_error(int ierr)
     else
 	reported_error = WEXITSTATUS(ierr);
 
-    fill_gpval_integer("GPVAL_SYSTEM_ERRNO", reported_error); 
+    fill_gpval_integer("GPVAL_SYSTEM_ERRNO", reported_error);
     if (reported_error == 127)
 	fill_gpval_string("GPVAL_SYSTEM_ERRMSG", "command not found or shell failed");
     else

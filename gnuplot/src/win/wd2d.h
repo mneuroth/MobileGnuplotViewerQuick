@@ -1,8 +1,4 @@
 /*
- * $Id: wd2d.h,v 1.1 2017/04/23 18:27:53 markisch Exp $
- */
-
-/*
 Copyright (c) 2017 Bastian Maerkisch. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
@@ -30,7 +26,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef WD2D_H
 #define WD2D_H
 
-#define DCRENDERER
+// Enable if you want to use Direct2D 1.1 (Windows 8 and Windows 7 Platform Update)
+//#define HAVE_D2D11
+
+#ifndef HAVE_D2D11
+# define DCRENDERER
+#endif
 
 #include <windows.h>
 #include "wgnuplib.h"
@@ -40,14 +41,17 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-extern HRESULT d2dInit(void);
-extern void d2dCleanup(void);
+HRESULT d2dInit(LPGW lpgw);
+HRESULT d2dResize(LPGW lpgw, RECT rect);
+void d2dReleaseRenderTarget(LPGW lpgw);
+void d2dCleanup(void);
 
 #ifdef DCRENDERER
-extern void drawgraph_d2d(LPGW lpgw, HDC hdc, LPRECT rect);
+void drawgraph_d2d(LPGW lpgw, HDC hdc, LPRECT rect);
 #else
-extern void drawgraph_d2d(LPGW lpgw, HWND hwnd, LPRECT rect);
+void drawgraph_d2d(LPGW lpgw, HWND hwnd, LPRECT rect);
 #endif
+HRESULT print_d2d(LPGW lpgw, DEVMODE * pDevMode, LPCTSTR szDevice, LPRECT rect);
 
 void InitFont_d2d(LPGW lpgw, HDC hdc, LPRECT rect);
 

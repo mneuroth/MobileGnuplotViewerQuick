@@ -44,37 +44,33 @@
 
 #define INITIAL_DATA_SIZE (4096)   /* initial size of data arrays */
 
-static int comparator __PROTO(( const void *a, const void *b ));
-static struct file_stats analyze_file __PROTO(( long n, int outofrange, int invalid, int blank, int dblblank, int headers ));
-static struct sgl_column_stats analyze_sgl_column __PROTO(( double *data, long n, long nr ));
-static struct two_column_stats analyze_two_columns __PROTO(( double *x, double *y,
-							     struct sgl_column_stats res_x,
-							     struct sgl_column_stats res_y,
-							     long n ));
+static int comparator( const void *a, const void *b );
+static struct file_stats analyze_file( long n, int outofrange, int invalid, int blank, int dblblank, int headers );
+static struct sgl_column_stats analyze_sgl_column( double *data, long n, long nr );
+static struct two_column_stats analyze_two_columns( double *x, double *y,
+						     struct sgl_column_stats res_x,
+						     struct sgl_column_stats res_y,
+						     long n );
 
-static void clear_one_var __PROTO(( char *prefix, char *base ));
-static void clear_stats_variables __PROTO(( char *prefix ));
+static void ensure_output(void);
+static char* fmt( char *buf, double val );
+static void sgl_column_output_nonformat( struct sgl_column_stats s, char *x );
+static void file_output( struct file_stats s );
+static void sgl_column_output( struct sgl_column_stats s, long n );
+static void two_column_output( struct sgl_column_stats x,
+				struct sgl_column_stats y,
+				struct two_column_stats xy, long n);
 
-static void ensure_output __PROTO((void));
-static char* fmt __PROTO(( char *buf, double val ));
-static void sgl_column_output_nonformat __PROTO(( struct sgl_column_stats s, char *x ));
-static void file_output __PROTO(( struct file_stats s ));
-static void sgl_column_output __PROTO(( struct sgl_column_stats s, long n ));
-static void two_column_output __PROTO(( struct sgl_column_stats x,
-					struct sgl_column_stats y,
-					struct two_column_stats xy, long n));
+static void clear_one_var( char *prefix, char *base );
+static void clear_stats_variables( char *prefix );
 
-static void create_and_set_var __PROTO(( double val, char *prefix,
-					 char *base, char *suffix ));
-static void create_and_set_int_var __PROTO(( int ival, char *prefix,
-					 char *base, char *suffix ));
-static void create_and_store_var __PROTO(( t_value *data, char *prefix,
-					 char *base, char *suffix ));
+static void create_and_set_var( double val, char *prefix, char *base, char *suffix );
+static void create_and_set_int_var( int ival, char *prefix, char *base, char *suffix );
+static void create_and_store_var( t_value *data, char *prefix, char *base, char *suffix );
 
-static void sgl_column_variables __PROTO(( struct sgl_column_stats res,
-					   char *prefix, char *postfix ));
+static void sgl_column_variables( struct sgl_column_stats res, char *prefix, char *postfix );
 
-static TBOOLEAN validate_data __PROTO((double v, AXIS_INDEX ax));
+static TBOOLEAN validate_data(double v, AXIS_INDEX ax);
 
 /* =================================================================
    Data Structures
@@ -93,7 +89,7 @@ struct file_stats {
     long invalid;
     long outofrange;
     long blocks;  /* blocks are separated by double blank lines */
-    long columnheaders;
+    long header_records;
     int  columns;
 };
 
@@ -174,7 +170,7 @@ analyze_file( long n, int outofrange, int invalid, int blank, int dblblank, int 
     res.blanks  = blank;
     res.blocks  = dblblank + 1;  /* blocks are separated by dbl blank lines */
     res.outofrange = outofrange;
-    res.columnheaders = headers;
+    res.header_records = headers;
     res.columns = df_last_col;
 
     return res;
@@ -388,12 +384,12 @@ file_output( struct file_stats s )
     ensure_output();
 
     /* Non-formatted to disk */
-    if ( print_out != _stdout && print_out != _stderr ) {
+    if ( print_out != stdout && print_out != _stderr ) {
 	fprintf( print_out, "%s\t%ld\n", "records", s.records );
 	fprintf( print_out, "%s\t%ld\n", "invalid", s.invalid );
 	fprintf( print_out, "%s\t%ld\n", "blanks", s.blanks );
 	fprintf( print_out, "%s\t%ld\n", "blocks", s.blocks );
-	fprintf( print_out, "%s\t%ld\n", "columnheaders", s.columnheaders );
+	fprintf( print_out, "%s\t%ld\n", "headers", s.header_records );
 	fprintf( print_out, "%s\t%ld\n", "outofrange", s.outofrange );
 	return;
     }
@@ -404,7 +400,7 @@ file_output( struct file_stats s )
     fprintf( print_out, "  Records:           %*ld\n", width, s.records );
     fprintf( print_out, "  Out of range:      %*ld\n", width, s.outofrange );
     fprintf( print_out, "  Invalid:           %*ld\n", width, s.invalid );
-    fprintf( print_out, "  Column headers:    %*ld\n", width, s.columnheaders );
+    fprintf( print_out, "  Header records:    %*ld\n", width, s.header_records );
     fprintf( print_out, "  Blank:             %*ld\n", width, s.blanks );
     fprintf( print_out, "  Data Blocks:       %*ld\n", width, s.blocks );
 }
@@ -461,7 +457,7 @@ sgl_column_output( struct sgl_column_stats s, long n )
     ensure_output();
 
     /* Non-formatted to disk */
-    if ( print_out != _stdout && print_out != _stderr ) {
+    if ( print_out != stdout && print_out != _stderr ) {
 	sgl_column_output_nonformat( s, "_y" );
 	return;
     }
@@ -524,7 +520,7 @@ two_column_output( struct sgl_column_stats x,
 	width = 1 + (int)log10((double)n);
 
     /* Non-formatted to disk */
-    if ( print_out != _stdout && print_out != _stderr ) {
+    if ( print_out != stdout && print_out != _stderr ) {
 	sgl_column_output_nonformat( x, "_x" );
 	sgl_column_output_nonformat( y, "_y" );
 
@@ -661,6 +657,9 @@ clear_stats_variables( char *prefix )
     clear_one_var( prefix, "pos_min_y" );
     clear_one_var( prefix, "pos_max_y" );
 
+    /* column headers */
+    clear_one_var( prefix, "column_header" );
+
 }
 
 static void
@@ -710,11 +709,25 @@ file_variables( struct file_stats s, char *prefix )
     /* Suffix does not make sense here! */
     create_and_set_int_var( s.records, prefix, "records", "" );
     create_and_set_int_var( s.invalid, prefix, "invalid", "" );
-    create_and_set_int_var( s.columnheaders, prefix, "headers", "" );
+    create_and_set_int_var( s.header_records, prefix, "headers", "" );
     create_and_set_int_var( s.blanks,  prefix, "blank",   "" );
     create_and_set_int_var( s.blocks,  prefix, "blocks",  "" );
     create_and_set_int_var( s.outofrange, prefix, "outofrange", "" );
     create_and_set_int_var( s.columns, prefix, "columns", "" );
+
+    /* copy column headers to an array */
+    if (df_columnheaders) {
+	int i;
+	t_value headers;
+	t_value *A = gp_alloc((s.columns+1) * sizeof(t_value), "column_headers");
+
+	A[0].v.int_val = s.columns;
+	for (i = 1; i <= s.columns; i++)
+	    Gstring(&A[i], gp_strdup(df_retrieve_columnhead(i)));
+	headers.type = ARRAY;
+	headers.v.value_array = A;
+	create_and_store_var( &headers, prefix, "column_header", "" );
+    }
 }
 
 static void
@@ -819,7 +832,7 @@ statsrequest(void)
     long invalid;          /* number of missing/invalid records */
     long blanks;           /* number of blank lines */
     long doubleblanks;     /* number of repeated blank lines */
-    long columnheaders;    /* number of records treated as headers rather than data */
+    long header_records;   /* number of records treated as headers rather than data */
     long out_of_range;     /* number pts rejected, because out of range */
 
     struct file_stats res_file;
@@ -845,7 +858,7 @@ statsrequest(void)
     /* Initialize */
     invalid = 0;          /* number of missing/invalid records */
     blanks = 0;           /* number of blank lines */
-    columnheaders = 0;    /* number of records treated as headers rather than data */
+    header_records = 0;    /* number of records treated as headers rather than data */
     doubleblanks = 0;     /* number of repeated blank lines */
     out_of_range = 0;     /* number pts rejected, because out of range */
     n = 0;                /* number of records retained */
@@ -861,7 +874,7 @@ statsrequest(void)
     if ( !data_x || !data_y )
       int_error( NO_CARET, "Internal error: out of memory in stats" );
 
-    n = invalid = blanks = columnheaders = doubleblanks = out_of_range = 0;
+    n = invalid = blanks = header_records = doubleblanks = out_of_range = 0;
 
     /* Get filename */
     i = c_token;
@@ -893,11 +906,6 @@ statsrequest(void)
 	    array_data = TRUE;
 
 	/* For all these below: we could save the state, switch off, then restore */
-#if !defined(NONLINEAR_AXES) || (NONLINEAR_AXES == 0)
-	if (axis_array[FIRST_X_AXIS].log || axis_array[FIRST_Y_AXIS].log)
-	    int_error( NO_CARET, "Stats command not available with logscale active");
-#endif
-
 	if (axis_array[FIRST_X_AXIS].datatype == DT_TIMEDATE
 	||  axis_array[FIRST_Y_AXIS].datatype == DT_TIMEDATE )
 	    int_error( NO_CARET, "Stats command not available in timedata mode");
@@ -987,7 +995,7 @@ statsrequest(void)
 	      continue;
 
 	    case DF_COLUMN_HEADERS:
-	      columnheaders += 1;
+	      header_records += 1;
 	      continue;
 
 	    case 0:
@@ -1062,7 +1070,7 @@ statsrequest(void)
     }
 
     /* Do the actual analysis */
-    res_file = analyze_file( n, out_of_range, invalid, blanks, doubleblanks, columnheaders );
+    res_file = analyze_file( n, out_of_range, invalid, blanks, doubleblanks, header_records );
 
     /* Jan 2015: Revised detection and handling of matrix data */
     if (array_data)

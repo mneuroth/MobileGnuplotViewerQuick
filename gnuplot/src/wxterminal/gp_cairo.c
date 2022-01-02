@@ -118,7 +118,6 @@ static int avg_vchar = 150;
 static void gp_cairo_fill(plot_struct *plot, int fillstyle, int fillpar);
 static void gp_cairo_fill_pattern(plot_struct *plot, int fillstyle, int fillpar);
 
-#ifdef EAM_BOXED_TEXT
 /* Boxed text support */
 static int bounding_box[4];
 static double bounding_xmargin = 1.0;
@@ -127,7 +126,6 @@ static double box_rotation = 0.0;
 static double box_origin_x;
 static double box_origin_y;
 static TBOOLEAN in_textbox = FALSE;
-#endif
 
 /* array of colors
  * FIXME could be shared with all gnuplot terminals */
@@ -146,7 +144,7 @@ static rgb_color gp_cairo_colorlist[12] = {
 {0.5,0.5,0.5} /* grey */
 };
 
-/* correspondance between gnuplot linetypes and terminal colors */
+/* correspondence between gnuplot linetypes and terminal colors */
 void gp_cairo_set_background( rgb_color background )
 {
 	gp_cairo_colorlist[0] = background;
@@ -181,7 +179,7 @@ void gp_cairo_initialize_plot(plot_struct *plot)
 
 	plot->current_x = -1; plot->current_y = -1;
 
-	strncpy(plot->fontname, "", sizeof(plot->fontname));
+	safe_strncpy(plot->fontname, "", sizeof(plot->fontname));
 	plot->fontsize = 1.0;
 	plot->encoding = S_ENC_DEFAULT;
 
@@ -191,6 +189,8 @@ void gp_cairo_initialize_plot(plot_struct *plot)
 
 	plot->oversampling = TRUE;
 	plot->oversampling_scale = GP_CAIRO_SCALE;
+
+	plot->upsampling_rate = 1.0;
 
 	plot->linecap = BUTT;
 
@@ -204,9 +204,7 @@ void gp_cairo_initialize_plot(plot_struct *plot)
 
 	plot->interrupt = FALSE;
 
-#ifdef EAM_BOXED_TEXT
 	in_textbox = FALSE;
-#endif
 }
 
 /* set the transformation matrix of the context, and other details */
@@ -334,11 +332,17 @@ void gp_cairo_set_font(plot_struct *plot, const char *name, float fontsize)
 	} else
 	    plot->fontstyle = PANGO_STYLE_NORMAL;
 
-	strncpy( plot->fontname, fname, sizeof(plot->fontname) );
+	safe_strncpy( plot->fontname, fname, sizeof(plot->fontname) );
 	plot->fontsize = fontsize;
 	free(fname);
 }
 
+/* work-around for "bold font gets stuck" bug */
+void gp_cairo_clear_bold_font(plot_struct *plot)
+{
+	plot->fontweight = PANGO_WEIGHT_NORMAL;
+	plot->fontstyle = PANGO_STYLE_NORMAL;
+}
 
 void gp_cairo_set_linewidth(plot_struct *plot, double linewidth)
 {
@@ -481,8 +485,8 @@ void gp_cairo_end_polygon(plot_struct *plot)
 	context_sav = plot->cr;
 	surface = cairo_surface_create_similar(cairo_get_target(plot->cr),
                                              CAIRO_CONTENT_COLOR_ALPHA,
-                                             plot->device_xmax*SCALE,
-                                             plot->device_ymax*SCALE);
+                                             plot->device_xmax*plot->upsampling_rate*SCALE,
+                                             plot->device_ymax*plot->upsampling_rate*SCALE);
 	context = cairo_create(surface);
 	cairo_set_operator(context,CAIRO_OPERATOR_SATURATE);
 	if (plot->antialiasing)
@@ -514,7 +518,7 @@ void gp_cairo_end_polygon(plot_struct *plot)
 		plot->color = path->color;
 		gp_cairo_fill( plot, path->corners->style & 0xf, path->corners->style >> 4 );
 		cairo_fill(plot->cr);
-		/* free the ressources, and go to the next point */
+		/* free the resources, and go to the next point */
 		free(path->corners);
 		path2 = path->previous;
 		free(path);
@@ -768,14 +772,14 @@ static gchar * gp_cairo_convert(plot_struct *plot, const char* string)
 }
 
 /*
- * The following #ifdef WIN32 section is all to work around a bug in
+ * The following #ifdef _WIN32 section is all to work around a bug in
  * the cairo/win32 backend for font rendering.  It has the effect of
  * testing for libfreetype support, and using that instead if possible.
  * Suggested by cairo developer Behdad Esfahbod.
  * Allin Cottrell suggests that this not necessary anymore for newer
  * versions of cairo.
  */
-#if defined(WIN32) && (CAIRO_VERSION_MAJOR < 2) && (CAIRO_VERSION_MINOR < 10)
+#if defined(_WIN32) && (CAIRO_VERSION_MAJOR < 2) && (CAIRO_VERSION_MINOR < 10)
 static PangoLayout *
 gp_cairo_create_layout(cairo_t *cr)
 {
@@ -809,6 +813,11 @@ gp_cairo_create_layout(cairo_t *cr)
 }
 #endif
 
+void gp_cairo_set_resolution(int dpi)
+{
+	pango_cairo_font_map_set_resolution(PANGO_CAIRO_FONT_MAP(pango_cairo_font_map_get_default()), dpi);
+}
+
 void gp_cairo_draw_text(plot_struct *plot, int x1, int y1, const char* string,
 		    int *width, int *height)
 {
@@ -839,7 +848,7 @@ void gp_cairo_draw_text(plot_struct *plot, int x1, int y1, const char* string,
 	if (!strcmp(plot->fontname,"Symbol")) {
 		FPRINTF((stderr,"Parsing a Symbol string\n"));
 		string_utf8 = gp_cairo_convert_symbol_to_unicode(plot, string);
-		strncpy(plot->fontname, gp_cairo_default_font(), sizeof(plot->fontname));
+		safe_strncpy(plot->fontname, gp_cairo_default_font(), sizeof(plot->fontname));
 		symbol_font_parsed = TRUE;
 	} else
 #endif /*MAP_SYMBOL*/
@@ -858,7 +867,7 @@ void gp_cairo_draw_text(plot_struct *plot, int x1, int y1, const char* string,
 #ifdef MAP_SYMBOL
 	/* restore the Symbol font setting */
 	if (symbol_font_parsed)
-		strncpy(plot->fontname, "Symbol", sizeof(plot->fontname));
+		safe_strncpy(plot->fontname, "Symbol", sizeof(plot->fontname));
 #endif /*MAP_SYMBOL*/
 	pango_font_description_set_size (desc, (int) (plot->fontsize*PANGO_SCALE*plot->oversampling_scale) );
 
@@ -925,7 +934,6 @@ void gp_cairo_draw_text(plot_struct *plot, int x1, int y1, const char* string,
 	 * Do it by ourselves, or we can get spurious lines on future calls. */
 	cairo_new_path(plot->cr);
 
-#ifdef EAM_BOXED_TEXT
 	if (in_textbox) {
 		box_rotation = -arg;
 		box_origin_x = x1;
@@ -961,7 +969,6 @@ void gp_cairo_draw_text(plot_struct *plot, int x1, int y1, const char* string,
 		if (bounding_box[3] < box_y + ink_rect.y + ink_rect.height)
 		    bounding_box[3] = box_y + ink_rect.y + ink_rect.height;
 	}
-#endif
 
 	/* free the layout object */
 	g_clear_object (&layout);
@@ -1107,7 +1114,7 @@ void gp_cairo_draw_point(plot_struct *plot, int x1, int y1, int style)
 		if (style == 14)
 			cairo_fill_preserve(plot->cr);
 		cairo_stroke(plot->cr);
-		break;				
+		break;
 	default :
 		break;
 	}
@@ -1304,11 +1311,11 @@ void gp_cairo_enhanced_flush(plot_struct *plot)
 		enhanced_text_utf8 = gp_cairo_convert_symbol_to_unicode(plot, gp_cairo_enhanced_string);
 
 		if (!strcmp(plot->fontname,"Symbol")) {
-			strncpy(gp_cairo_enhanced_font,
+			safe_strncpy(gp_cairo_enhanced_font,
 				plot->fontname,
 				sizeof(gp_cairo_enhanced_font));
 		} else {
-			strncpy(gp_cairo_enhanced_font,
+			safe_strncpy(gp_cairo_enhanced_font,
 				gp_cairo_default_font(), sizeof(gp_cairo_enhanced_font));
 		}
 		symbol_font_parsed = TRUE;
@@ -1345,7 +1352,7 @@ void gp_cairo_enhanced_flush(plot_struct *plot)
 		/* adding a blank character with the corresponding shape */
 		gp_cairo_add_shape(save_logical_rect,start);
 
-		strncpy(gp_cairo_save_utf8, "", sizeof(gp_cairo_save_utf8));
+		safe_strncpy(gp_cairo_save_utf8, "", sizeof(gp_cairo_save_utf8));
 		gp_cairo_enhanced_restore_now = FALSE;
 		start++;
 	}
@@ -1390,7 +1397,7 @@ void gp_cairo_enhanced_flush(plot_struct *plot)
 		/* adding a blank character with the corresponding shape */
 		gp_cairo_add_shape(underprinted_logical_rect, start);
 
-		strncpy(gp_cairo_underprinted_utf8, "", sizeof(gp_cairo_underprinted_utf8));
+		safe_strncpy(gp_cairo_underprinted_utf8, "", sizeof(gp_cairo_underprinted_utf8));
 		/* increment the position as we added a character */
 		start++;
 	}
@@ -1500,7 +1507,7 @@ void gp_cairo_enhanced_flush(plot_struct *plot)
 
 #ifdef MAP_SYMBOL
 	if (symbol_font_parsed)
-		strncpy(gp_cairo_enhanced_font, "Symbol", sizeof(gp_cairo_enhanced_font));
+		safe_strncpy(gp_cairo_enhanced_font, "Symbol", sizeof(gp_cairo_enhanced_font));
 #endif /* MAP_SYMBOL */
 
 	g_free(enhanced_text_utf8);
@@ -1536,11 +1543,12 @@ void gp_cairo_enhanced_open(plot_struct *plot, char* fontname, double fontsize, 
 	}
 
 	if (!gp_cairo_enhanced_opened_string) {
-		// Strip off Bold or Italic and apply immediately
-		// Is it really necessary to preserve plot->fontname?
+		/* Strip off Bold or Italic and apply immediately
+		 * Is it really necessary to preserve plot->fontname?
+		 */
 		char *save_plot_font = strdup(plot->fontname);
 		gp_cairo_set_font(plot, fontname, plot->fontsize);
-		strncpy(gp_cairo_enhanced_font, plot->fontname, sizeof(gp_cairo_enhanced_font));
+		safe_strncpy(gp_cairo_enhanced_font, plot->fontname, sizeof(gp_cairo_enhanced_font));
 		strcpy(plot->fontname, save_plot_font);
 		free(save_plot_font);
 
@@ -1573,7 +1581,7 @@ void gp_cairo_enhanced_init(plot_struct *plot, int len)
 	gp_cairo_enhanced_overprint = FALSE;
 	gp_cairo_enhanced_showflag = TRUE;
 	gp_cairo_enhanced_fontsize = plot->fontsize*plot->oversampling_scale;
-	strncpy(gp_cairo_enhanced_font, plot->fontname, sizeof(gp_cairo_enhanced_font));
+	safe_strncpy(gp_cairo_enhanced_font, plot->fontname, sizeof(gp_cairo_enhanced_font));
 	gp_cairo_enhanced_AttrList = pango_attr_list_new();
 }
 
@@ -1598,7 +1606,7 @@ void gp_cairo_enhanced_finish(plot_struct *plot, int x, int y)
 	baseline_offset = pango_layout_get_baseline(layout) / PANGO_SCALE;
 	vert_just = 0.5 * (float)(plot->fontsize * plot->oversampling_scale);
 	vert_just = baseline_offset - vert_just;
-	
+
 	arg = plot->text_angle * M_PI/180;
 	enh_x = x - vert_just * sin(arg);
 	enh_y = y - vert_just * cos(arg);
@@ -1633,8 +1641,7 @@ void gp_cairo_enhanced_finish(plot_struct *plot, int x, int y)
 	/* pango_cairo_show_layout does not clear the path (here a starting point)
 	 * Do it by ourselves, or we can get spurious lines on future calls. */
 	cairo_new_path(plot->cr);
-	
-#ifdef EAM_BOXED_TEXT
+
 	if (in_textbox) {
 		box_rotation = -arg;
 		box_origin_x = x;
@@ -1670,14 +1677,13 @@ void gp_cairo_enhanced_finish(plot_struct *plot, int x, int y)
 		if (bounding_box[3] < box_y + ink_rect.y + ink_rect.height)
 		    bounding_box[3] = box_y + ink_rect.y + ink_rect.height;
 	}
-#endif
 
 	/* free the layout object */
 	pango_attr_list_unref( gp_cairo_enhanced_AttrList );
 	gp_cairo_enhanced_AttrList = NULL;
 	g_clear_object (&layout);
 	cairo_restore(plot->cr);
-	strncpy(gp_cairo_utf8, "", sizeof(gp_cairo_utf8));
+	safe_strncpy(gp_cairo_utf8, "", sizeof(gp_cairo_utf8));
 	free(gp_cairo_enhanced_string);
 }
 
@@ -1735,7 +1741,6 @@ void gp_cairo_fill(plot_struct *plot, int fillstyle, int fillpar)
 	}
 }
 
-#ifdef EAM_BOXED_TEXT
 void gp_cairo_boxed_text(plot_struct *plot, int x, int y, int option)
 {
 	int dx, dy;
@@ -1761,7 +1766,7 @@ void gp_cairo_boxed_text(plot_struct *plot, int x, int y, int option)
 
 		/* In progress: textbox rotation
 		 * 1) translate to text origin
-		 * 2) substract translation from bounding box
+		 * 2) subtract translation from bounding box
 		 * 3) rotate about new origin
 		 * 4) stroke/fill
 		 */
@@ -1773,11 +1778,11 @@ void gp_cairo_boxed_text(plot_struct *plot, int x, int y, int option)
 		dy = 0.25 * bounding_ymargin * (float)(plot->fontsize * plot->oversampling_scale);
 		if (option == TEXTBOX_GREY)
 		    dy = 0;
-		gp_cairo_move(plot,   bounding_box[0]-dx, bounding_box[1]-dy); 
-		gp_cairo_vector(plot, bounding_box[0]-dx, bounding_box[3]+dy); 
-		gp_cairo_vector(plot, bounding_box[2]+dx, bounding_box[3]+dy); 
-		gp_cairo_vector(plot, bounding_box[2]+dx, bounding_box[1]-dy); 
-		gp_cairo_vector(plot, bounding_box[0]+dx, bounding_box[1]-dy); 
+		gp_cairo_move(plot,   bounding_box[0]-dx, bounding_box[1]-dy);
+		gp_cairo_vector(plot, bounding_box[0]-dx, bounding_box[3]+dy);
+		gp_cairo_vector(plot, bounding_box[2]+dx, bounding_box[3]+dy);
+		gp_cairo_vector(plot, bounding_box[2]+dx, bounding_box[1]-dy);
+		gp_cairo_vector(plot, bounding_box[0]+dx, bounding_box[1]-dy);
 		cairo_close_path(plot->cr);
 		if (option == TEXTBOX_BACKGROUNDFILL) {
 		    cairo_set_source_rgba(plot->cr, plot->color.r, plot->color.g,
@@ -1788,7 +1793,7 @@ void gp_cairo_boxed_text(plot_struct *plot, int x, int y, int option)
 		    cairo_fill(plot->cr);
 		} else {  /* option == TEXTBOX_OUTLINE */
 		    cairo_set_line_width(plot->cr,
-					 0.5*plot->linewidth*plot->oversampling_scale);
+					 plot->linewidth*plot->oversampling_scale);
 		    cairo_set_source_rgba(plot->cr, plot->color.r, plot->color.g,
 					  plot->color.b, 1. - plot->color.alpha);
 		    cairo_stroke(plot->cr);
@@ -1807,7 +1812,6 @@ void gp_cairo_boxed_text(plot_struct *plot, int x, int y, int option)
 		break;
 	}
 }
-#endif
 
 #define PATTERN_SIZE 8
 
@@ -1923,6 +1927,7 @@ void gp_cairo_set_termvar(plot_struct *plot, unsigned int *v_char,
 	PangoRectangle ink_rect;
 	PangoRectangle logical_rect;
 	unsigned int tmp_v_char, tmp_h_char;
+	extern int debug;
 
 	/* Create a PangoLayout, set the font and text */
 	layout = gp_cairo_create_layout (plot->cr);
@@ -1944,6 +1949,16 @@ void gp_cairo_set_termvar(plot_struct *plot, unsigned int *v_char,
 	 * That's why I use ceil() instead of direct division result */
 	tmp_v_char = (int) ceil( (double) logical_rect.height/PANGO_SCALE) - 1;
 	tmp_h_char = (int) ceil( (double) logical_rect.width/(10*PANGO_SCALE));
+
+	/* Desperation fallback case.
+	 * There have been reports of failure to obtain font metrics.
+	 * We don't know why (pango use of harfbuzz is a suspect).
+	 */
+	if (tmp_v_char <= 1 || tmp_h_char <= 1 || debug == 7) {
+		tmp_h_char = 140 + (plot->fontsize - 10.) * 16.;
+		tmp_v_char = 300 * (plot->fontsize / 10.);
+		fprintf(stderr, "warning: problem determining pango font metrics\n");
+	}
 
 	if (v_char)
 		*v_char = tmp_v_char;
@@ -1999,7 +2014,7 @@ const char* gp_cairo_enhanced_get_fontname(plot_struct *plot)
 const char *
 gp_cairo_default_font(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	return "Tahoma";
 #else
 	return "Sans";

@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: bitmap.c,v 1.28 2013/12/15 06:18:55 sfeam Exp $"); }
-#endif
-
 /* GNUPLOT - bitmap.c */
 
 /*[
@@ -98,10 +94,10 @@ unsigned int b_angle;		/* rotation of text */
 int b_maskcount = 0;
 
 /* Local prototypes */
-static void b_putc __PROTO((unsigned int, unsigned int, int, unsigned int));
-static GP_INLINE void b_setpixel __PROTO((unsigned int x, unsigned int y, unsigned int value));
-static GP_INLINE void b_setmaskpixel __PROTO((unsigned int x, unsigned int y, unsigned int value));
-static void b_line __PROTO((unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2));
+static void b_putc(unsigned int, unsigned int, int, unsigned int);
+static GP_INLINE void b_setpixel(unsigned int x, unsigned int y, unsigned int value);
+static GP_INLINE void b_setmaskpixel(unsigned int x, unsigned int y, unsigned int value);
+static void b_line(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2);
 
 /* file-scope variables */
 
@@ -119,7 +115,7 @@ static unsigned int b_lasty;	/* last pixel set - used by b_line */
 
 
 /* 5x9 font, bottom row first, left pixel in lsb */
-const char_row GPFAR fnt5x9[FNT_CHARS][FNT5X9_VBITS] = {
+const char_row fnt5x9[FNT_CHARS][FNT5X9_VBITS] = {
   /* */  {000000,000000,000000,000000,000000,000000,000000,000000,000000},
   /*!*/  {000000,000000,0x0004,000000,0x0004,0x0004,0x0004,0x0004,0x0004},
   /*"*/  {000000,000000,000000,000000,000000,000000,0x000a,0x000a,0x000a},
@@ -219,7 +215,7 @@ const char_row GPFAR fnt5x9[FNT_CHARS][FNT5X9_VBITS] = {
 };
 
 /* 9x17 font, bottom row first, left pixel in lsb */
-const char_row GPFAR fnt9x17[FNT_CHARS][FNT9X17_VBITS] = {
+const char_row fnt9x17[FNT_CHARS][FNT9X17_VBITS] = {
   /* */  {000000,000000,000000,000000,000000,000000,000000,000000,000000,
           000000,000000,000000,000000,000000,000000,000000,000000},
   /*!*/  {000000,000000,000000,000000,0x0010,000000,000000,000000,0x0010,
@@ -415,7 +411,7 @@ const char_row GPFAR fnt9x17[FNT_CHARS][FNT9X17_VBITS] = {
 };
 
 /* 13x25 font, bottom row first, left pixel in lsb */
-const char_row GPFAR fnt13x25[FNT_CHARS][FNT13X25_VBITS] = {
+const char_row fnt13x25[FNT_CHARS][FNT13X25_VBITS] = {
   /* */  {000000,000000,000000,000000,000000,000000,000000,000000,000000,
           000000,000000,000000,000000,000000,000000,000000,000000,000000,
           000000,000000,000000,000000,000000,000000,000000},
@@ -852,8 +848,8 @@ b_makebitmap(unsigned int x, unsigned int y, unsigned int planes)
     unsigned int j;
     unsigned int rows;
 
-    x = 8 * (unsigned int) (x / 8.0 + 0.9);	/* round up to multiple of 8 */
-    y = 8 * (unsigned int) (y / 8.0 + 0.9);	/* round up to multiple of 8 */
+    x = 8 * ((x + 7) / 8);	/* round up to multiple of 8 */
+    y = 8 * ((y + 7) / 8);	/* round up to multiple of 8 */
     b_psize = y / 8;		/* size of each plane */
     rows = b_psize * planes;	/* total number of rows of 8 pixels high */
     b_xsize = x;
@@ -1068,6 +1064,9 @@ b_setlinetype(int linetype)
 {
     if (linetype >= 7)
 	linetype %= 7;
+    if (linetype < LT_SOLID)
+	linetype = LT_SOLID;
+
     b_linemask = b_pattern[linetype + 2];
     b_maskcount = 0;
 }

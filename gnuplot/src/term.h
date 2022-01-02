@@ -1,7 +1,3 @@
-/*
- * $Id: term.h,v 1.72 2017/05/18 21:18:57 sfeam Exp $
- */
-
 /* GNUPLOT - term.h */
 
 /*[
@@ -53,7 +49,7 @@
  * pslatex and epslatex support is now provided by the combination of
  * post.trm and pslatex.trm.  You cannot build pslatex without post.
  * Both drivers are selected by default, but you can disable them below.
- * 
+ *
  * Enhanced text support is pretty much required for all terminals now.
  * If you build without GP_ENH_EST text layout will be degraded.
  */
@@ -69,6 +65,12 @@
 #  include "estimate.trm"	/* used for enhanced text processing */
 # endif
 
+/* Unicode escape sequences (\U+hhhh) are handling by the enhanced text code.
+ * Various terminals check every string to see whether it needs enhanced text
+ * processing. This macro allows them to include a check for the presence of
+ * unicode escapes.
+ */
+#define contains_unicode(S) strstr(S, "\\U+")
 
 /* Define SHORT_TERMLIST to select a few terminals. It is easier
  * to define the macro and list desired terminals in this section.
@@ -90,7 +92,7 @@
 # ifdef OS2
 #  include "pm.trm"		/* OS/2 Presentation Manager */
 # endif
-# ifdef _Windows
+# ifdef _WIN32
 #  include "win.trm"		/* MS-Windows */
 # endif
 #else /* include all applicable terminals not commented out */
@@ -104,36 +106,35 @@
 # include "be.trm"
 #endif
 
+/* MSDOS with djgpp compiler or _WIN32/Mingw or X11 */
+#if (defined(DJGPP) && (!defined(DJSVGA) || (DJSVGA != 0))) || defined(HAVE_GRX)
+# include "djsvga.trm"
+#endif
 
 /****************************************************************************/
-/* MS-DOS and Windows */
-#if defined(MSDOS) || defined(_Windows)
+/* MS-DOS */
+#if defined(MSDOS)
 
 /* MSDOS with emx-gcc compiler */
-# if defined(MSDOS) && defined(__EMX__)
+# if defined(__EMX__)
    /* Vesa-Cards */
 #  define EMXVESA
 #  include "emxvga.trm"
 # endif				/* MSDOS && EMX */
 
-/* MSDOS with djgpp compiler */
-# if defined(DJGPP) && (!defined(DJSVGA) || (DJSVGA != 0))
-#  include "djsvga.trm"
+/* MSDOS with OpenWatcom compiler */
+# if defined(__WATCOMC__)
+#  include "pc.trm"
 # endif
 
-/* All other Compilers */
-# ifndef _Windows
-#  ifdef PC
-/* uncomment the next line to include SuperVGA support */
-#   define BGI_NAME "svga256"	/* the name of the SVGA.BGI for Borland C */
-/* this also triggers the inclusion of Super VGA support */
-#   include "pc.trm"		/* all PC types except MS WINDOWS */
-#  endif
-# else				/* _Windows */
-#  include "win.trm"		/* MS-Windows */
-# endif				/* _Windows */
-#endif /* MSDOS || _Windows */
+#endif /* MSDOS */
 /****************************************************************************/
+
+/* Windows */
+#ifdef _WIN32
+/* Windows GDI/GDI+/Direct2D */
+# include "win.trm"
+#endif
 
 /* Apple Mac OS X */
 #ifdef HAVE_FRAMEWORK_AQUATERM
@@ -156,17 +157,6 @@
 /* Terminals for various Unix platforms                                    */
 /***************************************************************************/
 
-/* Linux VGA */
-#ifdef LINUXVGA
-# include "linux.trm"
-
-/* Linux VGAGL */
-# if defined(VGAGL) && defined (THREEDKIT)
-#  include "vgagl.trm"
-# endif
-#endif /* LINUXVGA */
-
-
 /* VAX Windowing System requires UIS libraries */
 #ifdef UIS
 # include "vws.trm"
@@ -174,7 +164,11 @@
 
 /****************************************************************************/
 /* Terminals not relevant for MSDOS, MS-Windows */
-#if !(defined(MSDOS) || defined(_Windows))
+#if !(defined(MSDOS) || defined(_WIN32))
+
+/* This is not really a terminal, it generates a help section for */
+/* using the linux console. */
+# include "linux-vgagl.trm"
 
 /* gpic for groff */
 #ifdef HAVE_GPIC
@@ -182,18 +176,20 @@
 #endif
 
 /* REGIS graphics language */
-#ifdef VMS
+#if defined(HAVE_REGIS)
 # include "regis.trm"
 #endif
 
-/* Tektronix 4106, 4107, 4109 and 420x terminals */
-# include "t410x.trm"
+#ifdef WITH_TEKTRONIX
+    /* Tektronix 4106, 4107, 4109 and 420x terminals */
+#   include "t410x.trm"
 
-/* a Tek 4010 and others including VT-style */
-# include "tek.trm"
+    /* a Tek 4010 and others including VT-style */
+#   include "tek.trm"
+#endif
 
 
-#endif /* !MSDOS && !_Windows */
+#endif /* !MSDOS && !_WIN32 */
 /****************************************************************************/
 
 
@@ -234,8 +230,12 @@
 # include "caca.trm"
 #endif
 
-/* Terminal for export to AutoCad (Release 10.x) */
-/* DWGR10 format (1988) */
+/* Legacy terminal for export to AutoCad (Release 10.x)
+ * DWGR10 format (1988)
+ * Still included by popular demand although basically untouched for 20+ years.
+ * Someone please update this terminal to adhere to a newer DXF standard!
+ * http://images.autodesk.com/adsk/files/autocad_2012_pdf_dxf-reference_enu.pdf
+ */
 #include "dxf.trm"
 
 /* Enhanced Metafile Format driver */
@@ -299,13 +299,15 @@
 #endif
 
 /* QMS laser printers */
-#include "qms.trm"
+/* #include "qms.trm" */
 
 /* W3C Scalable Vector Graphics file */
 #include "svg.trm"
 
 /* x11 tgif tool */
+#ifdef HAVE_TGIF
 #include "tgif.trm"
+#endif
 
 /* tcl/tk with perl extensions */
 #include "tkcanvas.trm"
@@ -340,23 +342,16 @@
 
 #endif /* NO_BITMAP_SUPPORT */
 
-/* TeX related terminals */
-#define EMTEX
-#define EEPIC
+/* TeX related terminals start here */
 
-/* latex and emtex */
-#include "latex.trm"
+
+/* LaTeX2e picture environment */
+#include "pict2e.trm"
 
 /* latex/tex with picture in postscript */
 #ifdef PSLATEX_DRIVER
 #include "pslatex.trm"
 #endif
-
-/* EEPIC-extended LaTeX driver, for EEPIC users */
-#include "eepic.trm"
-
-/* TPIC specials for TeX */
-#include "tpic.trm"
 
 /* LaTeX picture environment with PSTricks macros */
 #include "pstricks.trm"
@@ -372,6 +367,25 @@
 
 /* ConTeXt */
 #include "context.trm"
+
+/*
+ * DEPRECATED latex terminals no longer built by default
+ */
+#if 0
+#  define EMTEX
+#  define EEPIC
+#  define OLD_LATEX_TERMINAL
+
+#  include "latex.trm"	/* latex and emtex */
+#  include "eepic.trm"	/* EEPIC-extended LaTeX driver */
+#  include "tpic.trm"	/* TPIC specials for TeX */
+#else
+#  include "latex_old.h" /* deprecation notice for docs */
+#  undef OLD_LATEX_TERMINAL
+#endif
+
+/* End of TeX related terminals */
+
 
 #ifdef USE_GGI_DRIVER
 # include "ggi.trm"

@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: breaders.c,v 1.12 2012/06/08 17:33:41 sfeam Exp $"); }
-#endif
-
 /* GNUPLOT - breaders.c */
 
 /*[
@@ -269,30 +265,30 @@ edf_filetype_function(void)
 #define GD_PNG 1
 #define GD_GIF 2
 #define GD_JPEG 3
-void gd_filetype_function __PROTO((int filetype));
+void gd_filetype_function(int filetype, char *filename);
 
 void
 png_filetype_function(void)
 {
-    gd_filetype_function(GD_PNG);
+    gd_filetype_function(GD_PNG, df_filename);
 }
 
 void
 gif_filetype_function(void)
 {
-    gd_filetype_function(GD_GIF);
+    gd_filetype_function(GD_GIF, df_filename);
 }
 
 void
 jpeg_filetype_function(void)
 {
-    gd_filetype_function(GD_JPEG);
+    gd_filetype_function(GD_JPEG, df_filename);
 }
 
 #ifndef HAVE_GD_PNG
 
 void
-gd_filetype_function(int type)
+gd_filetype_function(int type, char *filename)
 {
     int_error(NO_CARET, "This copy of gnuplot cannot read png/gif/jpeg images");
 }
@@ -300,13 +296,20 @@ gd_filetype_function(int type)
 int
 df_libgd_get_pixel(int i, int j, int component) { return 0; }
 
+TBOOLEAN
+df_read_pixmap( t_pixmap *pixmap )
+{
+    int_warn(NO_CARET, "This copy of gnuplot cannot read png/gif/jpeg images");
+    return FALSE;
+}
+
 #else
 
 #include <gd.h>
 static gdImagePtr im = NULL;
 
 void
-gd_filetype_function(int filetype)
+gd_filetype_function(int filetype, char *filename)
 {
     FILE *fp;
     unsigned int M, N;
@@ -318,9 +321,9 @@ gd_filetype_function(int filetype)
     }
 
     /* read image into memory */
-    fp = loadpath_fopen(df_filename, "rb");
+    fp = loadpath_fopen(filename, "rb");
     if (!fp)
-	int_error(NO_CARET, "Can't open data file \"%s\"", df_filename);
+	int_error(NO_CARET, "Can't open data file \"%s\"", filename);
     
     switch(filetype) {
 	case GD_PNG:	im = gdImageCreateFromPng(fp); break;
@@ -338,7 +341,7 @@ gd_filetype_function(int filetype)
     fclose(fp);
     
     if (!im)
-	int_error(NO_CARET, "libgd doesn't recognize the format of \"%s\"", df_filename);
+	int_error(NO_CARET, "libgd doesn't recognize the format of \"%s\"", filename);
 
     /* check on image properties and complain if we can't handle them */
     M = im->sx;
@@ -385,11 +388,59 @@ df_libgd_get_pixel(int i, int j, int component)
     		return gdTrueColorGetRed(pixel);
     case 1:	return gdTrueColorGetGreen(pixel);
     case 2:	return gdTrueColorGetBlue(pixel);
-    case 3:	/* FIXME? Supposedly runs from 0-127 rather than 0-255 */
+    case 3:	/* runs from 0-127 rather than 0-255 */
 		alpha = 2 * gdTrueColorGetAlpha(pixel);
 		return (255-alpha);
     default:	return 0; /* shouldn't happen */
     }
+}
+
+TBOOLEAN
+df_read_pixmap( t_pixmap *pixmap )
+{
+    int filetype;
+    int i, j;
+    coordval *pixel;
+    char *file_ext = strrchr(pixmap->filename, '.');
+
+    /* Parse file name */
+    if (!file_ext++)
+	return FALSE;
+    if (!strcasecmp(file_ext, "png"))
+	filetype = GD_PNG;
+    else if (!strcasecmp(file_ext, "gif"))
+	filetype = GD_GIF;
+    else if (!strcasecmp(file_ext, "jpeg") || !strcasecmp(file_ext, "jpg"))
+	filetype = GD_JPEG;
+    else {
+	/* Clear anything that was there before */
+	pixmap->nrows = pixmap->ncols = 0;
+	int_warn(NO_CARET, "unrecognized pixmap type: %s", pixmap->filename);
+	return FALSE;
+    }
+    
+    /* Create a blank record that gd_filetype_function can write into */
+    df_add_binary_records(1, DF_CURRENT_RECORDS);
+
+    /* Open file and allocate space for image data */
+    gd_filetype_function(filetype, pixmap->filename);
+    pixmap->ncols = df_bin_record[0].scan_dim[0];
+    pixmap->nrows = df_bin_record[0].scan_dim[1];
+    pixmap->image_data = gp_realloc( pixmap->image_data,
+			4. * sizeof(coordval) * pixmap->ncols * pixmap->nrows, "pixmap");
+
+    /* Fill in image data */
+    pixel = pixmap->image_data;
+    for (i=0; i<pixmap->nrows; i++)
+    for (j=0; j<pixmap->ncols; j++)
+    {
+	*pixel++ = (coordval)df_libgd_get_pixel(j,i,0) / 255.;
+	*pixel++ = (coordval)df_libgd_get_pixel(j,i,1) / 255.;
+	*pixel++ = (coordval)df_libgd_get_pixel(j,i,2) / 255.;
+	*pixel++ = (coordval)df_libgd_get_pixel(j,i,3);
+    }
+
+    return TRUE;
 }
 
 #endif

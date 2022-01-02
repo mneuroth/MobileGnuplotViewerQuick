@@ -3,8 +3,7 @@
 ; Russell Lang, 30 Nov 1992
 ; Modified for 4.0, John Bollinger, 31 Dec 2002
 ; translated by Masahito Yamaga (ma@yama-ga.com) (for 3.7.2)
-; translated by Shigeharu TAKENO 03/25 2006 (for 4.1)
-; $Id: wgp410-sj.mnu,v 1.11 2017-09-05 18:18:20+09 shige Exp $
+; translated by Shigeharu TAKENO (for 4.X, 5.X), 2020-09-17
 
 [Menu]
 ファイル(&F)
@@ -119,29 +118,29 @@
 	[EndMenu]
 	[Menu]
 	スタイル (複合)
-		エラーバー (Error Bars)
+		誤差棒 (Error Bars)
 			with errorbars
-		X エラーバー
+		X 誤差棒
 			with xerrorbars
-		Y エラーバー
+		Y 誤差棒
 			with yerrorbars
-		XY エラーバー
+		XY 誤差棒
 			with xyerrorbars
-		エラーライン (Error Lines)
+		誤差線 (Error Lines)
 			with errorlines
-		X エラーライン
+		X 誤差線
 			with xerrorlines
-		Y エラーライン
+		Y 誤差線
 			with yerrorlines
-		XY エラーライン
+		XY 誤差線
 			with xyerrorlines
 		矩形 (Boxes)
 			with boxes
 		領域塗りつぶし (Filled Curves)
 			with filledcurves
-		矩形とエラーバー (Box Error Bars)
+		誤差棒付き矩形 (Box Error Bars)
 			with boxerrorbars
-		矩形と XY エラーバー
+		XY 誤差棒付き矩形 
 			with boxxyerrorbars
 		金融データ形式 (Finance Bars)
 			with financebars
@@ -464,11 +463,11 @@
 		set zrange [[INPUT]Lower bound?[EOS]:[INPUT]Upper bound?[EOS]]{ENTER}
 	--
 	X 軸のラベル
-		set xlabel "[INPUT]Label text?[EOS]" [INPUT]X offset, Y offset (eg. 2,3) ?{ENTER}
+		set xlabel "[INPUT]Label text?[EOS]" offset [INPUT]X offset, Y offset (eg. 2,3) ?{ENTER}
 	Y 軸のラベル
-		set ylabel "[INPUT]Label text?[EOS]" [INPUT]X offset, Y offset (eg. 2,3) ?{ENTER}
+		set ylabel "[INPUT]Label text?[EOS]" offset [INPUT]X offset, Y offset (eg. 2,3) ?{ENTER}
 	Z 軸のラベル
-		set zlabel "[INPUT]Label text?[EOS]" [INPUT]X offset, Y offset (eg. 2,3) ?{ENTER}
+		set zlabel "[INPUT]Label text?[EOS]" offset [INPUT]X offset, Y offset (eg. 2,3) ?{ENTER}
 	軸のラベルを表示
 		show xlabel{ENTER}show ylabel{ENTER}show zlabel{ENTER}
 	--
@@ -547,11 +546,11 @@
 	鉛直線 (Impulses)
 		set style data impulses{ENTER}
 	--
-	エラーバー (Error Bars)
+	誤差棒 (Error Bars)
 		set style data errorbars{ENTER}
 	矩形 (Boxes)
 		set style data boxes{ENTER}
-	矩形とエラーバー (Box Error Bars)
+	誤差棒付き矩形 (Box Error Bars)
 		set style data boxerrorbars{ENTER}
 	--
 	燈台形式 (Candlesticks)
@@ -577,11 +576,11 @@
 	鉛直線 (Impulses)
 		set style function impulses{ENTER}
 	--
-	エラーバー (Error Bars)
+	誤差棒 (Error Bars)
 		set style function errorbars{ENTER}
 	矩形 (Boxes)
 		set style function boxes{ENTER}
-	矩形とエラーバー (Box Error Bars)
+	誤差棒付き矩形 (Box Error Bars)
 		set style function boxerrorbars{ENTER}
 	--
 	燈台形式 (Candlesticks)
@@ -729,11 +728,18 @@
 	ウィンドウズ(&W)
 		help windows{ENTER}
 	--
+	オプション (&O)
+		[OPTIONS]
+	wgnuplot.ini の編集 (&E)
+		!start notepad %APPDATA%\wgnuplot.ini{ENTER}
+	gnuplot.ini の編集 (&G)
+		!start notepad %APPDATA%\gnuplot.ini{ENTER}
+	--
 	gnuplot に関して(&A)
 		[ABOUT]
 [EndMenu]
 
-; ボタンをいくつか
+; ツールバーボタン
 ;   タイトル文字列内のセミコロンの次の数字はアイコンのインデックス。
 ;   MSDN の以下参照: "Toolbar Standard Button Image Index Values"
 ;   http://msdn.microsoft.com/en-us/library/bb760433%28v=vs.85%29.aspx
@@ -745,26 +751,26 @@
 	再表示;4
 		replot{ENTER}
 [Button]
-	開く;7
+	スクリプトを開く;7
 		load '[OPEN]load[EOS]*.plt[EOS]'{ENTER}
 [Button]
-	保存;8
+	スクリプトを保存;8
 		save '[SAVE]save[EOS]*.plt[EOS]'{ENTER}
 [Button]
-	移動;31
+	ディレクトリの移動;31
 		cd '[DIRECTORY]New directory?[EOS]'{ENTER}
 [Button]
-	印刷;14
-		set term push;set terminal [INPUT]Terminal type?{ENTER}set output "PRN"{ENTER}replot{ENTER}set terminal pop{ENTER}unset output{ENTER}
+	プリンタへの出力;14
+		set term push;set terminal [INPUT]Terminal type?{ENTER}set output "PRN"{ENTER}replot{ENTER}set term pop{ENTER}unset output{ENTER}
 [Button]
-	ダンプ (win/wxt/qt);14
+	現在のスクリーンのダンプ (win/wxt/qt);14
 		screendump{ENTER}
 [Button]
-	前;15
+	前の履歴;15
 		{^P}
 [Button]
-	次;16
+	次の履歴;16
 		{^N}
 [Button]
-	オプション;10
+	オプションメニュー;10
 		[OPTIONS]

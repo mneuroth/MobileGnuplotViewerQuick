@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: strftime.c,v 1.6 2004/04/13 17:24:01 broeker Exp $"); }
-#endif
-
 /* GNUPLOT - strftime.c */
 
 /*[
@@ -74,8 +70,8 @@ char abbrev_day_names[7][8] =
 #include "variable.h"
 #endif /* TEST_STRFTIME */
 
-static void fill __PROTO((char *from, char **pto, size_t *pmaxsize));
-static void number __PROTO((int num, int pad, char **pto, size_t *pmaxsize));
+static void fill(char *from, char **pto, size_t *pmaxsize);
+static void number(int num, int pad, char **pto, size_t *pmaxsize);
 
 static void
 fill(char *from, char **pto, size_t *pmaxsize)
@@ -129,7 +125,7 @@ strftime(char *s, size_t max, const char *format, const struct tm *tp)
 		    if (tp->tm_mon >= 0 && tp->tm_mon <= 11)
 			fill(full_month_names[tp->tm_mon], &s, &max);
 		    break;
-		case 'c':	/* locale's date and time reprensentation */
+		case 'c':	/* locale's date and time representation */
 		    strftime(s, max, "%a %b %X %Y", tp);
 		    max -= strlen(s);
 		    s += strlen(s);

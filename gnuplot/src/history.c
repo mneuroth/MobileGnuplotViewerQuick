@@ -91,7 +91,9 @@ write_history(char *filename)
 void
 read_history(char *filename)
 {
+#ifdef GNUPLOT_HISTORY
     gp_read_history(filename);
+#endif
 }
 
 
@@ -392,7 +394,7 @@ gp_read_history(const char *filename)
 
 #ifdef USE_READLINE
 
-/* Save history to file, or write to _stdout or pipe.
+/* Save history to file, or write to stdout or pipe.
  * For pipes, only "|" works, pipes starting with ">" get a strange 
  * filename like in the non-readline version.
  *
@@ -402,7 +404,7 @@ void
 write_history_list(const int num, const char *const filename, const char *mode)
 {
     const HIST_ENTRY *list_entry;
-    FILE *out = _stdout;
+    FILE *out = stdout;
     int is_pipe = 0;
     int is_file = 0;
     int is_quiet = 0;
@@ -420,7 +422,7 @@ write_history_list(const int num, const char *const filename, const char *mode)
 	{
 	    if (!(out = fopen(filename, mode))) {
 		int_warn(NO_CARET, "Cannot open file to save history, using standard output.\n");
-		out = _stdout;
+		out = stdout;
 	    } else {
 		is_file = 1;
 	    }
@@ -503,7 +505,6 @@ history_find(char *cmd)
 #endif
 
     /* Anchored backward search for prefix */
-    /* FIXME: the built-in readline version used to ignore leading spaces */
     if (history_search_prefix(cmd, -1) == 0)
 	return current_history()->line;
     return NULL;

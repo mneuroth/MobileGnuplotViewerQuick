@@ -45,27 +45,15 @@
 #include "util.h"
 #include "variable.h"
 #include "version.h"
+#include "voxelgrid.h"
+#include "encoding.h"
 
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef OS2 /* os2.h required for gpexecute.h */
-# define INCL_DOS
+#ifdef OS2
 # define INCL_REXXSAA
-# ifdef OS2_IPC
-#  define INCL_DOSSEMAPHORES
-# endif
 # include <os2.h>
-#endif /* OS2 */
-
-#ifdef USE_MOUSE
-# include "mouse.h" /* for mouse_setting */
-# include "gpexecute.h"
-#endif
-
-/* on OS/2 this is needed even without USE_MOUSE */
-#if defined(OS2_IPC) && !defined(USE_MOUSE)
-# include "gpexecute.h"
 #endif
 
 #if defined(MSDOS) || defined(__EMX__) || (defined(WGP_CONSOLE) && defined(MSVC))
@@ -119,7 +107,7 @@ extern smg$create_key_table();
  */
 static char *expanded_history_filename;
 
-static void wrapper_for_write_history __PROTO((void));
+static void wrapper_for_write_history(void);
 
 #endif				/* GNUPLOT_HISTORY */
 
@@ -140,21 +128,21 @@ const char *user_shell = NULL;
 TBOOLEAN successful_initialization = FALSE;
 
 #ifdef X11
-extern int X11_args __PROTO((int, char **)); /* FIXME: defined in term/x11.trm */
+extern int X11_args(int, char **); /* FIXME: defined in term/x11.trm */
 #endif
 
 /* patch to get home dir, see command.c */
-#ifdef DJGPP
-# include <dir.h>               /* MAXPATH */
-char HelpFile[MAXPATH];
-#endif /*   - DJL */
+#if defined(MSDOS) || defined(OS2)
+char HelpFile[PATH_MAX];
+static char progpath[PATH_MAX] = "";
+#endif
 
 /* a longjmp buffer to get back to the command line */
 static JMP_BUF command_line_env;
 
-static void load_rcfile __PROTO((int where));
-static RETSIGTYPE inter __PROTO((int anint));
-static void init_memory __PROTO((void));
+static void load_rcfile(int where);
+static RETSIGTYPE inter(int anint);
+static void init_memory(void);
 
 static int exit_status = EXIT_SUCCESS;
 
@@ -169,10 +157,33 @@ static ULONG RexxInterface(PRXSTRING, PUSHORT, PRXSTRING);
 TBOOLEAN CallFromRexx = FALSE;
 #endif /* OS2 */
 
+/* START PATCHES for embedded gnuplot */
+
+FILE * _stderr = 0;
+FILE * _stdout = 0;
+
+jmp_buf buf_to_exit;
+
+void ResetGlobalVariables()
+{
+    outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
+    multiplot = FALSE;      // reset value      // PATCH for embedded gnuplot
+    exit_status = EXIT_SUCCESS;
+}
+
+void jump_to_exit(int status)
+{
+    fprintf(_stderr,"called gp_exit(%d) !!!!\n",status);
+
+    longjmp(buf_to_exit, 1);
+}
+
+/* END PATCHES for embedded gnuplot */
+
 static RETSIGTYPE
 inter(int anint)
 {
-    (void) anint;		/* aovid -Wunused warning */
+    (void) anint;		/* avoid -Wunused warning */
     (void) signal(SIGINT, (sigfunc) inter);
     (void) signal(SIGFPE, SIG_DFL);	/* turn off FPE trapping */
 
@@ -263,35 +274,12 @@ bail_to_command_line()
     LONGJMP(command_line_env, TRUE);
 }
 
-/* START PATCHES for embedded gnuplot */
-
-FILE * _stderr = 0;
-FILE * _stdout = 0;
-
-jmp_buf buf_to_exit;
-
-void ResetGlobalVariables()
-{
-    outstr = NULL;          // reset outstr     // PATCH for embedded gnuplot
-    multiplot = FALSE;      // reset value      // PATCH for embedded gnuplot
-    exit_status = EXIT_SUCCESS;
-}
-
-void jump_to_exit(int status)
-{
-    fprintf(_stderr,"called gp_exit(%d) !!!!\n",status);
-
-    longjmp(buf_to_exit, 1);
-}
-
-/* END PATCHES for embedded gnuplot */
-
 #if defined(_WIN32)
 int
-gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
+gnu_main(int argc_orig, char **argv, FILE * stdoutput, FILE * stderror)
 #else
 int
-gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
+gnu_main(int argc_orig, char **argv, FILE * stdoutput, FILE * stderror)
 #endif
 {
     int i;
@@ -307,6 +295,15 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
     }
     else
     {
+    /* We want the current value of argc to persist across a LONGJMP from int_error().
+     * Without this the compiler may put it on the stack, which LONGJMP clobbers.
+     * Here we try make it a volatile variable that optimization will not affect.
+     * Why do we not have to do the same for argv?   I don't know.
+     * But the test cases that broke with generic argc seem fine with generic argv.
+     */
+    static volatile int argc;
+    argc = argc_orig;
+
 #ifdef LINUXVGA
     LINUX_setup();		/* setup VGA before dropping privilege DBT 4/5/99 */
     drop_privilege();
@@ -320,28 +317,19 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
     }
 #endif
 
-#if defined(MSDOS) && !defined(_WIN32) && !defined(__GNUC__)
-    PC_setup();
-#endif /* MSDOS !Windows */
-
 /* HBB: Seems this isn't needed any more for DJGPP V2? */
 /* HBB: disable all floating point exceptions, just keep running... */
 #if defined(DJGPP) && (DJGPP!=2)
     _control87(MCW_EM, MCW_EM);
 #endif
 
-#if defined(OS2)
+#ifdef OS2
     {
-	int rc;
-#ifdef OS2_IPC
-	char semInputReadyName[40];
-
-	sprintf(semInputReadyName, "\\SEM32\\GP%i_Input_Ready", getpid());
-	rc = DosCreateEventSem(semInputReadyName, &semInputReady, 0, 0);
-	if (rc != 0)
-        fputs("DosCreateEventSem error\n", _stderr);
-#endif
-	rc = RexxRegisterSubcomExe("GNUPLOT", (PFN) RexxInterface, NULL);
+	int rc = RexxRegisterSubcomExe("GNUPLOT", (PFN) RexxInterface, NULL);
+	(void) rc;
+# ifdef OS2_IPC
+	os2_ipc_setup();
+# endif
     }
 #endif
 
@@ -350,21 +338,39 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
     malloc_debug(7);
 #endif
 
-/* get helpfile from home directory */
-#ifdef __DJGPP__
+
+/* init progpath and get helpfile from executable directory */
+#if defined(MSDOS) || defined(OS2)
     {
 	char *s;
-	strcpy(HelpFile, argv[0]);
-	for (s = HelpFile; *s; s++)
-	    if (*s == DIRSEP1)
-		*s = DIRSEP2;	/* '\\' to '/' */
-	strcpy(strrchr(HelpFile, DIRSEP2), "/gnuplot.gih");
-    }			/* Add also some "paranoid" tests for '\\':  AP */
-#endif /* DJGPP */
 
-#ifdef VMS
-    unsigned int status[2] = { 1, 0 };
+#ifdef __EMX__
+	_execname(progpath, sizeof(progpath));
+#else
+	safe_strncpy(progpath, argv[0], sizeof(progpath));
 #endif
+	/* convert '/' to '\\' */
+	for (s = progpath; *s != NUL; s++)
+	    if (*s == DIRSEP2)
+		*s = DIRSEP1;
+	/* cut program name */
+	s = strrchr(progpath, DIRSEP1);
+	if (s != NULL)
+	    s++;
+	else
+	    s = progpath;
+	*s = NUL;
+	/* init HelpFile */
+	strcpy(HelpFile, progpath);
+	strcat(HelpFile, "gnuplot.gih");
+	/* remove trailing "bin/" from progpath */
+	if ((s != NULL) && (s - progpath >= 4)) {
+	    s -= 4;
+	    if (strncasecmp(s, "bin", 3) == 0)
+		*s = NUL;
+	}
+    }
+#endif /* DJGPP */
 
 #if (defined(PIPE_IPC) || defined(_WIN32)) && (defined(HAVE_LIBREADLINE) || (defined(HAVE_LIBEDITLINE) && defined(X11)))
     /* Editline needs this to be set before the very first call to readline(). */
@@ -472,6 +478,7 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
     /* Initialize pre-loaded user variables */
     /* "pi" is hard-wired as the first variable */
     (void) add_udv_by_name("GNUTERM");
+    (void) add_udv_by_name("I");
     (void) add_udv_by_name("NaN");
     init_constants();
     udv_user_head = &(udv_NaN->next_udv);
@@ -517,10 +524,13 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 
 #ifdef VMS
     /* initialise screen management routines for command recall */
-    if (status[1] = smg$create_virtual_keyboard(&vms_vkid) != SS$_NORMAL)
-	done(status[1]);
-    if (status[1] = smg$create_key_table(&vms_ktid) != SS$_NORMAL)
-	done(status[1]);
+    {
+    unsigned int ierror;
+    if (ierror = smg$create_virtual_keyboard(&vms_vkid) != SS$_NORMAL)
+	done(ierror);
+    if (ierror = smg$create_key_table(&vms_ktid) != SS$_NORMAL)
+	done(ierror);
+    }
 #endif /* VMS */
 
     if (!SETJMP(command_line_env, 1)) {
@@ -538,6 +548,8 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 	   to properly handle keyboard input. */
 	init_encoding();
 #endif
+	init_gadgets();
+
 	/* April 2017: Now that error handling is in place, it is safe parse
 	 * GNUTERM during terminal initialization.
 	 * atexit processing is done in reverse order. We want
@@ -548,7 +560,7 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 	push_terminal(0);	/* remember the initial terminal */
 	gp_atexit(term_reset);
 
-    /* Execute commands in ~/.gnuplot */
+	/* Execute commands in ~/.gnuplot */
 	init_session();
 
 	if (interactive && term != 0) {		/* not unknown */
@@ -564,7 +576,7 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 	    /*
 	     * It is safe to ignore the return values of 'atexit()' and
 	     * 'on_exit()'. In the worst case, there is no history of your
-	     * currrent session and you have to type all again in your next
+	     * current session and you have to type all again in your next
 	     * session.
 	     */
 	    gp_atexit(wrapper_for_write_history);
@@ -595,17 +607,17 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 
 #ifdef VMS
 	/* after catching interrupt */
-	/* VAX stuffs up _stdout on SIGINT while writing to _stdout,
-	   so reopen _stdout. */
-	if (gpoutfile == _stdout) {
-	    if ((_stdout = freopen("SYS$OUTPUT", "w", _stdout)) == NULL) {
+    /* VAX stuffs up _stdout on SIGINT while writing to _stdout,
+       so reopen _stdout. */
+    if (gpoutfile == _stdout) {
+        if ((_stdout = freopen("SYS$OUTPUT", "w", _stdout)) == NULL) {
 		/* couldn't reopen it so try opening it instead */
-		if ((_stdout = fopen("SYS$OUTPUT", "w")) == NULL) {
+        if ((_stdout = fopen("SYS$OUTPUT", "w")) == NULL) {
 		    /* don't use int_error here - causes infinite loop! */
             fputs("Error opening SYS$OUTPUT as _stdout\n", _stderr);
 		}
 	    }
-	    gpoutfile = _stdout;
+        gpoutfile = _stdout;
 	}
 #endif /* VMS */
 
@@ -615,8 +627,6 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 	/* entering the loop again from the top finds them messed up.  */
 	/* If we reenter the loop via a goto then there is some hope   */
 	/* that code reordering does not hurt us.                      */
-	/* NB: the test for interactive means that execution from a    */
-	/* pipe will not continue after an error. Do we want this?     */
 	if (reading_from_dash && interactive)
 	    goto RECOVER_FROM_ERROR_IN_DASH;
 	reading_from_dash = FALSE;
@@ -629,7 +639,7 @@ gnu_main(int argc, char **argv, FILE * stdoutput, FILE * stderror)
 
     /* load filenames given as arguments */
     while (--argc > 0) {
-        ++argv;
+	    ++argv;
 	    c_token = 0;
 	    if (!strncmp(*argv, "-persist", 2) || !strcmp(*argv, "--persist")
 #ifdef _WIN32
@@ -650,8 +660,10 @@ RECOVER_FROM_ERROR_IN_DASH:
 		while (!com_line());
 		reading_from_dash = FALSE;
 		interactive = FALSE;
+		noinputfiles = FALSE;
 
 	    } else if (strcmp(*argv, "-e") == 0) {
+		int save_state = interactive;
 		--argc; ++argv;
 		if (argc <= 0) {
             fprintf(_stderr, "syntax:  gnuplot -e \"commands\"\n");
@@ -660,6 +672,7 @@ RECOVER_FROM_ERROR_IN_DASH:
 		interactive = FALSE;
 		noinputfiles = FALSE;
 		do_string(*argv);
+		interactive = save_state;
 
 	    } else if (!strncmp(*argv, "-slow", 2) || !strcmp(*argv, "--slow")) {
 		slow_font_startup = TRUE;
@@ -693,14 +706,15 @@ RECOVER_FROM_ERROR_IN_DASH:
 	    } else {
 		interactive = FALSE;
 		noinputfiles = FALSE;
-        load_file(loadpath_fopen(*argv, "r"), gp_strdup(*argv), 4);
-        }
+		load_file(loadpath_fopen(*argv, "r"), gp_strdup(*argv), 4);
+	    }
     }
 
     /* take commands from stdin */
-    if (noinputfiles)
+    if (noinputfiles) {
 	while (!com_line())
 	    ctrlc_flag = FALSE; /* reset asynchronous Ctrl-C flag */
+    }
 
 #ifdef _WIN32
     /* On Windows, handle 'persist' by keeping the main input loop running (windows/wxt), */
@@ -734,7 +748,6 @@ RECOVER_FROM_ERROR_IN_DASH:
 #ifdef OS2
     RexxDeregisterSubcom("GNUPLOT", NULL);
 #endif
-
     }   /* for setjmp */
 
     /* HBB 20040223: Not all compilers like exit() to end main() */
@@ -769,6 +782,8 @@ init_constants()
     (void) Gcomplex(&udv_pi.udv_value, M_PI, 0.0);
     udv_NaN = get_udv_by_name("NaN");
     (void) Gcomplex(&(udv_NaN->udv_value), not_a_number(), 0.0);
+    udv_I = get_udv_by_name("I");
+    (void) Gcomplex(&(udv_I->udv_value), 0.0, 1.0);
 }
 
 /*
@@ -784,8 +799,14 @@ init_session()
 	/* Undefine any previously-used variables */
 	del_udv_by_name("",TRUE);
 
-	/* Restore default colors before loadin local preferences */
+	/* Restore default colors before loading local preferences */
 	set_colorsequence(1);
+
+	/* Reset program variables not handled by 'reset' */
+	overflow_handling = INT64_OVERFLOW_TO_FLOAT;
+
+	/* Reset voxel data structures if supported */
+	init_voxelsupport();
 
 	/* Make sure all variables start in the same state 'reset'
 	 * would set them to.
@@ -817,7 +838,7 @@ load_rcfile(int where)
 
     if (where == 0) {
 #ifdef GNUPLOT_SHARE_DIR
-# if defined(_WIN32)
+# if defined(_WIN32) || defined(MSDOS) || defined(OS2)
 	rcfile = RelativePathToGnuplot(GNUPLOT_SHARE_DIR "\\gnuplotrc");
 # else
 	rcfile = (char *) gp_alloc(strlen(GNUPLOT_SHARE_DIR) + 1 + strlen("gnuplotrc") + 1, "rcfile");
@@ -861,19 +882,16 @@ get_user_env()
 	const char *env_home;
 
 	if ((env_home = getenv(HOME))
-#ifdef WIN32
+#ifdef _WIN32
 	    || (env_home = appdata_directory())
 	    || (env_home = getenv("USERPROFILE"))
 #endif
-#ifndef VMS
 	    || (env_home = getenv("HOME"))
-#endif
 	   )
 	    user_homedir = (const char *) gp_strdup(env_home);
 	else if (interactive)
 	    int_warn(NO_CARET, "no HOME found");
     }
-    /* Hhm ... what about VMS? */
     if (user_shell == NULL) {
 	const char *env_shell;
 
@@ -936,33 +954,10 @@ ExecuteMacro(char *argv, int namelength)
 
     if (namelength >= sizeof(pszName))
 	return 1;
-    /* FIXME HBB 20010121: 3rd argument doesn't make sense. Either
-     * this should be sizeof(pszName), or it shouldn't use
-     * safe_strncpy(), here */
-    safe_strncpy(pszName, argv, namelength + 1);
+    safe_strncpy(pszName, argv, sizeof(pszName));
     rxArgStr = &argv[namelength];
     RXSTRPTR(rxRc) = NULL;
 
-#if 0
-    /*
-       C-like calling of function: program name is first
-       parameter.
-       In REXX you would have to use
-       Parse Arg param0, param1
-       to get the program name in param0 and the arguments in param1.
-
-       Some versions before gnuplot 3.7pl1 used a similar approach but
-       passed program name and arguments in a single string:
-       (==> Parse Arg param0 param1)
-     */
-
-    MAKERXSTRING(rxArg[0], pszName, strlen(pszName));
-    rxArgCount++;
-    if (*rxArgStr) {
-	MAKERXSTRING(rxArg[1], rxArgStr, strlen(rxArgStr));
-	rxArgCount++;
-    }
-#else
     /*
        REXX standard calling (gnuplot 3.7pl1 and above):
        The program name is not supplied and so all actual arguments
@@ -975,7 +970,6 @@ ExecuteMacro(char *argv, int namelength)
 	MAKERXSTRING(rxArg[0], rxArgStr, strlen(rxArgStr));
 	rxArgCount++;
     }
-#endif
 
     CallFromRexx = TRUE;
     rc = RexxStart(
@@ -1031,10 +1025,7 @@ RexxInterface(PRXSTRING rxCmd, PUSHORT pusErr, PRXSTRING rxRc)
 	/* Set variable gp_input_line.
 	   Watch out for line length of NOT_ZERO_TERMINATED strings ! */
 	cmdlen = rxCmd->strlength + 1;
-	/* FIXME HBB 20010121: 3rd argument doesn't make sense. Either
-	 * this should be gp_input_line_len, or it shouldn't use
-	 * safe_strncpy(), here */
-	safe_strncpy(gp_input_line, rxCmd->strptr, cmdlen);
+	safe_strncpy(gp_input_line, rxCmd->strptr, gp_input_line_len);
 	gp_input_line[cmdlen] = NUL;
 	rc = do_line();
 	*pusErr = RXSUBCOM_OK;
@@ -1112,3 +1103,23 @@ restrict_popen()
     if (!successful_initialization)
 	int_error(NO_CARET,"Pipes and shell commands not permitted during initialization");
 }
+
+
+#if defined(MSDOS) || defined(OS2)
+/* retrieve path relative to gnuplot executable */
+char *
+RelativePathToGnuplot(const char * path)
+{
+    char * rel_path, *s;
+
+    rel_path = (char * ) gp_alloc(strlen(progpath) + strlen(path) + 1, "RelativePathToGnuplot");
+    strcpy(rel_path, progpath);
+    /* progpath is guaranteed to have a trailing slash */
+    strcat(rel_path, path);
+    /* convert slashes to backslashes */
+    for (s = rel_path;*s != NUL; s++)
+	if (*s == DIRSEP2)
+	    *s = DIRSEP1;
+    return rel_path;
+}
+#endif

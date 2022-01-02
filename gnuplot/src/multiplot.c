@@ -48,9 +48,9 @@
 #include "util.h"
 
 
-static void mp_layout_size_and_offset __PROTO((void));
-static void mp_layout_margins_and_spacing __PROTO((void));
-static void mp_layout_set_margin_or_spacing __PROTO((t_position *));
+static void mp_layout_size_and_offset(void);
+static void mp_layout_margins_and_spacing(void);
+static void mp_layout_set_margin_or_spacing(t_position *);
 
 enum set_multiplot_id {
     S_MULTIPLOT_LAYOUT,
@@ -155,7 +155,7 @@ multiplot_next()
 }
 
 void
-multiplot_previous()
+multiplot_previous(void)
 {
     mp_layout.current_panel--;
     if (mp_layout.auto_layout) {
@@ -357,7 +357,7 @@ multiplot_start()
 		    mp_layout.tmargin.scalex = mp_layout.bmargin.scalex;
 		    mp_layout_set_margin_or_spacing(&(mp_layout.tmargin));
 		} else {
-		    int_error(c_token, "expection <top>");
+		    int_error(c_token, "expecting <top>");
 		}
 		set_margins = TRUE;
 		break;
@@ -414,6 +414,7 @@ multiplot_start()
      */
     term_start_plot();
     multiplot = TRUE;
+    multiplot_count = 0;
     fill_gpval_integer("GPVAL_MULTIPLOT", 1);
 
     /* Place overall title before doing anything else */
@@ -453,6 +454,7 @@ void
 multiplot_end()
 {
     multiplot = FALSE;
+    multiplot_count = 0;
     fill_gpval_integer("GPVAL_MULTIPLOT", 0);
     /* reset plot size, origin and margins to values before 'set
        multiplot layout' */

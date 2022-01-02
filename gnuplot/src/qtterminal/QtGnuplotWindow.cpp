@@ -59,15 +59,20 @@ extern "C" {
 QtGnuplotWindow::QtGnuplotWindow(int id, QtGnuplotEventHandler* eventHandler, QWidget* parent)
 	: QMainWindow(parent)
 {
-	m_ctrl = false;
+//	m_ctrl = false;
 	m_eventHandler = eventHandler;
 	m_id = id;
 	m_pid = 0;
 	setWindowIcon(QIcon(":/images/gnuplot"));
 
-//	Setting this attribute causes an error to be reported to the user if a plot
-//	command is received after a plot command is closed.  Is this good or bad?
-//		setAttribute(Qt::WA_DeleteOnClose);
+//	This attribute is required in order for QtGnuplotApplication::windowDestroyed()
+//	to be called when a plot window is closed externally.  Without it, gnuplot_qt
+//	may be left as a zombie.  On the other hand, manually closing the last open
+//	window may cause warning messages (linux) or a program hang (Windows).
+//	We now work around this by instead checking for visible/invisible windows in
+//	QtGnuplotApplication::enterPersistMode() before exiting.
+//	History: Bugs #1554 #1753 #2188
+//	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Register as the main event receiver if not already created
 	if (m_eventHandler == 0)
@@ -231,6 +236,7 @@ void QtGnuplotWindow::showSettingsDialog()
 	m_ui->setupUi(settingsDialog);
 	m_ui->antialiasCheckBox->setCheckState(m_widget->antialias() ? Qt::Checked : Qt::Unchecked);
 	m_ui->roundedCheckBox->setCheckState(m_widget->rounded() ? Qt::Checked : Qt::Unchecked);
+	m_ui->ctrlQCheckBox->setCheckState(m_widget->ctrlQ() ? Qt::Checked : Qt::Unchecked);
 	m_ui->replotOnResizeCheckBox->setCheckState(m_widget->replotOnResize() ? Qt::Checked : Qt::Unchecked);
 	if (m_statusBar->isVisible())
 		m_ui->mouseLabelComboBox->setCurrentIndex(0);
@@ -252,6 +258,7 @@ void QtGnuplotWindow::showSettingsDialog()
 		m_widget->setBackgroundColor(m_chosenBackgroundColor);
 		m_widget->setAntialias(m_ui->antialiasCheckBox->checkState() == Qt::Checked);
 		m_widget->setRounded(m_ui->roundedCheckBox->checkState() == Qt::Checked);
+		m_widget->setCtrlQ(m_ui->ctrlQCheckBox->checkState() == Qt::Checked);
 		m_widget->setReplotOnResize(m_ui->replotOnResizeCheckBox->checkState() == Qt::Checked);
 		int statusIndex = m_ui->mouseLabelComboBox->currentIndex();
 		m_statusBarActive = (statusIndex == 0);
@@ -297,7 +304,10 @@ void QtGnuplotWindow::processEvent(QtGnuplotEventType type, QDataStream& in)
 		raise();
 	}
 	else if (type == GESetCtrl)
+	{
 		in >> m_ctrl;
+		m_widget->setCtrlQ(m_ctrl);
+	}
 	else if (type == GESetPosition)
 	{
 		QPoint pos;
@@ -312,7 +322,7 @@ void QtGnuplotWindow::processEvent(QtGnuplotEventType type, QDataStream& in)
 
 void QtGnuplotWindow::keyPressEvent(QKeyEvent* event)
 {
-	if ((event->key() == 'Q') && ( !m_ctrl || (QApplication::keyboardModifiers() & Qt::ControlModifier) ))
+	if ((event->key() == 'Q') && ( !m_widget->ctrlQ() || (QApplication::keyboardModifiers() & Qt::ControlModifier) ))
 		close();
 
 #ifdef _WIN32

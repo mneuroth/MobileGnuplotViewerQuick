@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: help.c,v 1.31 2015/09/11 19:48:02 sfeam Exp $"); }
-#endif
-
 /* GNUPLOT - help.c */
 
 /*[
@@ -46,6 +42,12 @@ void OutLine(const char *M){fputs(M,_stderr);}
 #include "alloc.h"
 #include "plot.h"
 #include "util.h"
+#ifdef __DJGPP__
+# include <pc.h>
+#endif
+#if defined(__WATCOMC__) && defined(MSDOS)
+# include <graph.h>
+#endif
 
 /*
  ** help -- help subsystem that understands defined keywords
@@ -144,18 +146,18 @@ static int keycount = 0;	/* number of keys */
 static FILE *helpfp = NULL;
 static KEY empty_key = {NULL, 0, NULL, 0};
 
-static int LoadHelp __PROTO((char *path));
-static void sortkeys __PROTO((void));
-static int keycomp __PROTO((SORTFUNC_ARGS a, SORTFUNC_ARGS b));
-static LINEBUF *storeline __PROTO((char *text));
-static LINKEY *storekey __PROTO((char *key));
-static KEY *FindHelp __PROTO((char *keyword));
-static TBOOLEAN Ambiguous __PROTO((struct key_s * key, size_t len));
+static int LoadHelp(char *path);
+static void sortkeys(void);
+static int keycomp(SORTFUNC_ARGS a, SORTFUNC_ARGS b);
+static LINEBUF *storeline(char *text);
+static LINKEY *storekey(char *key);
+static KEY *FindHelp(char *keyword);
+static TBOOLEAN Ambiguous(struct key_s * key, size_t len);
 
 /* Help output */
-static void PrintHelp __PROTO((struct key_s * key, TBOOLEAN *subtopics));
-static void ShowSubtopics __PROTO((struct key_s * key, TBOOLEAN *subtopics));
-static void OutLine_InternalPager __PROTO((const char *line));
+static void PrintHelp(struct key_s * key, TBOOLEAN *subtopics);
+static void ShowSubtopics(struct key_s * key, TBOOLEAN *subtopics);
+static void OutLine_InternalPager(const char *line);
 
 #if defined(PIPES)
 static FILE *outfile;		/* for unix pager, if any */
@@ -344,7 +346,6 @@ sortkeys()
     /* sort the array */
     /* note that it only moves objects of size (two pointers + long + int) */
     /* it moves no strings */
-    /* HBB 20010720: removed superfluous, potentially dangerous casts */
     qsort(keys, keycount, sizeof(KEY), keycomp);
 }
 
@@ -411,7 +412,7 @@ FindHelp(char *keyword)		/* string we look for */
 		    /* Expand front portion of keyword */
 		    int i, shift = key_len - len;
 
-		    for (i=keyword_len+shift; i >= len; i--)
+		    for (i=keyword_len+shift; i >= len && i >= shift; i--)
 			keyword[i] = keyword[i-shift];
 		    strncpy(keyword, key->key, key_len);  /* give back the full spelling */
 		    len = key_len;
@@ -462,13 +463,13 @@ Ambiguous(KEY *key, size_t len)
 		/* yup, this is different up to the next space */
 		if (!status) {
 		    /* first one we have printed is special */
-            fprintf(_stderr,
+		    fprintf(_stderr,
 			    "Ambiguous request '%.*s'; possible matches:\n",
 			    (int)len, first);
-            fprintf(_stderr, "\t%s\n", prev);
+		    fprintf(_stderr, "\t%s\n", prev);
 		    status = TRUE;
 		}
-        fprintf(_stderr, "\t%s\n", key->key);
+		fprintf(_stderr, "\t%s\n", key->key);
 		prev = key->key;
 	    }
 	}
@@ -667,12 +668,29 @@ StartOutput()
     /* fall through to built-in pager */
 #endif
 
-    /* buit-in dumb pager: use the line count provided by the terminal */
+    /* built-in dumb pager: use the line count provided by the terminal */
     line_count = getenv("LINES");
 
+    screensize = SCREENSIZE;
     if (line_count != NULL)
 	screensize = (int) strtol(line_count, NULL, 0);
-    if (line_count == NULL || screensize < 3)
+#ifdef __DJGPP__
+    if (line_count == NULL)
+	screensize = ScreenRows();
+#elif defined(__WATCOMC__) && defined(MSDOS)
+    if (line_count == NULL) {
+	struct videoconfig vc;
+	_getvideoconfig(&vc);
+	screensize = vc.numtextrows;
+    }
+#elif defined(OS2)
+    if (line_count == NULL) {
+	int dst[2];
+	_scrsize(dst);
+	screensize = dst[1];
+    }
+#endif
+    if (screensize < 3)
 	screensize = SCREENSIZE;
 
     /* built-in pager */
@@ -696,8 +714,8 @@ OutLine(const char *line)
     /* built-in dumb pager */
     /* leave room for prompt line */
     if (pagelines >= screensize - 2) {
-    fputs("Press return for more: ", _stderr);
-#if defined(_WIN32)
+	fputs("Press return for more: ", _stderr);
+#if defined(_WIN32) || defined(MSDOS)
 	do
 	    c = getchar();
 	while (c != EOF && c != '\n' && c != '\r');
@@ -724,7 +742,7 @@ OutLine_InternalPager(const char *line)
 #if defined(PIPES)
     if (outfile != _stderr) {
 	/* do not go through external pager */
-    fputs(line, _stderr);
+	fputs(line, _stderr);
 	return;
     }
 #endif /* PIPES */
@@ -732,8 +750,8 @@ OutLine_InternalPager(const char *line)
     /* built-in dumb pager */
     /* leave room for prompt line */
     if (pagelines >= screensize - 2) {
-    fputs("Press return for more: ", _stderr);
-#if defined(_WIN32)
+	fputs("Press return for more: ", _stderr);
+#if defined(_WIN32) || defined(MSDOS)
 	do
 	    c = getchar();
 	while (c != EOF && c != '\n' && c != '\r');

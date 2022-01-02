@@ -36,6 +36,7 @@ SOURCES += \
         gnuplot/src/datablock.c \
         gnuplot/src/datafile.c \
         gnuplot/src/dynarray.c \
+        gnuplot/src/encoding.c \
         gnuplot/src/eval.c \
         gnuplot/src/external.c \
         gnuplot/src/fit.c \
@@ -78,6 +79,8 @@ SOURCES += \
         gnuplot/src/util.c \
         gnuplot/src/util3d.c \
         gnuplot/src/variable.c \
+        gnuplot/src/voxelgrid.c \
+        gnuplot/src/vplot.c \
         gnuplot/src/version.c
 
 HEADERS += \
@@ -93,6 +96,7 @@ HEADERS += \
     gnuplot/src/datablock.h \
     gnuplot/src/datafile.h \
     gnuplot/src/dynarray.h \
+    gnuplot/src/encoding.h \
     gnuplot/src/eval.h \
     gnuplot/src/external.h \
     gnuplot/src/fit.h \
@@ -137,5 +141,7 @@ HEADERS += \
     gnuplot/src/util.h \
     gnuplot/src/util3d.h \
     gnuplot/src/variable.h \
+    gnuplot/src/voxelgrid.h \
+    gnuplot/src/vplot.h \
     gnuplot/src/version.h
 

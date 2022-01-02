@@ -1,7 +1,4 @@
 /*
- * $Id: jitter.c,v 1.3 2015/10/29 19:24:55 sfeam Exp $
- */
-/*
  * This file contains routines used to support the "set jitter" option.
  * This plot mode was inspired by the appearance of "beeswarm" plots produced
  * by R, but I do not know to what extent the algorithms used are the same.
@@ -51,15 +48,15 @@
  * with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
 ]*/
@@ -68,7 +65,7 @@
 
 t_jitter jitter = {{first_axes, first_axes, first_axes, 0.0, 0.0, 0.0}, 0.0, 0.0, JITTER_DEFAULT};
 
-static int compare_xypoints __PROTO((SORTFUNC_ARGS arg1, SORTFUNC_ARGS arg2));
+static int compare_xypoints(SORTFUNC_ARGS arg1, SORTFUNC_ARGS arg2);
 
 static int
 compare_xypoints(SORTFUNC_ARGS arg1, SORTFUNC_ARGS arg2)
@@ -92,7 +89,7 @@ compare_xypoints(SORTFUNC_ARGS arg1, SORTFUNC_ARGS arg2)
 }
 
 /*
- * "set jitter overlap <ydelta> spread <factor>" 
+ * "set jitter overlap <ydelta> spread <factor>"
  * displaces overlapping points in a point plot.
  * The jittering algorithm is inspired by the beeswarm plot variant in R.
  */
@@ -117,13 +114,14 @@ jitter_points(struct curve_points *plot)
     yoverlap.scaley = jitter.overlap.scalex;
     map_position_r(&yoverlap, &xjit, &ygap, "jitter");
 
-    /* Clear xhigh and yhigh, where we will later store the jitter offsets. */
-    /* Store variable color temporarily in ylow so it is not lost by sorting. */
+    /* Clear data slots where we will later store the jitter offsets.
+     * Store variable color temporarily in z so it is not lost by sorting.
+     */
     for (i = 0; i < plot->p_count; i++) {
 	if (plot->varcolor)
-	    plot->points[i].ylow = plot->varcolor[i];
-	plot->points[i].xhigh = 0.0;
-	plot->points[i].yhigh = 0.0;
+	    plot->points[i].z = plot->varcolor[i];
+	plot->points[i].CRD_XJITTER = 0.0;
+	plot->points[i].CRD_YJITTER = 0.0;
     }
 
     /* Sort points */
@@ -144,27 +142,26 @@ jitter_points(struct curve_points *plot)
 			xjit -= jitter.limit;
 	    if ((j & 01) != 0)
 		    xjit = -xjit;
-	    plot->points[i+j].xhigh = xjit;
+	    plot->points[i+j].CRD_XJITTER = xjit;
 
 	    if (jitter.style == JITTER_SQUARE)
-		plot->points[i+j].yhigh = plot->points[i].y - plot->points[i+j].y;
+		plot->points[i+j].CRD_YJITTER = plot->points[i].y - plot->points[i+j].y;
 
 	    /* Displace points on y instead of x */
 	    if (jitter.style == JITTER_ON_Y) {
-		plot->points[i+j].yhigh = xjit;
-		plot->points[i+j].xhigh = 0;
+		plot->points[i+j].CRD_YJITTER = xjit;
+		plot->points[i+j].CRD_XJITTER = 0;
 	    }
 
 	}
-        i += j;
+	i += j;
     }
 
     /* Copy variable colors back to where the plotting code expects to find them */
-    if (plot->varcolor)
-	for (i = 0; i < plot->p_count; i++) {
-	    plot->varcolor[i] = plot->points[i].ylow;
-	    plot->points[i].ylow = plot->points[i].y;
-	}
+    if (plot->varcolor) {
+	for (i = 0; i < plot->p_count; i++)
+	    plot->varcolor[i] = plot->points[i].z;
+    }
 
 }
 

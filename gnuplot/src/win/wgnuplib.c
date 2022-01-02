@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: wgnuplib.c,v 1.12 2016/07/21 09:07:44 markisch Exp $"); }
-#endif
-
 /* GNUPLOT - win/wgnuplib.c */
 /*[
  * Copyright 1992, 1993, 1998, 2004   Russell Lang
@@ -55,7 +51,6 @@ LPWSTR szTextClass = L"wgnuplot_text";
 LPWSTR szToolbarClass = L"wgnuplot_toolbar";
 LPWSTR szSeparatorClass = L"wgnuplot_separator";
 LPWSTR szPauseClass = L"wgnuplot_pause";
-LPTSTR szGraphClass = TEXT("wgnuplot_graph");
 
 /* Window ID */
 struct WID {

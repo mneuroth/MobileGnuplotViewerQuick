@@ -59,9 +59,10 @@ FILE *table_outfile = NULL;
 udvt_entry *table_var = NULL;
 TBOOLEAN table_mode = FALSE;
 char *table_sep = NULL;
+struct at_type *table_filter_at = NULL;
 
-static char *expand_newline __PROTO((const char *in));
-static TBOOLEAN imploded __PROTO((curve_points *this_plot));
+static char *expand_newline(const char *in);
+static TBOOLEAN imploded(curve_points *this_plot);
 
 static FILE *outfile;
 
@@ -91,11 +92,6 @@ output_number(double coord, int axis, char *buffer) {
 	    gstrftime(buffer+1, BUFFERSIZE-1, axis_array[axis].formatstring, coord);
 	while (strchr(buffer,'\n')) {*(strchr(buffer,'\n')) = ' ';}
 	strcat(buffer,"\"");
-#if !defined(NONLINEAR_AXES) || (NONLINEAR_AXES == 0)
-    } else if (axis_array[axis].log) {
-	double x = pow(axis_array[axis].base, coord);
-	gprintf(buffer, BUFFERSIZE, axis_array[axis].formatstring, 1.0, x);
-#endif
     } else
 	gprintf(buffer, BUFFERSIZE, axis_array[axis].formatstring, 1.0, coord);
     strcat(buffer, " ");
@@ -194,11 +190,14 @@ print_table(struct curve_points *current_plot, int plot_num)
 
 	default:
 	    if (interactive)
-		fprintf(_stderr, "Tabular output of %s plot style not fully implemented\n",
+        fprintf(_stderr, "Tabular output of %s plot style not fully implemented\n",
 		    current_plot->plot_style == HISTOGRAMS ? "histograms" :
 		    "this");
 	    break;
 	}
+
+	if (current_plot->plot_smooth == SMOOTH_BINS)
+	    len = strappend(&line, &size, len, "  N");
 
 	if (current_plot->varcolor)
 	    len = strappend(&line, &size, len, "  color");
@@ -235,7 +234,12 @@ print_table(struct curve_points *current_plot, int plot_num)
 		i++, point++) {
 
 		/* Reproduce blank lines read from original input file, if any */
-		if (!memcmp(point, &blank_data_line, sizeof(struct coordinate))) {
+		/* NB: complicated test is necessary because if struct coordinate
+		 *     is padded, the padding has not been initialized and memcmp
+		 *     chokes on uninitialized bytes (or anyhow valgrind thinks so)
+		 */
+		if (point->type == UNDEFINED
+		&&  !memcmp(&point->x, &blank_data_line.x, 7*sizeof(coordval))) {
 		    print_line("");
 		    continue;
 		}
@@ -306,6 +310,11 @@ print_table(struct curve_points *current_plot, int plot_num)
 			/* ? */
 			break;
 		} /* switch(plot type) */
+
+		if (current_plot->plot_smooth == SMOOTH_BINS) {
+		    snprintf(buffer, BUFFERSIZE, " %4d", (int)point->z);
+		    len = strappend(&line, &size, len, buffer);
+		}
 
 		if (current_plot->varcolor) {
 		    double colorval = current_plot->varcolor[i];
@@ -408,7 +417,7 @@ print_3dtable(int pcount)
 	    break;
 
 	default:
-	    fprintf(_stderr, "Tabular output of this 3D plot style not implemented\n");
+        fprintf(_stderr, "Tabular output of this 3D plot style not implemented\n");
 	    continue;
 	}
 
@@ -572,6 +581,15 @@ tabulate_one_line(double v[MAXDATACOLS], struct value str[MAXDATACOLS], int ncol
 {
     int col;
     FILE *outfile = (table_outfile) ? table_outfile : gpoutfile;
+    struct value keep;
+
+    if (table_filter_at) {
+	evaluate_inside_using = TRUE;
+	evaluate_at(table_filter_at, &keep);
+	evaluate_inside_using = FALSE;
+	if (undefined || isnan(real(&keep)) || real(&keep) == 0)
+	    return FALSE;
+    }
 
     if (table_var == NULL) {
 	char sep = (table_sep && *table_sep) ? *table_sep : '\t';

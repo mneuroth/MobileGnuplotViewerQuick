@@ -1,7 +1,3 @@
-/*
- * $Id: scanner.h,v 1.7 2011/06/19 22:10:37 sfeam Exp $
- */
-
 /* GNUPLOT - scanner.h */
 
 /*[
@@ -50,7 +46,7 @@ extern int curly_brace_count;
 
 /* Prototypes of functions exported by scanner.c */
 
-TBOOLEAN legal_identifier __PROTO((char *p));
-int scanner __PROTO((char **expression, size_t *line_lengthp));
+TBOOLEAN legal_identifier(char *p);
+int scanner(char **expression, size_t *line_lengthp);
 
 #endif /* GNUPLOT_SCANNER_H */

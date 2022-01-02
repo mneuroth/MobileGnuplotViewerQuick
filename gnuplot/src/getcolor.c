@@ -27,15 +27,15 @@
  * contain code for calculating colors from gray by user defined functions.
  */
 #ifndef GPLT_X11_MODE
-static int calculate_color_from_formulae __PROTO((double, rgb_color *));
+static int calculate_color_from_formulae(double, rgb_color *);
 #endif
 
-static void color_components_from_gray __PROTO((double gray, rgb_color *color));
-static int interpolate_color_from_gray __PROTO((double, rgb_color *));
-static double get_max_dev __PROTO((rgb_color *colors, int j, double limit));
-static int is_extremum __PROTO((rgb_color left,rgb_color mid,rgb_color right));
-static void CMY_2_RGB __PROTO((rgb_color *color));
-static void HSV_2_RGB __PROTO((rgb_color *color));
+static void color_components_from_gray(double gray, rgb_color *color);
+static int interpolate_color_from_gray(double, rgb_color *);
+static double get_max_dev(rgb_color *colors, int j, double limit);
+static int is_extremum(rgb_color left,rgb_color mid,rgb_color right);
+static void CMY_2_RGB(rgb_color *color);
+static void HSV_2_RGB(rgb_color *color);
 
 
 /* check if two palettes p1 and p2 differ significantly */
@@ -108,12 +108,12 @@ palettes_differ(t_sm_palette *p1, t_sm_palette *p2)
 
 /*  This one takes the gradient defined in sm_palette.gradient and
  *  returns an interpolated color for the given gray value.  It
- *  does not matter wether RGB or HSV or whatever values are stored
+ *  does not matter whether RGB or HSV or whatever values are stored
  *  in sm_palette.gradient[i].col, they will simply be interpolated.
- *  Return 0 on sucess, 1 if gray outside the range covered by the
+ *  Return 0 on success, 1 if gray outside the range covered by the
  *  gradient.  No gamma correction is done.  The user can implement
  *  gamma correction specifying more points.
- *  sm_palette.gradient[] should be sorted acording to .pos.
+ *  sm_palette.gradient[] should be sorted according to .pos.
  *  Returns 1 on failure and fills color with "nearest" color.
  */
 static int
@@ -163,7 +163,7 @@ interpolate_color_from_gray(double gray, rgb_color *color)
         double dx = sm_palette.gradient[idx].pos
 	    - sm_palette.gradient[idx - 1].pos;
 	double f = (gray - sm_palette.gradient[idx-1].pos) / dx;
-	
+
 	col1 = & sm_palette.gradient[idx - 1].col;
 	color->r = (col1->r + f * (col2->r - col1->r));
 	color->g = (col1->g + f * (col2->g - col1->g));
@@ -257,10 +257,10 @@ color_components_from_gray(double gray, rgb_color *color)
 	color->r = gray + a * (-0.14861 * cos(phi) + 1.78277 * sin(phi));
 	color->g = gray + a * (-0.29227 * cos(phi) - 0.90649 * sin(phi));
 	color->b = gray + a * ( 1.97294 * cos(phi));
-	if (color->r > 1.0) color->r = 1.0; if (color->r < 0.0) color->r = 0.0;
-	if (color->g > 1.0) color->g = 1.0; if (color->g < 0.0) color->g = 0.0;
-	if (color->b > 1.0) color->b = 1.0; if (color->b < 0.0) color->b = 0.0;
-	}	
+	color->r = clip_to_01(color->r);
+	color->g = clip_to_01(color->g);
+	color->b = clip_to_01(color->b);
+	}
 	break;
     }
 }
@@ -314,7 +314,7 @@ rgb255_from_rgb1(rgb_color rgb1, rgb255_color *rgb255)
  *
  *  EAM Sep 2010 - Guarantee that for palettes with multiple segments
  *  (created by 'set palette defined ...') the mapped gray value is always
- *  in the appropriate segment.  This has the effect of overriding 
+ *  in the appropriate segment.  This has the effect of overriding
  *  use_maxcolors if the defined palette has more segments than the nominal
  *  limit.
  */
@@ -327,7 +327,7 @@ rgb1maxcolors_from_gray(double gray, rgb_color *color)
     rgb1_from_gray(gray, color);
 }
 
-double 
+double
 quantize_gray( double gray )
 {
     double qgray = floor(gray * sm_palette.use_maxcolors)
@@ -352,8 +352,8 @@ quantize_gray( double gray )
 	 * interval. Earlier versions of quantize_gray() handled this case poorly.
 	 * This version isn't perfect either.  In particular it fails to handle the
 	 * converse problematic case where qgray is inside some small interval but
-	 * the true gray value is not.  This causes a color from the narrow segment 
-	 *  to be applied incorrectly to neighoring segments as well.
+	 * the true gray value is not.  This causes a color from the narrow segment
+	 *  to be applied incorrectly to neighboring segments as well.
 	 */
 	else for (j=0; j<sm_palette.gradient_num; j++) {
 	    /* Does the true gray value lie in this interval? */
@@ -367,7 +367,7 @@ quantize_gray( double gray )
 	}
     }
 
-    return qgray;	
+    return qgray;
 }
 
 
@@ -456,7 +456,7 @@ is_extremum(rgb_color left, rgb_color mid, rgb_color right)
  *  This function takes a palette and constructs a gradient which can
  *  be used to approximate the palette by linear interpolation.
  *  The palette is sampled at samples+1 points equally spaced in [0,1].
- *  From this huge gradient a much smaler one is constructed by selecting
+ *  From this huge gradient a much smaller one is constructed by selecting
  *  just those sampling points which still do approximate the full sampled
  *  one well enough.  allowed_deviation determines the maximum deviation
  *  of all color components which is still acceptable for the reduced
@@ -835,12 +835,12 @@ HSV_2_RGB(rgb_color *col)
 /*
  * Support for user-callable rgb = hsv2rgb(h,s,v)
  */
-unsigned int 
+unsigned int
 hsv2rgb ( rgb_color *color )
 {
     HSV_2_RGB(color);
 
-    return    ((unsigned int)(255.*color->r) << 16) 
+    return    ((unsigned int)(255.*color->r) << 16)
 	    + ((unsigned int)(255.*color->g) << 8)
 	    + ((unsigned int)(255.*color->b));
 }

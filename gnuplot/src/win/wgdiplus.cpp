@@ -1,8 +1,4 @@
 /*
- * $Id: wgdiplus.cpp,v 1.59.2.7 2017/08/15 14:03:10 markisch Exp $
- */
-
-/*
 Copyright (c) 2011-2017 Bastian Maerkisch. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -30,10 +26,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // include iostream / cstdio _before_ syscfg.h in order
 // to avoid re-definition by wtext.h/winmain.c routines
 #include <iostream>
+#include <vector>
 extern "C" {
 # include "syscfg.h"
 }
-#define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
 #include <windowsx.h>
 #define GDIPVER 0x0110
@@ -57,7 +53,6 @@ using namespace Gdiplus;
 static bool gdiplusInitialized = false;
 static ULONG_PTR gdiplusToken;
 
-#define GWOPMAX 4096
 #define MINMAX(a,val,b) (((val) <= (a)) ? (a) : ((val) <= (b) ? (val) : (b)))
 const int pattern_num = 8;
 
@@ -344,7 +339,7 @@ EnhancedSetFont()
 static unsigned
 EnhancedTextLength(char * text)
 {
-	LPWSTR textw = UnicodeText(enhanced_text, enhstate.lpgw->encoding);
+	LPWSTR textw = UnicodeTextWithEscapes(enhanced_text, enhstate.lpgw->encoding);
 	RectF box;
 	enhstate_gdiplus.graphics->MeasureString(textw, -1, enhstate_gdiplus.font, PointF(0, 0), enhstate_gdiplus.stringformat, &box);
 	free(textw);
@@ -355,7 +350,7 @@ EnhancedTextLength(char * text)
 static void
 EnhancedPutText(int x, int y, char * text)
 {
-	LPWSTR textw = UnicodeText(text, enhstate.lpgw->encoding);
+	LPWSTR textw = UnicodeTextWithEscapes(text, enhstate.lpgw->encoding);
 	Graphics *g = enhstate_gdiplus.graphics;
 	if (enhstate.lpgw->angle == 0) {
 		PointF pointF(x, y + enhstate.lpgw->tmDescent);
@@ -488,9 +483,9 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 	/* polylines and polygons */
 	int polymax = 200;			/* size of ppt */
 	int polyi = 0;				/* number of points in ppt */
-	PointF * ppt;				/* storage of polyline/polygon-points */
+	std::vector<PointF> ppt(polymax);	/* storage of polyline/polygon-points */
 	int last_polyi = 0;			/* number of points in last_poly */
-	PointF * last_poly = NULL;	/* storage of last filled polygon */
+	std::vector<PointF> last_poly(0);	/* storage of last filled polygon */
 	unsigned int lastop = -1;	/* used for plotting last point on a line */
 
 	/* filled polygons and boxes */
@@ -592,8 +587,6 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 					DashCapFlat);
 	solid_pen.SetLineJoin(lpgw->rounded ? LineJoinRound : LineJoinMiter);
 
-	ppt = (PointF *) malloc((polymax + 1) * sizeof(PointF));
-
 	htic = (lpgw->org_pointsize * MulDiv(lpgw->htic, rr - rl, lpgw->xmax) + 1);
 	vtic = (lpgw->org_pointsize * MulDiv(lpgw->vtic, rb - rt, lpgw->ymax) + 1);
 
@@ -649,7 +642,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 		}
 
 		/* finish last filled polygon */
-		if ((last_poly != NULL) &&
+		if ((!last_poly.empty()) &&
 			(((lastop == W_filled_polygon_draw) && (curptr->op != W_fillstyle)) ||
 			 ((curptr->op == W_fillstyle) && (curptr->x != unsigned(last_fillstyle))))) {
 			if (poly_graphics == NULL) {
@@ -657,14 +650,13 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 				SmoothingMode mode = graphics.GetSmoothingMode();
 				if (lpgw->antialiasing && !lpgw->polyaa)
 					graphics.SetSmoothingMode(SmoothingModeNone);
-				graphics.FillPolygon(fill_brush, last_poly, last_polyi);
+				graphics.FillPolygon(fill_brush, last_poly.data(), last_polyi);
 				graphics.SetSmoothingMode(mode);
 			} else {
-				poly_graphics->FillPolygon(fill_brush, last_poly, last_polyi);
+				poly_graphics->FillPolygon(fill_brush, last_poly.data(), last_polyi);
 			}
 			last_polyi = 0;
-			free(last_poly);
-			last_poly = NULL;
+			last_poly.clear();
 		}
 
 		/* handle layer commands first */
@@ -790,6 +782,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 
 		case W_polyline: {
 			POINTL * poly = (POINTL *) LocalLock(curptr->htext);
+			if (poly == NULL) break; // memory allocation failed
 			polyi = curptr->x;
 			PointF * points = new PointF[polyi];
 			for (int i = 0; i < polyi; i++) {
@@ -882,6 +875,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 				gdiplusSetDashStyle(&pen, static_cast<DashStyle>(cur_penstruct.lopnStyle));
 			} else if (dt == DASHTYPE_CUSTOM) {
 				t_dashtype * dash = static_cast<t_dashtype *>(LocalLock(curptr->htext));
+				if (dash == NULL) break; // memory allocation failed
 				INT count = 0;
 				while ((dash->pattern[count] != 0.) && (count < DASHPATTERN_LENGTH)) count++;
 				pen.SetDashPattern(dash->pattern, count);
@@ -1339,7 +1333,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 			/* a point of the polygon is coming */
 			if (polyi >= polymax) {
 				polymax += 200;
-				ppt = (PointF *) realloc(ppt, (polymax + 1) * sizeof(PointF));
+				ppt.reserve(polymax + 1);
 			}
 			ppt[polyi].X = xdash;
 			ppt[polyi].Y = ydash;
@@ -1353,7 +1347,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 			//bool same_rot = true;
 
 			// Test if successive polygons share a common edge:
-			if ((last_poly != NULL) && (polyi > 2)) {
+			if ((!last_poly.empty()) && (polyi > 2)) {
 				// Check for a common edge with previous filled polygon.
 				for (i = 0; (i < polyi) && !found; i++) {
 					for (k = 0; (k < last_polyi) && !found; k++) {
@@ -1381,7 +1375,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 
 				int extra = polyi - 2;
 				// extend buffer to make room for extra points
-				last_poly = (PointF *) realloc(last_poly, (last_polyi + extra + 1) * sizeof(PointF));
+				last_poly.reserve(last_polyi + extra + 1);
 				/* TODO: should use memmove instead */
 				for (int n = last_polyi - 1; n >= k; n--) {
 					last_poly[n + extra].X = last_poly[n].X;
@@ -1394,22 +1388,20 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 				}
 				last_polyi += extra;
 			} else {
-				if (last_poly != NULL) {
+				if (!last_poly.empty()) {
 					if (poly_graphics == NULL) {
 						// changing smoothing mode is still necessary in case of new/unknown code paths
 						SmoothingMode mode = graphics.GetSmoothingMode();
 						if (lpgw->antialiasing && !lpgw->polyaa)
 							graphics.SetSmoothingMode(SmoothingModeNone);
-						graphics.FillPolygon(fill_brush, last_poly, last_polyi);
+						graphics.FillPolygon(fill_brush, last_poly.data(), last_polyi);
 						graphics.SetSmoothingMode(mode);
 					} else {
-						poly_graphics->FillPolygon(fill_brush, last_poly, last_polyi);
+						poly_graphics->FillPolygon(fill_brush, last_poly.data(), last_polyi);
 					}
-					free(last_poly);
 				}
 				// save the current polygon
-				last_poly = (PointF *) malloc(sizeof(PointF) * (polyi + 1));
-				memcpy(last_poly, ppt, sizeof(PointF) * (polyi + 1));
+				last_poly = ppt;
 				last_polyi = polyi;
 			}
 
@@ -1429,6 +1421,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 			} else {
 				/* The last OP contains the image and it's size */
 				char * image = (char *) LocalLock(curptr->htext);
+				if (image == NULL) break; // memory allocation failed
 				unsigned int width = curptr->x;
 				unsigned int height = curptr->y;
 				if (image) {
@@ -1655,7 +1648,7 @@ do_draw_gdiplus(LPGW lpgw, Graphics &graphics, LPRECT rect, enum draw_target tar
 		delete cb;
 	if (font)
 		delete font;
-	free(ppt);
+	ppt.clear();
 }
 
 
@@ -1747,7 +1740,11 @@ SaveAsBitmap(LPGW lpgw)
 	Ofn.lpstrDefExt = L"png";
 
 	if (GetSaveFileNameW(&Ofn) != 0) {
-		Bitmap * bitmap = Bitmap::FromHBITMAP(lpgw->hBitmap, 0);
+		// Note that there might be a copy in lpgw->hBitmap., but documentation
+		// says we may not use that (although it seems to work).
+		// So we get a new copy of the screen:
+		HBITMAP hBitmap = GraphGetBitmap(lpgw);
+		Bitmap * bitmap = Bitmap::FromHBITMAP(hBitmap, 0);
 		UINT ntype = Ofn.nFilterIndex - 1;
 #if 0
 		LPWSTR wtype = pImageCodecInfo[ntype].FormatDescription;
@@ -1759,6 +1756,7 @@ SaveAsBitmap(LPGW lpgw)
 #endif
 		bitmap->Save(Ofn.lpstrFile, &(pImageCodecInfo[ntype].Clsid), NULL);
 		delete bitmap;
+		DeleteObject(hBitmap);
 	}
 	free(filter);
 }

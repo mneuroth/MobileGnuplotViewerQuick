@@ -1,7 +1,3 @@
-/*
- * $Id: help.h,v 1.7 2000/11/01 18:57:32 broeker Exp $
- */
-
 /* GNUPLOT - help.h */
 
 /*[
@@ -47,10 +43,10 @@
 
 /* Prototypes from file "help.c" */
 
-int  help __PROTO((char *keyword, char *path, TBOOLEAN *subtopics));
-void FreeHelp __PROTO((void));
-void StartOutput __PROTO((void));
-void OutLine __PROTO((const char *line));
-void EndOutput __PROTO((void));
+int  help(char *keyword, char *path, TBOOLEAN *subtopics);
+void FreeHelp(void);
+void StartOutput(void);
+void OutLine(const char *line);
+void EndOutput(void);
 
 #endif /* GNUPLOT_HELP_H */

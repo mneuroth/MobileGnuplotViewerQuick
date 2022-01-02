@@ -1,7 +1,3 @@
-#ifndef lint
-static char *RCSid() { return RCSid("$Id: scanner.c,v 1.42 2014/05/09 22:14:12 broeker Exp $"); }
-#endif
-
 /* GNUPLOT - scanner.c */
 
 /*[
@@ -42,18 +38,8 @@ static char *RCSid() { return RCSid("$Id: scanner.c,v 1.42 2014/05/09 22:14:12 b
 
 int curly_brace_count;
 
-static int get_num __PROTO((char str[]));
-static void substitute __PROTO((char **strp, size_t *str_lenp, int current));
-
-#ifdef VMS
-#include <descrip.h>
-#define MAILBOX "PLOT$MAILBOX"
-#ifdef __DECC
-#include <lib$routines.h>	/* avoid some IMPLICITFNC warnings */
-#include <starlet.h>
-#endif /* __DECC */
-#endif /* VMS */
-
+static int get_num(char str[]);
+static void substitute(char **strp, size_t *str_lenp, int current);
 
 #define isident(c) (isalnum((unsigned char)(c)) || (c) == '_' || ALLOWED_8BITVAR(c))
 
@@ -195,36 +181,29 @@ scanner(char **expressionp, size_t *expressionlenp)
 		    expression[current + 1] = NUL;
 		    break;
 		} else if (quote == '\"'
-                           && expression[current] == '\\'
-			   && expression[current + 1]) {
+			&& expression[current] == '\\'
+			&& expression[current + 1]) {
 		    current++;
 		    token[t_num].length += 2;
 		} else if (quote == '\"' && expression[current] == '`') {
 		    substitute(expressionp, expressionlenp, current);
 		    expression = *expressionp;	/* it might have moved */
 		    current--;
-                } else if (quote == '\'' 
-                           && expression[current+1] == '\''
-                           && expression[current+2] == '\'') {
-                    /* look ahead: two subsequent single quotes 
-                     * -> take them in
-                     */
-                    current += 2;
-                    token[t_num].length += 3;
+		} else if (quote == '\'' 
+			&& expression[current+1] == '\''
+			&& expression[current+2] == '\'') {
+		    /* look ahead: two subsequent single quotes 
+		     * -> take them in
+		     */
+		    current += 2;
+		    token[t_num].length += 3;
 		} else
 		    token[t_num].length++;
 	    }
 	} else
 	    switch (expression[current]) {
 	    case '#':
-#ifdef OLD_STYLE_CALL_ARGS
-		/* FIXME: This ugly exception handles the old-style syntatic  */
-		/* entity $# (number of arguments in "call" statement), which */
-		/* otherwise would be treated as introducing a comment.       */
-		if ((t_num == 0) ||
-		    (gp_input_line[token[t_num-1].start_index] != '$'))
-#endif
-			goto endline;	/* ignore the rest of the line */
+		goto endline;	/* ignore the rest of the line */
 	    case '^':
 	    case '+':
 	    case '-':
@@ -239,7 +218,10 @@ scanner(char **expressionp, size_t *expressionlenp)
 	    case ':':
 	    case '?':
 	    case ',':
-	    case '$':
+		break;
+	    case '$':		/* The # in $# is _not_ a comment */
+		if (expression[current + 1] == '#')
+		    APPEND_TOKEN;
 		break;
 	    case '}':		/* complex constants will not end up here */
 		curly_brace_count--;
@@ -291,6 +273,7 @@ static int
 get_num(char str[])
 {
     int count = 0;
+    char *endptr;
 
     token[t_num].is_token = FALSE;
     token[t_num].l_val.type = INTGR;	/* assume unless . or E found */
@@ -315,7 +298,6 @@ get_num(char str[])
     }
     if (token[t_num].l_val.type == INTGR) {
 	long long lval;
-	char *endptr;
 	errno = 0;
 	lval = strtoll(str, &endptr, 0);
 	if (!errno) {
@@ -327,7 +309,7 @@ get_num(char str[])
 	    if ((token[t_num].l_val.v.int_val = lval) == lval)
 		return(count);
 	    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
-		if ((unsigned long)(token[t_num].l_val.v.int_val & 0xffffffff) == lval)
+		if ((long long unsigned int)lval == (long long unsigned int)token[t_num].l_val.v.int_val)
 		    return(count);
 	    }
 	}
@@ -336,7 +318,8 @@ get_num(char str[])
 	/* Fall through */
     }
     token[t_num].l_val.v.cmplx_val.imag = 0.0;
-    token[t_num].l_val.v.cmplx_val.real = atof(str);
+    token[t_num].l_val.v.cmplx_val.real = strtod(str, &endptr);
+    count = endptr - str;
     return (count);
 }
 
@@ -384,7 +367,12 @@ substitute(char **strp, size_t *str_lenp, int current)
     /* now replace ` ` with output */
     output_pos = 0;
     while ((c = output[output_pos++])) {
-	if (c != '\n' && c != '\r')
+	/* This was added in 3.5, so it's been a long time,
+	 * but deleting internal line breaks makes no sense.
+	 * Removed for 5.4
+	 * A trailing \n is still removed, however.
+	 */
+	if ((output[output_pos] != '\0') || (c != '\n'))
 	    (*strp)[current++] = c;
 	if (current == *str_lenp)
 	    extend_input_line();

@@ -1,7 +1,3 @@
-/*
- * $Id: contour.h,v 1.8 2004/07/01 17:10:04 broeker Exp $
- */
-
 /* GNUPLOT - contour.h */
 
 /*[
@@ -62,7 +58,7 @@ typedef enum en_contour_kind {
 typedef enum en_contour_levels_kind {
     /* How contour levels are set */
     LEVELS_AUTO,		/* automatically selected */
-    LEVELS_INCREMENTAL,		/* user specified start & incremnet */
+    LEVELS_INCREMENTAL,		/* user specified start & increment */
     LEVELS_DISCRETE		/* user specified discrete levels */
 } t_contour_levels_kind;
 
@@ -87,8 +83,8 @@ extern dynarray dyn_contour_levels_list;
 
 /* Prototypes of functions exported by contour.c */
 
-struct gnuplot_contours *contour __PROTO((int num_isolines, struct iso_curve *iso_lines));
-int solve_tri_diag __PROTO((tri_diag m[], double r[], double x[], int n));
+struct gnuplot_contours *contour(int num_isolines, struct iso_curve *iso_lines);
+int solve_tri_diag(tri_diag m[], double r[], double x[], int n);
 
 
 #endif /* GNUPLOT_CONTOUR_H */

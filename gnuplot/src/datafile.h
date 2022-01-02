@@ -94,16 +94,18 @@ extern char *df_filename;
 extern int df_line_number;
 extern AXIS_INDEX df_axis[];
 
-#ifdef BACKWARDS_COMPATIBLE
-extern struct udft_entry ydata_func; /* deprecated "thru" function */
-#endif
-
 /* Returned to caller by df_readline() */
 extern char *df_tokens[];
 extern struct value df_strings[];	/* used only by TABLESTYLE */
 
 /* number of columns in first row of data return to user in STATS_columns */
 extern int df_last_col;
+
+/* number of matrix elements entered as missing or NaN */
+extern int df_bad_matrix_values;
+
+/* First row of data is known to contain headers rather than data */
+extern TBOOLEAN df_columnheaders;
 
 /* string representing missing values, ascii datafiles */
 extern char *missing_val;
@@ -130,29 +132,31 @@ extern TBOOLEAN df_warn_on_missing_columnheader;
 
 /* Used by plot title columnhead, stats name columnhead */
 extern char *df_key_title;
+extern struct at_type *df_plot_title_at;
 
 /* Prototypes of functions exported by datafile.c */
 
-int df_open __PROTO((const char *, int, struct curve_points *));
-int df_readline __PROTO((double [], int));
-void df_close __PROTO((void));
-void df_init __PROTO((void));
-char * df_fgets __PROTO((FILE *));
-void df_showdata __PROTO((void));
-int df_2dbinary __PROTO((struct curve_points *));
-int df_3dmatrix __PROTO((struct surface_points *, int));
-void df_set_key_title __PROTO((struct curve_points *));
-void df_set_key_title_columnhead __PROTO((struct curve_points *));
-char * df_parse_string_field __PROTO((char *));
-int expect_string __PROTO((const char column ));
+int df_open(const char *, int, struct curve_points *);
+int df_readline(double [], int);
+void df_close(void);
+void df_init(void);
+char * df_fgets(FILE *);
+void df_showdata(void);
+int df_2dbinary(struct curve_points *);
+int df_3dmatrix(struct surface_points *, int);
+void df_set_key_title(struct curve_points *);
+void df_set_key_title_columnhead(struct curve_points *);
+char * df_parse_string_field(char *);
+int expect_string(const char column );
 
-void df_reset_after_error __PROTO((void));
-void f_dollars __PROTO((union argument *x));
-void f_column  __PROTO((union argument *x));
-void f_columnhead  __PROTO((union argument *x));
-void f_valid   __PROTO((union argument *x));
-void f_timecolumn   __PROTO((union argument *x));
-void f_stringcolumn   __PROTO((union argument *x));
+char *df_retrieve_columnhead(int column);
+void df_reset_after_error(void);
+void f_dollars(union argument *x);
+void f_column (union argument *x);
+void f_columnhead (union argument *x);
+void f_valid  (union argument *x);
+void f_timecolumn  (union argument *x);
+void f_stringcolumn  (union argument *x);
 
 struct use_spec_s {
     int column;
@@ -271,7 +275,7 @@ typedef struct df_binary_file_record_struct {
     int submatrix_nrows;
 
     /* *** Do not modify outside of datafile.c!!! *** */
-    char GPFAR *memory_data;
+    char *memory_data;
 } df_binary_file_record_struct;
 
 extern df_binary_file_record_struct *df_bin_record;
@@ -282,19 +286,19 @@ extern struct use_spec_s use_spec[];
 
 /* Prototypes of functions exported by datafile.c */
 
-void df_show_binary __PROTO((FILE *fp));
-void df_show_datasizes __PROTO((FILE *fp));
-void df_show_filetypes __PROTO((FILE *fp));
-void df_set_datafile_binary __PROTO((void)); 
-void df_unset_datafile_binary __PROTO((void));
-void df_add_binary_records __PROTO((int, df_records_type));
-void df_extend_binary_columns __PROTO((int));
-void df_set_skip_before __PROTO((int col, int bytes));                /* Number of bytes to skip before a binary column. */
+void df_show_binary(FILE *fp);
+void df_show_datasizes(FILE *fp);
+void df_show_filetypes(FILE *fp);
+void df_set_datafile_binary(void); 
+void df_unset_datafile_binary(void);
+void df_add_binary_records(int, df_records_type);
+void df_extend_binary_columns(int);
+void df_set_skip_before(int col, int bytes);                /* Number of bytes to skip before a binary column. */
 #define df_set_skip_after(col,bytes) df_set_skip_before(col+1,bytes)  /* Number of bytes to skip after a binary column. */
-void df_set_read_type __PROTO((int col, df_data_type type));          /* Type of data in the binary column. */
-df_data_type df_get_read_type __PROTO((int col));                     /* Type of data in the binary column. */
-int df_get_read_size __PROTO((int col));                              /* Size of data in the binary column. */
-int df_get_num_matrix_cols __PROTO((void));
-void df_set_plot_mode __PROTO((int));
+void df_set_read_type(int col, df_data_type type);          /* Type of data in the binary column. */
+df_data_type df_get_read_type(int col);                     /* Type of data in the binary column. */
+int df_get_read_size(int col);                              /* Size of data in the binary column. */
+int df_get_num_matrix_cols(void);
+void df_set_plot_mode(int);
 
 #endif /* GNUPLOT_DATAFILE_H */

@@ -39,13 +39,14 @@
 #include "internal.h"		/* for eval_reset_after_error */
 #include "misc.h"
 #include "plot.h"
+#include "pm3d.h"		/* for pm3d_reset_after_error */
 #include "variable.h"		/* For locale handling */
 #include "setshow.h"		/* for conv_text() */
 #include "tabulate.h"		/* for table_mode */
-
-#if defined(HAVE_DIRENT_H) && !defined(_WIN32)
-# include <sys/types.h>
-# include <dirent.h>
+#include "voxelgrid.h"
+#include "encoding.h"
+#if defined(_MSC_VER) || defined(__WATCOMC__)
+# include <io.h>		/* for _access */
 #endif
 
 /* Exported (set-table) variables */
@@ -66,7 +67,7 @@ TBOOLEAN use_minus_sign = FALSE;
 char *numeric_locale = NULL;
 
 /* Holds the name of the current LC_TIME as set by "set locale" */
-char *current_locale = NULL;
+char *time_locale = NULL;
 
 const char *current_prompt = NULL; /* to be set by read_line() */
 
@@ -76,12 +77,14 @@ const char *current_prompt = NULL; /* to be set by read_line() */
  */
 TBOOLEAN screen_ok;
 
+int debug = 0;
+
 /* internal prototypes */
 
-static void mant_exp __PROTO((double, double, TBOOLEAN, double *, int *, const char *));
-static void parse_sq __PROTO((char *));
-static TBOOLEAN utf8_getmore __PROTO((unsigned long * wch, const char **str, int nbytes));
-static char *utf8_strchrn __PROTO((const char *s, int N));
+static void mant_exp(double, double, TBOOLEAN, double *, int *, const char *);
+static void parse_sq(char *);
+static char *utf8_strchrn(const char *s, int N);
+static char *num_to_str(double r);
 
 /*
  * equals() compares string value of token number t_num with str[], and
@@ -142,7 +145,19 @@ almost_equals(int t_num, const char *str)
     return (after || str[i] == '$' || str[i] == NUL);
 }
 
+/* Extract one token from the input line */
+char *
+token_to_string(int t)
+{
+    static char *token_string = NULL;
+    int token_length = token[t].length;
 
+    token_string = realloc(token_string, token_length+1);
+    memcpy(token_string, &gp_input_line[token[t].start_index], token_length);
+    token_string[token_length] = '\0';
+
+    return token_string;
+}
 
 int
 isstring(int t_num)
@@ -211,7 +226,7 @@ might_be_numeric(int t_num)
  * is_definition() returns TRUE if the next tokens are of the form
  *   identifier =
  *              -or-
- *   identifier ( identifer {,identifier} ) =
+ *   identifier ( identifier {,identifier} ) =
  */
 int
 is_definition(int t_num)
@@ -223,6 +238,11 @@ is_definition(int t_num)
     /* function? */
     /* look for dummy variables */
     if (isletter(t_num) && equals(t_num + 1, "(") && isletter(t_num + 2)) {
+
+	/* Block redefinition of reserved function names */
+	if (is_builtin_function(t_num))
+	    return 0;
+
 	t_num += 3;		/* point past first dummy */
 	while (equals(t_num, ",")) {
 	    if (!isletter(++t_num))
@@ -276,7 +296,7 @@ token_len(int t_num)
 
 /*
  * capture() copies into str[] the part of gp_input_line[] which lies between
- * the begining of token[start] and end of token[end].
+ * the beginning of token[start] and end of token[end].
  */
 void
 capture(char *str, int start, int end, int max)
@@ -396,8 +416,6 @@ gp_stradd(const char *a, const char *b)
     return new;
 }
 
-/* HBB 20020405: moved these functions here from axis.c, where they no
- * longer truly belong. */
 /*{{{  mant_exp - split into mantissa and/or exponent */
 /* HBB 20010121: added code that attempts to fix rounding-induced
  * off-by-one errors in 10^%T and similar output formats */
@@ -504,28 +522,31 @@ mant_exp(
 
 /*}}} */
 
+/* Wrapper for gprintf_value() */
+void
+gprintf(char *outstring, size_t count, char *format, double log10_base, double x)
+{
+    struct value v;
+    Gcomplex(&v, x, 0.0);
+    gprintf_value(outstring, count, format, log10_base, &v);
+}
 
-/*{{{  gprintf */
-/* extended s(n)printf */
+/* Analogous to snprintf() but uses gnuplot's private format specs */
 /* HBB 20010121: added code to maintain consistency between mantissa
  * and exponent across sprintf() calls.  The problem: format string
  * '%t*10^%T' will display 9.99 as '10.0*10^0', but 10.01 as
  * '1.0*10^1'.  This causes problems for people using the %T part,
  * only, with logscaled axes, in combination with the occasional
  * round-off error. */
-/* EAM Nov 2012:
- * Unbelievably, the count parameter has been silently ignored or
- * improperly applied ever since this routine was introduced back
- * in version 3.7.  Now fixed to prevent buffer overflow.
- */
 void
-gprintf(
+gprintf_value(
     char *outstring,
     size_t count,
     char *format,
     double log10_base,
-    double x)
+    struct value *v)
 {
+    double x = real(v);
     char tempdest[MAX_LINE_LEN + 1];
     char temp[MAX_LINE_LEN + 1];
     char *t;
@@ -537,9 +558,9 @@ gprintf(
     char *dest  = &tempdest[0];
     char *limit = &tempdest[MAX_LINE_LEN];
     static double log10_of_1024; /* to avoid excess precision comparison in check of connection %b -- %B */
-    
+
     log10_of_1024 = log10(1024);
-    
+
 #define remaining_space (size_t)(limit-dest)
 
     *dest = '\0';
@@ -589,22 +610,17 @@ gprintf(
 
 	/*{{{  convert conversion character */
 	switch (*format) {
-	    /*{{{  x and o */
+	    /*{{{  x and o can handle 64bit unsigned integers */
 	case 'x':
 	case 'X':
 	case 'o':
 	case 'O':
-	    if (fabs(x) >= (double)INT_MAX) {
-		t[0] = 'l';
-		t[1] = 'l';
-		t[2] = *format;
-		t[3] = '\0';
-		snprintf(dest, remaining_space, temp, (long long) x);
-	    } else {
-		t[0] = *format;
-		t[1] = '\0';
-		snprintf(dest, remaining_space, temp, (int) x);
-	    }
+	    t[0] = 'l';
+	    t[1] = 'l';
+	    t[2] = *format;
+	    t[3] = '\0';
+	    snprintf(dest, remaining_space, temp,
+		     v->type == INTGR ? v->v.int_val : (intgr_t)real(v));
 	    break;
 	    /*}}} */
 	    /*{{{  e, f and g */
@@ -620,7 +636,7 @@ gprintf(
 	    break;
 	case 'h':
 	case 'H':
-	    /* g/G with enhanced formating (if applicable) */
+	    /* g/G with enhanced formatting (if applicable) */
 	    t[0] = (*format == 'h') ? 'g' : 'G';
 	    t[1] = 0;
 
@@ -848,7 +864,11 @@ gprintf(
 		    /* -18 -> 0, 0 -> 6, +18 -> 12, ... */
 		    /* HBB 20010121: avoid division of -ve ints! */
 		    power = (power + 24) / 3;
-		    snprintf(dest, remaining_space, temp, "yzafpnum kMGTPEZY"[power]);
+		    if (power == 8) { /* add no extra space */
+		        snprintf(dest, remaining_space, temp, '\0');
+		    } else {
+		        snprintf(dest, remaining_space, temp, "yzafpnum kMGTPEZY"[power]);
+		    }
 
 		    /* Replace u with micro character */
 		    if (use_micro && power == 6)
@@ -949,8 +969,7 @@ gprintf(
 	    }
 	}
 
-    /* EXPERIMENTAL
-     * Some people prefer a "real" minus sign to the hyphen that standard
+    /* Some people prefer a "real" minus sign to the hyphen that standard
      * formatted input and output both use.  Unlike decimal signs, there is
      * no internationalization mechanism to specify this preference.
      * This code replaces all hyphens with the character string specified by
@@ -997,25 +1016,12 @@ gprintf(
 
 done:
 
-#if (0)
-    /* Oct 2013 - Not safe because it fails to recognize LaTeX macros.	*/
-    /* For LaTeX terminals, if the user has not already provided a   	*/
-    /* format in math mode, wrap whatever we got by default in $...$ 	*/
-    if (((term->flags & TERM_IS_LATEX)) && !strchr(tempdest, '$')) {
-	*(outstring++) = '$';
-	strcat(tempdest, "$");
-	count -= 2;
-    }
-#endif
-
     /* Copy as much as fits */
     safe_strncpy(outstring, tempdest, count);
 
     if (!evaluate_inside_using)
 	reset_numeric_locale();
 }
-
-/*}}} */
 
 /* some macros for the error and warning functions below
  * may turn this into a utility function later
@@ -1037,7 +1043,6 @@ do {						\
 static void
 print_line_with_error(int t_num)
 {
-    int i;
     int true_line_num = inline_num;
 
     if (t_num == DATAFILE) {
@@ -1064,6 +1069,9 @@ print_line_with_error(int t_num)
 	}
 
 	if (t_num != NO_CARET) {
+	    int i;
+	    int caret = GPMIN(token[t_num].start_index, strlen(minimal_input_line));
+
 	    /* Refresh current command line */
 	    if (!screen_ok)
 		fprintf(_stderr, "\n%s%s\n",
@@ -1073,7 +1081,7 @@ print_line_with_error(int t_num)
 	    PRINT_SPACES_UNDER_PROMPT;
 
 	    /* Print spaces up to token */
-	    for (i = 0; i < token[t_num].start_index; i++)
+	    for (i = 0; i < caret; i++)
 		fputc((minimal_input_line[i] == '\t') ? '\t' : ' ', _stderr);
 
 	    /* Print token */
@@ -1109,10 +1117,6 @@ os_error(int t_num, const char *str, va_dcl)
 #ifdef VA_START
     va_list args;
 #endif
-#ifdef VMS
-    static status[2] = { 1, 0 };		/* 1 is count of error msgs */
-#endif /* VMS */
-
     /* reprint line if screen has been written to */
     print_line_with_error(t_num);
 
@@ -1131,12 +1135,7 @@ os_error(int t_num, const char *str, va_dcl)
 #endif
     putc('\n', _stderr);
 
-#ifdef VMS
-    status[1] = vaxc$errno;
-    sys$putmsg(status);
-#else /* VMS */
     perror("system error");
-#endif /* VMS */
 
     putc('\n', _stderr);
     fill_gpval_string("GPVAL_ERRMSG", strerror(errno));
@@ -1190,6 +1189,7 @@ common_error_exit()
     eval_reset_after_error();
     clause_reset_after_error();
     parse_reset_after_error();
+    pm3d_reset_after_error();
     set_iterator = cleanup_iteration(set_iterator);
     plot_iterator = cleanup_iteration(plot_iterator);
     scanning_range_in_progress = FALSE;
@@ -1324,9 +1324,14 @@ parse_esc(char *instr)
 		    *t++ = '\\';
 		    *t++ = *s++;
 		}
+	    } else if (s[0] == 'U' && s[1] == '+') {
+		/* Unicode escape:  \U+hhhh
+		 * Keep backslash; translation will be handled elsewhere.
+		 */
+		*t++ = '\\';
 	    }
 	} else if (df_separators && *s == '\"' && *(s+1) == '\"') {
-	/* EAM Mar 2003 - For parsing CSV strings with quoted quotes */
+	    /* For parsing CSV strings with quoted quotes */
 	    *t++ = *s++; s++;
 	} else {
 	    *t++ = *s++;
@@ -1336,20 +1341,17 @@ parse_esc(char *instr)
 }
 
 
-/* FIXME HH 20020915: This function does nothing if dirent.h and windows.h
- * not available. */
+/* This function does nothing if dirent.h and windows.h not available. */
 TBOOLEAN
 existdir(const char *name)
 {
-#if defined(HAVE_DIRENT_H ) || defined(_WIN32)
+#if defined(HAVE_DIRENT)
     DIR *dp;
     if ((dp = opendir(name)) == NULL)
 	return FALSE;
 
     closedir(dp);
     return TRUE;
-#elif defined(VMS)
-    return FALSE;
 #else
     int_warn(NO_CARET,
 	     "Test on directory existence not supported\n\t('%s!')",
@@ -1362,7 +1364,7 @@ existdir(const char *name)
 TBOOLEAN
 existfile(const char *name)
 {
-#ifdef __MSC__
+#ifdef _MSC_VER
     return (_access(name, 0) == 0);
 #else
     return (access(name, F_OK) == 0);
@@ -1381,124 +1383,6 @@ getusername()
 
     return gp_strdup(username);
 }
-
-TBOOLEAN contains8bit(const char *s)
-{
-    while (*s) {
-	if ((*s++ & 0x80))
-	    return TRUE;
-    }
-    return FALSE;
-}
-
-#define INVALID_UTF8 0xfffful
-
-/* Read from second byte to end of UTF-8 sequence.
-   used by utf8toulong() */
-static TBOOLEAN
-utf8_getmore (unsigned long * wch, const char **str, int nbytes)
-{
-  int i;
-  unsigned char c;
-  unsigned long minvalue[] = {0x80, 0x800, 0x10000, 0x200000, 0x4000000};
-
-  for (i = 0; i < nbytes; i++) {
-    c = (unsigned char) **str;
-
-    if ((c & 0xc0) != 0x80) {
-      *wch = INVALID_UTF8;
-      return FALSE;
-    }
-    *wch = (*wch << 6) | (c & 0x3f);
-    (*str)++;
-  }
-
-  /* check for overlong UTF-8 sequences */
-  if (*wch < minvalue[nbytes-1]) {
-    *wch = INVALID_UTF8;
-    return FALSE;
-  }
-  return TRUE;
-}
-
-/* Convert UTF-8 multibyte sequence from string to unsigned long character.
-   Returns TRUE on success.
-*/
-TBOOLEAN
-utf8toulong (unsigned long * wch, const char ** str)
-{
-  unsigned char c;
-
-  c =  (unsigned char) *(*str)++;
-  if ((c & 0x80) == 0) {
-    *wch = (unsigned long) c;
-    return TRUE;
-  }
-
-  if ((c & 0xe0) == 0xc0) {
-    *wch = c & 0x1f;
-    return utf8_getmore(wch, str, 1);
-  }
-
-  if ((c & 0xf0) == 0xe0) {
-    *wch = c & 0x0f;
-    return utf8_getmore(wch, str, 2);
-  }
-
-  if ((c & 0xf8) == 0xf0) {
-    *wch = c & 0x07;
-    return utf8_getmore(wch, str, 3);
-  }
-
-  if ((c & 0xfc) == 0xf8) {
-    *wch = c & 0x03;
-    return utf8_getmore(wch, str, 4);
-  }
-
-  if ((c & 0xfe) == 0xfc) {
-    *wch = c & 0x01;
-    return utf8_getmore(wch, str, 5);
-  }
-
-  *wch = INVALID_UTF8;
-  return FALSE;
-}
-
-/*
- * Returns number of (possibly multi-byte) characters in a UTF-8 string
- */
-size_t
-strlen_utf8(const char *s)
-{
-    int i = 0, j = 0;
-    while (s[i]) {
-	if ((s[i] & 0xc0) != 0x80) j++;
-	i++;
-    }
-    return j;
-}
-
-
-TBOOLEAN
-is_sjis_lead_byte(char c)
-{
-    unsigned int ch = (unsigned char) c;
-    return ((ch >= 0x81) && (ch <= 0x9f)) || ((ch >= 0xe1) && (ch <= 0xee));
-}
-
-
-size_t
-strlen_sjis(const char *s)
-{
-    int i = 0, j = 0;
-    while (s[i]) {
-	if (is_sjis_lead_byte(s[i])) i++; /* skip */
-	j++;
-	i++;
-    }
-    return j;
-}
-
 
 size_t
 gp_strlen(const char *s)
@@ -1565,7 +1449,7 @@ streq(const char *a, const char *b)
 
 
 /* append string src to dest
-   re-allocates memory if necessary, (re-)determines the length of the 
+   re-allocates memory if necessary, (re-)determines the length of the
    destination string only if len==0
  */
 size_t
@@ -1601,7 +1485,7 @@ value_to_str(struct value *val, TBOOLEAN need_quotes)
 
     switch (val->type) {
     case INTGR:
-	sprintf(s[j], "%d", val->v.int_val);
+	sprintf(s[j], PLD, val->v.int_val);
 	break;
     case CMPLX:
 	if (isnan(val->v.cmplx_val.real))
@@ -1643,7 +1527,13 @@ value_to_str(struct value *val, TBOOLEAN need_quotes)
 	}
     case ARRAY:
 	{
-	sprintf(s[j], "<%d element array>", val->v.value_array->v.int_val);
+	sprintf(s[j], "<%d element array>", (int)(val->v.value_array->v.int_val));
+	break;
+	}
+    case VOXELGRID:
+	{
+	int N = val->v.vgrid->size;
+	sprintf(s[j], "%d x %d x %d voxel grid", N, N, N);
 	break;
 	}
     case NOTDEFINED:
@@ -1663,7 +1553,7 @@ value_to_str(struct value *val, TBOOLEAN need_quotes)
  * format. Rotates through 4 buffers 's[j]', and returns pointers to
  * them, to avoid execution ordering problems if this function is
  * called more than once between sequence points. */
-char *
+static char *
 num_to_str(double r)
 {
     static int i = 0;
@@ -1682,3 +1572,23 @@ num_to_str(double r)
     return s[j];
 }
 
+/* Auto-generated titles need modification to be compatible with LaTeX.
+ * For example filenames may contain underscore characters or dollar signs.
+ * Function plots auto-generate a copy of the function or expression,
+ * which probably looks better in math mode.
+ * We could perhaps go further and texify syntax such as a**b -> a^b
+ */
+char *
+texify_title(char *str, int plot_type)
+{
+    static char *latex_title = NULL;
+
+	if (plot_type == DATA || plot_type == DATA3D) {
+	    latex_title = escape_reserved_chars(str,"#$%^&_{}\\");
+	} else {
+	    latex_title = gp_realloc(latex_title, strlen(str) + 4, NULL);
+	    sprintf(latex_title, "$%s$", str);
+	}
+
+    return latex_title;
+}

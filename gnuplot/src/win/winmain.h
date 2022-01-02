@@ -1,7 +1,3 @@
-/*
- * $Id: winmain.h,v 1.19 2016/08/05 05:10:29 markisch Exp $
- */
-
 /* GNUPLOT - win/winmain.h */
 
 /*[
@@ -71,16 +67,16 @@ void win_sleep(DWORD dwMilliSeconds);
 TBOOLEAN WinAnyWindowOpen(void);
 void WinPersistTextClose(void);
 void WinMessageLoop(void);
+void WinOpenConsole(void);
+BOOL WINAPI ConsoleHandler(DWORD dwType);
 void WinRaiseConsole(void);
 UINT WinGetCodepage(enum set_encoding_id encoding);
-enum set_encoding_id WinGetEncoding(UINT cp);
 LPWSTR UnicodeText(LPCSTR str, enum set_encoding_id encoding);
 LPSTR AnsiText(LPCWSTR strw,  enum set_encoding_id encoding);
 void MultiByteAccumulate(BYTE ch, LPWSTR wstr, int * count);
 LPSTR RelativePathToGnuplot(const char * path);
 
 int ConsoleReadCh(void);
-DWORD WINAPI stdin_pipe_reader(LPVOID param);
 
 UINT GetDPI(void);
 

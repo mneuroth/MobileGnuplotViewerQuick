@@ -1,7 +1,3 @@
-/*
- * $Id: wxt_gui.h,v 1.58 2016/09/22 07:09:42 markisch Exp $
- */
-
 /* GNUPLOT - wxt_gui.h */
 
 /*[
@@ -77,7 +73,7 @@
 # include <wx/wx.h>
 #endif /* WX_PRECOMP */
 
-/* clipboard functionnality */
+/* clipboard functionality */
 #include <wx/dataobj.h>
 #include <wx/clipbrd.h>
 
@@ -112,26 +108,19 @@
 #include <vector>
 #include <list>
 
-/* suprisingly Cocoa version of wxWidgets does not define _Bool ! */
+/* surprisingly Cocoa version of wxWidgets does not define _Bool ! */
 #ifdef __WXOSX_COCOA__
 #define _Bool bool
 #endif
 
 extern "C" {
-/* for interactive */
-# include "plot.h"
-/* for stdfn.h, JUSTIFY, encoding, *term definition, color.h */
-# include "term_api.h"
-/* for do_event declaration */
-# include "mouse.h"
-/* for rgb functions */
-# include "getcolor.h"
-/* for paused_for_mouse, PAUSE_BUTTON1 and friends */
-# include "command.h"
-/* for int_error */
-# include "util.h"
-/* for wrap_readline_signal_handler */
-# include "readline.h"
+#include "plot.h"	/* for interactive */
+#include "term_api.h"	/* for stdfn.h, JUSTIFY, encoding, *term definition, color.h */
+#include "mouse.h"	/* for do_event declaration */
+#include "getcolor.h"	/* for rgb functions */
+#include "command.h"	/* for paused_for_mouse, PAUSE_BUTTON1 and friends */
+#include "util.h"	/* for int_error, locale */
+#include "readline.h"	/* for wrap_readline_signal_handler */
 }
 
 /* if the gtk headers are available, use them to tweak some behaviours */
@@ -149,7 +138,7 @@ extern "C" {
 # define IMAGE_SURFACE
 #endif
 
-/* temporarly undef GTK_SURFACE for two reasons :
+/* temporarily undef GTK_SURFACE for two reasons :
  * - because of a CAIRO_OPERATOR_SATURATE bug,
  * - because as for now, it is slower than the pure image surface,
  * (multiple copies between video memory and main memory for operations that are
@@ -183,8 +172,8 @@ extern "C" {
 /* Windows native backend,
  * redefinition of fprintf, getch...
  * console window */
-# ifdef _Windows
-#  ifndef _WIN32_WINNT 
+# ifdef _WIN32
+#  ifndef _WIN32_WINNT
 #   define _WIN32_WINNT 0x0501
 #  endif
 #  include <windows.h>
@@ -208,7 +197,7 @@ extern "C" {
 #  include <gtk/gtk.h>
 # endif
 
-# ifdef _Windows
+# ifdef _WIN32
 #  include <cairo-win32.h>
 # endif
 
@@ -270,8 +259,8 @@ class wxtApp : public wxApp
 public:
 #if defined(WXT_MULTITHREADED) && defined(WX_NEEDS_XINITTHREADS) && defined(X11)
 	/* Magic fix needed by wxgtk3.0 */
-        wxtApp() : wxApp() { XInitThreads(); } 
-#endif 
+        wxtApp() : wxApp() { XInitThreads(); }
+#endif
 
 	/* This one is called just after wxWidgets initialization */
 	bool OnInit();
@@ -317,9 +306,7 @@ typedef enum wxt_gp_command_t {
 	command_image,
 	command_layer,
 	command_hypertext
-#ifdef EAM_BOXED_TEXT
 	,command_boxed_text
-#endif
 	,command_dashtype
 } wxt_gp_command_t;
 

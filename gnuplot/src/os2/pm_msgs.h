@@ -1,7 +1,3 @@
-/*
- * $Id: pm_msgs.h,v 1.3 2005/08/07 09:43:33 mikulik Exp $
- */
-
 /* GNUPLOT - pm_msgs.h */
 
 /*[
@@ -81,5 +77,12 @@
 #define GR_IMAGE		'i'
 #define GR_RGB_IMAGE	'I'
 
-#endif
+/* "special" option commands */
+#define SET_SPECIAL_ENHANCED	'e'
+#define SET_SPECIAL_RAISE	'^'
+#define SET_SPECIAL_LOWER	'_'
+#define SET_SPECIAL_FONT	'f'
+#define SET_SPECIAL_FONTSCALE	's'
+#define SET_SPECIAL_CODEPAGE	'c'
 
+#endif

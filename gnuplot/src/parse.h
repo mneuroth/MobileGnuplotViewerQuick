@@ -1,7 +1,3 @@
-/*
- * $Id: parse.h,v 1.38 2017/02/04 23:59:27 sfeam Exp $
- */
-
 /* GNUPLOT - parse.h */
 
 /*[
@@ -67,6 +63,9 @@ extern TBOOLEAN parse_1st_row_as_headers;
 /* This is used by df_open() and df_readascii() */
 extern udvt_entry *df_array;
 
+/* This is used to block re-definition of built-in functions */
+extern int is_builtin_function(int t_num);
+
 /* Protection mechanism for trying to parse a string followed by a + or - sign.
  * Also suppresses an undefined variable message if an unrecognized token
  * is encountered during try_to_get_string().
@@ -75,19 +74,20 @@ extern TBOOLEAN string_result_only;
 
 /* Prototypes of exported functions in parse.c */
 
-int int_expression __PROTO(());
-double real_expression __PROTO(());
-void parse_reset_after_error __PROTO(());
-struct value * const_string_express __PROTO((struct value *valptr));
-struct value * const_express __PROTO((struct value *valptr));
-char* string_or_express __PROTO((struct at_type **atptr));
-struct at_type * temp_at __PROTO((void));
-struct at_type * perm_at __PROTO((void));
-struct at_type * create_call_column_at __PROTO((char *));
-struct udvt_entry * add_udv __PROTO((int t_num));
-struct udft_entry * add_udf __PROTO((int t_num));
-void cleanup_udvlist __PROTO((void));
-int is_function __PROTO((int t_num));
+intgr_t int_expression(void);
+double real_expression(void);
+void parse_reset_after_error(void);
+struct value * const_string_express(struct value *valptr);
+struct value * const_express(struct value *valptr);
+char* string_or_express(struct at_type **atptr);
+struct at_type * temp_at(void);
+struct at_type * perm_at(void);
+struct at_type * create_call_column_at(char *);
+struct at_type * create_call_columnhead(void);
+struct udvt_entry * add_udv(int t_num);
+struct udft_entry * add_udf(int t_num);
+void cleanup_udvlist(void);
+int is_function(int t_num);
 
 /* Code that uses the iteration routines here must provide */
 /* a blank iteration structure to use for bookkeeping.     */
@@ -109,12 +109,15 @@ extern t_iterator * plot_iterator;	/* Used for plot and splot */
 extern t_iterator * set_iterator;	/* Used by set/unset commands */
 
 /* These are used by the iteration code */
-t_iterator * check_for_iteration __PROTO((void));
-TBOOLEAN next_iteration  __PROTO((t_iterator *));
-TBOOLEAN empty_iteration  __PROTO((t_iterator *));
-TBOOLEAN forever_iteration  __PROTO((t_iterator *));
-t_iterator * cleanup_iteration __PROTO((t_iterator *));
+t_iterator * check_for_iteration(void);
+TBOOLEAN next_iteration (t_iterator *);
+TBOOLEAN empty_iteration (t_iterator *);
+TBOOLEAN forever_iteration (t_iterator *);
+t_iterator * cleanup_iteration(t_iterator *);
 
-void parse_link_via __PROTO((struct udft_entry *));
+void parse_link_via(struct udft_entry *);
+
+/* Magic number used instead of actual column number in $# */
+#define DOLLAR_NCOLUMNS -123
 
 #endif /* PARSE_H */

@@ -1,3 +1,5 @@
+/* Hello, Emacs, this is -*-C-*- */
+
 /* GNUPLOT - dumb.trm */
 
 /*[
@@ -60,35 +62,33 @@ register_term(dumb_driver)
 #endif
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void DUMB_options __PROTO((void));
-TERM_PUBLIC void DUMB_init __PROTO((void));
-TERM_PUBLIC void DUMB_graphics __PROTO((void));
-TERM_PUBLIC void DUMB_text __PROTO((void));
-TERM_PUBLIC void DUMB_reset __PROTO((void));
-TERM_PUBLIC void DUMB_linetype __PROTO((int linetype));
-TERM_PUBLIC void DUMB_move __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void DUMB_point __PROTO((unsigned int x, unsigned int y,
-				     int point));
-TERM_PUBLIC void DUMB_vector __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void DUMB_put_text __PROTO((unsigned int x, unsigned int y,
-					const char *str));
-TERM_PUBLIC void DUMB_arrow __PROTO((unsigned int sx, unsigned int sy,
-				     unsigned int ex, unsigned int ey,
-				     int head));
+TERM_PUBLIC void DUMB_options(void);
+TERM_PUBLIC void DUMB_init(void);
+TERM_PUBLIC void DUMB_graphics(void);
+TERM_PUBLIC void DUMB_text(void);
+TERM_PUBLIC void DUMB_reset(void);
+TERM_PUBLIC void DUMB_linetype(int linetype);
+TERM_PUBLIC void DUMB_move(unsigned int x, unsigned int y);
+TERM_PUBLIC void DUMB_point(unsigned int x, unsigned int y, int point);
+TERM_PUBLIC void DUMB_vector(unsigned int x, unsigned int y);
+TERM_PUBLIC void DUMB_put_text(unsigned int x, unsigned int y, const char *str);
+TERM_PUBLIC void DUMB_arrow(unsigned int sx, unsigned int sy,
+			    unsigned int ex, unsigned int ey,
+			    int head);
 
 #ifndef NO_DUMB_ENHANCED_SUPPORT
 /* To support "set term dumb enhanced" (don't ask why!) */
-TERM_PUBLIC void ENHdumb_put_text __PROTO((unsigned int x, unsigned int y, const char str[]));
-TERM_PUBLIC void ENHdumb_OPEN __PROTO((char * fontname, double fontsize,
-	                            double base, TBOOLEAN widthflag, TBOOLEAN showflag,
-				    int overprint));
-TERM_PUBLIC void ENHdumb_FLUSH __PROTO((void));
+TERM_PUBLIC void ENHdumb_put_text(unsigned int x, unsigned int y, const char str[]);
+TERM_PUBLIC void ENHdumb_OPEN(char * fontname, double fontsize,
+	                      double base, TBOOLEAN widthflag, TBOOLEAN showflag,
+			      int overprint);
+TERM_PUBLIC void ENHdumb_FLUSH(void);
 #else
 #define ENHdumb_put_text NULL
 #endif
 #ifndef NO_DUMB_COLOR_SUPPORT
-TERM_PUBLIC int dumb_make_palette __PROTO((t_sm_palette *palette));
-TERM_PUBLIC void dumb_set_color __PROTO((t_colorspec *));
+TERM_PUBLIC int dumb_make_palette(t_sm_palette *palette);
+TERM_PUBLIC void dumb_set_color(t_colorspec *);
 #endif
 
 #define DUMB_XMAX 79
@@ -101,6 +101,7 @@ TERM_PUBLIC void dumb_set_color __PROTO((t_colorspec *));
 #define DUMB_AXIS_CONST '\1'
 #define DUMB_BORDER_CONST '\2'
 #define DUMB_FILL_CONST '\3'
+#define DUMB_NODRAW_CONST '\4'
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -136,9 +137,9 @@ static int dumb_colormode = 0;
 
 #define DUMB_PIXEL(x,y) dumb_matrix[dumb_xmax*(y)+(x)]
 
-static void dumb_set_pixel __PROTO((int x, int y, int v));
+static void dumb_set_pixel(int x, int y, int v);
 
-enum DUMB_id { DUMB_FEED, DUMB_NOFEED, DUMB_ENH, DUMB_NOENH, 
+enum DUMB_id { DUMB_FEED, DUMB_NOFEED, DUMB_ENH, DUMB_NOENH,
                DUMB_SIZE, DUMB_ASPECT,
                DUMB_ANSI, DUMB_ANSI256, DUMB_ANSIRGB, DUMB_NOCOLOR,
                DUMB_OTHER };
@@ -205,8 +206,10 @@ DUMB_options()
 	case DUMB_ANSIRGB:
 	    c_token++;
 	    dumb_colormode = cmd;
+#ifndef NO_DUMB_COLOR_SUPPORT
 	    term->make_palette = dumb_make_palette;
 	    term->set_color = dumb_set_color;
+#endif
 	    break;
 	case DUMB_NOCOLOR:
 	    c_token++;
@@ -260,7 +263,7 @@ dumb_set_pixel(int x, int y, int v)
     char *charpixel;
 
     if ((unsigned int) x <= dumb_xmax 	/* ie x>=0 && x<=dumb_xmax */
-    &&  (unsigned int) y <= dumb_ymax 
+    &&  (unsigned int) y <= dumb_ymax
     )  {
 	charpixel = (char *)(&dumb_matrix[dumb_xmax * y + x]);
 	/* null-terminate single ascii character (needed for UTF-8) */
@@ -280,7 +283,7 @@ DUMB_init()
 
     dumb_matrix = gp_realloc(dumb_matrix, size*sizeof(charcell), "dumb terminal");
 #ifndef NO_DUMB_COLOR_SUPPORT
-    dumb_colors = gp_realloc(dumb_colors, size*sizeof(t_colorspec), "dumb terminal");    
+    dumb_colors = gp_realloc(dumb_colors, size*sizeof(t_colorspec), "dumb terminal");
 #endif
 }
 
@@ -436,6 +439,8 @@ DUMB_text()
 		memcpy(&dumb_prev_color, color, sizeof(t_colorspec));
 		break;
 	    }
+	    default:
+		break;
 	    }
 #endif
 #ifdef DUMB_UTF8
@@ -478,6 +483,8 @@ DUMB_linetype(int linetype)
 	dumb_pen = DUMB_BORDER_CONST;
     else if (linetype == LT_AXIS)
 	dumb_pen = DUMB_AXIS_CONST;
+    else if (linetype == LT_NODRAW)
+	dumb_pen = DUMB_NODRAW_CONST;
     else if (linetype <= LT_NODRAW)
 	dumb_pen = ' ';
     else {
@@ -516,6 +523,11 @@ DUMB_vector(unsigned int arg_x, unsigned int arg_y)
     char pen, pen1;
     int delta;
 
+    if (dumb_pen == DUMB_NODRAW_CONST) {
+	DUMB_move(x, y);
+	return;
+    }
+
     if (ABS(y - dumb_y) > ABS(x - dumb_x)) {
 	switch (dumb_pen) {
 	case DUMB_AXIS_CONST:
@@ -539,9 +551,9 @@ DUMB_vector(unsigned int arg_x, unsigned int arg_y)
 	}
 	dumb_set_pixel(dumb_x, dumb_y, pen1);
 	for (delta = 1; delta < ABS(y - dumb_y); delta++) {
-	    dumb_set_pixel(dumb_x  + (int) ((double) (x - dumb_x) *
-					    delta / ABS(y - dumb_y) + 0.5),
-			   dumb_y + delta * sign(y - dumb_y), pen);
+	    dumb_set_pixel(
+		dumb_x  + (int)round((double) (x - dumb_x) * delta / ABS(y - dumb_y)),
+		dumb_y + delta * sign(y - dumb_y), pen);
 	}
 	dumb_set_pixel(x, y, pen1);
     } else if (ABS(x - dumb_x) > ABS(y - dumb_y)) {
@@ -568,8 +580,7 @@ DUMB_vector(unsigned int arg_x, unsigned int arg_y)
 	dumb_set_pixel(dumb_x, dumb_y, pen1);
 	for (delta = 1; delta < ABS(x - dumb_x); delta++)
 	    dumb_set_pixel(dumb_x + delta * sign(x - dumb_x),
-			   dumb_y +
-			   (int) ((double) (y - dumb_y) * delta / ABS(x - dumb_x) + 0.5),
+			   dumb_y + (int)round((double) (y - dumb_y) * delta / ABS(x - dumb_x)),
 			   pen);
 	dumb_set_pixel(x, y, pen1);
     } else {
@@ -600,17 +611,25 @@ DUMB_vector(unsigned int arg_x, unsigned int arg_y)
 }
 
 static void
-utf8_copy_one(char *dest, char *orig)
+utf8_copy_one(char *dest, const char *orig)
 {
+    const char *nextchar = orig;
+    unsigned long wch;
     *((charcell *)dest) = 0;	/* zero-fill */
-    *dest = *orig;		/* first char */
-    if (encoding != S_ENC_UTF8)
+
+    if (encoding != S_ENC_UTF8) {
+	*dest = *orig;
 	return;
-    if ((*dest & 0x80) == 0)	/* ascii char */
-	return;
-    orig++; dest++;
-    while ((*orig & 0xc0) == 0x80)
+    }
+
+    /* Valid UTF8 byte sequence */
+    if (utf8toulong(&wch, &nextchar)) {
+	while (orig < nextchar)
+	    *dest++ = *orig++;
+    } else {
+	int_warn(NO_CARET, "invalid UTF-8 byte sequence");
 	*dest++ = *orig++;
+    }
 }
 
 TERM_PUBLIC void
@@ -665,7 +684,8 @@ DUMB_arrow(
     else dumb_pen = '.';
     dumb_x = sx;
     dumb_y = sy;
-    DUMB_vector(ex, ey);
+    if (!(head & HEADS_ONLY))
+	DUMB_vector(ex, ey);
 
     /* Arrow tail */
     if ((head & BACKHEAD)) {
@@ -734,7 +754,7 @@ ENHdumb_OPEN(
 	/* Start new text fragment */
 	    enhanced_cur_text = &enhanced_text[0];
 	/* Scale fractional font height to vertical units of display */
-	    ENHdumb_base = base * 2;
+	    ENHdumb_base = base * 2 / fontsize;
 	/* Keep track of whether we are supposed to show this string */
 	    ENHdumb_show = showflag;
 	/* 0/1/2  no overprint / 1st pass / 2nd pass */
@@ -795,12 +815,12 @@ ENHdumb_put_text(unsigned int x, unsigned int y, const char *str)
 
     /* If no enhanced text processing is needed, we can use the plain  */
     /* vanilla put_text() routine instead of this fancy recursive one. */
-    if (ignore_enhanced_text || !strpbrk(str, "{}^_@&~")) {
+    if (ignore_enhanced_text || (!strpbrk(str, "{}^_@&~") && !contains_unicode(str))) {
 	DUMB_put_text(x,y,str);
 	return;
     }
 
-    length = estimate_strlen(str);
+    length = estimate_strlen(str, NULL);
     if (x + length > dumb_xmax)
 	x = GPMAX(0, dumb_xmax - length);
     if (y > dumb_ymax)
@@ -859,7 +879,7 @@ dumb_float_compare(const void * elem1, const void * elem2)
 {
 	int val = *(float *)elem1 - *(float *)elem2;
 	return (0 < val) - (val < 0);
-};
+}
 
 /* adopted copy from caca.trm */
 TERM_PUBLIC void
@@ -1017,11 +1037,11 @@ START_HELP(dumb)
 " To obtain the best color match in `ansi` mode, you should use",
 " `set colorsequence classic`.",
 " Depending on the mode, the `dumb` terminal will emit the",
-" folowing sequences (without the additional whitespace):",
+" following sequences (without the additional whitespace):",
 "",
 "       ESC [ 0 m           reset attributes to defaults",
 "       foreground color:",
-"       ESC [ 1 m           set intense/bold", 
+"       ESC [ 1 m           set intense/bold",
 "       ESC [ 22 m          intense/bold off",
 "       ESC [ <fg> m        with color code 30 <= <fg> <= 37",
 "       ESC [ 39 m          reset to default",

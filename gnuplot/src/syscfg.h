@@ -1,7 +1,3 @@
-/*
- * $Id: syscfg.h,v 1.62.2.1 2017/07/30 07:52:31 markisch Exp $
- */
-
 /* GNUPLOT - syscfg.h */
 
 /*[
@@ -93,23 +89,12 @@
 # endif  /* __DECC */
 #endif /* VMS */
 
-#if defined(_WINDOWS) || defined(_Windows) || defined(WIN32) || defined(_WIN32)
-# ifndef _Windows
-#  define _Windows
-# endif
-# ifndef WIN32
-#  define WIN32
-# endif
-# ifndef _WIN32
-#  define _WIN32
-# endif
+#ifdef _WIN32
 # ifdef _WIN64
 #  define OS "MS-Windows 64 bit"
 # else
 #  define OS "MS-Windows 32 bit"
 # endif
-/* introduced by Pedro Mendes, prm@aber.ac.uk */
-#  define far
 /* Fix for broken compiler headers
  * See stdfn.h
  */
@@ -124,16 +109,20 @@
 # define PATHSEP ';'
 # define GNUPLOT_HISTORY_FILE "~\\gnuplot_history"
 /* Flags for windows.h:
-   Minimal required platform is Windows XP
- */
+   Minimal required platform is Windows 7, see
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745.aspx
+*/
+#ifndef NTDDI_VERSION
+# define NTDDI_VERSION NTDDI_WIN7
+#endif
 #ifndef WINVER
-# define WINVER 0x0501
+# define WINVER _WIN32_WINNT_WIN7
 #endif
 #ifndef _WIN32_WINNT
-# define _WIN32_WINNT 0x0501
+# define _WIN32_WINNT _WIN32_WINNT_WIN7
 #endif
 #ifndef _WIN32_IE
-# define _WIN32_IE 0x0501
+# define _WIN32_IE _WIN32_IE_IE80
 #endif
 
 /* The unicode/encoding support requires translation of file names */
@@ -220,34 +209,17 @@ FILE * win_popen(const char *filename, const char *mode);
 #endif
 /* End fall-through defaults */
 
-/* Need this before any headers are incldued */
-#ifdef PROTOTYPES
-# define __PROTO(proto) proto
-#else
-# define __PROTO(proto) ()
-#endif
-
-/* DOS/Windows stuff. Moved here from command.c */
+/* DOS stuff */
 #if defined(MSDOS)
-# ifdef DJGPP
+# ifdef __DJGPP__
 #  include <dos.h>
 #  include <dir.h>              /* HBB: for setdisk() */
-# else
+# elif defined(__WATCOMC__)
+#  include <dos.h>
+#  include <direct.h>
 #  include <process.h>
-# endif                         /* !DJGPP */
+# endif                         /* !__DJGPP__ */
 #endif /* MSDOS */
-
-/* Watcom's compiler; this should probably be somewhere
- * in the Windows section
- */
-#ifdef __WATCOMC__
-# define GP_EXCEPTION_NAME _exception
-#endif
-
-#ifdef __MSC__
-# include <direct.h> /* for getcwd() */
-#endif
-
 
 
 #if defined(alliant)
@@ -262,10 +234,6 @@ FILE * win_popen(const char *filename, const char *mode);
 /* HBB 20000416: stuff moved from plot.h to here. It's system-dependent,
  * so it belongs here, IMHO */
 
-/* BM 20110904: remnant of huge memory model support */
-#define GPHUGE /* nothing */
-#define GPFAR /* nothing */
-
 #if defined(HAVE_SYS_TYPES_H)
 # include <sys/types.h>
 # if defined(HAVE_SYS_WAIT_H)
@@ -274,7 +242,7 @@ FILE * win_popen(const char *filename, const char *mode);
 #endif
 
 #if !defined(WEXITSTATUS)
-# if defined(_WIN32) || defined(OS2)
+# if defined(_WIN32)
 #  define WEXITSTATUS(stat_val) (stat_val)
 # else
 #  define WEXITSTATUS(stat_val) ((unsigned int)(stat_val) >> 8)
@@ -291,6 +259,29 @@ FILE * win_popen(const char *filename, const char *mode);
 #   define off_t long
 # endif
 #endif
+
+/*
+ * Support for 64-bit integer arithmetic
+ */
+
+#ifdef HAVE_INTTYPES_H
+				/* NB: inttypes.h includes stdint.h */
+#include <inttypes.h>		/* C99 type definitions */
+typedef int64_t intgr_t;	/* Allows evaluation with 64-bit integer arithmetic */
+typedef uint64_t uintgr_t;	/* Allows evaluation with 64-bit integer arithmetic */
+#define PLD "%" PRId64
+#define INTGR_MAX INT64_MAX
+#define INTGR_MIN INT64_MIN
+#define LARGEST_GUARANTEED_NONOVERFLOW 9.22337203685477478e+18
+#else
+typedef int intgr_t;		/* no C99 types available */
+typedef unsigned uintgr_t;	/* no C99 types available */
+#define PLD "%d"
+#define INTGR_MAX INT_MAX
+#define INTGR_MIN INT_MIN
+#define LARGEST_GUARANTEED_NONOVERFLOW (double)(INT_MAX)
+#endif
+
 
 typedef double coordval;
 
@@ -317,9 +308,9 @@ typedef double coordval;
 #endif
 
 #ifndef SIGFUNC_NO_INT_ARG
-typedef RETSIGTYPE (*sigfunc)__PROTO((int));
+typedef RETSIGTYPE (*sigfunc) (int);
 #else
-typedef RETSIGTYPE (*sigfunc)__PROTO((void));
+typedef RETSIGTYPE (*sigfunc) (void);
 #endif
 
 #ifdef HAVE_SIGSETJMP
@@ -354,23 +345,9 @@ typedef RETSIGTYPE (*sigfunc)__PROTO((void));
 # define CONCAT3(x,y,z) x/**/y/**/z
 #endif
 
-/* Windows needs to redefine stdin/_stdout functions */
+/* Windows needs to redefine stdin/stdout functions */
 #if defined(_WIN32) && !defined(WINDOWS_NO_GUI)
 # include "win/wtext.h"
-#endif
-
-#ifndef GP_EXCEPTION_NAME
-# define GP_EXCEPTION_NAME exception
-#endif
-
-#ifndef GP_MATHERR
-# define GP_MATHERR matherr
-#endif
-
-#ifdef HAVE_STRUCT_EXCEPTION_IN_MATH_H
-# define STRUCT_EXCEPTION_P_X struct GP_EXCEPTION_NAME *x
-#else
-# define STRUCT_EXCEPTION_P_X /* nothing */
 #endif
 
 /* if GP_INLINE has not yet been defined, set to __inline__ for gcc,

@@ -60,7 +60,7 @@
  * rrggbb are the red green and blue components in hex.  For example
  * x00ff00 is green.  The background color is set first, then the
  * color borders, then the X & Y axis, then the plotting colors.
- * (The wierd color spec is in order to get around limitations
+ * (The weird color spec is in order to get around limitations
  * in gnuplot's scanner.)
  *
  * This driver is modeled after the PBM driver pbm.trm.
@@ -116,38 +116,36 @@ register_term(png)
 #endif
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void PNG_options __PROTO((void));
-TERM_PUBLIC void PNG_init __PROTO((void));
-TERM_PUBLIC void PNG_graphics __PROTO((void));
-TERM_PUBLIC void PNG_text __PROTO((void));
-TERM_PUBLIC void PNG_linetype __PROTO((int linetype));
-TERM_PUBLIC void PNG_linewidth __PROTO((double linewidth));
-TERM_PUBLIC void PNG_move __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void PNG_vector __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void PNG_put_text __PROTO((unsigned int x, unsigned int y, const char str[]));
-TERM_PUBLIC int PNG_justify_text __PROTO((enum JUSTIFY mode));
-TERM_PUBLIC void PNG_point __PROTO((unsigned int x, unsigned int y, int number));
-TERM_PUBLIC int PNG_text_angle __PROTO((int ang));
-TERM_PUBLIC void PNG_reset __PROTO((void));
-TERM_PUBLIC int PNG_set_font __PROTO((const char *fontname));
-TERM_PUBLIC void PNG_pointsize __PROTO((double ptsize));
+TERM_PUBLIC void PNG_options(void);
+TERM_PUBLIC void PNG_init(void);
+TERM_PUBLIC void PNG_graphics(void);
+TERM_PUBLIC void PNG_text(void);
+TERM_PUBLIC void PNG_linetype(int linetype);
+TERM_PUBLIC void PNG_linewidth(double linewidth);
+TERM_PUBLIC void PNG_move(unsigned int x, unsigned int y);
+TERM_PUBLIC void PNG_vector(unsigned int x, unsigned int y);
+TERM_PUBLIC void PNG_put_text(unsigned int x, unsigned int y, const char str[]);
+TERM_PUBLIC int PNG_justify_text(enum JUSTIFY mode);
+TERM_PUBLIC void PNG_point(unsigned int x, unsigned int y, int number);
+TERM_PUBLIC int PNG_text_angle(int ang);
+TERM_PUBLIC void PNG_reset(void);
+TERM_PUBLIC int PNG_set_font(const char *fontname);
+TERM_PUBLIC void PNG_pointsize(double ptsize);
 TERM_PUBLIC void PNG_boxfill(int, unsigned int, unsigned int, unsigned int, unsigned int);
 TERM_PUBLIC int PNG_make_palette (t_sm_palette *);
 /* TERM_PUBLIC void PNG_previous_palette (void); */
 TERM_PUBLIC void PNG_set_color (t_colorspec *);
 TERM_PUBLIC void PNG_filled_polygon (int, gpiPoint *);
-TERM_PUBLIC void PNG_image __PROTO((unsigned int, unsigned int, coordval *, gpiPoint *, t_imagecolor));
+TERM_PUBLIC void PNG_image(unsigned int, unsigned int, coordval *, gpiPoint *, t_imagecolor);
 
 /* To support "set term png enhanced" */
-TERM_PUBLIC void ENHGD_put_text __PROTO((unsigned int x, unsigned int y, const char str[]));
-TERM_PUBLIC void ENHGD_OPEN __PROTO((char * fontname, double fontsize,
+TERM_PUBLIC void ENHGD_put_text(unsigned int x, unsigned int y, const char str[]);
+TERM_PUBLIC void ENHGD_OPEN(char * fontname, double fontsize,
 			double base, TBOOLEAN widthflag, TBOOLEAN showflag,
-			int overprint));
-TERM_PUBLIC void ENHGD_FLUSH __PROTO((void));
+			int overprint);
+TERM_PUBLIC void ENHGD_FLUSH(void);
 
-#ifdef EAM_BOXED_TEXT
-TERM_PUBLIC void ENHGD_boxed_text __PROTO((unsigned int, unsigned int, int));
-#endif
+TERM_PUBLIC void ENHGD_boxed_text(unsigned int, unsigned int, int);
 
 #include <gd.h>
 /* Include files for bitmap fonts */
@@ -174,25 +172,25 @@ TERM_PUBLIC void ENHGD_boxed_text __PROTO((unsigned int, unsigned int, int));
 # define gdUseFontConfig(x) 0
 #endif
 
-/* These intermediate functions are necessary on Windows since 
+/* These intermediate functions are necessary on Windows since
    the shared version of libgd uses a different calling convention
    and there is no proper macro defined.
 */
-#if defined(WIN32) && !defined(NONDLL)
+#if defined(_WIN32) && !defined(NONDLL)
 static void gp_gdImagePolygon(gdImagePtr, gdPointPtr, int, int);
 static void gp_gdImageFilledPolygon(gdImagePtr, gdPointPtr, int, int);
 #else
 # define gp_gdImagePolygon gdImagePolygon
-# define gp_gdImageFilledPolygon gdImageFilledPolygon 
+# define gp_gdImageFilledPolygon gdImageFilledPolygon
 #endif
 
-static void PNG_PointX __PROTO((unsigned int, unsigned int));
-static void PNG_PointPlus __PROTO((unsigned int, unsigned int));
+static void PNG_PointX(unsigned int, unsigned int);
+static void PNG_PointPlus(unsigned int, unsigned int);
 static void PNG_Triangle(unsigned int x, unsigned int y, int direction,
-	void (*draw_func)(gdImagePtr, gdPointPtr, int, int));
+			void (*draw_func)(gdImagePtr, gdPointPtr, int, int));
 static void PNG_Diamond(unsigned int x, unsigned int y,
-	void (*draw_func)(gdImagePtr, gdPointPtr, int, int));
-static void PNG_init_brush __PROTO((int));
+			void (*draw_func)(gdImagePtr, gdPointPtr, int, int));
+static void PNG_init_brush(int);
 
 #define GREG_XMAX 640
 #define GREG_YMAX 480
@@ -277,12 +275,10 @@ static int PNG_YMAX = GREG_YMAX;
 static const int PNG_POINT_SCALE = 3;
 static int PNG_ps = 3;
 
-#ifdef EAM_BOXED_TEXT
     unsigned int bounding_box[4];
 #define GD_TEXTBOX_MARGIN 1.0
     double bounding_xmargin = GD_TEXTBOX_MARGIN;
     double bounding_ymargin = GD_TEXTBOX_MARGIN;
-#endif
 
 static TBOOLEAN ENHgd_show = TRUE;
 static TBOOLEAN ENHgd_sizeonly = FALSE;
@@ -327,7 +323,7 @@ static struct gen_table PNG_opts[] =
 static double PNG_linewidth_factor = 1.0;
 static double PNG_dashlength_factor = 1.0;
 
-/* shige takeno: 
+/* shige takeno:
  * libgd can be built to prefer UTF-8 or SJIS encoding for Japanese.
  * If it wants SJIS and we are currently in UTF8, convert.
  * If it wants UTF8 and we are currently in SJIS, convert.
@@ -338,7 +334,7 @@ static double PNG_dashlength_factor = 1.0;
 #ifdef HAVE_ICONV
 #include <iconv.h>
 #endif
-static void gd_iconv __PROTO((char **string));
+static void gd_iconv(char **string);
 
 /* EAM - gdImage structure to hold brushes for linewidth */
 /* We will allocate and initialize these on demand */
@@ -364,14 +360,14 @@ static PNG_FILL_TILE PNG_fill_tile = { (gdImagePtr)0, 0, 0 };
 static gdFTStringExtra PNG_FONT_INFO = {0,0,0,0,0,NULL,NULL};
 #endif
 
-#if defined(WIN32) && !defined(NONDLL)
-static void 
+#if defined(_WIN32) && !defined(NONDLL)
+static void
 gp_gdImagePolygon(gdImagePtr im, gdPointPtr p, int n, int c)
 {
     gdImagePolygon(im, p, n, c);
 }
 
-static void 
+static void
 gp_gdImageFilledPolygon(gdImagePtr im, gdPointPtr p, int n, int c)
 {
     gdImageFilledPolygon(im, p, n, c);
@@ -383,7 +379,7 @@ gp_gdImageFilledPolygon(gdImagePtr im, gdPointPtr p, int n, int c)
    down the file.
 */
 static void
-image_do_crop ()
+image_do_crop (void)
 {
     if (png_state.flags & PNG_USE_CROP) {
 	int x, y, x1, y1, x2, y2, flag;
@@ -437,7 +433,7 @@ image_do_crop ()
 	gdImageDestroy(png_state.image);
 	png_state.image = im_crop;
 	/* Re-set transparency for sixelgd */
-	if (strcmp("sixelgd", term->name) == 0 && 
+	if (strcmp("sixelgd", term->name) == 0 &&
 	    png_state.TrueColor && (png_state.flags & PNG_USE_TRANSPARENT)) {
 	    gdImageColorTransparent(png_state.image, png_state.color_table[0]);
 	}
@@ -445,9 +441,9 @@ image_do_crop ()
 }
 
 
-static int PNG_FillSolid __PROTO((int fillpar));
-static int PNG_FillPattern __PROTO((int fillpar));
-static int PNG_FillTransparent __PROTO((int fillpar));
+static int PNG_FillSolid(int fillpar);
+static int PNG_FillPattern(int fillpar);
+static int PNG_FillTransparent(int fillpar);
 
 static int
 PNG_FillSolid(int fillpar)
@@ -484,7 +480,7 @@ PNG_FillTransparent(int fillpar)
     int red   = (png_state.rgb >> 16) & 0xff;
     int green = (png_state.rgb >> 8) & 0xff;
     int blue  = png_state.rgb & 0xff;
-    int alpha = 127 * (float)(100-fillpar) / 100.;
+    int alpha = 127 * (double)(100-fillpar) / 100.;
 
     return  gdImageColorExactAlpha(png_state.image, red, green, blue, alpha);
 }
@@ -823,7 +819,7 @@ PNG_options()
 		err = gdImageStringFT(NULL, &brect[0], 0,
 			png_state.ttffont, png_state.default_ttfsize*png_state.fontscale,
 			0.0, 0, 0, "test");
-	
+
 		/* If that didn't work, try again using the fontconfig mechanism */
 		if (err && gdUseFontConfig(1)) {
 		    err = gdImageStringFT(NULL, &brect[0], 0,
@@ -1060,8 +1056,8 @@ PNG_options()
 		png_state.default_ttffont, png_state.default_ttfsize*png_state.fontscale,
 		0.0, 0, 0, "f00000000g");
 	if (!err) {
-	    term->h_char = .11 * (float)(brect[2] - brect[0]) + 0.5;
-	    term->v_char = 1.1 * (float)(brect[1] - brect[7]) + 0.5;
+	    term->h_char = .11 * (double)(brect[2] - brect[0]) + 0.5;
+	    term->v_char = 1.1 * (double)(brect[1] - brect[7]) + 0.5;
 	}
     }
 #endif
@@ -1112,7 +1108,7 @@ PNG_options()
 	    sprintf(term_options + strlen(term_options), "animate ");
 	else
 	    sprintf(term_options + strlen(term_options),
-		"animate delay %d loop %d %soptimize ", 
+		"animate delay %d loop %d %soptimize ",
 		png_state.frame_delay, png_state.loop_count,
 		png_state.frame_optimization ? "" : "no");
     }
@@ -1148,6 +1144,11 @@ PNG_options()
     case 9:
 	strcat(term_options,"giant ");
 	break;
+    }
+    /* Oct 2020:  'animate optimize' is deprecated */
+    if (png_state.animate && png_state.frame_optimization) {
+	strcat(term_options,
+		"\n\tWarning: the 'optimize' option to gif animation is deprecated");
     }
 
 }
@@ -1185,7 +1186,8 @@ PNG_init_brush(int width)
 	brush->last_rgb = -99;  /* Something invalid */
 	if (!((brush->im = gdImageCreateTrueColor(width,width))))
 	    int_error(NO_CARET,"libgd: failed to create brush structure");
-	brush->bgnd = gdImageColorAllocate( brush->im, 255, 255, 255 );
+	/* Whatever is chosen here is unavailable as a brush color */
+	brush->bgnd = gdImageColorAllocate( brush->im, 254, 253, 252 );
 	gdImageSaveAlpha(brush->im, 1);
 	gdImageFill(brush->im, 0, 0, brush->bgnd);
 	gdImageColorTransparent(brush->im, brush->bgnd);
@@ -1330,15 +1332,15 @@ void PNG_set_color (t_colorspec *colorspec)
     case TC_RGB:
 	png_state.rgb = colorspec->lt;
 	if (png_state.TrueColor)
-	    png_state.color = gdImageColorExactAlpha(png_state.image, 
+	    png_state.color = gdImageColorExactAlpha(png_state.image,
 		(colorspec->lt >> 16) & 0xff,
-		(colorspec->lt >> 8) & 0xff, 
+		(colorspec->lt >> 8) & 0xff,
 		 colorspec->lt & 0xff,
 		(colorspec->lt >> 25) & 0x7f);
 	else
 	    png_state.color = gdImageColorResolve(png_state.image,
 		(colorspec->lt >> 16) & 0xff,
-		(colorspec->lt >> 8) & 0xff, 
+		(colorspec->lt >> 8) & 0xff,
 		colorspec->lt & 0xff);
 	break;
 
@@ -1351,7 +1353,10 @@ void PNG_set_color (t_colorspec *colorspec)
 	    png_state.rgb = (color.r << 16) + (color.g << 8) +color.b;
 	    return;
 	} else {
-	    int png_color = (gray <= 0) ? 0 : (int)(gray * sm_palette.colors);
+	    int png_color;
+	    if (sm_palette.use_maxcolors > 0)
+		gray = quantize_gray(gray);
+	    png_color = (gray <= 0) ? 0 : (int)(gray * sm_palette.colors);
 	    if (png_color >= sm_palette.colors)
 		png_color = sm_palette.colors - 1;
 	    /* map [0;1] to interval [0;png_smooth_colors-1] */
@@ -1373,7 +1378,7 @@ void PNG_filled_polygon(int points, gpiPoint *corners)
     int i;
     int fillpar = corners->style >> 4;
     int color = png_state.color;
-    
+
     /* since gpiPoint carries more than just x and y if
      * we have EXTENDED_COLOR_SPECS defined, we need to
      * copy it to the gdPointPtr struct; make it static
@@ -1477,7 +1482,7 @@ PNG_graphics()
     unsigned int rgb;
     unsigned int n_colors = GD_DEFINED_COLORS;
 
-    /* avoid to pre-allocate colors for the sixel terminal in indexed mode */ 
+    /* avoid to pre-allocate colors for the sixel terminal in indexed mode */
     if ((strcmp("sixelgd", term->name) == 0) && !png_state.TrueColor)
 	n_colors = 1;
 
@@ -1525,13 +1530,18 @@ PNG_graphics()
 	    gdImageColorAllocate(png_state.image, (rgb >> 16) & 0xff,
 				 (rgb >> 8) & 0xff, rgb & 0xff);
     }
+
+    if ( png_state.frame_optimization && ( png_state.frame_count > 0 ) && png_state.previous_image ) {
+         gdImagePaletteCopy(png_state.image, png_state.previous_image);
+    }
+
     if (png_state.flags & PNG_USE_TRANSPARENT)
 	gdImageColorTransparent(png_state.image, png_state.color_table[0]);
     else
 	gdImageColorTransparent(png_state.image, -1);
 
     /* Fix for truecolor and transparent options */
-    if (strcmp("sixelgd", term->name) == 0 && 
+    if (strcmp("sixelgd", term->name) == 0 &&
         png_state.TrueColor && png_state.flags & PNG_USE_TRANSPARENT) {
 	gdImageAlphaBlending(png_state.image, gdEffectReplace);
 	gdImageFill(png_state.image, 1, 1, png_state.color_table[0]);
@@ -1627,14 +1637,14 @@ PNG_vector(unsigned int x, unsigned int y)
 		/* when the line is thick.			             */
 		if (lw > 2) {
 		    if (png_state.dashfraction >= dashpattern[0])
-		    gdImageFilledArc(png_state.image, 
+		    gdImageFilledArc(png_state.image,
 				     (int)(new_x + 0.5), Y((int)(new_y + 0.5)),
 				2 * lw, 2 * lw,
 			 	0, 360, png_state.color, gdArc);
 		} else {
-		    gdImageLine(png_state.image, 
+		    gdImageLine(png_state.image,
 				(int)(last_x + 0.5), Y((int)(last_y + 0.5)),
-				(int)(new_x + 0.5), Y((int)(new_y + 0.5)), 
+				(int)(new_x + 0.5), Y((int)(new_y + 0.5)),
 				    gdBrushed );
 		}
 	    }
@@ -1647,7 +1657,7 @@ PNG_vector(unsigned int x, unsigned int y)
     /* All other (not dashed) vectors */
     } else {
 	if (png_state.linewidth == 1) {
-#if defined(gdAntiAliased) 
+#if defined(gdAntiAliased)
 	    gdImageSetThickness(png_state.image,1);
 	    gdImageSetAntiAliased(png_state.image, png_state.color);
 	    gdImageLine(png_state.image, png_state.x, Y(png_state.y),
@@ -1696,7 +1706,7 @@ PNG_linetype(int type)
 
     if (typeindex + 3 >= png_state.n_colors) {
 	int rgb = pm3d_color_names_tbl[typeindex + 3].value;
-	png_state.color = gdImageColorResolve(png_state.image, 
+	png_state.color = gdImageColorResolve(png_state.image,
 				(rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff);
 	png_state.rgb = rgb;
     } else {
@@ -1771,7 +1781,6 @@ PNG_put_text(unsigned int x, unsigned int y, const char *string)
 		fprintf(stderr,"gdImageStringFT: %s while printing string %s with font %s\n",
 		    err,string,png_state.ttffont);
 
-#ifdef EAM_BOXED_TEXT
 	    if (!ENHgd_sizeonly) {
 		int xmax = GPMAX(brect[2],brect[6]);
 		int xmin = GPMIN(brect[0],brect[4]);
@@ -1782,7 +1791,6 @@ PNG_put_text(unsigned int x, unsigned int y, const char *string)
 		if (ymin < bounding_box[1]) bounding_box[1] = ymin;
 		if (ymax > bounding_box[3]) bounding_box[3] = ymax;
 	    }
-#endif
 
 	}
     } else if (png_state.angle != 0) {
@@ -1990,8 +1998,8 @@ PNG_set_font(const char *fontname)
 		0.0, 0, 0, "f00000000g");
 	}
 	if (!err) {
-	    term->h_char = .11 * (float)(brect[2] - brect[0]) + 0.5;
-	    term->v_char = 1.1 * (float)(brect[1] - brect[7]) + 0.5;
+	    term->h_char = .11 * (double)(brect[2] - brect[0]) + 0.5;
+	    term->v_char = 1.1 * (double)(brect[1] - brect[7]) + 0.5;
 	}
     }
 #endif
@@ -2134,11 +2142,10 @@ ENHGD_FLUSH()
 		x, Y(y), fragment);
     }
 #endif
-    if (err) 
+    if (err)
 	fprintf(stderr,"gdImageStringFT: %s while printing string %s with font %s\n",
 	    err,enhanced_text,ENHgd_font);
 
-#ifdef EAM_BOXED_TEXT
     if (!ENHgd_sizeonly) {
 	int xmax = GPMAX(brect[2],brect[6]);
 	int xmin = GPMIN(brect[0],brect[4]);
@@ -2149,7 +2156,6 @@ ENHGD_FLUSH()
 	if (ymin < bounding_box[1]) bounding_box[1] = ymin;
 	if (ymax > bounding_box[3]) bounding_box[3] = ymax;
     }
-#endif
 
     if (ENHgd_overprint == 1) {
 	png_state.x += ((brect[2] - brect[0]))/2;
@@ -2164,6 +2170,7 @@ TERM_PUBLIC void
 ENHGD_put_text(unsigned int x, unsigned int y, const char *str)
 {
     char *original_string = (char *)str;
+    char *fontcopy;
 
     if (ignore_enhanced_text || !png_state.ttffont) {
 	PNG_put_text(x,y,str);
@@ -2176,7 +2183,7 @@ ENHGD_put_text(unsigned int x, unsigned int y, const char *str)
     /* if there are no magic characters, we should just be able
      * punt the string to PNG_put_text()
      */
-    if (!strpbrk(str, "{}^_@&~")) {
+    if (!strpbrk(str, "{}^_@&~") && !contains_unicode(str)) {
 	/* FIXME: do something to ensure default font is selected */
 	PNG_put_text(x,y,str);
 	return;
@@ -2207,8 +2214,9 @@ ENHGD_put_text(unsigned int x, unsigned int y, const char *str)
      * closing brace in the string. We increment past it (else
      * we get stuck in an infinite loop) and try again.
      */
+    fontcopy = strdup(ENHgd_font);
     while (*(str = enhanced_recursion((char *)str, TRUE,
-			ENHgd_font, ENHgd_fontsize * png_state.fontscale,
+			fontcopy, ENHgd_fontsize * png_state.fontscale,
 			0.0, TRUE, TRUE, 0))) {
 	(term->enhanced_flush)();
 
@@ -2220,6 +2228,7 @@ ENHGD_put_text(unsigned int x, unsigned int y, const char *str)
 
 	/* else carry on and process the rest of the string */
     }
+    free(fontcopy);
 
     /* We can do text justification by running the entire top level string */
     /* through 2 times, with the ENHgd_sizeonly flag set the first time.   */
@@ -2245,7 +2254,6 @@ ENHGD_put_text(unsigned int x, unsigned int y, const char *str)
 
 }
 
-#ifdef EAM_BOXED_TEXT
 TERM_PUBLIC void
 ENHGD_boxed_text(unsigned int x, unsigned int y, int option)
 {
@@ -2257,22 +2265,11 @@ ENHGD_boxed_text(unsigned int x, unsigned int y, int option)
 	break;
     case TEXTBOX_OUTLINE:
 	/* Stroke the outline of the bounding box for previous text */
-	gdImageLine(png_state.image,
-		bounding_box[0]-bounding_xmargin, bounding_box[1]-bounding_ymargin,
-	 	bounding_box[0]-bounding_xmargin, bounding_box[3]+bounding_ymargin,
-		png_state.color);
-	gdImageLine(png_state.image,
-		bounding_box[0]-bounding_xmargin, bounding_box[3]+bounding_ymargin,
-		bounding_box[2]+bounding_xmargin, bounding_box[3]+bounding_ymargin,
-		png_state.color);
-	gdImageLine(png_state.image,
-		bounding_box[2]+bounding_xmargin, bounding_box[3]+bounding_ymargin,
-		bounding_box[2]+bounding_xmargin, bounding_box[1]-bounding_ymargin,
-		png_state.color);
-	gdImageLine(png_state.image,
-		bounding_box[2]+bounding_xmargin, bounding_box[1]-bounding_ymargin,
-		bounding_box[0]-bounding_xmargin, bounding_box[1]-bounding_ymargin,
-		png_state.color);
+	PNG_move  (bounding_box[0]-bounding_xmargin, Y(bounding_box[1]-bounding_ymargin));
+	PNG_vector(bounding_box[0]-bounding_xmargin, Y(bounding_box[3]+bounding_ymargin));
+	PNG_vector(bounding_box[2]+bounding_xmargin, Y(bounding_box[3]+bounding_ymargin));
+	PNG_vector(bounding_box[2]+bounding_xmargin, Y(bounding_box[1]-bounding_ymargin));
+	PNG_vector(bounding_box[0]-bounding_xmargin, Y(bounding_box[1]-bounding_ymargin));
 	break;
     case TEXTBOX_BACKGROUNDFILL:
 	/* Fill the box with current color. */
@@ -2292,7 +2289,6 @@ ENHGD_boxed_text(unsigned int x, unsigned int y, int option)
     	break;
     }
 }
-#endif
 
 
 
@@ -2366,7 +2362,7 @@ PNG_image (unsigned int M, unsigned int N, coordval * image, gpiPoint * corner, 
 	    rgb1.g = *image++;
 	    rgb1.b = *image++;
 	    rgb255_from_rgb1( rgb1, &rgb255 );
-	    pixel = gdImageColorResolve( im, 
+	    pixel = gdImageColorResolve( im,
 		(int)rgb255.r, (int)rgb255.g, (int)rgb255.b );
 	    gdImageSetPixel( im, m, n, pixel );
 	}
@@ -2500,9 +2496,7 @@ TERM_TABLE_START(png_driver)
     , NULL		/* path */
     , 0.0		/* tscale */
     , NULL		/* hypertext */
-#ifdef EAM_BOXED_TEXT
     , ENHGD_boxed_text
-#endif
 TERM_TABLE_END(png_driver)
 
 #undef LAST_TERM
@@ -2605,7 +2599,7 @@ register_term(jpeg)
 #endif
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void JPEG_text __PROTO((void));
+TERM_PUBLIC void JPEG_text(void);
 #define GOT_NEXT_PROTO
 #endif
 
@@ -2659,9 +2653,7 @@ TERM_TABLE_START(jpeg_driver)
     , NULL		/* path */
     , 0.0		/* tscale */
     , NULL		/* hypertext */
-#ifdef EAM_BOXED_TEXT
     , ENHGD_boxed_text
-#endif
 TERM_TABLE_END(jpeg_driver)
 
 #undef LAST_TERM
@@ -2736,7 +2728,7 @@ register_term(gif)
 #endif
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void GIF_text __PROTO((void));
+TERM_PUBLIC void GIF_text(void);
 #define GOT_NEXT_PROTO
 #endif
 
@@ -2759,8 +2751,8 @@ GIF_text()
 	/* Note - using a global colormap saves space, but it breaks	*/
 	/* if later frames add new colors to the palette.		*/
 	if (png_state.frame_count == 0) {
-	    gdImageGifAnimBegin(png_state.image, gpoutfile, 
-		1, /* Load Global Colormap even if it isn't used */ 
+	    gdImageGifAnimBegin(png_state.image, gpoutfile,
+		1, /* Load Global Colormap even if it isn't used */
 		png_state.loop_count );
 	}
 	gdImageGifAnimAdd(png_state.image, gpoutfile,
@@ -2769,8 +2761,8 @@ GIF_text()
 	    0, 0 /* No offset */,
 	    png_state.frame_delay,
 	    (png_state.flags & PNG_USE_TRANSPARENT)
-			? gdDisposalRestorePrevious 
-			: gdDisposalNone, 
+			? gdDisposalRestorePrevious
+			: gdDisposalNone,
 	    (png_state.frame_optimization && !(png_state.flags & PNG_USE_TRANSPARENT))
 	    ? png_state.previous_image : NULL);
 	png_state.frame_count++;
@@ -2814,9 +2806,7 @@ TERM_TABLE_START(gif_driver)
     , NULL		/* path */
     , 0.0		/* tscale */
     , NULL		/* hypertext */
-#ifdef EAM_BOXED_TEXT
     , ENHGD_boxed_text
-#endif
 TERM_TABLE_END(gif_driver)
 
 #undef LAST_TERM
@@ -2843,8 +2833,8 @@ START_HELP(gif)
 "              {tiny | small | medium | large | giant}",
 "              {font \"<face> {,<pointsize>}\"} {fontscale <scale>}",
 "              {size <x>,<y>} {{no}crop}",
-"              {animate {delay <d>} {loop <n>} {{no}optimize}}",
 "              {background <rgb_color>}",
+"              {animate {delay <d>} {loop <n>} {optimize}}",
 "",
 " PNG, JPEG and GIF images are created using the external library libgd.",
 " GIF plots may be viewed interactively by piping the output to the",
@@ -2867,19 +2857,30 @@ START_HELP(gif)
 " applicable for line widths greater than 1.  This setting is most useful when",
 " drawing horizontal or vertical lines.  Default is `rounded`.",
 "",
-" The details of font selection are complicated.",
-" Two equivalent simple examples are given below:",
-"      set term gif font arial 11",
-"      set term gif font \"arial,11\"",
-" For more information please see the separate section under `fonts`.",
+" The output plot size <x,y> is given in pixels---it defaults to 640x480.",
+" Please see additional information under `canvas` and `set size`.",
+" Blank space at the edges of the finished plot may be trimmed using the `crop`",
+" option, resulting in a smaller final image size. Default is `nocrop`.",
 "",
-" The `animate` option is available only if your local gd library supports",
-" the creation of animated gifs. The default delay between display of",
-" successive images may be specified in units of 1/100 second (default 5).",
-" The actual delay may vary depending on the program used as a viewer.",
-" Number of animation loops can be specified, default 0 means infinity.",
+"2 animate",
+"?set term gif animate",
+"?animation",
+"?animate",
+"",
+"       set term gif animate {delay <d>} {loop <n>} {{no}optimize}}",
+"",
+" The gif terminal `animate` option creates a single gif file containing",
+" multiple frames. The delay between display of successive frames may be",
+" specified in units of 1/100 second (default 5), but this value may or may",
+" not be honored accurately by a program used to view the animation later.",
+" The number of animation loops during playback can be specified, with the",
+" default of 0 meaning unlimited looping. Again this value may or may not be",
+" honored by the program later used for viewing.",
 " An animation sequence is terminated by the next `set output` or `set term`",
-" command.  The `optimize` option has two effects on the animation.",
+" command.",
+"",
+" The `optimize` option [DEPRECATED] is passed to the gd library when the",
+" output file is opened. It has two effects on the animation.",
 "",
 " 1) A single color map is used for the entire animation. This requires",
 " that all colors used in any frame of the animation are already",
@@ -2890,39 +2891,36 @@ START_HELP(gif)
 " may not be possible if the animation uses transparency.",
 "",
 " Both of these optimizations are intended to produce a smaller output file,",
-" but the decrease in size is probably only significant for long animations",
-" or very small frame sizes.",
-" The `nooptimize` option turns off both of the effects just described.",
-" Each frame is stored in its entirety along with a private color map.",
-" Note that it is possible to post-process a non-optimized animation",
-" using external utilities, and this post-processing can yield a smaller",
-" file than gnuplot's internal optimization mode.",
-" The default is `nooptimize`.",
+" but the decrease in size is probably only significant for long animations.",
+" Caveat: The implementation of optimization in libgd is known to be buggy.",
+" Therefore use of this option in gnuplot is not recommended.",
 "",
-" The output plot size <x,y> is given in pixels---it defaults to 640x480.",
-" Please see additional information under `canvas` and `set size`.",
-" Blank space at the edges of the finished plot may be trimmed using the `crop`",
-" option, resulting in a smaller final image size. Default is `nocrop`.",
+" Example showing continuous rotation:",
+"      set term gif animate loop 0",
+"      set output 'rotating_surface.gif'",
+"      do for [ang=1:359] {",
+"          set view 60, ang",
+"          splot f(x,y) with pm3d",
+"      }",
+"      unset output",
 "",
-"2 examples",
-"?set term gif examples",
-"       set terminal gif medium size 640,480 background '#ffffff'",
+"2 fonts",
+"?set term gif fonts",
+"",
+" The details of font selection are complicated.",
+" For more information please see the separate section under `fonts gd`.",
+"",
+" Examples:",
+"",
+"       set terminal gif medium noenhanced size 640,480 background '#ffffff'",
 "",
 " Use the medium size built-in non-scaleable, non-rotatable font.",
+" Enhanced text mode will not work with this font.",
 " Use white (24 bit RGB in hexadecimal) for the non-transparent background.",
 "",
-"       set terminal gif font arial 14 enhanced",
+"       set terminal gif font arial 14",
 "",
-" Searches for a scalable font with face name 'arial' and sets the font",
-" size to 14pt.  Please see `fonts` for details of how the font search",
-" is done.  Because this is a scalable font, we can use enhanced text mode.",
-"",
-"       set term gif animate transparent opt delay 10 size 200,200",
-"       load \"animate2.dem\"",
-"",
-" Open the gif terminal for creation of an animated gif file.  The individual",
-" frames of the animation sequence are created by the script file animate2.dem",
-" from the standard collection of demos.",
+" Searches for a font with face name 'arial' and sets the font size to 14pt.",
 ""
 END_HELP(gif)
 #endif /* TERM_HELP */
@@ -3002,9 +3000,7 @@ TERM_TABLE_START(sixelgd_driver)
     NULL,		/* path */
     0.0,		/* tscale */
     NULL		/* hypertext */
-#ifdef EAM_BOXED_TEXT
     , ENHGD_boxed_text
-#endif
 TERM_TABLE_END(sixelgd_driver)
 
 #undef LAST_TERM
@@ -3025,7 +3021,7 @@ START_HELP(sixelgd)
 "?sixelgd",
 " Syntax:",
 "       set terminal sixelgd",
-"              {{no}enhanced}",
+"              {{no}enhanced} {{no}truecolor}",
 "              {{no}transparent} {rounded|butt}",
 "              {linewidth <lw>} {dashlength <dl>}",
 "              {tiny | small | medium | large | giant}",
@@ -3070,10 +3066,10 @@ START_HELP(sixelgd)
 " Blank space at the edges of the finished plot may be trimmed using the `crop`",
 " option, resulting in a smaller final image size. Default is `nocrop`."
 "",
-" The terminal has been sucessfully tested with the xterm, mlterm and mintty",
+" The terminal has been successfully tested with the xterm, mlterm and mintty",
 " terminals.  The later two support the `truecolor` mode using 256 sixel",
 " colors out of box. Distributed copies of xterm may or may not have been",
-" configured to support sixel graphics and 256 colors."
+" configured to support sixel graphics and may be limited to 16 colors."
 END_HELP(sixelgd)
 #endif /* TERM_HELP */
 #endif /* WITH_GD_SIXEL */

@@ -1,11 +1,7 @@
-/*
- * $Id: mousecmn.h,v 1.19 2016/09/28 14:46:18 markisch Exp $
- */
-
 /* GNUPLOT - mousecnm.h */
 
 /*[
- * 
+ *
  * Copyright: Petr Mikulik <mikulik@physics.muni.cz>, since 1999
  *
  * Permission to use, copy, and distribute this software and its
@@ -68,7 +64,7 @@ enum {
     GE_plotdone,        /* acknowledgement of plot completion (for synchronization) */
     GE_replot,          /* used only by ggi.trm */
     GE_reset,           /* reset to a well-defined state
-			   (e.g.  after an X11 error occured) */
+			   (e.g.  after an X11 error occurred) */
     GE_fontprops,       /* par1 = hchar par2 = vchar */
 #if defined(PIPE_IPC)
     GE_pending,         /* signal gp_exec_event() to send pending events */
@@ -161,7 +157,9 @@ enum { /* other special keys */
     GP_F11,
     GP_F12,
     GP_Cancel,
-    GP_Button1,
+    GP_Button1,	/* Buttons must come last */
+    GP_Button2,
+    GP_Button3,
     GP_LAST_KEY
 };
 

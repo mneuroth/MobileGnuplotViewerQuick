@@ -67,43 +67,42 @@ t_iterator * set_iterator = NULL;
 
 /* Internal prototypes: */
 
-static void convert __PROTO((struct value *, int));
-static void extend_at __PROTO((void));
-static union argument *add_action __PROTO((enum operators sf_index));
-static void parse_expression __PROTO((void));
-static void accept_logical_OR_expression __PROTO((void));
-static void accept_logical_AND_expression __PROTO((void));
-static void accept_inclusive_OR_expression __PROTO((void));
-static void accept_exclusive_OR_expression __PROTO((void));
-static void accept_AND_expression __PROTO((void));
-static void accept_equality_expression __PROTO((void));
-static void accept_relational_expression __PROTO((void));
-static void accept_bitshift_expression __PROTO((void));
-static void accept_additive_expression __PROTO((void));
-static void accept_multiplicative_expression __PROTO((void));
-static void parse_primary_expression __PROTO((void));
-static void parse_conditional_expression __PROTO((void));
-static void parse_logical_OR_expression __PROTO((void));
-static void parse_logical_AND_expression __PROTO((void));
-static void parse_inclusive_OR_expression __PROTO((void));
-static void parse_exclusive_OR_expression __PROTO((void));
-static void parse_AND_expression __PROTO((void));
-static void parse_equality_expression __PROTO((void));
-static void parse_relational_expression __PROTO((void));
-static void parse_bitshift_expression __PROTO((void));
-static void parse_additive_expression __PROTO((void));
-static void parse_multiplicative_expression __PROTO((void));
-static void parse_unary_expression __PROTO((void));
-static void parse_sum_expression __PROTO((void));
-static int  parse_assignment_expression __PROTO((void));
-static int  parse_array_assignment_expression __PROTO((void));
-static int is_builtin_function __PROTO((int t_num));
+static void convert(struct value *, int);
+static void extend_at(void);
+static union argument *add_action(enum operators sf_index);
+static void parse_expression(void);
+static void accept_logical_OR_expression(void);
+static void accept_logical_AND_expression(void);
+static void accept_inclusive_OR_expression(void);
+static void accept_exclusive_OR_expression(void);
+static void accept_AND_expression(void);
+static void accept_equality_expression(void);
+static void accept_relational_expression(void);
+static void accept_bitshift_expression(void);
+static void accept_additive_expression(void);
+static void accept_multiplicative_expression(void);
+static void parse_primary_expression(void);
+static void parse_conditional_expression(void);
+static void parse_logical_OR_expression(void);
+static void parse_logical_AND_expression(void);
+static void parse_inclusive_OR_expression(void);
+static void parse_exclusive_OR_expression(void);
+static void parse_AND_expression(void);
+static void parse_equality_expression(void);
+static void parse_relational_expression(void);
+static void parse_bitshift_expression(void);
+static void parse_additive_expression(void);
+static void parse_multiplicative_expression(void);
+static void parse_unary_expression(void);
+static void parse_sum_expression(void);
+static int  parse_assignment_expression(void);
+static int  parse_array_assignment_expression(void);
 
-static void set_up_columnheader_parsing __PROTO((struct at_entry *previous ));
+static void set_up_columnheader_parsing(struct at_entry *previous );
 
-static TBOOLEAN no_iteration __PROTO((t_iterator *));
-static void reevaluate_iteration_limits __PROTO((t_iterator *iter));
-static void reset_iteration __PROTO((t_iterator *iter));
+static TBOOLEAN no_iteration(t_iterator *);
+static void reevaluate_iteration_limits(t_iterator *iter);
+static void reset_iteration(t_iterator *iter);
 
 /* Internal variables: */
 
@@ -117,10 +116,10 @@ convert(struct value *val_ptr, int t_num)
 }
 
 
-int
+intgr_t
 int_expression()
 {
-    return (int)real_expression();
+    return (intgr_t)real_expression();
 }
 
 double
@@ -235,7 +234,7 @@ string_or_express(struct at_type **atptr)
     for (i = 0; i < at->a_count; i++) {
 	enum operators op_index = at->actions[i].index;
 	if ( op_index == PUSHD1 || op_index == PUSHD2 || op_index == PUSHD
-                || op_index == SUM ) {
+	||   op_index == SUM ) {
 	    has_dummies = TRUE;
 	    break;
 	}
@@ -315,6 +314,24 @@ create_call_column_at(char *string)
     at->actions[0].arg.v_arg.type = STRING;
     at->actions[0].arg.v_arg.v.string_val = string;
     at->actions[1].index = COLUMN;
+    at->actions[1].arg.j_arg = 0;
+
+    return (at);
+}
+
+/* Create an action table that describes a call to columnhead(-1). */
+/* This is substituted for the bare keyword "colummhead" */
+struct at_type *
+create_call_columnhead()
+{
+    struct at_type *at = gp_alloc(sizeof(int) + 2*sizeof(struct at_entry),"");
+
+    at->a_count = 2;
+    at->actions[0].index = PUSHC;
+    at->actions[0].arg.j_arg = 3;	/* FIXME - magic number! */
+    at->actions[0].arg.v_arg.type = INTGR;
+    at->actions[0].arg.v_arg.v.int_val = -1;
+    at->actions[1].index = COLUMNHEAD;
     at->actions[1].arg.j_arg = 0;
 
     return (at);
@@ -572,12 +589,6 @@ parse_primary_expression()
 		add_action(PUSH)->udv_arg = datablock_udv;
 	    } else
 		int_error(c_token, "Column number or datablock line expected");
-	} else if (equals(c_token,"N")) {
-	    /* $N == pseudocolumn -3 means "last column" */
-	    c_token++;
-	    Ginteger(&a, -3);
-	    at_highest_column_used = -3;
-	    add_action(DOLLARS)->v_arg = a;
 	} else {
 	    convert(&a, c_token++);
 	    if (a.type != INTGR || a.v.int_val < 0)
@@ -586,6 +597,10 @@ parse_primary_expression()
 		at_highest_column_used = a.v.int_val;
 	    add_action(DOLLARS)->v_arg = a;
 	}
+    } else if (equals(c_token, "$#")) {
+	struct value a = {INTGR, {DOLLAR_NCOLUMNS}};
+	c_token++;
+	add_action(DOLLARS)->v_arg = a;
     } else if (equals(c_token, "|")) {
 	struct udvt_entry *udv;
 	c_token++;
@@ -616,22 +631,6 @@ parse_primary_expression()
 	    struct value num_params;
 	    num_params.type = INTGR;
 
-#if (1)	    /* DEPRECATED */
-	    if (whichfunc && (strcmp(ft[whichfunc].f_name,"defined")==0)) {
-		/* Deprecated syntax:   if (defined(foo)) ...  */
-		/* New syntax:          if (exists("foo")) ... */
-		struct udvt_entry *udv = add_udv(c_token+2);
-		union argument *foo = add_action(PUSHC);
-		foo->v_arg.type = INTGR;
-		if (udv->udv_value.type == NOTDEFINED)
-		    foo->v_arg.v.int_val = 0;
-		else
-		    foo->v_arg.v.int_val = 1;
-		c_token += 4;  /* skip past "defined ( <foo> ) " */
-		return;
-	    }
-#endif
-
 	    if (whichfunc) {
 		c_token += 2;	/* skip fnc name and '(' */
 		parse_expression(); /* parse fnc argument */
@@ -653,6 +652,10 @@ parse_primary_expression()
 
 		/* v4 timecolumn only had 1 param; v5 has 2. Accept either */
 		if (!strcmp(ft[whichfunc].f_name,"timecolumn"))
+		    add_action(PUSHC)->v_arg = num_params;
+
+		/* These functions have an optional 3rd parameter */
+		if (!strncmp(ft[whichfunc].f_name,"weekdate_",9))
 		    add_action(PUSHC)->v_arg = num_params;
 
 		/* The column() function has side effects requiring special handling */
@@ -685,7 +688,7 @@ parse_primary_expression()
 		add_action(call_type)->udf_arg = add_udf(tok);
 	    }
 	} else if (equals(c_token, "sum") && equals(c_token+1, "[")) {
-            parse_sum_expression();
+	    parse_sum_expression();
 	/* dummy_func==NULL is a flag to say no dummy variables active */
 	} else if (dummy_func) {
 	    if (equals(c_token, c_dummy_var[0])) {
@@ -1118,15 +1121,11 @@ parse_link_via( struct udft_entry *udf )
 static void
 parse_sum_expression()
 {
-    /* sum [<var>=<range>] <expr>
-     * - Pass a udf to f_sum (with action code (for <expr>) that is not added
-     *   to the global action table).
-     * - f_sum uses a newly created udv (<var>) to pass the current value of
-     *   <var> to <expr> (resp. its ac).
-     * - The original idea was to treat <expr> as function f(<var>), but there
-     *   was the following problem: Consider 'g(x) = sum [k=1:4] f(k)'. There
-     *   are two dummy variables 'x' and 'k' from different functions 'g' and
-     *   'f' which would require changing the parsing of dummy variables.
+    /* sum [<var>=<start>:<end>] <expr>
+     * - <var> pushed to stack *by name*
+     * - <start> and <end> expressions pushed to stack
+     * - A new action table for <expr> is created and passed to f_sum(arg)
+     *   via arg->udf_arg
      */
 
     char *errormsg = "Expecting 'sum [<var> = <start>:<end>] <expression>'\n";
@@ -1143,35 +1142,33 @@ parse_sum_expression()
 
     /* <var> */
     if (!isletter(c_token))
-        int_error(c_token, errormsg);
-    /* create a user defined variable and pass it to f_sum via PUSHC, since the
-     * argument of f_sum is already used by the udf */
+	int_error(c_token, errormsg);
     m_capture(&varname, c_token, c_token);
-    add_udv(c_token);
     arg = add_action(PUSHC);
     Gstring(&(arg->v_arg), varname);
     c_token++;
 
     if (!equals(c_token, "="))
-        int_error(c_token, errormsg);
+	int_error(c_token, errormsg);
     c_token++;
 
     /* <start> */
     parse_expression();
 
     if (!equals(c_token, ":"))
-        int_error(c_token, errormsg);
+	int_error(c_token, errormsg);
     c_token++;
 
     /* <end> */
     parse_expression();
 
     if (!equals(c_token, "]"))
-        int_error(c_token, errormsg);
+	int_error(c_token, errormsg);
     c_token++;
 
-    /* parse <expr> and convert it to a new action table. */
-    /* modeled on code from temp_at(). */
+    /* parse <expr> and convert it to a new action table.
+     * modeled on code from temp_at().
+     */
     /* 1. save environment to restart parsing */
     save_at = at;
     save_at_size = at_size;
@@ -1185,7 +1182,7 @@ parse_sum_expression()
     udf->definition = NULL;
     udf->dummy_num = 0;
     for (i = 0; i < MAX_NUM_VAR; i++)
-        (void) Ginteger(&(udf->dummy_values[i]), 0);
+	Ginteger(&(udf->dummy_values[i]), 0);
 
     /* 3. restore environment */
     at = save_at;
@@ -1243,7 +1240,7 @@ add_udf(int t_num)
 }
 
 /* return standard function index or 0 */
-static int
+int
 is_builtin_function(int t_num)
 {
     int i;
@@ -1361,8 +1358,7 @@ check_for_iteration()
 	    }
 	    if (!equals(c_token++, "]"))
 	    	int_error(c_token-1, errormsg);
-	    gpfree_array(&(iteration_udv->udv_value));
-	    gpfree_string(&(iteration_udv->udv_value));
+	    free_value(&(iteration_udv->udv_value));
 	    Ginteger(&(iteration_udv->udv_value), iteration_start);
 	}
 	else if (equals(c_token++, "in")) {
@@ -1378,8 +1374,7 @@ check_for_iteration()
 	    iteration_string = v.v.string_val;
 	    iteration_start = 1;
 	    iteration_end = gp_words(iteration_string);
-	    gpfree_array(&(iteration_udv->udv_value));
-	    gpfree_string(&(iteration_udv->udv_value));
+	    free_value(&(iteration_udv->udv_value));
 	    Gstring(&(iteration_udv->udv_value), gp_word(iteration_string, 1));
 	}
 	else /* Neither [i=B:E] or [s in "foo"] */

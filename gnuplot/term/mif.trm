@@ -1,6 +1,4 @@
-/* Hello, Emacs, this is -*-C-*-
- * $Id: mif.trm,v 1.33 2006/07/21 02:35:47 sfeam Exp $
- */
+/* Hello, Emacs, this is -*-C-*- */
 
 /* GNUPLOT -- mif.trm */
 
@@ -99,25 +97,25 @@ register_term(mif)
 
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void MIF_init __PROTO((void));
-TERM_PUBLIC void MIF_graphics __PROTO((void));
-TERM_PUBLIC void MIF_text __PROTO((void));
-TERM_PUBLIC void MIF_linetype __PROTO((int linetype));
-TERM_PUBLIC void MIF_move __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void MIF_vector __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void MIF_put_text __PROTO((unsigned int x, unsigned int y, const char *str));
-TERM_PUBLIC int MIF_text_angle __PROTO((int ang));
-TERM_PUBLIC void MIF_reset __PROTO((void));
-TERM_PUBLIC void MIF_options __PROTO((void));
-TERM_PUBLIC int MIF_justify_text __PROTO((enum JUSTIFY mode));
-TERM_PUBLIC void MIF_point __PROTO((unsigned int x, unsigned int y, int number));
-TERM_PUBLIC void MIF_boxfill __PROTO((int style, unsigned int x1, unsigned int y1,
-	    unsigned int width, unsigned int height));
-TERM_PUBLIC void MIF_filled_polygon __PROTO((int points, gpiPoint* corners));
+TERM_PUBLIC void MIF_init(void);
+TERM_PUBLIC void MIF_graphics(void);
+TERM_PUBLIC void MIF_text(void);
+TERM_PUBLIC void MIF_linetype(int linetype);
+TERM_PUBLIC void MIF_move(unsigned int x, unsigned int y);
+TERM_PUBLIC void MIF_vector(unsigned int x, unsigned int y);
+TERM_PUBLIC void MIF_put_text(unsigned int x, unsigned int y, const char *str);
+TERM_PUBLIC int MIF_text_angle(int ang);
+TERM_PUBLIC void MIF_reset(void);
+TERM_PUBLIC void MIF_options(void);
+TERM_PUBLIC int MIF_justify_text(enum JUSTIFY mode);
+TERM_PUBLIC void MIF_point(unsigned int x, unsigned int y, int number);
+TERM_PUBLIC void MIF_boxfill(int style, unsigned int x1, unsigned int y1,
+	    unsigned int width, unsigned int height);
+TERM_PUBLIC void MIF_filled_polygon(int points, gpiPoint* corners);
 
 /** Coordinates **/
 /* The cast to float is not necessary because we are dividing by a float */
-/* On OSK the cast to a float is not allowed in a constant expression wich */
+/* On OSK the cast to a float is not allowed in a constant expression which */
 /* is used by the declaration and initialization of mif_line */
 /* Converts gnuplot units to MIF units */
 #define GNP_TO_MIF(P)   ((P) / 1000.0)
@@ -129,12 +127,12 @@ TERM_PUBLIC void MIF_filled_polygon __PROTO((int points, gpiPoint* corners));
 #define MIF_XLAST (MIF_XMAX - 1)
 #define MIF_YLAST (MIF_YMAX - 1)
 
-static int insert_mif_line __PROTO((double fx, double fy));
-static int proc_group_id __PROTO((int group_id));
-static void free_mif_line __PROTO((void));
-static void put_mif_line __PROTO((void));
-static void MIF_set_font __PROTO((const char *));
-static void mif_put_point __PROTO((unsigned int x, unsigned int y, int np));
+static int insert_mif_line(double fx, double fy);
+static int proc_group_id(int group_id);
+static void free_mif_line(void);
+static void put_mif_line(void);
+static void MIF_set_font(const char *);
+static void mif_put_point(unsigned int x, unsigned int y, int np);
 
 #endif
 
@@ -151,7 +149,7 @@ static struct mif_line {	/* Line point structure specification */
     struct mif_line *next;	/* Pointer to next line point */
     struct mif_line *prev;	/* Pointer to previous line point */
 } mif_line =
-{				/* Current position structure. Adjust for orign. Local for this file. */
+{				/* Current position structure. Adjust for origin. Local for this file. */
     GNP_TO_MIF(0),
 	GNP_TO_MIF(MIF_YLAST),
 	&mif_line,
@@ -195,7 +193,7 @@ static int mif_pattern_table[MIF_NPENS] =
 /** MIF groups administration **/
 #define MIF_NGROUP_ID           20
 static struct mif_group_id {
-    int group_existance;
+    int group_existence;
 /* This group id should generate a MIF group */
 #define MIF_GROUP_EXISTS        1
 /* This group id should not generate a MIF group */
@@ -204,7 +202,7 @@ static struct mif_group_id {
     int group_id;
 #define MIF_INVALID_GROUP_ID    0	/* An invalid MIF group ID */
 
-} mif_group_id[MIF_NGROUP_ID];	/* List of used group ID:s and corresponding MIF groups existance */
+} mif_group_id[MIF_NGROUP_ID];	/* List of used group ID:s and corresponding MIF groups existence */
 
 /** Semaphores **/
 static int mif_initialized = 0;	/* != 0 when output is active */
@@ -241,8 +239,8 @@ static struct mpt *mif_point = &(mpt[1]);
 
 
 /** Declaration of routine/s for internal use **/
-static int insert_mif_line __PROTO((double fx, double fy));
-static int proc_group_id __PROTO((int group_id));
+static int insert_mif_line(double fx, double fy);
+static int proc_group_id(int group_id);
 
 enum MIF_id {
     MIF_MONOCHROME, MIF_COLOR, MIF_VECTORS, MIF_POLYLINE, MIF_HELP,
@@ -531,7 +529,7 @@ MIF_init()
 	/* Reset group ID generator */
 	for (i = 0; i < MIF_NGROUP_ID; i++) {
 	    mif_group_id[i].group_id = MIF_INVALID_GROUP_ID;
-	    mif_group_id[i].group_existance = MIF_GROUP_NOT_EXISTS;
+	    mif_group_id[i].group_existence = MIF_GROUP_NOT_EXISTS;
 	}
 
 	/* Identify ourselves */
@@ -610,7 +608,7 @@ MIF_graphics()
 	/* Reset group ID generator */
 	for (i = 0; i < MIF_NGROUP_ID; i++) {
 	    mif_group_id[i].group_id = MIF_INVALID_GROUP_ID;
-	    mif_group_id[i].group_existance = MIF_GROUP_NOT_EXISTS;
+	    mif_group_id[i].group_existence = MIF_GROUP_NOT_EXISTS;
 	}
 
 	/* Frame preamble */
@@ -652,7 +650,7 @@ MIF_text()
 
 	for (i = 0; i < MIF_NGROUP_ID; i++) {
 	    if (mif_group_id[i].group_id != MIF_INVALID_GROUP_ID &&
-		mif_group_id[i].group_existance == MIF_GROUP_EXISTS) {
+		mif_group_id[i].group_existence == MIF_GROUP_EXISTS) {
 		fprintf(gpoutfile, "\
 \t<Group\n\
 \t\t<ID %d>\n\
@@ -669,10 +667,10 @@ MIF_text()
 
 	/* Tell that this terminal driver is not working with a plot frame */
 	mif_in_frame = 0;
-    }				/* Frame finshed */
+    }				/* Frame finished */
 }
 
-/* Select type of line in grapics */
+/* Select type of line in graphics */
 /* NOTE: actually written to output the first time a primitive
  * is drawn AFTER this call */
 /* -2=border, -1=X/Y-axis, 0-13=lines, and 14-=mapped back */
@@ -881,7 +879,7 @@ insert_mif_line(double fx, double fy)
     return (rval);
 }
 
-/* Register group ID. Update group ID existance. */
+/* Register group ID. Update group ID existence. */
 /* Returns:     1       group_id belongs to a MIF group
 		0       group_id does not belong to a MIF group
 	       -1       not inside a Frame
@@ -900,18 +898,18 @@ proc_group_id(int group_id)
 	     mif_group_id[i].group_id != MIF_INVALID_GROUP_ID &&
 	     mif_group_id[i].group_id != group_id;
 	     i++) {
-	    /* Don't check the group_existance variable */
+	    /* Don't check the group_existence variable */
 	}
 
 	if (i < MIF_NGROUP_ID) {
 	    if (mif_group_id[i].group_id == MIF_INVALID_GROUP_ID) {
 		/* Register as new group ID for eventual use as MIF group */
 		mif_group_id[i].group_id = group_id;
-		mif_group_id[i].group_existance = MIF_GROUP_NOT_EXISTS;
+		mif_group_id[i].group_existence = MIF_GROUP_NOT_EXISTS;
 	    } else {
 		/* If second use of this group ID -> create a new MIF group */
 		if (mif_group_id[i].group_id == group_id) {
-		    mif_group_id[i].group_existance = MIF_GROUP_EXISTS;
+		    mif_group_id[i].group_existence = MIF_GROUP_EXISTS;
 		    /* NOTE: a group MUST have at least two members. */
 		    rval = 1;
 		}

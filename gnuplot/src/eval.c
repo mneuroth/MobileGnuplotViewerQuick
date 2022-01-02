@@ -30,10 +30,6 @@
  * to the extent permitted by applicable law.
 ]*/
 
-/* HBB 20010724: I moved several variables and functions from parse.c
- * to here, because they're involved with *evaluating* functions, not
- * with parsing them: evaluate_at(), fpe(), and fpe_env */
-
 #include "eval.h"
 
 #include "syscfg.h"
@@ -48,15 +44,17 @@
 #include "util.h"
 #include "version.h"
 #include "term_api.h"
+#include "voxelgrid.h"
 
 #include <signal.h>
 #include <setjmp.h>
 
 /* Internal prototypes */
-static RETSIGTYPE fpe __PROTO((int an_int));
+static RETSIGTYPE fpe(int an_int);
 
 /* Global variables exported by this module */
 struct udvt_entry udv_pi = { NULL, "pi", {INTGR, {0} } };
+struct udvt_entry *udv_I;
 struct udvt_entry *udv_NaN;
 /* first in linked list */
 struct udvt_entry *first_udv = &udv_pi;
@@ -72,6 +70,8 @@ struct udvt_entry **udv_user_head;
  */
 TBOOLEAN undefined;
 
+enum int64_overflow overflow_handling = INT64_OVERFLOW_TO_FLOAT;
+
 /* The stack this operates on */
 static struct value stack[STACK_DEPTH];
 static int s_p = -1;		/* stack pointer */
@@ -81,7 +81,7 @@ static int jump_offset;		/* to be modified by 'jump' operators */
 
 /* The table of built-in functions */
 /* These must strictly parallel enum operators in eval.h */
-const struct ft_entry GPFAR ft[] =
+const struct ft_entry ft[] =
 {
     /* internal functions: */
     {"push",  f_push},
@@ -142,6 +142,7 @@ const struct ft_entry GPFAR ft[] =
     {"stringcolumn",  f_stringcolumn},	/* for using specs */
     {"strcol",  f_stringcolumn},	/* shorthand form */
     {"columnhead",  f_columnhead},
+    {"columnheader",  f_columnhead},
     {"valid",  f_valid},
     {"timecolumn",  f_timecolumn},
 
@@ -170,10 +171,14 @@ const struct ft_entry GPFAR ft[] =
     {"exp",  f_exp},
     {"log10",  f_log10},
     {"log",  f_log},
+    {"besi0",  f_besi0},
+    {"besi1",  f_besi1},
     {"besj0",  f_besj0},
     {"besj1",  f_besj1},
+    {"besjn",  f_besjn},
     {"besy0",  f_besy0},
     {"besy1",  f_besy1},
+    {"besyn",  f_besyn},
     {"erf",  f_erf},
     {"erfc",  f_erfc},
     {"gamma",  f_gamma},
@@ -184,7 +189,6 @@ const struct ft_entry GPFAR ft[] =
     {"rand",  f_rand},
     {"floor",  f_floor},
     {"ceil",  f_ceil},
-    {"defined", f_exists},	/* DEPRECATED syntax defined(foo) */
 
     {"norm",  f_normal},	/* XXX-JG */
     {"inverf",  f_inverse_erf},	/* XXX-JG */
@@ -195,6 +199,7 @@ const struct ft_entry GPFAR ft[] =
     {"lambertw",  f_lambertw}, /* HBB, from G.Kuhnle 20001107 */
     {"airy",  f_airy},         /* janert, 20090905 */
     {"expint",  f_expint},     /* Jim Van Zandt, 20101010 */
+    {"besin",  f_besin},
 
 #ifdef HAVE_LIBCERF
     {"cerf", f_cerf},		/* complex error function */
@@ -204,20 +209,24 @@ const struct ft_entry GPFAR ft[] =
     {"faddeeva", f_faddeeva},	/* Faddeeva rescaled complex error function "w_of_z" */
 #endif
 
-    {"tm_sec",  f_tmsec},	/* for timeseries */
-    {"tm_min",  f_tmmin},	/* for timeseries */
-    {"tm_hour",  f_tmhour},	/* for timeseries */
-    {"tm_mday",  f_tmmday},	/* for timeseries */
-    {"tm_mon",  f_tmmon},	/* for timeseries */
-    {"tm_year",  f_tmyear},	/* for timeseries */
-    {"tm_wday",  f_tmwday},	/* for timeseries */
-    {"tm_yday",  f_tmyday},	/* for timeseries */
+    {"tm_sec",  f_tmsec},	/* time function */
+    {"tm_min",  f_tmmin},	/* time function */
+    {"tm_hour", f_tmhour},	/* time function */
+    {"tm_mday", f_tmmday},	/* time function */
+    {"tm_mon",  f_tmmon},	/* time function */
+    {"tm_year", f_tmyear},	/* time function */
+    {"tm_wday", f_tmwday},	/* time function */
+    {"tm_yday", f_tmyday},	/* time function */
+    {"tm_week", f_tmweek},	/* time function */
+    {"weekdate_iso", f_weekdate_iso},
+    {"weekdate_cdc", f_weekdate_cdc},
 
     {"sprintf",  f_sprintf},	/* for string variables only */
     {"gprintf",  f_gprintf},	/* for string variables only */
     {"strlen",  f_strlen},	/* for string variables only */
     {"strstrt",  f_strstrt},	/* for string variables only */
     {"substr",  f_range},	/* for string variables only */
+    {"trim",  f_trim},		/* for string variables only */
     {"word",  f_word},		/* for string variables only */
     {"words", f_words},		/* implemented as word(s,-1) */
     {"strftime",  f_strftime},  /* time to string */
@@ -229,6 +238,11 @@ const struct ft_entry GPFAR ft[] =
     {"value", f_value},		/* retrieve value of variable known by name */
 
     {"hsv2rgb", f_hsv2rgb},	/* color conversion */
+    {"palette", f_palette},	/* palette color lookup */
+
+#ifdef VOXEL_GRID_SUPPORT
+    {"voxel", f_voxel},		/* extract value of single voxel */
+#endif
 
     {NULL, NULL}
 };
@@ -242,7 +256,7 @@ static JMP_BUF fpe_env;
 static RETSIGTYPE
 fpe(int an_int)
 {
-#if defined(MSDOS) && !defined(__EMX__) && !defined(DJGPP) && !defined(_WIN32)
+#if defined(MSDOS) && !defined(__EMX__) && !defined(DJGPP)
     /* thanks to lotto@wjh12.UUCP for telling us about this  */
     _fpreset();
 #endif
@@ -280,25 +294,6 @@ real(struct value *val)
 }
 
 
-/* returns the real part of val, converted to int if necessary */
-int
-real_int(struct value *val)
-{
-    switch (val->type) {
-    case INTGR:
-	return val->v.int_val;
-    case CMPLX:
-	return (int) val->v.cmplx_val.real;
-    case STRING:
-	return atoi(val->v.string_val);
-    default:
-	int_error(NO_CARET, "unknown type in real_int()");
-    }
-    /* NOTREACHED */
-    return 0;
-}
-
-
 /* returns the imag part of val */
 double
 imag(struct value *val)
@@ -330,7 +325,7 @@ magnitude(struct value *val)
 {
     switch (val->type) {
     case INTGR:
-	return ((double) abs(val->v.int_val));
+	return (fabs((double)val->v.int_val));
     case CMPLX:
 	{
 	    /* The straightforward implementation sqrt(r*r+i*i)
@@ -398,7 +393,7 @@ Gcomplex(struct value *a, double realpart, double imagpart)
 
 
 struct value *
-Ginteger(struct value *a, int i)
+Ginteger(struct value *a, intgr_t i)
 {
     a->type = INTGR;
     a->v.int_val = i;
@@ -413,27 +408,29 @@ Gstring(struct value *a, char *s)
     return (a);
 }
 
+/* Common interface for freeing data structures attached to a struct value.
+ * Each of the type-specific routines will ignore values of other types.
+ */
+void
+free_value(struct value *a)
+{
+    gpfree_string(a);
+    gpfree_datablock(a);
+    gpfree_array(a);
+}
+
 /* It is always safe to call gpfree_string with a->type is INTGR or CMPLX.
  * However it would be fatal to call it with a->type = STRING if a->string_val
  * was not obtained by a previous call to gp_alloc(), or has already been freed.
  * Thus 'a->type' is set to NOTDEFINED afterwards to make subsequent calls safe.
  */
-struct value *
+void
 gpfree_string(struct value *a)
 {
     if (a->type == STRING) {
 	free(a->v.string_val);
 	a->type = NOTDEFINED;
     }
-
-    else if (a->type == ARRAY) {
-	/* gpfree_array() is now a separate routine. This is to help find */
-	/* any remaining callers who expect gpfree_string to handle it.   */
-	FPRINTF((_stderr,"eval.c:%d hit array in gpfree_string()", __LINE__));
-	a->type = NOTDEFINED;
-    }
-
-    return a;
 }
 
 void
@@ -484,7 +481,7 @@ void
 check_stack()
 {				/* make sure stack's empty */
     if (s_p != -1)
-	fprintf(_stderr, "\n\
+    fprintf(_stderr, "\n\
 warning:  internal error--stack not empty!\n\
           (function called with too many parameters?)\n");
 }
@@ -522,9 +519,9 @@ pop_or_convert_from_string(struct value *v)
 
 	if (*(v->v.string_val)
 	&&  strspn(v->v.string_val,"0123456789 ") == strlen(v->v.string_val)) {
-	    int i = atoi(v->v.string_val);
+	    long long li = atoll(v->v.string_val);
 	    gpfree_string(v);
-	    Ginteger(v, i);
+	    Ginteger(v, li);
 	} else {
 	    double d = strtod(v->v.string_val,&eov);
 	    if (v->v.string_val == eov) {
@@ -534,7 +531,7 @@ pop_or_convert_from_string(struct value *v)
 	    }
 	    gpfree_string(v);
 	    Gcomplex(v, d, 0.);
-	    FPRINTF((_stderr,"converted string to CMPLX value %g\n",real(v)));
+        FPRINTF((_stderr,"converted string to CMPLX value %g\n",real(v)));
 	}
     }
     return(v);
@@ -550,33 +547,6 @@ push(struct value *x)
     /* WARNING - This is a memory leak if the string is not later freed */
     if (x->type == STRING && x->v.string_val)
 	stack[s_p].v.string_val = gp_strdup(x->v.string_val);
-
-#ifdef ARRAY_COPY_ON_REFERENCE
-    /* NOTE: Without this code, any operation during expression evaluation that */
-    /* alters the content of an existing array would potentially corrupt the	*/
-    /* original copy.  E.g. "Array A[3];  B=A" would result in a new variable B	*/
-    /* that points to the same content as the original array A.  This problem	*/
-    /* can be avoided by making a copy of the original array when pushing it on	*/
-    /* the evaluation stack.  Any change or persistance of the copy does not	*/
-    /* corrupt the original.  However there are two penalties from this.   	*/
-    /* (1) Every reference, including retrieval of a single array element, 	*/
-    /* triggers a sequence of copy/evaluate/free so it is very wasteful.  	*/
-    /* (2) The lifetime of the copy is problematic.  Enabling this code in its	*/
-    /* current state will almost certainly reveal memory leaks or double-free	*/
-    /* failures.  Some compromise (detect and allow a simple copy but nothing	*/
-    /* else?) might be possible so this code is left as a starting point.  	*/
-    if (x->type == ARRAY) {
-	int i;
-	int array_size = x->v.value_array[0].v.int_val + 1;
-	stack[s_p].v.value_array = gp_alloc(array_size * sizeof(struct value), "push copy of array");
-	memcpy(stack[s_p].v.value_array, x->v.value_array, array_size*sizeof(struct value));
-	for (i=1; i<array_size; i++) 
-	    if (stack[s_p].v.value_array[i].type == STRING) {
-		stack[s_p].v.value_array[i].v.string_val
-		= strdup(stack[s_p].v.value_array[i].v.string_val);
-	    }
-    }
-#endif
 }
 
 
@@ -687,7 +657,7 @@ execute_at(struct at_type *at_ptr)
 }
 
 /* As of May 2013 input of Inf/NaN values through evaluation is treated */
-/* equivalently to direct input of a formated value.  See imageNaN.dem. */
+/* equivalently to direct input of a formatted value.  See imageNaN.dem. */
 void
 evaluate_at(struct at_type *at_ptr, struct value *val_ptr)
 {
@@ -810,18 +780,16 @@ del_udv_by_name(char *key, TBOOLEAN wildcard)
 
  	/* exact match */
 	else if (!wildcard && !strcmp(key, udv_ptr->udv_name)) {
-	    gpfree_array(&(udv_ptr->udv_value));
-	    gpfree_string(&(udv_ptr->udv_value));
-	    gpfree_datablock(&(udv_ptr->udv_value));
+	    gpfree_vgrid(udv_ptr);
+	    free_value(&(udv_ptr->udv_value));
 	    udv_ptr->udv_value.type = NOTDEFINED;
 	    break;
 	}
 
 	/* wildcard match: prefix matches */
 	else if ( wildcard && !strncmp(key, udv_ptr->udv_name, strlen(key)) ) {
-	    gpfree_array(&(udv_ptr->udv_value));
-	    gpfree_string(&(udv_ptr->udv_value));
-	    gpfree_datablock(&(udv_ptr->udv_value));
+	    gpfree_vgrid(udv_ptr);
+	    free_value(&(udv_ptr->udv_value));
 	    udv_ptr->udv_value.type = NOTDEFINED;
 	    /* no break - keep looking! */
 	}
@@ -848,13 +816,13 @@ clear_udf_list()
     first_udf = NULL;
 }
 
-static void update_plot_bounds __PROTO((void));
-static void fill_gpval_axis __PROTO((AXIS_INDEX axis));
-static void fill_gpval_sysinfo __PROTO((void));
-static void set_gpval_axis_sth_double __PROTO((const char *prefix, AXIS_INDEX axis, const char *suffix, double value, int is_int));
+static void update_plot_bounds(void);
+static void fill_gpval_axis(AXIS_INDEX axis);
+static void fill_gpval_sysinfo(void);
+static void set_gpval_axis_sth_double(const char *prefix, AXIS_INDEX axis, const char *suffix, double value);
 
 static void
-set_gpval_axis_sth_double(const char *prefix, AXIS_INDEX axis, const char *suffix, double value, int is_int)
+set_gpval_axis_sth_double(const char *prefix, AXIS_INDEX axis, const char *suffix, double value)
 {
     struct udvt_entry *v;
     char *cc, s[24];
@@ -862,12 +830,9 @@ set_gpval_axis_sth_double(const char *prefix, AXIS_INDEX axis, const char *suffi
     for (cc=s; *cc; cc++)
 	*cc = toupper((unsigned char)*cc); /* make the name uppercase */
     v = add_udv_by_name(s);
-    if (!v) 
+    if (!v)
 	return; /* should not happen */
-    if (is_int)
-	Ginteger(&v->udv_value, (int)(value+0.5));
-    else
-	Gcomplex(&v->udv_value, value, 0);
+    Gcomplex(&v->udv_value, value, 0);
 }
 
 static void
@@ -875,15 +840,13 @@ fill_gpval_axis(AXIS_INDEX axis)
 {
     const char *prefix = "GPVAL";
     AXIS *ap = &axis_array[axis];
-    double a = AXIS_DE_LOG_VALUE(axis, ap->min);
-    double b = AXIS_DE_LOG_VALUE(axis, ap->max);
-    set_gpval_axis_sth_double(prefix, axis, "MIN", a, 0);
-    set_gpval_axis_sth_double(prefix, axis, "MAX", b, 0);
-    set_gpval_axis_sth_double(prefix, axis, "LOG", ap->base, 0);
+    set_gpval_axis_sth_double(prefix, axis, "MIN", ap->min);
+    set_gpval_axis_sth_double(prefix, axis, "MAX", ap->max);
+    set_gpval_axis_sth_double(prefix, axis, "LOG", ap->base);
 
     if (axis < POLAR_AXIS) {
-	set_gpval_axis_sth_double("GPVAL_DATA", axis, "MIN", AXIS_DE_LOG_VALUE(axis, ap->data_min), 0);
-	set_gpval_axis_sth_double("GPVAL_DATA", axis, "MAX", AXIS_DE_LOG_VALUE(axis, ap->data_max), 0);
+	set_gpval_axis_sth_double("GPVAL_DATA", axis, "MIN", ap->data_min);
+	set_gpval_axis_sth_double("GPVAL_DATA", axis, "MAX", ap->data_max);
     }
 }
 
@@ -904,7 +867,7 @@ fill_gpval_string(char *var, const char *stringvalue)
 }
 
 void
-fill_gpval_integer(char *var, int value)
+fill_gpval_integer(char *var, intgr_t value)
 {
     struct udvt_entry *v = add_udv_by_name(var);
     if (!v)
@@ -991,9 +954,9 @@ update_gpval_variables(int context)
 	/* in which x/y axes are drawn after 'set view equal xy[z]' */
 	fill_gpval_float("GPVAL_VIEW_XCENT",
 		(double)(canvas.xright+1 - xmiddle)/(double)(canvas.xright+1));
-	fill_gpval_float("GPVAL_VIEW_YCENT", 
+	fill_gpval_float("GPVAL_VIEW_YCENT",
 		1.0 - (double)(canvas.ytop+1 - ymiddle)/(double)(canvas.ytop+1));
-	fill_gpval_float("GPVAL_VIEW_RADIUS", 
+	fill_gpval_float("GPVAL_VIEW_RADIUS",
 		0.5 * surface_scale * xscaler/(double)(canvas.xright+1));
 
 	return;
@@ -1148,7 +1111,7 @@ gp_word(char *string, int i)
     struct value a;
 
     push(Gstring(&a, string));
-    push(Ginteger(&a, i));
+    push(Ginteger(&a, (intgr_t)i));
     f_word((union argument *)NULL);
     pop(&a);
 

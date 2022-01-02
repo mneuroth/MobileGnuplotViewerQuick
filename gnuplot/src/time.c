@@ -31,15 +31,10 @@
 ]*/
 
 
-/* This module either adds a routine gstrptime() to read a formatted time,
- * augmenting the standard suite of time routines provided by ansi,
- * or it completely replaces the whole lot with a new set of routines
- * which count time relative to the EPOCH date. Default is to use the
- * new routines. Define USE_SYSTEM_TIME to use the system routines, at your
- * own risk. One problem in particular is that not all systems allow
- * the time with integer value 0 to be represented symbolically, which
- * prevents use of relative times.  Also, the system routines do not allow
- * you to read in fractional seconds.
+/* This module provides a set of routines to read or write times using
+ * human-friendly units (hours, days, years, etc).  Unlike similar
+ * ansi routines, these ones support sub-second precision and relative
+ * times.  E.g.   -1.23 seconds is a valid time.
  */
 
 
@@ -48,7 +43,7 @@
 #include "util.h"
 #include "variable.h"
 
-static char *read_int __PROTO((char *s, int nr, int *d));
+static char *read_int(char *s, int nr, int *d);
 
 static char *
 read_int(char *s, int nr, int *d)
@@ -63,18 +58,11 @@ read_int(char *s, int nr, int *d)
 }
 
 
-
-#ifndef USE_SYSTEM_TIME
-
-/* a new set of routines to completely replace the ansi ones
- * Use at your own risk
- */
-
-static int gdysize __PROTO((int yr));
+static int gdysize(int yr);
 
 static int mndday[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-static size_t xstrftime __PROTO((char *buf, int bsz, const char *fmt, struct tm * tm, double usec, double fulltime));
+static size_t xstrftime(char *buf, int bsz, const char *fmt, struct tm * tm, double usec, double fulltime);
 
 /* days in year */
 static int
@@ -98,7 +86,7 @@ gdysize(int yr)
  *		a date that is returned in tm, with fractional seconds
  *		returned in usec
  * DT_DMS	indicates relative time format elements were encountered
- *		(tH tM tS).  The relative time in seconds is returned
+ *		(tD tH tM tS).  The relative time in seconds is returned
  *		in reltime.
  * DT_BAD	time format could not be interpreted
  *
@@ -111,11 +99,16 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
     int yday = 0;
     TBOOLEAN sanity_check_date = FALSE;
     TBOOLEAN reltime_formats = FALSE;
+    TBOOLEAN explicit_pm = FALSE;
+    TBOOLEAN explicit_am = FALSE;
+    TBOOLEAN leading_minus_sign = FALSE;
 
     tm->tm_mday = 1;
     tm->tm_mon = tm->tm_hour = tm->tm_min = tm->tm_sec = 0;
     /* make relative times work (user-defined tic step) */
     tm->tm_year = ZERO_YEAR;
+
+    init_timezone(tm);
 
     /* Fractional seconds will be returned separately, since
      * there is no slot for the fraction in struct tm.
@@ -145,7 +138,7 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
 	tm->tm_mon = -1;
 	sanity_check_date = TRUE;
     }
-    /* Relative time formats tH tM tS cannot be mixed with date formats */
+    /* Relative time formats tD tH tM tS cannot be mixed with date formats */
     if (strstr(fmt,"%t")) {
 	reltime_formats = TRUE;
 	*reltime = 0.0;
@@ -265,18 +258,32 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
 		ggmtime(tm, when);
 		if (fraction && fraction < s)
 		    ufraction = atof(fraction);
-		if (ufraction < 1.)		/* Filter out e.g. 123.456e7 */
+		if (ufraction < 1.)	/* Filter out e.g. 123.456e7 */
 		    *usec = ufraction;
-		*reltime = when;		/* not used unless return DT_DMS */
+		*reltime = when;	/* not used unless we return DT_DMS ... */
+		if (when < 0)		/* ... which we force for negative times */
+		    reltime_formats = TRUE;
 		break;
 	    }
 
 	case 't':
-	    /* Relative time formats tH tM tS */
+	    /* Relative time formats tD tH tM tS */
 	    {
 		double cont = 0;
+
+		/* Special case of negative time with first field 0,
+		 * e.g.  -00:12:34
+		 */
+		if (*reltime == 0) {
+		    while (isspace((unsigned char) *s)) s++;
+		    if (*s == '-')
+			leading_minus_sign = TRUE;
+		}
+
 		fmt++;
-		if (*fmt == 'H') {
+		if (*fmt == 'D') {
+		    cont = 86400. * strtod(s, &s);
+		} else if (*fmt == 'H') {
 		    cont = 3600. * strtod(s, &s);
 		} else if (*fmt == 'M') {
 		    cont = 60. * strtod(s, &s);
@@ -287,25 +294,58 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
 		}
 		if (*reltime < 0)
 		    *reltime -= fabs(cont);
+		else if (*reltime > 0)
+		    *reltime += fabs(cont);
+		else if (leading_minus_sign)
+		    *reltime -= fabs(cont);
 		else
-		    *reltime += cont;
-		/* FIXME:  reltime > 0 && cont < 0 should be disallowed */
+		    *reltime = cont;
 		/* FIXME:  leading precision field should be accepted but ignored */
 		break;
 	    }
 
 	case 'a':		/* weekday name (ignored) */
 	case 'A':		/* weekday name (ignored) */
-	    while (isalpha(*s))
+	    while (isalpha((unsigned char) *s))
 		s++;
 	    break;
 	case 'w':		/* one or two digit weekday number (ignored) */
 	case 'W':		/* one or two digit week number (ignored) */
-	    if (isdigit(*s))
+	    if (isdigit((unsigned char) *s))
 		s++;
-	    if (isdigit(*s))
+	    if (isdigit((unsigned char) *s))
 		s++;
 	    break;
+
+	case 'p':		/* am or pm */
+	    if (!strncmp(s, "pm", 2) || !strncmp(s, "PM", 2))
+		explicit_pm = TRUE;
+	    if (!strncmp(s, "am", 2) || !strncmp(s, "AM", 2))
+		explicit_am = TRUE;
+	    s += 2;
+	    break;
+
+#ifdef HAVE_STRUCT_TM_TM_GMTOFF
+	case 'z':		/* timezone offset  */
+	    {
+		int neg = (*s == '-') ? -1 : 1;
+		int off_h, off_m;
+		if (*s == '-' || *s == '+')
+		    s++;
+		s = read_int(s, 2, &off_h);
+		if (*s == ':')
+		    s++;
+		s = read_int(s, 2, &off_m);
+		tm->tm_gmtoff = 3600*off_h + 60*off_m;
+		tm->tm_gmtoff *= neg;
+
+	        break;
+	    }
+	case 'Z':		/* timezone name (ignored) */
+	    while (*s && !isspace((unsigned char) *s))
+		s++;
+	    break;
+#endif
 
 	default:
 	    int_warn(DATAFILE, "Bad time format in string");
@@ -319,6 +359,12 @@ gstrptime(char *s, char *fmt, struct tm *tm, double *usec, double *reltime)
     }
 
     FPRINTF((_stderr, "read date-time : %02d/%02d/%d:%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
+
+    /* apply AM/PM correction */
+    if ((tm->tm_hour < 12) && explicit_pm)
+	tm->tm_hour += 12;
+    if ((tm->tm_hour == 12) && explicit_am)
+	tm->tm_hour = 0;
 
     /* now sanity check the date/time entered, normalising if necessary
      * read_int cannot read a -ve number, but can read %m=0 then decrement
@@ -587,15 +633,36 @@ xstrftime(
 		int tminute, tsecond;
 
 		    switch (*fmt++) {
+		    case 'D':
+			/* +/- fractional days */
+			if (p > 0) {
+			    incr = snprintf(s, bsz-l-1, "%*.*f", w, p, fulltime/86400.);
+			    CHECK_SPACE(incr);
+			    break;
+			}
+			/* Set flag in case hours come next */
+			if (fulltime < 0) {
+			    CHECK_SPACE(1);	/* the minus sign */
+			    *s++ = '-';
+			    l++;
+			}
+			sign_printed = TRUE;
+			/* +/- integral day truncated toward zero */
+			sprintf(s, "%0*d", w, (int)floor(fabs(fulltime/86400.)));
+
+			/* Subtract the day component from the total */
+			fulltime -= sgn(fulltime) * 86400. * floor(fabs(fulltime/86400.));
+			break;
 		    case 'H':
 			/* +/- fractional hours (not wrapped at 24h) */
 			if (p > 0) {
-			    incr = snprintf(s, bsz-l-1, "%*.*f", w, p, fulltime/3600.);
+			    incr = snprintf(s, bsz-l-1, "%*.*f", w, p,
+				sign_printed ? fabs(fulltime)/3600. : fulltime/3600.);
 			    CHECK_SPACE(incr);
 			    break;
 			}
 			/* Set flag in case minutes come next */
-			if (fulltime < 0) {
+			if (fulltime < 0 && !sign_printed) {
 			    CHECK_SPACE(1);	/* the minus sign */
 			    *s++ = '-';
 			    l++;
@@ -653,56 +720,24 @@ xstrftime(
 		    break;
 		}
 
-	    case 'W':		/* mon 1 day of week */
+	    case 'W':		/* Mon..Sun is day 0..6 */
+		/* CHANGE Jan 2021
+		 * Follow ISO 8601 standard week date convention.
+		 */
 		{
-		    int week;
-		    if (tm->tm_yday <= tm->tm_wday) {
-			week = 1;
-
-			if ((tm->tm_mday - tm->tm_yday) > 4) {
-			    week = 52;
-			}
-			if (tm->tm_yday == tm->tm_wday && tm->tm_wday == 0)
-			    week = 52;
-
-		    } else {
-
-			/* sun prev week */
-			int bw = tm->tm_yday - tm->tm_wday;
-
-			if (tm->tm_wday > 0)
-			    bw += 7;	/* sun end of week */
-
-			week = (int) bw / 7;
-
-			if ((bw % 7) > 2)	/* jan 1 is before friday */
-			    week++;
-		    }
-		    FORMAT_STRING(1, 2, week);	/* %02d */
-		    break;
+		int week = tmweek(fulltime, 0);
+		FORMAT_STRING(1, 2, week);	/* %02d */
+		break;
 		}
 
-	    case 'U':		/* sun 1 day of week */
+	    case 'U':		/* Sun..Sat is day 0..6 */
+		/* CHANGE Jan 2021
+		 * Follow CDC/MMWR "epi week" convention
+		 */
 		{
-		    int week, bw;
-
-		    if (tm->tm_yday <= tm->tm_wday) {
-			week = 1;
-			if ((tm->tm_mday - tm->tm_yday) > 4) {
-			    week = 52;
-			}
-		    } else {
-			/* sat prev week */
-			bw = tm->tm_yday - tm->tm_wday - 1;
-			if (tm->tm_wday >= 0)
-			    bw += 7;	/* sat end of week */
-			week = (int) bw / 7;
-			if ((bw % 7) > 1) {	/* jan 1 is before friday */
-			    week++;
-			}
-		    }
-		    FORMAT_STRING(1, 2, week);	/* %02d */
-		    break;
+		int week = tmweek(fulltime, 1);
+		FORMAT_STRING(1, 2, week);	/* %02d */
+		break;
 		}
 
 	    case 'w':		/* day of week, sun=0 */
@@ -738,7 +773,7 @@ double
 gtimegm(struct tm *tm)
 {
     int i;
-    /* returns sec from year ZERO_YEAR, defined in gp_time.h */
+    /* returns sec from year ZERO_YEAR in UTC, defined in gp_time.h */
     double dsec = 0.;
 
     if (tm->tm_year < ZERO_YEAR) {
@@ -766,8 +801,13 @@ gtimegm(struct tm *tm)
     dsec *= 60.0;
     dsec += tm->tm_sec;
 
-    FPRINTF((_stderr, "broken-down time : %02d/%02d/%d:%02d:%02d:%02d = %g seconds\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour,
-	     tm->tm_min, tm->tm_sec, dsec));
+#ifdef HAVE_STRUCT_TM_TM_GMTOFF
+    dsec -= tm->tm_gmtoff;
+
+    FPRINTF((_stderr, "broken-down time : %02d/%02d/%d:%02d:%02d:%02d:(%02d:%02d) = %g seconds\n",
+	     tm->tm_mday, tm->tm_mon + 1, tm->tm_year, tm->tm_hour,
+	     tm->tm_min, tm->tm_sec, tm->tm_gmtoff / 3600, (tm->tm_gmtoff % 3600) / 60, dsec));
+#endif
 
     return (dsec);
 }
@@ -789,6 +829,8 @@ ggmtime(struct tm *tm, double l_clock)
 
     tm->tm_year = ZERO_YEAR;
     tm->tm_mday = tm->tm_yday = tm->tm_mon = tm->tm_hour = tm->tm_min = tm->tm_sec = 0;
+    init_timezone(tm);
+
     if (l_clock >= 0) {
 	for (;;) {
 	    int days_in_year = gdysize(tm->tm_year);
@@ -837,105 +879,115 @@ ggmtime(struct tm *tm, double l_clock)
     return (0);
 }
 
-
-
-
-#else /* USE_SYSTEM_TIME */
-
-/* define gnu time routines in terms of system time routines */
-
-size_t
-gstrftime(char *buf, size_t bufsz, const char *fmt, double l_clock)
-{
-    time_t t = (time_t) l_clock;
-    return strftime(buf, bufsz, fmt, gmtime(&t));
-}
-
-double
-gtimegm(struct tm *tm)
-{
-    return (double) mktime(tm);
-}
-
+/*
+ * tmweek( time, standard )
+ * input:  time in seconds since epoch date 1-Jan-1970
+ * return: week of year in either
+ *      standard = 0  to use ISO 8601 standard week (Mon-Sun)
+ *      standard = 1  to use CDC/MMWR "epi week" (Sun-Sat)
+ * Notes:
+ *	The first week of the year is the week whose starts is closest
+ *	    to 1 January, even if that is in the previous calendar year.
+ *	Corollaries: Up to three days in Week 1 may be in previous year.
+ *	The last week of a year may extend into the next calendar year.
+ *	The highest week number in a year is either 52 or 53.
+ */
 int
-ggmtime(struct tm *tm, double l_clock)
+tmweek( double time, int standard )
 {
-    time_t t = (time_t) l_clock;
-    struct tm *m = gmtime(&t);
-    *tm = *m;			/* can any non-ansi compilers not do this ? */
-    return 0;
-}
+    struct tm tm;
+    int wday, week;
 
-/* supplemental routine gstrptime() to read a formatted time */
+    /* Fill time structure from time since epoch in seconds */
+    ggmtime(&tm, time);
 
-char *
-gstrptime(char *s, char *fmt, struct tm *tm)
-{
-    FPRINTF((_stderr, "gstrptime(\"%s\", \"%s\")\n", s, fmt));
+    if (standard == 0)
+	/* ISO C tm->tm_wday uses 0 = Sunday but we want 0 = Monday */
+	wday = (6 + tm.tm_wday) % 7;
+    else
+	wday = tm.tm_wday;
+    week = (int)(10 + tm.tm_yday - wday ) / 7;
 
-    /* linux does not appear to like years before 1902
-     * NT complains if its before 1970
-     * initialise fields to midnight, 1st Jan, 1970 (for relative times)
+    /* Up to three days in December may belong in week 1 of the next year. */
+    if (tm.tm_mon == 11) {
+	if ( (tm.tm_mday == 31 && wday < 3)
+	||   (tm.tm_mday == 30 && wday < 2)
+	||   (tm.tm_mday == 29 && wday < 1))
+	    week = 1;
+    }
+
+    /* Up to three days in January may be in the last week of the previous year.
+     * That might be either week 52 or week 53 depending on the leap year cycle.
      */
-    tm->tm_sec = tm->tm_min = tm->tm_hour = 0;
-    tm->tm_mday = 1;
-    tm->tm_mon = 0;
-    tm->tm_year = 70;
-    /* oops - it goes wrong without this */
-    tm->tm_isdst = 0;
+    if (week == 0) {
+	struct tm temp = tm;
+	int Jan01, Dec31;
 
-    for (; *fmt && *s; ++fmt) {
-	if (*fmt != '%') {
-	    if (*s != *fmt)
-		return s;
-	    ++s;
-	    continue;
-	}
-	assert(*fmt == '%');
-
-	switch (*++fmt) {
-	case 0:
-	    /* uh oh - % is last character in format */
-	    return s;
-	case '%':
-	    /* literal % */
-	    if (*s++ != '%')
-		return s - 1;
-	    continue;
-
-#define NOTHING	/* nothing */
-#define LETTER(L, width, field, extra)		\
-	case L:					\
-	    s=read_int(s,width,&tm->field);	\
-	    extra;				\
-	    continue;
-
-	    LETTER('d', 2, tm_mday, NOTHING);
-	    LETTER('m', 2, tm_mon, NOTHING);
-	    LETTER('y', 2, tm_year, NOTHING);
-	    LETTER('Y', 4, tm_year, tm->tm_year -= 1900);
-	    LETTER('H', 2, tm_hour, NOTHING);
-	    LETTER('M', 2, tm_min, NOTHING);
-	    LETTER('S', 2, tm_sec, NOTHING);
-#undef NOTHING
-#undef LETTER
-
-	default:
-	    int_error(DATAFILE, "incorrect time format character");
-	}
+	/* Was either 1 Jan or 31 Dec of the previous year precisely midweek? */
+	temp.tm_year -= 1; temp.tm_mon = 0; temp.tm_mday = 1;
+	ggmtime( &temp, gtimegm(&temp) );
+	Jan01 = temp.tm_wday;
+	temp.tm_mon = 11; temp.tm_mday = 31;
+	ggmtime( &temp, gtimegm(&temp) );
+	Dec31 = temp.tm_wday;
+	if (standard == 0)
+	    week = (Jan01 == 4 || Dec31 == 4) ? 53 : 52;
+	else
+	    week = (Jan01 == 3 || Dec31 == 3) ? 53 : 52;
     }
 
-    FPRINTF((_stderr, "Before mktime : %d/%d/%d:%d:%d:%d\n", tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
-    /* mktime range-checks the time */
-
-    if (mktime(tm) == -1) {
-	FPRINTF((_stderr, "mktime() was not happy\n"));
-	int_error(DATAFILE, "Invalid date/time [mktime() did not like it]");
-    }
-    FPRINTF((_stderr, "After mktime : %d/%d/%d:%d:%d:%d\n", tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_hour, tm->tm_min, tm->tm_sec));
-
-    return s;
+    return week;
 }
 
 
-#endif /* USE_SYSTEM_TIME */
+/*
+ * Convert from week date notation to standard time in seconds since epoch.
+ *   time = weekdate( year, week, standard )
+ *   year, week as given in "week date" format; may not be calendar year
+ *          e.g. ISO week date 2009-W01-2 corresponds to 30 Dec 2008
+ *   standard 0 - ISO 8601 week date (week starts on Monday)
+ *   standard 1 - CDC/MMRW epidemiological week (starts on Sunday)
+ */
+double
+weekdate( int year, int week, int day, int standard )
+{
+    struct tm time_tm;
+    double time;
+    int wday;
+
+    /* Sanity check input (but allow day = 0 to mean day 1) */
+    /* FIXME:  Is there a minimum year for ISO dates? */
+    if (week < 1 || week > 53 || day > 7 || day < 0)
+	int_error(NO_CARET, "invalid week date");
+    if (day == 0)
+	day = 1;
+
+    memset( &time_tm, 0, sizeof(struct tm) );
+
+    /* Find standard time and week date for 1 Jan in nominal year.
+     * This will let us determine the start date for the week date system.
+     */
+    time_tm.tm_year = year;
+    time_tm.tm_mday = 1;
+    time_tm.tm_mon = 0;
+    time = gtimegm(&time_tm);
+
+    /* Normalize (unlike mktime, gtimegm does not recalculation wday) */
+    ggmtime(&time_tm, time);
+
+    /* Add offset to nearest Sunday (ISO 8601) */
+    if (standard == 1)
+	wday = time_tm.tm_wday;
+    else
+	wday = (6 + time_tm.tm_wday) % 7;
+    if (wday < 4)
+	time -= wday * DAY_SEC;
+    else
+	time += (7-wday) * DAY_SEC;
+
+    /* Now add offsets to the week number we were given */
+    time += (week-1) * WEEK_SEC;
+    time += (day-1) * DAY_SEC;
+
+    return time;
+}

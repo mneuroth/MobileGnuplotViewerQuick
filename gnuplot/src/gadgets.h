@@ -1,3 +1,7 @@
+/*
+ * gadgets.h,v 1.1.3.1 2000/05/03 21:47:15 hbb Exp
+ */
+
 /* GNUPLOT - gadgets.h */
 
 /*[
@@ -79,7 +83,7 @@ typedef struct text_label {
     enum JUSTIFY pos;		/* left/center/right horizontal justification */
     int rotate;
     int layer;
-    int boxed;			/* EAM_BOXED_TEXT */
+    int boxed;			/* 0 no box;  -1 default box props;  >0 boxstyle */
     char *text;
     char *font;			/* Entry font added by DJL */
     struct t_colorspec textcolor;
@@ -120,7 +124,6 @@ typedef struct arrow_def {
     struct arrow_style_type arrow_properties;
 } arrow_def;
 
-#ifdef EAM_OBJECTS
 /* The object types supported so far are OBJ_RECTANGLE, OBJ_CIRCLE, and OBJ_ELLIPSE */
 typedef struct rectangle {
     int type;			/* 0 = corners;  1 = center + size */
@@ -167,8 +170,8 @@ typedef struct object {
     struct object *next;
     int tag;
     int layer;			/* behind or back or front */
-    int object_type;		/* OBJ_RECTANGLE */
-    t_clip_object clip;         
+    int object_type;		/* e.g. OBJ_RECTANGLE */
+    t_clip_object clip;
     fill_style_type fillstyle;
     lp_style_type lp_properties;
     union o {t_rectangle rectangle; t_circle circle; t_ellipse ellipse; t_polygon polygon;} o;
@@ -177,7 +180,6 @@ typedef struct object {
 #define OBJ_CIRCLE (2)
 #define OBJ_ELLIPSE (3)
 #define OBJ_POLYGON (4)
-#endif
 
 /* Datastructure implementing 'set dashtype' */
 struct custom_dashtype_def {
@@ -201,13 +203,34 @@ struct arrowstyle_def {
     struct arrow_style_type arrow_properties;
 };
 
-/* For 'set style parallelaxis' */
+/* Datastructure for 'set pixmap */
+typedef struct t_pixmap {
+    int tag;			/* index referring to this pixmap */
+    struct t_pixmap *next;	/* pointer to next pixmap in the linked list */
+    unsigned int ncols, nrows;	/* image size */
+    t_position pin;		/* where it goes */
+    t_position extent;		/* width dx;  dy implicitly dx*aspect_ratio */
+    int layer;			/* front/back/behind */
+    TBOOLEAN center;		/* position is center rather than lower left */
+    char *filename;		/* where to read the pixmap pixmap */
+    coordval *image_data;	/* pixel array RGBARGBA... */
+} t_pixmap;
+
+/* Used by 'set style parallelaxis' and 'set style spiderplot' */
 struct pa_style {
     lp_style_type lp_properties;/* used to draw the axes themselves */
     int layer;			/* front/back */
 };
 #define DEFAULT_PARALLEL_AXIS_STYLE \
-	{{0, LT_BLACK, 0, DASHTYPE_SOLID, 0, 0, 2.0, 0.0, DEFAULT_P_CHAR, BLACK_COLORSPEC, DEFAULT_DASHPATTERN}, LAYER_FRONT }
+	{{0, LT_BLACK, 0, DASHTYPE_SOLID, 0, 0, 2.0, 0.0, DEFAULT_P_CHAR, BLACK_COLORSPEC, DEFAULT_DASHPATTERN}, LAYER_FRONT}
+
+struct spider_web {
+    lp_style_type lp_properties;
+    fill_style_type fillstyle;
+};
+extern struct spider_web spiderplot_style;
+#define DEFAULT_SPIDERPLOT_STYLE \
+	{ DEFAULT_LP_STYLE_TYPE, {FS_EMPTY, 100, 0, DEFAULT_COLORSPEC} }
 
 /* The stacking direction of the key box: (vertical, horizontal) */
 typedef enum en_key_stack_direction {
@@ -242,13 +265,12 @@ typedef enum en_key_sample_positioning {
 } t_key_sample_positioning;
 
 typedef struct {
-    int opt_given; /* option given / not given (otherwise default) */
-    int closeto;   /* from list FILLEDCURVES_CLOSED, ... */
+    enum filledcurves_opts_id closeto;	/* from list FILLEDCURVES_CLOSED, ... */
     double at;	   /* value for FILLEDCURVES_AT... */
     double aty;	   /* the other value for FILLEDCURVES_ATXY */
     int oneside;   /* -1 if fill below bound only; +1 if fill above bound only */
 } filledcurves_opts;
-#define EMPTY_FILLEDCURVES_OPTS { 0, 0, 0.0, 0.0, 0 }
+#define EMPTY_FILLEDCURVES_OPTS { FILLEDCURVES_DEFAULT, 0.0, 0.0, 0 }
 
 typedef struct histogram_style {
     int type;		/* enum t_histogram_type */
@@ -294,7 +316,6 @@ typedef struct boxplot_style {
 extern boxplot_style boxplot_opts;
 #define DEFAULT_BOXPLOT_STYLE { 0, 1.5, TRUE, 6, CANDLESTICKS, -1.0, 1.0, BOXPLOT_FACTOR_LABELS_AUTO, FALSE }
 
-#ifdef EAM_BOXED_TEXT
 typedef struct textbox_style {
     TBOOLEAN opaque;	/* True if the box is background-filled before writing into it */
     TBOOLEAN noborder;	/* True if you want fill only, no lines */
@@ -305,7 +326,6 @@ typedef struct textbox_style {
     t_colorspec fillcolor;	/* only used if opaque is TRUE */
 } textbox_style;
 #define DEFAULT_TEXTBOX_STYLE { FALSE, FALSE, 1.0, 1.0, 1.0, BLACK_COLORSPEC, BACKGROUND_COLORSPEC }
-#endif
 
 /***********************************************************/
 /* Variables defined by gadgets.c needed by other modules. */
@@ -348,6 +368,7 @@ typedef struct {
     struct lp_style_type box;	/* linetype of box around key:  */
     char *font;			/* Will be used for both key title and plot titles */
     struct t_colorspec textcolor;	/* Will be used for both key title and plot titles */
+    struct t_colorspec fillcolor;	/* only used if "set key front" */
     BoundingBox bounds;
     int maxcols;		/* maximum no of columns for horizontal keys */
     int maxrows;		/* maximum no of rows for vertical keys */
@@ -371,6 +392,7 @@ extern legend_key keyT;
 		FALSE, FALSE, FALSE, TRUE, \
 		DEFAULT_KEYBOX_LP, \
 		NULL, {TC_LT, LT_BLACK, 0.0}, \
+		BACKGROUND_COLORSPEC, \
 		{0,0,0,0}, 0, 0, \
 		EMPTY_LABELSTRUCT}
 
@@ -425,6 +447,9 @@ extern float yoffset;		/* y origin setting */
 extern float aspect_ratio;	/* 1.0 for square */
 extern int aspect_ratio_3D;	/* 2 for equal scaling of x and y; 3 for z also */
 
+extern double boxwidth;
+extern TBOOLEAN boxwidth_is_absolute;
+
 /* plot border autosizing overrides, in characters (-1: autosize) */
 extern t_position lmargin, bmargin, rmargin, tmargin;
 #define DEFAULT_MARGIN_POSITION {character, character, character, -1, -1, -1}
@@ -441,11 +466,12 @@ extern struct linestyle_def *first_mono_linestyle;
 
 extern struct arrowstyle_def *first_arrowstyle;
 
+extern struct t_pixmap *pixmap_listhead;
+
 extern struct pa_style parallel_axis_style;
 
-#ifdef EAM_OBJECTS
 extern struct object *first_object;
-#endif
+extern struct object grid_wall[];
 
 extern text_label title;
 
@@ -457,6 +483,7 @@ extern text_label timelabel;
 extern int timelabel_bottom;
 
 extern TBOOLEAN	polar;
+extern TBOOLEAN spiderplot;
 extern TBOOLEAN inverted_raxis;	/* true if R_AXIS.set_min > R_AXIS.set_max */
 
 #define ZERO 1e-8		/* default for 'zero' set option */
@@ -485,6 +512,7 @@ extern const struct lp_style_type default_border_lp;
 extern TBOOLEAN	clip_lines1;
 extern TBOOLEAN	clip_lines2;
 extern TBOOLEAN	clip_points;
+extern TBOOLEAN	clip_radial;
 
 #define SAMPLES 100		/* default number of samples for a plot */
 extern int samples_1;
@@ -528,38 +556,42 @@ extern TBOOLEAN volatile_data;
 extern int current_x11_windowid;
 
 /* Plot layer definitions are collected here. */
-/* Someday they might actually be used.       */
 #define LAYER_BEHIND     -1
 #define LAYER_BACK        0
 #define LAYER_FRONT       1
-#define LAYER_FOREGROUND  2	/* not currently used */
-#define LAYER_PLOT       16	/* currently used only by fig.trm */
+#define LAYER_FOREGROUND  2	/* used only for axis tic labels */
+#define LAYER_FRONTBACK   4	/* used only by grid walls */
+#define LAYER_DEPTHORDER  8	/* for objects to be included in pm3d depth sorting */
+#define LAYER_PLOT	 16	/* currently used only by fig.trm */
 #define LAYER_PLOTLABELS 99
 
 /* Functions exported by gadgets.c */
 
+/* initialization (called once on program entry */
+void init_gadgets(void);
+
 /* moved here from util3d: */
-int draw_clip_line __PROTO((int, int, int, int));
-void draw_clip_polygon __PROTO((int , gpiPoint *));
-void draw_clip_arrow __PROTO((int, int, int, int, int));
-void clip_polygon __PROTO((gpiPoint *, gpiPoint *, int , int *));
-int clip_point __PROTO((unsigned int, unsigned int));
-void clip_put_text __PROTO((unsigned int, unsigned int, char *));
+int draw_clip_line(int, int, int, int);
+void draw_clip_polygon(int , gpiPoint *);
+void draw_clip_arrow(double, double, double, double, t_arrow_head);
+void clip_polygon(gpiPoint *, gpiPoint *, int , int *);
+int clip_point(int, int);
 
 /* moved here from graph3d: */
-void clip_move __PROTO((unsigned int x, unsigned int y));
-void clip_vector __PROTO((unsigned int x, unsigned int y));
+void clip_move(int x, int y);
+void clip_vector(int x, int y);
+
+void draw_polar_clip_line(double, double, double, double);
 
 /* Common routines for setting line or text color from t_colorspec */
-void apply_pm3dcolor __PROTO((struct t_colorspec *tc));
-void reset_textcolor __PROTO((const struct t_colorspec *tc));
+void apply_pm3dcolor(struct t_colorspec *tc);
+void reset_textcolor(const struct t_colorspec *tc);
 
 /* Timestamp code shared by 2D and 3D */
-void do_timelabel __PROTO((unsigned int x, unsigned int y));
+void do_timelabel(int x, int y);
 
 extern fill_style_type default_fillstyle;
 
-#ifdef EAM_OBJECTS
 /*       Warning: C89 does not like the union initializers     */
 extern struct object default_rectangle;
 #define DEFAULT_RECTANGLE_STYLE { NULL, -1, 0, OBJ_RECTANGLE, OBJ_CLIP,	\
@@ -584,32 +616,76 @@ extern struct object default_ellipse;
 	{0, LT_BLACK, 0, DASHTYPE_SOLID, 0, 0, 1.0, 0.0, DEFAULT_P_CHAR, BLACK_COLORSPEC, DEFAULT_DASHPATTERN}, \
 	{.polygon = {0, NULL} } }
 
-#endif
+#define WALL_Y0_TAG 0
+#define WALL_X0_TAG 1
+#define WALL_Y1_TAG 2
+#define WALL_X1_TAG 3
+#define WALL_Z0_TAG 4
+#define WALL_Y0_CORNERS { {graph, graph, graph, 0, 0, 0}, \
+		{graph, graph, graph, 0, 0, 1}, {graph, graph, graph, 1, 0, 1},	\
+		{graph, graph, graph, 1, 0, 0}, {graph, graph, graph, 0, 0, 0} }
+#define WALL_X0_CORNERS { {graph, graph, graph, 0, 0, 0}, \
+		{graph, graph, graph, 0, 1, 0},	{graph, graph, graph, 0, 1, 1}, \
+		{graph, graph, graph, 0, 0, 1}, {graph, graph, graph, 0, 0, 0} }
+#define WALL_Y1_CORNERS { {graph, graph, graph, 0, 1, 0}, \
+		{graph, graph, graph, 1, 1, 0}, {graph, graph, graph, 1, 1, 1},	\
+		{graph, graph, graph, 0, 1, 1}, {graph, graph, graph, 0, 1, 0} }
+#define WALL_X1_CORNERS { {graph, graph, graph, 1, 0, 0}, \
+		{graph, graph, graph, 1, 0, 1},	{graph, graph, graph, 1, 1, 1}, \
+		{graph, graph, graph, 1, 1, 0}, {graph, graph, graph, 1, 0, 0} }
+#define WALL_Z0_CORNERS { {graph, graph, graph, 0, 0, 0}, \
+		{graph, graph, graph, 1, 0, 0}, {graph, graph, graph, 1, 1, 0}, \
+		{graph, graph, graph, 0, 1, 0},	{graph, graph, graph, 0, 0, 0} }
+#define WALL_Y_COLOR 0xcdb79e
+#define WALL_X_COLOR 0x228b22
+#define WALL_Z_COLOR 0xa0b6cd
+
+#define WALL_Y0 { NULL, WALL_Y0_TAG, LAYER_FRONTBACK, OBJ_POLYGON, OBJ_CLIP, \
+	{FS_TRANSPARENT_SOLID, 50, 0, BLACK_COLORSPEC}, \
+	DEFAULT_LP_STYLE_TYPE, \
+	{.polygon = {5, NULL} } }
+#define WALL_Y1 { NULL, WALL_Y1_TAG, LAYER_FRONTBACK, OBJ_POLYGON, OBJ_CLIP, \
+	{FS_TRANSPARENT_SOLID, 50, 0, BLACK_COLORSPEC}, \
+	DEFAULT_LP_STYLE_TYPE, \
+	{.polygon = {5, NULL} } }
+#define WALL_X0 { NULL, WALL_X0_TAG, LAYER_FRONTBACK, OBJ_POLYGON, OBJ_CLIP, \
+	{FS_TRANSPARENT_SOLID, 50, 0, BLACK_COLORSPEC}, \
+	DEFAULT_LP_STYLE_TYPE, \
+	{.polygon = {5, NULL} } }
+#define WALL_X1 { NULL, WALL_X1_TAG, LAYER_FRONTBACK, OBJ_POLYGON, OBJ_CLIP, \
+	{FS_TRANSPARENT_SOLID, 50, 0, BLACK_COLORSPEC}, \
+	DEFAULT_LP_STYLE_TYPE, \
+	{.polygon = {5, NULL} } }
+#define WALL_Z0 { NULL, WALL_Z0_TAG, LAYER_FRONTBACK, OBJ_POLYGON, OBJ_CLIP, \
+	{FS_TRANSPARENT_SOLID, 50, 0, BLACK_COLORSPEC}, \
+	DEFAULT_LP_STYLE_TYPE, \
+	{.polygon = {5, NULL} } }
 
 /* filledcurves style options set by 'set style [data|func] filledcurves opts' */
 extern filledcurves_opts filledcurves_opts_data;
 extern filledcurves_opts filledcurves_opts_func;
 
 /* Prefer line styles over plain line types */
-#if TRUE || defined(BACKWARDS_COMPATIBLE)
+/* Mostly for backwards compatibility */
 extern TBOOLEAN prefer_line_styles;
-#else
-#define prefer_line_styles FALSE
-#endif
 
 extern histogram_style histogram_opts;
 
-#ifdef EAM_BOXED_TEXT
-extern textbox_style textbox_opts;
-#endif
+/* TODO: linked list rather than fixed size array */
+#define NUM_TEXTBOX_STYLES 4
+extern textbox_style textbox_opts[NUM_TEXTBOX_STYLES];
 
-void default_arrow_style __PROTO((struct arrow_style_type *arrow));
-void apply_head_properties __PROTO((struct arrow_style_type *arrow_properties));
+void default_arrow_style(struct arrow_style_type *arrow);
+void apply_head_properties(struct arrow_style_type *arrow_properties);
 
-void free_labels __PROTO((struct text_label *tl));
+void free_labels(struct text_label *tl);
 
-void get_offsets __PROTO((struct text_label *this_label, int *htic, int *vtic));
-void write_label __PROTO((unsigned int x, unsigned int y, struct text_label *label));
-int label_width __PROTO((const char *, int *));
+void get_offsets(struct text_label *this_label, int *htic, int *vtic);
+void write_label(int x, int y, struct text_label *label);
+int label_width(const char *, int *);
+
+TBOOLEAN pm3d_objects(void);
+
+void place_title(int title_x, int title_y);
 
 #endif /* GNUPLOT_GADGETS_H */

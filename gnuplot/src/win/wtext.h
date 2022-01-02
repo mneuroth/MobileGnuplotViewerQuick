@@ -1,7 +1,3 @@
-/*
- * $Id: wtext.h,v 1.19 2016/08/06 13:22:50 markisch Exp $
- */
-
 /* GNUPLOT - win/wtext.h */
 
 /*[
@@ -54,7 +50,7 @@ extern "C" {
 #else
 #define putch(ch)  ConsolePutCh(ch)
 #endif
- 
+
 #undef  getch
 #ifndef WGP_CONSOLE
 #define getch()  MyGetCh()
@@ -138,13 +134,15 @@ void RedirectOutputStreams(int init);
 
 #ifdef WGP_CONSOLE
 
-int ConsoleGetch();
+int ConsoleGetch(void);
 
 #endif /* WGP_CONSOLE */
 
-/* Standard compliant replacement functions */
-/* Note that stdio.h has to be included first. */
-#ifdef _MSC_VER
+/* Standard compliant replacement functions
+   Note that stdio.h has to be included first.
+   Starting with MSVC 2015, snprintf is C99 compliant.
+ */
+#if defined(_MSC_VER) &&  (_MSC_VER < 1900)
 #define snprintf ms_snprintf
 #define vsnprintf ms_vsnprintf
 #endif

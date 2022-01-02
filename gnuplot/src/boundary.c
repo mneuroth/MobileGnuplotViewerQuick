@@ -59,20 +59,25 @@ static int key_width;		/* calculate once, then everyone uses it */
 static int key_height;		/* ditto */
 static int key_title_height;	/* nominal number of lines * character height */
 static int key_title_extra;	/* allow room for subscript/superscript */
+static int key_title_ypos;	/* offset from key->bounds.ytop */
 static int time_y, time_x;
-static int title_x, title_y;
+
+int title_x, title_y;		/* Used by boundary and by 2D graphics */
 
 /*
  * These quantities are needed in do_plot() e.g. for histogtram title layout
  */
 int key_entry_height;		/* bigger of t->v_char, t->v_tic */
 int key_point_offset;		/* offset from x for point sample */
-int key_col_wth, yl_ref;
 int ylabel_x, y2label_x, xlabel_y, x2label_y;
 int x2label_yoffset;
 int ylabel_y, y2label_y, xtic_y, x2tic_y, ytic_x, y2tic_x;
 int key_rows;
 int key_cols;
+int key_count;
+
+static int key_col_wth, yl_ref;
+static int xl, yl;
 
 /*{{{  boundary() */
 /* borders of plotting area
@@ -172,18 +177,30 @@ boundary(struct curve_points *plots, int count)
 
     /*     first compute heights of things to be written in the margin */
 
-    /* title */
+
+    /* Title placement has been reworked for 5.4
+     * NOTE: title_textheight is _not_ the height of the title!
+     * It is the amount of space reserved for the title above the plot.
+     * A negative offset greater than the number of title lines means
+     * that the title will appear inside the boundary and no extra space
+     * needs to be reserved for it above the plot.
+     */
+    title_textheight = 0;
     if (titlelin) {
-	double tmpx, tmpy;
-	map_position_r(&(title.offset), &tmpx, &tmpy, "title");
+	title_textheight = t->v_char;	/* Gap of one normal line height */
 	if (title.font)
 	    t->set_font(title.font);
-	title_textheight = (int) ((titlelin) * (t->v_char) + tmpy);
+	title_y = titlelin * t->v_char;
+	if ((titlelin + title.offset.y) > 0)
+	    title_textheight += titlelin * t->v_char;
 	if (title.font)
 	    t->set_font("");
-	title_textheight += (int)(t->v_char); /* Gap of one normal line height */
-    } else
-	title_textheight = 0;
+	title_y += 0.5 * t->v_char;	/* Approximate same placement as version 5.2 */
+    }
+
+    /* Extra space at the top for spiderplot axis label */
+    if (spiderplot)
+	title_textheight += 1.5 * t->v_char;
 
     /* x2label */
     if (x2lablin) {
@@ -388,6 +405,8 @@ boundary(struct curve_points *plots, int count)
 	    /* make room for the end of rotated ytics or y2tics */
 	    plot_bounds.ybot += (int) (t->h_char * 2);
 	}
+	if (spiderplot) /* Extra space at the bottom for spiderplot axis label */
+	    plot_bounds.ybot += 2 * t->h_char;
 	/* Last chance for better estimate of space required for ttic labels */
 	/* It is too late to go back and adjust positions relative to ytop */
 	if (ttic_textheight > 0) {
@@ -453,7 +472,7 @@ boundary(struct curve_points *plots, int count)
 	    ytic_textwidth = (int) (t->h_char * (widest_tic_strlen + 2));
 	}
     } else if (axis_array[FIRST_Y_AXIS].label.text) {
-	/* substitutes for extra space added to left of ytic labels */
+	/* substitutes for extra space added to left of ytix labels */
 	ytic_textwidth = 2 * (t->h_char);
     } else {
 	ytic_textwidth = 0;
@@ -482,10 +501,13 @@ boundary(struct curve_points *plots, int count)
 
 	if (plot_bounds.xleft - ytic_width - ytic_textwidth < 0)
 	    plot_bounds.xleft = ytic_width + ytic_textwidth;
-	if (plot_bounds.xleft == t->xmax * xoffset)
-	    plot_bounds.xleft += t->h_char * 2;
+
+	if (plot_bounds.xleft < t->xmax * xoffset + t->h_char * 2)
+	    plot_bounds.xleft = t->xmax * xoffset + t->h_char * 2;
+
 	/* DBT 12-3-98  extra margin just in case */
 	plot_bounds.xleft += 0.5 * t->h_char;
+
     }
     /* Note: we took care of explicit 'set lmargin foo' at line 492 */
 
@@ -527,7 +549,7 @@ boundary(struct curve_points *plots, int count)
 	while (tic) {
 	    if (tic->label) {
 		double xx;
-		int length = estimate_strlen(tic->label)
+		int length = estimate_strlen(tic->label, NULL)
 			   * cos(DEG2RAD * (double)(axis_array[FIRST_X_AXIS].tic_rotate))
 			   * term->h_char;
 
@@ -598,10 +620,6 @@ boundary(struct curve_points *plots, int count)
      * use widest_tics until tics are set up. Bit of a downer - let us
      * assume tics are 5 characters wide
      */
-    /* HBB 20001205: moved this block to before aspect_ratio is
-     * applied: setup_tics may extend the ranges, which would distort
-     * the aspect ratio */
-
     setup_tics(&axis_array[FIRST_X_AXIS], 20);
     setup_tics(&axis_array[SECOND_X_AXIS], 20);
 
@@ -618,51 +636,49 @@ boundary(struct curve_points *plots, int count)
     }
 
 
-    /* Modify the bounding box to fit the aspect ratio, if any was
-     * given. */
+    /* Modify the bounding box to fit the aspect ratio, if any was given */
     if (aspect_ratio != 0.0) {
 	double current_aspect_ratio;
+	double current, required;
 
-	if (aspect_ratio < 0
-	    && (X_AXIS.max - X_AXIS.min) != 0.0
-	    ) {
-	    current_aspect_ratio = - aspect_ratio
+	if (aspect_ratio < 0 && (X_AXIS.max - X_AXIS.min) != 0.0) {
+	    current_aspect_ratio = -aspect_ratio
 		* fabs((Y_AXIS.max - Y_AXIS.min) / (X_AXIS.max - X_AXIS.min));
 	} else
 	    current_aspect_ratio = aspect_ratio;
 
-	if (current_aspect_ratio < 0.001 || current_aspect_ratio > 1000.0)
+	if (current_aspect_ratio < 0.005 || current_aspect_ratio > 2000.0)
 	    int_warn(NO_CARET, "extreme aspect ratio");
-	if (TRUE) {
-	    /* Apply despite the warning */
-	    double current = ((double) (plot_bounds.ytop - plot_bounds.ybot))
-			   / (plot_bounds.xright - plot_bounds.xleft);
-	    double required = (current_aspect_ratio * t->v_tic) / t->h_tic;
 
-	    if (current > required) {
-		/* too tall */
-		int old_height = plot_bounds.ytop - plot_bounds.ybot;
-		int new_height = required * (plot_bounds.xright - plot_bounds.xleft);
-		if (bmargin.scalex == screen)
-		    plot_bounds.ytop = plot_bounds.ybot + new_height;
-		else if (tmargin.scalex == screen)
-		    plot_bounds.ybot = plot_bounds.ytop - new_height;
-		else {
-		    plot_bounds.ybot += (old_height - new_height) / 2;
-		    plot_bounds.ytop -= (old_height - new_height) / 2;
-		}
+	current = ((double) (plot_bounds.ytop - plot_bounds.ybot))
+		/ ((double) (plot_bounds.xright - plot_bounds.xleft));
+	required = (current_aspect_ratio * t->v_tic) / t->h_tic;
 
-	    } else {
-		int old_width = plot_bounds.xright - plot_bounds.xleft;
-		int new_width = (plot_bounds.ytop - plot_bounds.ybot) / required;
-		if (lmargin.scalex == screen)
-		    plot_bounds.xright = plot_bounds.xleft + new_width;
-		else if (rmargin.scalex == screen)
-		    plot_bounds.xleft = plot_bounds.xright - new_width;
-		else {
-		    plot_bounds.xleft += (old_width - new_width) / 2;
-		    plot_bounds.xright -= (old_width - new_width) / 2;
-		}
+	/* Fixed borders take precedence over centering */
+	if (current > required) {
+	    /* too tall */
+	    int old_height = plot_bounds.ytop - plot_bounds.ybot;
+	    int new_height = required * (plot_bounds.xright - plot_bounds.xleft);
+	    if (bmargin.scalex == screen)
+		plot_bounds.ytop = plot_bounds.ybot + new_height;
+	    else if (tmargin.scalex == screen)
+		plot_bounds.ybot = plot_bounds.ytop - new_height;
+	    else {
+		plot_bounds.ybot += (old_height - new_height) / 2;
+		plot_bounds.ytop -= (old_height - new_height) / 2;
+	    }
+
+	} else {
+	    /* too wide */
+	    int old_width = plot_bounds.xright - plot_bounds.xleft;
+	    int new_width = (plot_bounds.ytop - plot_bounds.ybot) / required;
+	    if (lmargin.scalex == screen)
+		plot_bounds.xright = plot_bounds.xleft + new_width;
+	    else if (rmargin.scalex == screen)
+		plot_bounds.xleft = plot_bounds.xright - new_width;
+	    else {
+		plot_bounds.xleft += (old_width - new_width) / 2;
+		plot_bounds.xright -= (old_width - new_width) / 2;
 	    }
 	}
     }
@@ -715,19 +731,19 @@ boundary(struct curve_points *plots, int count)
 	    plot_bounds.ybot += xtic_textheight;
     }
 
-    /* EAM - FIXME
-     * Notwithstanding all these fancy calculations, plot_bounds.ytop must always be above plot_bounds.ybot
+    /*
+     * Notwithstanding all these fancy calculations,
+     * plot_bounds.ytop must always be above plot_bounds.ybot
      */
     if (plot_bounds.ytop < plot_bounds.ybot) {
 	int i = plot_bounds.ytop;
 
 	plot_bounds.ytop = plot_bounds.ybot;
 	plot_bounds.ybot = i;
-    FPRINTF((_stderr,"boundary: Big problems! plot_bounds.ybot > plot_bounds.ytop\n"));
+	FPRINTF((_stderr,"boundary: Big problems! plot_bounds.ybot > plot_bounds.ytop\n"));
     }
 
-    /*  compute coordinates for axis labels, title et al
-     *     (some of these may not be used) */
+    /*  compute coordinates for axis labels, title etc */
 
     x2label_y = plot_bounds.ytop + x2label_textheight;
     x2label_y += 0.5 * t->v_char;
@@ -739,12 +755,19 @@ boundary(struct curve_points *plots, int count)
     }
 
     title_x = (plot_bounds.xleft + plot_bounds.xright) / 2;
-    title_y = plot_bounds.ytop + title_textheight + x2tic_textheight;
-    title_y += ttic_textheight;
-    if (x2label_y + x2label_yoffset > plot_bounds.ytop)
-	title_y += x2label_textheight;
-    if (x2tic_height > 0)
-	title_y += x2tic_height;
+
+    /* title_y was previously set to the actual title height.
+     * Further corrections to this placement only if it is above the plot
+     */
+    title_y += plot_bounds.ytop;
+    if (titlelin + title.offset.y > 0) {
+	title_y += x2tic_textheight;
+	title_y += ttic_textheight;
+	if (x2label_y + x2label_yoffset > plot_bounds.ytop)
+	    title_y += x2label_textheight;
+	if (x2tic_height > 0)
+	    title_y += x2tic_height;
+    }
 
     /* Shift upward by 0.2 line to allow for descenders in xlabel text */
     xlabel_y = plot_bounds.ybot - xtic_height - xtic_textheight - xlabel_textheight
@@ -938,7 +961,10 @@ do_key_layout(legend_key *key)
     if (key->font)
 	t->set_font(key->font);
 
+    /* Is it OK to initialize these here rather than in do_plot? */
+    key_count = 0;
     key_xleft = 0;
+    xl = yl = 0;
 
     if (key->swidth >= 0) {
 	key_sample_width = key->swidth * t->h_char + t->h_tic;
@@ -952,16 +978,23 @@ do_key_layout(legend_key *key)
     if (key_entry_height == 0)
 	key_entry_height = 1;
 
-    /* Key title length and height */
+    /* Key title length and height, adjusted for font size and markup */
     key_title_height = 0;
     key_title_extra = 0;
-    if (key->title.text) {
-	int ytheight;
-	(void) label_width(key->title.text, &ytheight);
-	key_title_height = ytheight * t->v_char;
-	if ((*key->title.text) && (t->flags & TERM_ENHANCED_TEXT)
-	&&  (strchr(key->title.text,'^') || strchr(key->title.text,'_')))
-	    key_title_extra = t->v_char;
+    key_title_ypos = 0;
+    if (key->title.text && *key->title.text) {
+	double est_height;
+	int est_lines;
+	if (key->title.font)
+	    t->set_font(key->title.font);
+	(void) label_width(key->title.text, &est_lines);
+	(void) estimate_strlen(key->title.text, &est_height);
+	key_title_height = est_height * t->v_char;
+	key_title_ypos = (key_title_height/2);
+	if (key->title.font)
+	    t->set_font("");
+	/* FIXME: empirical tweak. I don't know why this is needed */
+	key_title_ypos -= (est_lines-1) * t->v_char/2;
     }
 
     if (key->reverse) {
@@ -1029,15 +1062,25 @@ do_key_layout(legend_key *key)
 		key_panic = TRUE;
 	    }
 	    key_rows = (ptitl_cnt + key_cols - 1) / key_cols;
+#if (0)
+	} else {
+	    /* This was a work-around for a spiderplot bug. No longer needed? */
+	    if (key_rows == 0)
+		key_rows = i;
+#endif
 	}
     }
 
     /* If the key title is wider than the contents, try to make room for it */
     if (key->title.text) {
 	int ytlen = label_width(key->title.text, NULL) - key->swidth + 2;
+	if (key->title.font)
+	    t->set_font(key->title.font);
 	ytlen *= t->h_char;
 	if (ytlen > key_cols * key_col_wth)
 	    key_col_wth = ytlen / key_cols;
+	if (key->title.font)
+	    t->set_font("");
     }
 
     /* Adjust for outside key, leave manually set margins alone */
@@ -1093,15 +1136,24 @@ find_maxl_keys(struct curve_points *plots, int count, int *kcnt)
     mlen = cnt = 0;
     this_plot = plots;
     for (curve = 0; curve < count; this_plot = this_plot->next, curve++) {
-	if (this_plot->title && !this_plot->title_is_suppressed && !this_plot->title_position) {
-	    ignore_enhanced(this_plot->title_no_enhanced);
-	    len = estimate_strlen(this_plot->title);
-	    if (len != 0) {
-		cnt++;
-		if (len > mlen)
-		    mlen = len;
+
+	if (this_plot->plot_style == PARALLELPLOT)
+	    continue;
+
+	if (this_plot->title && !this_plot->title_is_suppressed
+	&&  !this_plot->title_position) {
+	    if (this_plot->plot_style == SPIDERPLOT && this_plot->plot_type != KEYENTRY)
+		; /* Nothing */
+	    else {
+		ignore_enhanced(this_plot->title_no_enhanced);
+		len = estimate_strlen(this_plot->title, NULL);
+		if (len != 0) {
+		    cnt++;
+		    if (len > mlen)
+			mlen = len;
+		}
+		ignore_enhanced(FALSE);
 	    }
-	    ignore_enhanced(FALSE);
 	}
 
 	/* Check for new histogram here and save space for divider */
@@ -1109,12 +1161,17 @@ find_maxl_keys(struct curve_points *plots, int count, int *kcnt)
 	&&  previous_plot_style == HISTOGRAMS
 	&&  this_plot->histogram_sequence == 0 && cnt > 1)
 	    cnt++;
-	/* Check for column-stacked histogram with key entries */
-	if (this_plot->plot_style == HISTOGRAMS &&  this_plot->labels) {
+
+	/* Check for column-stacked histogram with key entries.
+	 * Same thing for spiderplots.
+	 * This is needed for 'plot ... using col:key(1)'
+	 */
+	if (this_plot->labels &&
+	    (this_plot->plot_style == HISTOGRAMS || this_plot->plot_style == SPIDERPLOT)) {
 	    text_label *key_entry = this_plot->labels->next;
 	    for (; key_entry; key_entry=key_entry->next) {
 		cnt++;
-		len = key_entry->text ? estimate_strlen(key_entry->text) : 0;
+		len = key_entry->text ? estimate_strlen(key_entry->text, NULL) : 0;
 		if (len > mlen)
 		    mlen = len;
 	    }
@@ -1138,9 +1195,11 @@ do_key_sample(
     struct curve_points *this_plot,
     legend_key *key,
     char *title,
-    int xl, int yl)
+    coordval var_color)
 {
     struct termentry *t = term;
+    int xl_save = xl;
+    int yl_save = yl;
 
     /* Clip key box against canvas */
     BoundingBox *clip_save = clip_area;
@@ -1168,13 +1227,17 @@ do_key_sample(
 	/* Draw key text in black */
 	(*t->linetype)(LT_BLACK);
 
+    if (this_plot->title_is_automated && (t->flags & TERM_IS_LATEX)) {
+	title = texify_title(title, this_plot->plot_type);
+    }
+
     if (key->just == GPKEY_LEFT) {
 	write_multiline(xl + key_text_left, yl, title, LEFT, JUST_CENTRE, 0, key->font);
     } else {
 	if ((*t->justify_text) (RIGHT)) {
 	    write_multiline(xl + key_text_right, yl, title, RIGHT, JUST_CENTRE, 0, key->font);
 	} else {
-	    int x = xl + key_text_right - t->h_char * estimate_strlen(title);
+	    int x = xl + key_text_right - t->h_char * estimate_strlen(title, NULL);
 	    if (key->region == GPKEY_AUTO_EXTERIOR_LRTBC ||	/* HBB 990327 */
 		key->region == GPKEY_AUTO_EXTERIOR_MARGIN ||
 		inrange((x), (plot_bounds.xleft), (plot_bounds.xright)))
@@ -1184,25 +1247,25 @@ do_key_sample(
 
     /* Draw sample in same style and color as the corresponding plot  */
     /* The variable color case uses the color of the first data point */
-    if (!check_for_variable_color(this_plot, &this_plot->varcolor[0]))
+    if (!check_for_variable_color(this_plot, &var_color))
 	term_apply_lp_properties(&this_plot->lp_properties);
 
     /* draw sample depending on bits set in plot_style */
     if (this_plot->plot_style & PLOT_STYLE_HAS_FILL && t->fillbox) {
 	struct fill_style_type *fs = &this_plot->fill_properties;
 	int style = style_from_fill(fs);
-	unsigned int x = xl + key_sample_left;
-	unsigned int y = yl - key_sample_height/4;
-	unsigned int w = key_sample_right - key_sample_left;
-	unsigned int h = key_sample_height/2;
+	int x = xl + key_sample_left;
+	int y = yl - key_sample_height/4;
+	int w = key_sample_right - key_sample_left;
+	int h = key_sample_height/2;
 
-#ifdef EAM_OBJECTS
 	if (this_plot->plot_style == CIRCLES && w > 0) {
 	    do_arc(xl + key_point_offset, yl, key_sample_height/4, 0., 360., style, FALSE);
 	    /* Retrace the border if the style requests it */
 	    if (need_fill_border(fs)) {
 	        do_arc(xl + key_point_offset, yl, key_sample_height/4, 0., 360., 0, FALSE);
 	    }
+
 	} else if (this_plot->plot_style == ELLIPSES && w > 0) {
 	    t_ellipse *key_ellipse = (t_ellipse *) gp_alloc(sizeof(t_ellipse),
 	        "cute little ellipse for the key sample");
@@ -1218,9 +1281,8 @@ do_key_sample(
 		do_ellipse(2, key_ellipse, 0, FALSE);
 	    }
 	    free(key_ellipse);
-	} else
-#endif
-	if (w > 0) {    /* All other plot types with fill */
+
+	} else if (w > 0) {    /* All other plot types with fill */
 	    if (style != FS_EMPTY)
 		(*t->fillbox)(style,x,y,w,h);
 
@@ -1247,10 +1309,14 @@ do_key_sample(
 	    }
 	}
 
-    } else if (this_plot->plot_style == VECTOR && t->arrow) {
+    } else if ((this_plot->plot_style & PLOT_STYLE_HAS_VECTOR) && t->arrow) {
+	double x1 = xl + key_sample_left;
+	double y1 = yl;
+	double x2 = xl + key_sample_right;
+	double y2 = yl;
 	apply_head_properties(&(this_plot->arrow_properties));
-	draw_clip_arrow(xl + key_sample_left, yl, xl + key_sample_right, yl,
-		    this_plot->arrow_properties.head);
+	draw_clip_arrow(x1, y1, x2, y2,
+			this_plot->arrow_properties.head);
 
     } else if (this_plot->lp_properties.l_type == LT_NODRAW) {
 	;
@@ -1286,21 +1352,35 @@ do_key_sample(
 
     (*t->layer)(TERM_LAYER_END_KEYSAMPLE);
 
+    /* Restore original linetype for the main plot if we changed it */
+    if (this_plot->plot_type != FUNC
+    && (this_plot->plot_style & PLOT_STYLE_HAS_ERRORBAR)
+    && (bar_lp.flags & LP_ERRORBAR_SET) != 0) {
+	term_apply_lp_properties(&this_plot->lp_properties);
+    }
+
     /* Restore previous clipping area */
     clip_area = clip_save;
+    xl = xl_save;
+    yl = yl_save;
 }
 
 void
 do_key_sample_point(
     struct curve_points *this_plot,
-    legend_key *key,
-    int xl, int yl)
+    legend_key *key)
 {
     struct termentry *t = term;
+    int xl_save = xl;
+    int yl_save = yl;
 
-    /* If the plot this title belongs to specified a non-standard place */
-    /* for the key sample to appear, use that to override xl, yl.       */
-    if (this_plot->title_position && this_plot->title_position->scalex != character) {
+    /* If the plot this title belongs to specified a non-standard place
+     * for the key sample to appear, use that to override xl, yl.
+     * For "at end|beg" do nothing at all.
+     */
+    if (this_plot->title_position) {
+	if (this_plot->title_position->scalex == character)
+	    return;
 	map_position(this_plot->title_position, &xl, &yl, "key sample");
 	xl -=  (key->just == GPKEY_LEFT) ? key_text_left : key_text_right;
     }
@@ -1347,6 +1427,8 @@ do_key_sample_point(
 	}
     }
 
+    xl = xl_save;
+    yl = yl_save;
     (t->layer)(TERM_LAYER_END_KEYSAMPLE);
 }
 
@@ -1355,15 +1437,16 @@ do_key_sample_point(
 /* are drawn. Then the reserved space for the legend is blanked out, and 	*/
 /* finally the second pass through this code draws the legend.			*/
 void
-draw_key(legend_key *key, TBOOLEAN key_pass, int *xinkey, int *yinkey)
+draw_key(legend_key *key, TBOOLEAN key_pass)
 {
     struct termentry *t = term;
+
+    (t->layer)(TERM_LAYER_KEYBOX);
 
     /* In two-pass mode (set key opaque) we blank out the key box after	*/
     /* the graph is drawn and then redo the key in the blank area.	*/
     if (key_pass && t->fillbox && !(t->flags & TERM_NULL_SET_COLOR)) {
-	t_colorspec background_fill = BACKGROUND_COLORSPEC;
-	(*t->set_color)(&background_fill);
+	(*t->set_color)(&key->fillcolor);
 	(*t->fillbox)(FS_OPAQUE, key->bounds.xleft, key->bounds.ybot,
 		key_width, key_height);
     }
@@ -1379,8 +1462,7 @@ draw_key(legend_key *key, TBOOLEAN key_pass, int *xinkey, int *yinkey)
 
 	/* Only draw the title once */
 	if (key_pass || !key->front) {
-	    write_label(title_anchor,
-			key->bounds.ytop - (key_title_extra + key_entry_height)/2,
+	    write_label(title_anchor, key->bounds.ytop - key_title_ypos,
 			&key->title);
 	    (*t->linetype)(LT_BLACK);
 	}
@@ -1410,8 +1492,8 @@ draw_key(legend_key *key, TBOOLEAN key_pass, int *xinkey, int *yinkey)
 
     yl_ref = key->bounds.ytop - (key_title_height + key_title_extra);
     yl_ref -= ((key->height_fix + 1) * key_entry_height) / 2;
-    *xinkey = key->bounds.xleft + key_size_left;
-    *yinkey = yl_ref;
+    xl = key->bounds.xleft + key_size_left;
+    yl = yl_ref;
 }
 
 /*
@@ -1424,8 +1506,8 @@ draw_titles()
 
     /* YLABEL */
     if (axis_array[FIRST_Y_AXIS].label.text) {
-	unsigned int x = ylabel_x;
-	unsigned int y = (plot_bounds.ytop + plot_bounds.ybot) / 2;
+	int x = ylabel_x;
+	int y = (plot_bounds.ytop + plot_bounds.ybot) / 2;
 	/* There has been much argument about the optimal ylabel position */
 	x += t->h_char / 4.;
 	write_label(x, y, &(axis_array[FIRST_Y_AXIS].label));
@@ -1444,7 +1526,7 @@ draw_titles()
     if (axis_array[FIRST_X_AXIS].label.text) {
 	struct text_label *label = &axis_array[FIRST_X_AXIS].label;
 	double tmpx, tmpy;
-	unsigned int x, y;
+	int x, y;
 	map_position_r(&(label->offset), &tmpx, &tmpy, "xlabel");
 
 	x = (plot_bounds.xright + plot_bounds.xleft) / 2;
@@ -1455,23 +1537,9 @@ draw_titles()
 	reset_textcolor(&(label->textcolor));
     }
 
-    /* PLACE TITLE */
-    if (title.text) {
-	double tmpx, tmpy;
-	unsigned int x, y;
-	map_position_r(&(title.offset), &tmpx, &tmpy, "doplot");
-	/* we worked out y-coordinate in boundary(), including the y offset */
-	x = title_x;
-	y = title_y - tmpy - t->v_char / 2;
-
-	/* NB: write_label applies text color but does not reset it */
-	write_label(x, y, &title);
-	reset_textcolor(&(title.textcolor));
-    }
-
     /* X2LABEL */
     if (axis_array[SECOND_X_AXIS].label.text) {
-	unsigned int x, y;
+	int x, y;
 	/* we worked out y-coordinate in boundary() */
 	x = (plot_bounds.xright + plot_bounds.xleft) / 2;
 	y = x2label_y - t->v_char / 2;
@@ -1481,7 +1549,7 @@ draw_titles()
 
     /* RLABEL */
     if (axis_array[POLAR_AXIS].label.text) {
-	unsigned int x, y;
+	int x, y;
 
 	/* This assumes we always have a horizontal R axis */
 	x = map_x(polar_radius(R_AXIS.max) / 2.0);
@@ -1493,4 +1561,29 @@ draw_titles()
     /* PLACE TIMELABEL */
     if (timelabel.text)
 	do_timelabel(time_x, time_y);
+}
+
+/* advance current position in the key in preparation for next key entry */
+void
+advance_key(TBOOLEAN only_invert)
+{
+    legend_key *key = &keyT;
+
+    if (key->invert)
+        yl = key->bounds.ybot + yl_ref + key_entry_height/2 - yl;
+    if (only_invert)
+	return;
+    if (key_count >= key_rows) {
+        yl = yl_ref;
+        xl += key_col_wth;
+        key_count = 0;
+    } else
+        yl = yl - key_entry_height;
+}
+
+/* stupid test used in only one place but it refers to our local variables */
+TBOOLEAN
+at_left_of_key()
+{
+    return (yl == yl_ref);
 }

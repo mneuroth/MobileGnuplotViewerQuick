@@ -34,6 +34,8 @@
 
 #include "alloc.h"
 #include "command.h"
+#include "datablock.h"
+#include "encoding.h"
 #include "graphics.h"
 #include "plot.h"
 #include "tables.h"
@@ -44,24 +46,12 @@
 #include "setshow.h"
 #ifdef _WIN32
 # include <fcntl.h>
-# if defined(__WATCOMC__) || defined(__MSC__)
+# if defined(__WATCOMC__) || defined(_MSC_VER)
 #  include <io.h>        /* for setmode() */
 # endif
 #endif
-#if defined(HAVE_DIRENT_H) && !defined(_WIN32)
-# include <sys/types.h>
-# include <dirent.h>
-#endif
-#ifdef _WIN32
-/* Windows version of opendir() and friends are in stdfn.c */
-/* Note: OpenWatcom has them in direct.h, but we prefer
-         the built-in variants as they handle encodings.
-*/
-# include "win/winmain.h"
-#endif
 
-static char *recursivefullname __PROTO((const char *path, const char *filename, TBOOLEAN recursive));
-static void prepare_call __PROTO((int calltype));
+static void prepare_call(int calltype);
 
 /* State information for load_file(), to recover from errors
  * and properly handle recursive load_file calls
@@ -73,69 +63,8 @@ int call_argc;
 char *call_args[10] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 static char *argname[] = {"ARG0","ARG1","ARG2","ARG3","ARG4","ARG5","ARG6","ARG7","ARG8","ARG9"};
 
-/*
- * iso_alloc() allocates a iso_curve structure that can hold 'num'
- * points.
- */
-struct iso_curve *
-iso_alloc(int num)
-{
-    struct iso_curve *ip;
-    ip = (struct iso_curve *) gp_alloc(sizeof(struct iso_curve), "iso curve");
-    ip->p_max = (num >= 0 ? num : 0);
-    ip->p_count = 0;
-    if (num > 0) {
-	ip->points = (struct coordinate GPHUGE *)
-	    gp_alloc(num * sizeof(struct coordinate), "iso curve points");
-	memset(ip->points, 0, num * sizeof(struct coordinate));
-    } else
-	ip->points = (struct coordinate GPHUGE *) NULL;
-    ip->next = NULL;
-    return (ip);
-}
-
-/*
- * iso_extend() reallocates a iso_curve structure to hold "num"
- * points. This will either expand or shrink the storage.
- */
-void
-iso_extend(struct iso_curve *ip, int num)
-{
-    if (num == ip->p_max)
-	return;
-
-    if (num > 0) {
-	if (ip->points == NULL) {
-	    ip->points = (struct coordinate GPHUGE *)
-		gp_alloc(num * sizeof(struct coordinate), "iso curve points");
-	} else {
-	    ip->points = (struct coordinate GPHUGE *)
-		gp_realloc(ip->points, num * sizeof(struct coordinate), "expanding curve points");
-	}
-	if (num > ip->p_max)
-	    memset( &(ip->points[ip->p_max]), 0, (num - ip->p_max) * sizeof(struct coordinate));
-	ip->p_max = num;
-    } else {
-	if (ip->points != (struct coordinate GPHUGE *) NULL)
-	    free(ip->points);
-	ip->points = (struct coordinate GPHUGE *) NULL;
-	ip->p_max = 0;
-    }
-}
-
-/*
- * iso_free() releases any memory which was previously malloc()'d to hold
- *   iso curve points.
- */
-void
-iso_free(struct iso_curve *ip)
-{
-    if (ip) {
-	if (ip->points)
-	    free((char *) ip->points);
-	free((char *) ip);
-    }
-}
+/* Used by postscript terminal if a font file is found by loadpath_fopen() */
+char *loadpath_fontname = NULL;
 
 static void
 prepare_call(int calltype)
@@ -182,11 +111,11 @@ prepare_call(int calltype)
 			default:
 				int_error(save_token, "Unrecognized argument type");
 				break;
-			case INTGR:	
-				sprintf(val_as_string, "%d", a.v.int_val);
+			case INTGR:
+				sprintf(val_as_string, PLD, a.v.int_val);
 				call_args[call_argc] = gp_strdup(val_as_string);
 				break;
-		    } 
+		    }
 
 		/* Old (pre version 5) style wrapping of bare tokens as strings
 		 * is still used for storing numerical constants ARGn but not ARGV[n]
@@ -222,7 +151,7 @@ prepare_call(int calltype)
 
     /* Old-style "call" arguments were referenced as $0 ... $9 and $#.
      * New-style has ARG0 = script-name, ARG1 ... ARG9 and ARGC
-     * Version 5.2.4 adds ARGV[n]
+     * Version 5.3 adds ARGV[n]
      */
     udv = add_udv_by_name("ARGC");
     Ginteger(&(udv->udv_value), call_argc);
@@ -232,8 +161,7 @@ prepare_call(int calltype)
     Gstring(&(udv->udv_value), gp_strdup(lf_head->name));
 
     udv = add_udv_by_name("ARGV");
-    gpfree_array(&(udv->udv_value));
-    gpfree_string(&(udv->udv_value));
+    free_value(&(udv->udv_value));
 
     argv_size = GPMIN(call_argc, 9);
     udv->udv_value.type = ARRAY;
@@ -257,65 +185,6 @@ prepare_call(int calltype)
     }
 }
 
-#ifdef OLD_STYLE_CALL_ARGS
-
-const char *
-expand_call_arg(int c)
-{
-    static char numstr[3];
-    if (c == '$') {
-	return "$";
-    } else if (c == '#') {
-	assert(call_argc >= 0 && call_argc <= 9);
-	sprintf(numstr, "%i", call_argc);
-	return numstr;
-    } else if (c >= '0' && c <= '9') {
-	int ind = c - '0';
-	if (ind >= call_argc)
-	    return "";
-	else
-	    return call_args[ind];
-    } else {
-	/* pass through unrecognized syntax elements that begin with $, e.g. datablock names */
-	sprintf(numstr, "$%c", c);
-	return numstr;
-    }
-    return NULL; /* Avoid compiler warning */
-}
-
-
-static void
-expand_call_args(void)
-{
-    int il = 0;
-    int len;
-    char *rl;
-    char *raw_line = gp_strdup(gp_input_line);
-
-    rl = raw_line;
-    *gp_input_line = '\0';
-    while (*rl) {
-	if (*rl == '$') {
-	    const char *sub = expand_call_arg(*(++rl));
-	    len = strlen(sub);
-	    while (gp_input_line_len - il < len + 1)
-		extend_input_line();
-	    strcpy(gp_input_line + il, sub);
-	    il += len;
-	} else {
-	    if (il + 1 > gp_input_line_len)
-		extend_input_line();
-	    gp_input_line[il++] = *rl;
-	}
-	rl++;
-    }
-    if (il + 1 > gp_input_line_len)
-	extend_input_line();
-    gp_input_line[il] = '\0';
-    free(raw_line);
-}
-#endif /* OLD_STYLE_CALL_ARGS */
-
 /*
  * calltype indicates whether load_file() is called from
  * (1) the "load" command, no arguments substitution is done
@@ -323,6 +192,7 @@ expand_call_args(void)
  * (3) on program entry to load initialization files (acts like "load")
  * (4) to execute script files given on the command line (acts like "load")
  * (5) to execute a single script file given with -c (acts like "call")
+ * (6) "load $datablock" (EXPERIMENTAL)
  */
 void
 load_file(FILE *fp, char *name, int calltype)
@@ -333,9 +203,14 @@ load_file(FILE *fp, char *name, int calltype)
     int more;
     int stop = FALSE;
     udvt_entry *gpval_lineno = NULL;
+    char **datablock_input_line = NULL;
 
-    if (fp == (FILE *) NULL)
-	int_error(NO_CARET, "Cannot open script file '%s'", name);
+    /* Support for "load $datablock" */
+    if (calltype == 6)
+	datablock_input_line = get_datablock(name);
+
+    if (!fp && !datablock_input_line)
+	int_error(NO_CARET, "Cannot load input from '%s'", name);
 
     /* Provide a user-visible copy of the current line number in the input file */
     gpval_lineno = add_udv_by_name("GPVAL_LINENO");
@@ -365,13 +240,28 @@ load_file(FILE *fp, char *name, int calltype)
 	start = 0;
 	more = TRUE;
 
-    /* read one logical line */
+	/* read one logical line */
 	while (more) {
-        if (fgets(&(gp_input_line[start]), left, fp) == (char *) NULL) {
-		stop = TRUE;	/* EOF in file */
+	    if (fp && fgets(&(gp_input_line[start]), left, fp) == (char *) NULL) {
+		/* EOF in input file */
+		stop = TRUE;
+		gp_input_line[start] = '\0';
+		more = FALSE;
+	    } else if (!fp && datablock_input_line && (*datablock_input_line == NULL)) {
+		/* End of input datablock */
+		stop = TRUE;
 		gp_input_line[start] = '\0';
 		more = FALSE;
 	    } else {
+		/* Either we successfully read a line from input file fp
+		 * or we are about to copy a line from a datablock.
+		 * Either way we have to process line-ending '\' as a 
+		 * continuation request.
+		 */
+		if (!fp && datablock_input_line) {
+		    strncpy(&(gp_input_line[start]), *datablock_input_line, left);
+		    datablock_input_line++;
+		}
 		inline_num++;
 		gpval_lineno->udv_value.v.int_val = inline_num;	/* User visible copy */
 		if ((len = strlen(gp_input_line)) == 0)
@@ -428,27 +318,23 @@ load_file(FILE *fp, char *name, int calltype)
 			left = gp_input_line_len - start;
 			continue;
 		    }
-		    
+
 		    more = FALSE;
 		}
 
 	    }
 	}
-	
-    /* If we hit a 'break' or 'continue' statement in the lines just processed */
+
+	/* If we hit a 'break' or 'continue' statement in the lines just processed */
 	if (iteration_early_exit())
 	    continue;
 
 	/* process line */
 	if (strlen(gp_input_line) > 0) {
-#ifdef OLD_STYLE_CALL_ARGS
-	    if (calltype == 2 || calltype == 5)
-		expand_call_args();
-#endif
 	    screen_ok = FALSE;	/* make sure command line is echoed on error */
-        if (do_line())
-        stop = TRUE;
-    }
+	    if (do_line())
+		stop = TRUE;
+	}
     }
 
     /* pop state */
@@ -544,7 +430,7 @@ lf_pop()
     }
     free(lf->name);
     free(lf->cmdline);
-    
+
     lf_head = lf->prev;
     free(lf);
     return (TRUE);
@@ -637,6 +523,15 @@ loadpath_fopen(const char *filename, const char *mode)
 {
     FILE *fp;
 
+    /* The global copy of fullname is only for the benefit of post.trm's
+     * automatic fontfile conversion via a constructed shell command.
+     * FIXME: There was a Feature Request to export the directory path
+     * in which a loaded file was found to a user-visible variable for the
+     * lifetime of that load.  This is close but without the lifetime.
+     */
+    free(loadpath_fontname);
+    loadpath_fontname = NULL;
+
 #if defined(PIPES)
     if (*filename == '<') {
 	restrict_popen();
@@ -654,7 +549,8 @@ loadpath_fopen(const char *filename, const char *mode)
 	    strcpy(fullname, path);
 	    PATH_CONCAT(fullname, filename);
 	    if ((fp = fopen(fullname, mode)) != NULL) {
-		free(fullname);
+		/* free(fullname); */
+		loadpath_fontname = fullname;
 		fullname = NULL;
 		/* reset loadpath internals!
 		 * maybe this can be replaced by calling get_loadpath with
@@ -664,8 +560,7 @@ loadpath_fopen(const char *filename, const char *mode)
 	    }
 	}
 
-	if (fullname)
-	    free(fullname);
+	free(fullname);
     }
 
 #ifdef _WIN32
@@ -674,107 +569,6 @@ loadpath_fopen(const char *filename, const char *mode)
 #endif
     return fp;
 }
-
-
-/* Harald Harders <h.harders@tu-bs.de> */
-static char *
-recursivefullname(const char *path, const char *filename, TBOOLEAN recursive)
-{
-    char *fullname = NULL;
-    FILE *fp;
-
-    /* length of path, dir separator, filename, \0 */
-    fullname = gp_alloc(strlen(path) + 1 + strlen(filename) + 1,
-			"recursivefullname");
-    strcpy(fullname, path);
-    PATH_CONCAT(fullname, filename);
-
-    if ((fp = fopen(fullname, "r")) != NULL) {
-	fclose(fp);
-	return fullname;
-    } else {
-	free(fullname);
-	fullname = NULL;
-    }
-
-    if (recursive) {
-#if defined HAVE_DIRENT_H || defined(_WIN32)
-	DIR *dir;
-	struct dirent *direntry;
-	struct stat buf;
-
-	dir = opendir(path);
-	if (dir) {
-	    while ((direntry = readdir(dir)) != NULL) {
-		char *fulldir = (char *) gp_alloc(strlen(path) + 1 + strlen(direntry->d_name) + 1,
-					 "fontpath_fullname");
-		strcpy(fulldir, path);
-#  if defined(VMS)
-		if (fulldir[strlen(fulldir) - 1] == ']')
-		    fulldir[strlen(fulldir) - 1] = '\0';
-		strcpy(&(fulldir[strlen(fulldir)]), ".");
-		strcpy(&(fulldir[strlen(fulldir)]), direntry->d_name);
-		strcpy(&(fulldir[strlen(fulldir)]), "]");
-#  else
-		PATH_CONCAT(fulldir, direntry->d_name);
-#  endif
-		stat(fulldir, &buf);
-		if ((S_ISDIR(buf.st_mode)) &&
-		    (strcmp(direntry->d_name, ".") != 0) &&
-		    (strcmp(direntry->d_name, "..") != 0)) {
-		    fullname = recursivefullname(fulldir, filename, TRUE);
-		    if (fullname != NULL)
-			break;
-		}
-		free(fulldir);
-	    }
-	    closedir(dir);
-	}
-#else
-	int_warn(NO_CARET, "Recursive directory search not supported\n\t('%s!')", path);
-#endif
-    }
-    return fullname;
-}
-
-
-/* may return NULL */
-char *
-fontpath_fullname(const char *filename)
-{
-    FILE *fp;
-    char *fullname = NULL;
-
-#if defined(PIPES)
-    if (*filename == '<') {
-	os_error(NO_CARET, "fontpath_fullname: No Pipe allowed");
-    } else
-#endif /* PIPES */
-    if ((fp = fopen(filename, "r")) == (FILE *) NULL) {
-	/* try 'fontpath' variable */
-	char *tmppath, *path = NULL;
-
-	while ((tmppath = get_fontpath()) != NULL) {
-	    TBOOLEAN subdirs = FALSE;
-	    path = gp_strdup(tmppath);
-	    if (path[strlen(path) - 1] == '!') {
-		path[strlen(path) - 1] = '\0';
-		subdirs = TRUE;
-	    }			/* if */
-	    fullname = recursivefullname(path, filename, subdirs);
-	    if (fullname != NULL) {
-		while (get_fontpath());
-		free(path);
-		break;
-	    }
-	    free(path);
-	}
-    } else
-	fullname = gp_strdup(filename);
-
-    return fullname;
-}
-
 
 /* Push current terminal.
  * Called 1. in main(), just after init_terminal(),
@@ -848,47 +642,43 @@ get_style()
 }
 
 /* Parse options for style filledcurves and fill fco accordingly.
- * If no option given, then set fco->opt_given to 0.
+ * If no option given, set it to FILLEDCURVES_DEFAULT.
  */
 void
 get_filledcurves_style_options(filledcurves_opts *fco)
 {
-    int p;
-    p = lookup_table(&filledcurves_opts_tbl[0], c_token);
+    enum filledcurves_opts_id p;
+    fco->closeto = FILLEDCURVES_DEFAULT;
+    fco->oneside = 0;
 
-    if (p == FILLEDCURVES_ABOVE) {
-	fco->oneside = 1;
-	p = lookup_table(&filledcurves_opts_tbl[0], ++c_token);
-    } else if (p == FILLEDCURVES_BELOW) {
-	fco->oneside = -1;
-	p = lookup_table(&filledcurves_opts_tbl[0], ++c_token);
-    } else
-	fco->oneside = 0;
+    while ((p = lookup_table(&filledcurves_opts_tbl[0], c_token)) != -1) {
+	fco->closeto = p;
+	c_token++;
 
-    if (p == -1) {
-	fco->opt_given = 0;
-	return;			/* no option given */
-    } else
-	fco->opt_given = 1;
+	if (p == FILLEDCURVES_ABOVE) {
+	    fco->oneside = 1;
+	    continue;
+	} else if (p == FILLEDCURVES_BELOW) {
+	    fco->oneside = -1;
+	    continue;
+	}
 
-    c_token++;
-
-    fco->closeto = p;
-    fco->at = 0;
-    if (!equals(c_token, "="))
-	return;
-    /* parameter required for filledcurves x1=... and friends */
-    if (p < FILLEDCURVES_ATXY)
-	fco->closeto += 4;
-    c_token++;
-    fco->at = real_expression();
-    if (p != FILLEDCURVES_ATXY)
-	return;
-    /* two values required for FILLEDCURVES_ATXY */
-    if (!equals(c_token, ","))
-	int_error(c_token, "syntax is xy=<x>,<y>");
-    c_token++;
-    fco->aty = real_expression();
+	fco->at = 0;
+	if (!equals(c_token, "="))
+	    return;
+	/* parameter required for filledcurves x1=... and friends */
+	if (p < FILLEDCURVES_ATXY)
+	    fco->closeto += 4;
+	c_token++;
+	fco->at = real_expression();
+	if (p != FILLEDCURVES_ATXY)
+	    return;
+	/* two values required for FILLEDCURVES_ATXY */
+	if (!equals(c_token, ","))
+	    int_error(c_token, "syntax is xy=<x>,<y>");
+	c_token++;
+	fco->aty = real_expression();
+    }
     return;
 }
 
@@ -898,7 +688,7 @@ get_filledcurves_style_options(filledcurves_opts *fco)
 void
 filledcurves_options_tofile(filledcurves_opts *fco, FILE *fp)
 {
-    if (!fco->opt_given)
+    if (fco->closeto == FILLEDCURVES_DEFAULT)
 	return;
     if (fco->oneside)
 	fputs(fco->oneside > 0 ? "above " : "below ", fp);
@@ -936,7 +726,7 @@ need_fill_border(struct fill_style_type *fillstyle)
     /* Wants a border in a new color */
     if (p.pm3d_color.type != TC_DEFAULT)
 	apply_pm3dcolor(&p.pm3d_color);
-    
+
     return TRUE;
 }
 
@@ -951,7 +741,7 @@ parse_dashtype(struct t_dashtype *dt)
     /* Erase any previous contents */
     memset(dt, 0, sizeof(struct t_dashtype));
 
-    /* Fill in structure based on keyword ... */ 
+    /* Fill in structure based on keyword ... */
     if (equals(c_token, "solid")) {
 	res = DASHTYPE_SOLID;
 	c_token++;
@@ -981,9 +771,10 @@ parse_dashtype(struct t_dashtype *dt)
 
     /* Or string representing pattern elements ... */
     } else if ((dash_str = try_to_get_string())) {
+	int leading_space = 0;
 #define DSCALE 10.
 	while (dash_str[j] && (k < DASHPATTERN_LENGTH || dash_str[j] == ' ')) {
-	    /* .      Dot with short space 
+	    /* .      Dot with short space
 	     * -      Dash with regular space
 	     * _      Long dash with regular space
 	     * space  Don't add new dash, just increase last space */
@@ -1001,24 +792,31 @@ parse_dashtype(struct t_dashtype *dt)
 		dt->pattern[k++] = 1.0 * DSCALE;
 		break;
 	    case ' ':
-		if (k > 0)
-		dt->pattern[k-1] += 1.0 * DSCALE;
+		if (k == 0)
+		    leading_space++;
+		else
+		    dt->pattern[k-1] += 1.0 * DSCALE;
 		break;
 	    default:
 		int_error(c_token - 1, "expecting one of . - _ or space");
 	    }
 	    j++;
-#undef  DSCALE
 	}
+	/* Move leading space, if any, to the end */
+	if (k > 0)
+	    dt->pattern[k-1] += leading_space * DSCALE;
+#undef  DSCALE
+
 	/* truncate dash_str if we ran out of space in the array representation */
 	dash_str[j] = '\0';
-	strncpy(dt->dstring, dash_str, sizeof(dt->dstring)-1);
+	safe_strncpy(dt->dstring, dash_str, sizeof(dt->dstring));
 	free(dash_str);
-	res = DASHTYPE_CUSTOM;
+	if (k == 0)
+	    res = DASHTYPE_SOLID;
+	else
+	    res = DASHTYPE_CUSTOM;
 
     /* Or index of previously defined dashtype */
-    /* FIXME: Is the index enough or should we copy its contents into this one? */
-    /* FIXME: What happens if there is a recursive definition? */
     } else {
 	res = int_expression();
 	if (res < 0)
@@ -1034,7 +832,7 @@ parse_dashtype(struct t_dashtype *dt)
 
 /*
  * destination_class tells us whether we are filling in a line style ('set style line'),
- * a persistant linetype ('set linetype') or an ad hoc set of properties for a single
+ * a persistent linetype ('set linetype') or an ad hoc set of properties for a single
  * use ('plot ... lc foo lw baz').
  * allow_point controls whether we accept a point attribute in this lp_style.
  */
@@ -1042,7 +840,7 @@ int
 lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_point)
 {
     /* keep track of which options were set during this call */
-    int set_lt = 0, set_pal = 0, set_lw = 0; 
+    int set_lt = 0, set_pal = 0, set_lw = 0;
     int set_pt = 0, set_ps  = 0, set_pi = 0;
     int set_pn = 0;
     int set_dt = 0;
@@ -1051,19 +849,19 @@ lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_po
     /* EAM Mar 2010 - We don't want properties from a user-defined default
      * linetype to override properties explicitly set here.  So fill in a
      * local lp_style_type as we go and then copy over the specifically
-     * requested properties on top of the default ones.                                           
+     * requested properties on top of the default ones.
      */
     struct lp_style_type newlp = *lp;
-	
+
     if ((destination_class == LP_ADHOC)
     && (almost_equals(c_token, "lines$tyle") || equals(c_token, "ls"))) {
 	c_token++;
 	lp_use_properties(lp, int_expression());
-    } 
-    
+    }
+
     while (!END_OF_COMMAND) {
 
-	/* This special case is to flag an attemp to "set object N lt <lt>",
+	/* This special case is to flag an attempt to "set object N lt <lt>",
 	 * which would otherwise be accepted but ignored, leading to confusion
 	 * FIXME:  Couldn't this be handled at a higher level?
 	 */
@@ -1126,7 +924,9 @@ lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_po
 	 * from generating an error claiming redundant line properties.
 	 */
 	if ((destination_class == LP_NOFILL || destination_class == LP_ADHOC)
-	&&  (equals(c_token,"fc") || almost_equals(c_token,"fillc$olor")))
+	&&  (equals(c_token,"fc") || almost_equals(c_token,"fillc$olor"))
+	&&  (!almost_equals(c_token+1, "pal$ette"))
+	   )
 	    break;
 
 	if (equals(c_token,"lc") || almost_equals(c_token,"linec$olor")
@@ -1202,15 +1002,8 @@ lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_po
 		c_token++;
 		if ((symbol = try_to_get_string())) {
 		    newlp.p_type = PT_CHARACTER;
-		    /* An alternative mechanism would be to use
-		     * utf8toulong(&newlp.p_char, symbol);
-		     */
-		    strncpy(newlp.p_char, symbol, sizeof(newlp.p_char)-1);
-		    /* Truncate ascii text to single character */
-		    if ((newlp.p_char[0] & 0x80) == 0)
-			newlp.p_char[1] = '\0';
-		    /* strncpy does not guarantee null-termination */
-		    newlp.p_char[sizeof(newlp.p_char)-1] = '\0';
+		    truncate_to_one_utf8_char(symbol);
+		    safe_strncpy(newlp.p_char, symbol, sizeof(newlp.p_char));
 		    free(symbol);
 		} else if (almost_equals(c_token, "var$iable") && (destination_class == LP_ADHOC)) {
 		    newlp.p_type = PT_VARIABLE;
@@ -1279,7 +1072,7 @@ lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_po
 	    c_token++;
 	    tmp = parse_dashtype(&newlp.custom_dash_pattern);
 	    /* Pull the dashtype from the list of already defined dashtypes, */
-	    /* but only if it we didn't get an explicit one back from parse_dashtype */ 
+	    /* but only if it we didn't get an explicit one back from parse_dashtype */
 	    if (tmp == DASHTYPE_AXIS)
 		lp->l_type = LT_AXIS;
 	    if (tmp >= 0)
@@ -1314,10 +1107,10 @@ lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_po
 	lp->p_size = newlp.p_size;
     if (set_pi) {
 	lp->p_interval = newlp.p_interval;
-        lp->p_number = 0;
+	lp->p_number = 0;
     }
     if (set_pn) {
-        lp->p_number = newlp.p_number;
+	lp->p_number = newlp.p_number;
 	lp->p_interval = 0;
     }
     if (newlp.l_type == LT_COLORFROMCOLUMN)
@@ -1325,8 +1118,8 @@ lp_parse(struct lp_style_type *lp, lp_class destination_class, TBOOLEAN allow_po
     if (set_dt) {
 	lp->d_type = newlp.d_type;
 	lp->custom_dash_pattern = newlp.custom_dash_pattern;
-    }	
-		
+    }
+
 
     return new_lt;
 }
@@ -1340,18 +1133,11 @@ const struct gen_table fs_opt_tbl[] = {
 };
 
 void
-parse_fillstyle(struct fill_style_type *fs, int def_style, int def_density, int def_pattern, 
-		t_colorspec def_bordertype)
+parse_fillstyle(struct fill_style_type *fs)
 {
     TBOOLEAN set_fill = FALSE;
     TBOOLEAN set_border = FALSE;
     TBOOLEAN transparent = FALSE;
-
-    /* Set defaults */
-    fs->fillstyle = def_style;
-    fs->filldensity = def_density;
-    fs->fillpattern = def_pattern;
-    fs->border_color = def_bordertype;
 
     if (END_OF_COMMAND)
 	return;
@@ -1385,7 +1171,7 @@ parse_fillstyle(struct fill_style_type *fs, int def_style, int def_density, int 
 		c_token++;
 
 		if (!transparent)
-		    fs->filldensity = 100;
+			fs->filldensity = 100;
 
 		if (might_be_numeric(c_token)) {
 		    if (fs->fillstyle == FS_SOLID) {
@@ -1440,7 +1226,7 @@ parse_fillstyle(struct fill_style_type *fs, int def_style, int def_density, int 
     if (transparent) {
 	if (fs->fillstyle == FS_SOLID)
 	    fs->fillstyle = FS_TRANSPARENT_SOLID;
-        else if (fs->fillstyle == FS_PATTERN)
+	else if (fs->fillstyle == FS_PATTERN)
 	    fs->fillstyle = FS_TRANSPARENT_PATTERN;
     }
 }
@@ -1486,8 +1272,6 @@ parse_colorspec(struct t_colorspec *tc, int options)
 	/*
 	 * July 2014 - translate linetype into user-defined linetype color.
 	 * This is a CHANGE!
-	 * FIXME: calling load_linetype here may obviate the need to call it
-	 * many places in the higher level code.  They could be removed.
 	 */
 	load_linetype(&lptemp, tc->lt + 1);
 	*tc = lptemp.pm3d_color;
@@ -1613,7 +1397,7 @@ arrow_use_properties(struct arrow_style_type *arrow, int tag)
     if (!this || this->tag != tag)
 	int_warn(NO_CARET,"arrowstyle %d not found", tag);
 
-    /* Restore orginal color if the style doesn't specify one */
+    /* Restore original color if the style doesn't specify one */
     if (arrow->lp_properties.pm3d_color.type == TC_DEFAULT)
 	arrow->lp_properties.pm3d_color = save_colorspec;
 }
@@ -1717,7 +1501,7 @@ arrow_parse(
 	    /* invalid backangle --> default of 90.0 degrees */
 	    if (arrow->head_backangle <= arrow->head_angle)
 		arrow->head_backangle = 90.0;
-	    
+
 	    /* Assume adjustable size but check for 'fixed' instead */
 	    arrow->head_fixedsize = FALSE;
 	    continue;
@@ -1769,59 +1553,4 @@ get_image_options(t_image *image)
 	image->fallback = TRUE;
     }
 
-}
-
-
-enum set_encoding_id
-encoding_from_locale(void)
-{
-    char *l = NULL;
-    enum set_encoding_id encoding = S_ENC_INVALID;
-
-#if defined(_WIN32)
-#ifdef HAVE_LOCALE_H
-    char * cp_str;
-
-    l = setlocale(LC_CTYPE, "");
-    /* preserve locale string, skip language information */
-    cp_str = strchr(l, '.');
-    if (cp_str) {
-	unsigned cp;
-
-	cp_str++; /* Step past the dot in, e.g., German_Germany.1252 */
-	cp = strtoul(cp_str, NULL, 10);
-
-	if (cp != 0) {
-	    enum set_encoding_id newenc = WinGetEncoding(cp);
-	    encoding = newenc;
-	}
-    }
-#endif
-    /* get encoding from currently active codepage */
-    if (encoding == S_ENC_INVALID) {
-#ifndef WGP_CONSOLE
-	encoding = WinGetEncoding(GetACP());
-#else
-	encoding = WinGetEncoding(GetConsoleCP());
-#endif
-    }
-#elif defined(HAVE_LOCALE_H)
-    l = setlocale(LC_CTYPE, "");
-    if (l && (strstr(l, "utf") || strstr(l, "UTF")))
-	encoding = S_ENC_UTF8;
-    if (l && (strstr(l, "sjis") || strstr(l, "SJIS") || strstr(l, "932")))
-	encoding = S_ENC_SJIS;
-    /* FIXME: "set encoding locale" supports only sjis and utf8 on non-Windows systems */
-#endif
-    return encoding;
-}
-
-
-void
-init_encoding(void)
-{
-    encoding = encoding_from_locale();
-    if (encoding == S_ENC_INVALID)
-	encoding = S_ENC_DEFAULT;
-    init_special_chars();
 }

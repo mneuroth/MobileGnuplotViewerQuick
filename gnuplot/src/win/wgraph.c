@@ -38,6 +38,19 @@
 
 #include "syscfg.h"
 
+/* Enable following define to include the GDI backend */
+//#define USE_WINGDI
+
+/* sanity check */
+#if !defined(USE_WINGDI) && !defined(HAVE_GDIPLUS) && !defined(HAVE_D2D)
+# error "No valid windows terminal backend enabled."
+#endif
+
+/* Use GDI instead of GDI+ while rotating splots */
+#if defined(HAVE_GDIPLUS) && defined(USE_WINGDI)
+#  define FASTROT_WITH_GDI
+#endif
+
 #define STRICT
 #include <windows.h>
 #include <windowsx.h>
@@ -71,6 +84,10 @@
 #ifndef WM_MOUSEHWHEEL /* requires _WIN32_WINNT >= 0x0600 */
 # define WM_MOUSEHWHEEL 0x020E
 #endif
+
+/* Names of window classes */
+static const LPTSTR szGraphClass = TEXT("wgnuplot_graph");
+static const LPTSTR szGraphParentClass = TEXT("wgnuplot_graphwindow");
 
 #ifdef USE_MOUSE
 /* Petr Mikulik, February 2001
@@ -141,13 +158,9 @@ COLORREF wginitcolor[WGDEFCOLOR] =  {
 #define WGDEFSTYLE 5
 int wginitstyle[WGDEFSTYLE] = {PS_SOLID, PS_DASH, PS_DOT, PS_DASHDOT, PS_DASHDOTDOT};
 
-/* Maximum number of GWOPBLK arrays to be remembered. */
-/* HBB 20010218: moved here from wgnuplib.h: other parts of the program don't
- * need to know about it */
-#define GWOPMAX 4096
-
 #define MINMAX(a,val,b) (((val) <= (a)) ? (a) : ((val) <= (b) ? (val) : (b)))
 
+#ifdef USE_WINGDI
 /* bitmaps for filled boxes (ULIG) */
 /* zeros represent the foreground color and ones represent the background color */
 #define PATTERN_BITMAP_LENGTH 16
@@ -181,6 +194,7 @@ static BITMAP pattern_bitdata[pattern_num];
 static HBITMAP pattern_bitmap[pattern_num];
 
 static TBOOLEAN brushes_initialized = FALSE;
+#endif
 
 
 /* Internal state of enhanced text processing.
@@ -189,16 +203,18 @@ static TBOOLEAN brushes_initialized = FALSE;
 */
 enhstate_struct enhstate;
 
+#ifdef USE_WINGDI
 static struct {
 	HDC  hdc;            /* device context */
 } enhstate_gdi;
-
+#endif
 
 /* ================================== */
 
 /* prototypes for module-local functions */
 
 LRESULT CALLBACK WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndGraphParentProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK LineStyleDlgProc(HWND hdlg, UINT wmsg, WPARAM wparam, LPARAM lparam);
 
 static void	DestroyBlocks(LPGW lpgw);
@@ -207,18 +223,20 @@ static void	StorePen(LPGW lpgw, int i, COLORREF ref, int colorstyle, int monosty
 static void	MakePens(LPGW lpgw, HDC hdc);
 static void	DestroyPens(LPGW lpgw);
 static void	Wnd_GetTextSize(HDC hdc, LPCSTR str, size_t len, int *cx, int *cy);
-static void	GetPlotRect(LPGW lpgw, LPRECT rect);
+static BOOL	GetPlotRect(LPGW lpgw, LPRECT rect);
 static void	MakeFonts(LPGW lpgw, LPRECT lprect, HDC hdc);
 static void	DestroyFonts(LPGW lpgw);
-static void	SetFont(LPGW lpgw, HDC hdc);
 static void	SelFont(LPGW lpgw);
+#ifdef USE_WINGDI
+static void	SetFont(LPGW lpgw, HDC hdc);
 static void	GraphChangeFont(LPGW lpgw, LPCTSTR font, int fontsize, HDC hdc, RECT rect);
 static void	dot(HDC hdc, int xdash, int ydash);
-static unsigned int GraphGetTextLength(LPGW lpgw, HDC hdc, LPCSTR text);
+static unsigned int GraphGetTextLength(LPGW lpgw, HDC hdc, LPCSTR text, TBOOLEAN escapes);
 static void	draw_text_justify(HDC hdc, int justify);
-static void	draw_put_text(LPGW lpgw, HDC hdc, int x, int y, char * str);
+static void	draw_put_text(LPGW lpgw, HDC hdc, int x, int y, char * str, TBOOLEAN escapes);
 static void	draw_image(LPGW lpgw, HDC hdc, char *image, POINT corners[4], unsigned int width, unsigned int height, int color_mode);
 static void	drawgraph(LPGW lpgw, HDC hdc, LPRECT rect);
+#endif
 static void	CopyClip(LPGW lpgw);
 static void	SaveAsEMF(LPGW lpgw);
 static void	CopyPrint(LPGW lpgw);
@@ -416,7 +434,7 @@ GraphInit(LPGW lpgw)
 
 	if (!lpgw->hPrevInstance) {
 		wndclass.style = CS_HREDRAW | CS_VREDRAW;
-		wndclass.lpfnWndProc = WndGraphProc;
+		wndclass.lpfnWndProc = WndGraphParentProc;
 		wndclass.cbClsExtra = 0;
 		wndclass.cbWndExtra = 2 * sizeof(void *);
 		wndclass.hInstance = lpgw->hInstance;
@@ -424,12 +442,17 @@ GraphInit(LPGW lpgw)
 		wndclass.hCursor = NULL;
 		wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 		wndclass.lpszMenuName = NULL;
+		wndclass.lpszClassName = szGraphParentClass;
+		RegisterClass(&wndclass);
+
+		wndclass.lpfnWndProc = WndGraphProc;
+		wndclass.hIcon = NULL;
 		wndclass.lpszClassName = szGraphClass;
 		RegisterClass(&wndclass);
 	}
 
 	if (!lpgw->bDocked) {
-		lpgw->hWndGraph = CreateWindow(szGraphClass, lpgw->Title,
+		lpgw->hWndGraph = CreateWindow(szGraphParentClass, lpgw->Title,
 		    WS_OVERLAPPEDWINDOW,
 		    lpgw->Origin.x, lpgw->Origin.y,
 		    lpgw->Size.x, lpgw->Size.y,
@@ -449,7 +472,7 @@ GraphInit(LPGW lpgw)
 		lpgw->Origin.y = textwin.ButtonHeight;
 		lpgw->Size.x = size.cx;
 		lpgw->Size.y = size.cy;
-		lpgw->hWndGraph = CreateWindow(szGraphClass, lpgw->Title,
+		lpgw->hWndGraph = CreateWindow(szGraphParentClass, lpgw->Title,
 		    WS_CHILD,
 		    lpgw->Origin.x, lpgw->Origin.y,
 		    lpgw->Size.x, lpgw->Size.y,
@@ -588,8 +611,10 @@ GraphInit(LPGW lpgw)
 	AppendMenu(lpgw->hPopMenu, MF_STRING | (lpgw->color ? MF_CHECKED : MF_UNCHECKED),
 		M_COLOR, TEXT("C&olor"));
 	AppendMenu(lpgw->hPopMenu, MF_SEPARATOR, 0, NULL);
+#ifdef USE_WINGDI
 	AppendMenu(lpgw->hPopMenu, MF_STRING | (lpgw->gdiplus ? MF_CHECKED : MF_UNCHECKED),
 		M_GDI, TEXT("&GDI backend"));
+#endif
 #ifdef HAVE_GDIPLUS
 	AppendMenu(lpgw->hPopMenu, MF_STRING | (lpgw->gdiplus ? MF_CHECKED : MF_UNCHECKED),
 		M_GDIPLUS, TEXT("GDI&+ backend"));
@@ -648,30 +673,43 @@ GraphInit(LPGW lpgw)
 		GetClientRect(lpgw->hWndGraph, &rect);
 		lpgw->Decoration.x = wrect.right - wrect.left + rect.left - rect.right;
 		lpgw->Decoration.y = wrect.bottom - wrect.top + rect.top - rect.bottom + lpgw->ToolbarHeight + lpgw->StatusHeight;
+		/* 2020-10-07 shige: get real value of Size.{x,y} for CW_USEDEFAULT */
+		if (lpgw->Size.x == CW_USEDEFAULT || lpgw->Size.y == CW_USEDEFAULT) {
+			lpgw->Size.x = wrect.right - wrect.left;
+			lpgw->Size.y = wrect.bottom - wrect.top;
+		}
 	}
 
 	/* resize to match requested canvas size */
 	if (!lpgw->bDocked && lpgw->Canvas.x != 0) {
 		lpgw->Size.x = lpgw->Canvas.x + lpgw->Decoration.x;
 		lpgw->Size.y = lpgw->Canvas.y + lpgw->Decoration.y;
-		SetWindowPos(lpgw->hWndGraph, HWND_BOTTOM, 
-			     lpgw->Origin.x, lpgw->Origin.y, 
+		SetWindowPos(lpgw->hWndGraph, HWND_BOTTOM,
+			     lpgw->Origin.x, lpgw->Origin.y,
 			     lpgw->Size.x, lpgw->Size.y,
 			     SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOMOVE);
 	}
+
+	// Finally, create the window for the actual graph
+	lpgw->hGraph = CreateWindow(szGraphClass, lpgw->Title,
+	    WS_CHILD,
+	    0, lpgw->ToolbarHeight,
+	    lpgw->Size.x - lpgw->Decoration.x, lpgw->Size.y - lpgw->Decoration.y,
+	    lpgw->hWndGraph, NULL, lpgw->hInstance, lpgw);
 
 	// initialize font (and pens)
 	{
 		HDC hdc;
 		RECT rect;
 
-		hdc = GetDC(lpgw->hWndGraph);
+		hdc = GetDC(lpgw->hGraph);
 		MakePens(lpgw, hdc);
 		GetPlotRect(lpgw, &rect);
 		MakeFonts(lpgw, &rect, hdc);
-		ReleaseDC(lpgw->hWndGraph, hdc);
+		ReleaseDC(lpgw->hGraph, hdc);
 	}
 
+	ShowWindow(lpgw->hGraph, SW_SHOWNOACTIVATE);
 	ShowWindow(lpgw->hWndGraph, SW_SHOWNORMAL);
 
 #ifndef WGP_CONSOLE
@@ -703,12 +741,19 @@ GraphClose(LPGW lpgw)
 	Wnd_exec_event(lpgw, (LPARAM)0, GE_reset, 0);
 #endif
 	/* close window */
-	if (lpgw->hWndGraph)
-		DestroyWindow(lpgw->hWndGraph);
+	if (lpgw->hWndGraph != NULL) {
+		/* avoid recursive calls */
+		HWND hWndGraph = lpgw->hWndGraph;
+		lpgw->hWndGraph = NULL;
+		DestroyWindow(hWndGraph);
+	}
 	WinMessageLoop();
-	lpgw->hWndGraph = NULL;
+	lpgw->hGraph = NULL;
 	lpgw->hStatusbar = NULL;
 	lpgw->hToolbar = NULL;
+#ifdef HAVE_D2D
+	d2dReleaseRenderTarget(lpgw);
+#endif
 
 	lpgw->locked = TRUE;
 	DestroyBlocks(lpgw);
@@ -754,11 +799,11 @@ GraphEnd(LPGW lpgw)
 {
 	RECT rect;
 
-	GetClientRect(lpgw->hWndGraph, &rect);
-	InvalidateRect(lpgw->hWndGraph, &rect, 1);
+	GetClientRect(lpgw->hGraph, &rect);
+	InvalidateRect(lpgw->hGraph, &rect, 1);
 	lpgw->buffervalid = FALSE;
 	lpgw->locked = FALSE;
-	UpdateWindow(lpgw->hWndGraph);
+	UpdateWindow(lpgw->hGraph);
 #ifdef USE_MOUSE
 	gp_exec_event(GE_plotdone, 0, 0, 0, 0, lpgw->Id);	/* notify main program */
 #endif
@@ -794,7 +839,7 @@ GraphRedraw(LPGW lpgw)
 {
 	lpgw->buffervalid = FALSE;
 	if (GraphHasWindow(lpgw))
-		SendMessage(lpgw->hWndGraph, WM_COMMAND, M_REBUILDTOOLS, 0L);
+		SendMessage(lpgw->hGraph, WM_COMMAND, M_REBUILDTOOLS, 0L);
 }
 
 
@@ -846,6 +891,7 @@ StorePen(LPGW lpgw, int i, COLORREF ref, int colorstyle, int monostyle)
 static void
 MakePens(LPGW lpgw, HDC hdc)
 {
+#ifdef USE_WINGDI
 	int i;
 	LOGPEN pen;
 
@@ -883,6 +929,7 @@ MakePens(LPGW lpgw, HDC hdc)
 		}
 		brushes_initialized = TRUE;
 	}
+#endif
 }
 
 
@@ -890,6 +937,7 @@ MakePens(LPGW lpgw, HDC hdc)
 static void
 DestroyPens(LPGW lpgw)
 {
+#ifdef USE_WINGDI
 	int i;
 
 	DeleteObject(lpgw->hbrush);
@@ -910,6 +958,7 @@ DestroyPens(LPGW lpgw)
 		}
 		brushes_initialized = FALSE;
 	}
+#endif
 }
 
 /* ================================== */
@@ -928,25 +977,20 @@ Wnd_GetTextSize(HDC hdc, LPCSTR str, size_t len, int *cx, int *cy)
 }
 
 
-static void
+static BOOL
 GetPlotRect(LPGW lpgw, LPRECT rect)
 {
-	GetClientRect(lpgw->hWndGraph, rect);
-	rect->bottom -= lpgw->StatusHeight; /* leave some room for the status line */
-	rect->top += lpgw->ToolbarHeight;
-	if (rect->bottom < rect->top) rect->bottom = rect->top;
+	return GetClientRect(lpgw->hGraph, rect);
 }
 
 
+#ifdef USE_WINGDI
 static void
 GetPlotRectInMM(LPGW lpgw, LPRECT rect, HDC hdc)
 {
 	int iWidthMM, iHeightMM, iWidthPels, iHeightPels;
 
 	GetPlotRect (lpgw, rect);
-	rect->right -= rect->left;
-	rect->bottom -= rect->top;
-	rect->left = rect->top = 0;
 
 	/* Taken from
 	http://msdn.microsoft.com/en-us/library/dd183519(VS.85).aspx
@@ -1003,21 +1047,34 @@ TryCreateFont(LPGW lpgw, LPTSTR fontface, HDC hdc)
 	}
 	return FALSE;
 }
+#endif
 
 
 static void
 MakeFonts(LPGW lpgw, LPRECT lprect, HDC hdc)
 {
+#ifdef USE_WINGDI
 	HFONT hfontold;
 	TEXTMETRIC tm;
 	int result;
 	LPTSTR p;
 	int cx, cy;
+#endif
+
+#ifdef HAVE_D2D
+	lpgw->dpi = GetDeviceCaps(hdc, LOGPIXELSY);
+#endif
 
 #ifdef HAVE_GDIPLUS
-	if (lpgw->gdiplus && !(lpgw->rotating && lpgw->fastrotation)) {
-		InitFont_gdiplus(lpgw, hdc, lprect);
-		return;
+	if (lpgw->gdiplus) {
+#ifdef FASTROT_WITH_GDI
+		if (!(lpgw->rotating && lpgw->fastrotation)) {
+#endif
+			InitFont_gdiplus(lpgw, hdc, lprect);
+			return;
+#ifdef FASTROT_WITH_GDI
+		}
+#endif
 	}
 #endif
 #ifdef HAVE_D2D
@@ -1027,6 +1084,7 @@ MakeFonts(LPGW lpgw, LPRECT lprect, HDC hdc)
 	}
 #endif
 
+#ifdef USE_WINGDI
 	lpgw->rotate = FALSE;
 	memset(&(lpgw->lf), 0, sizeof(LOGFONT));
 	_tcsncpy(lpgw->lf.lfFaceName, lpgw->fontname, LF_FACESIZE);
@@ -1110,12 +1168,14 @@ MakeFonts(LPGW lpgw, LPRECT lprect, HDC hdc)
 	lpgw->tmAscent = tm.tmAscent;
 	lpgw->tmDescent = tm.tmDescent;
 	SelectObject(hdc, hfontold);
+#endif
 }
 
 
 static void
 DestroyFonts(LPGW lpgw)
 {
+#ifdef USE_WINGDI
 	if (lpgw->hfonth) {
 		DeleteObject(lpgw->hfonth);
 		lpgw->hfonth = 0;
@@ -1124,9 +1184,11 @@ DestroyFonts(LPGW lpgw)
 		DeleteObject(lpgw->hfontv);
 		lpgw->hfontv = 0;
 	}
+#endif
 }
 
 
+#ifdef USE_WINGDI
 static void
 SetFont(LPGW lpgw, HDC hdc)
 {
@@ -1140,6 +1202,7 @@ SetFont(LPGW lpgw, HDC hdc)
 			SelectObject(hdc, lpgw->hfontv);
 	}
 }
+#endif
 
 
 static void
@@ -1169,9 +1232,9 @@ SelFont(LPGW lpgw)
 		lf.lfItalic = FALSE;
 	}
 	lf.lfCharSet = DEFAULT_CHARSET;
-	hdc = GetDC(lpgw->hWndGraph);
+	hdc = GetDC(lpgw->hGraph);
 	lf.lfHeight = -MulDiv(lpgw->fontsize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-	ReleaseDC(lpgw->hWndGraph, hdc);
+	ReleaseDC(lpgw->hGraph, hdc);
 	cf.lpLogFont = &lf;
 	cf.nFontType = SCREEN_FONTTYPE;
 	cf.Flags = CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT | CF_SCALABLEONLY;
@@ -1185,7 +1248,7 @@ SelFont(LPGW lpgw)
 		/* set current font as default font */
 		_tcscpy(lpgw->deffontname, lpgw->fontname);
 		lpgw->deffontsize = lpgw->fontsize;
-		SendMessage(lpgw->hWndGraph, WM_COMMAND, M_REBUILDTOOLS, 0L);
+		SendMessage(lpgw->hGraph, WM_COMMAND, M_REBUILDTOOLS, 0L);
 	}
 }
 
@@ -1218,12 +1281,14 @@ DestroyCursors(LPGW lpgw)
 /* ================================== */
 
 
+#ifdef USE_WINGDI
 static void
 dot(HDC hdc, int xdash, int ydash)
 {
 	MoveTo(hdc, xdash, ydash);
 	LineTo(hdc, xdash, ydash + 1);
 }
+#endif
 
 
 unsigned
@@ -1234,8 +1299,9 @@ luma_from_color(unsigned red, unsigned green, unsigned blue)
 }
 
 
+#ifdef USE_WINGDI
 static unsigned int
-GraphGetTextLength(LPGW lpgw, HDC hdc, LPCSTR text)
+GraphGetTextLength(LPGW lpgw, HDC hdc, LPCSTR text, TBOOLEAN escapes)
 {
 	SIZE size;
 	LPWSTR textw;
@@ -1243,7 +1309,10 @@ GraphGetTextLength(LPGW lpgw, HDC hdc, LPCSTR text)
 	if (text == NULL)
 		return 0;
 
-	textw = UnicodeText(text, lpgw->encoding);
+	if (escapes)
+		textw = UnicodeTextWithEscapes(text, lpgw->encoding);
+	else
+		textw = UnicodeText(text, lpgw->encoding);
 	if (textw) {
 		GetTextExtentPoint32W(hdc, textw, wcslen(textw), &size);
 		free(textw);
@@ -1252,9 +1321,11 @@ GraphGetTextLength(LPGW lpgw, HDC hdc, LPCSTR text)
 	}
 	return size.cx;
 }
+#endif
 
 
 /*   local enhanced text helper functions */
+#ifdef USE_WINGDI
 
 static void
 EnhancedSetFont()
@@ -1267,13 +1338,13 @@ EnhancedSetFont()
 static unsigned
 EnhancedTextLength(char * text)
 {
-	return GraphGetTextLength(enhstate.lpgw, enhstate_gdi.hdc, text);
+	return GraphGetTextLength(enhstate.lpgw, enhstate_gdi.hdc, text, TRUE);
 }
 
 static void
 EnhancedPutText(int x, int y, char * text)
 {
-	draw_put_text(enhstate.lpgw, enhstate_gdi.hdc, x, y, text);
+	draw_put_text(enhstate.lpgw, enhstate_gdi.hdc, x, y, text, TRUE);
 }
 
 static void
@@ -1295,9 +1366,86 @@ draw_enhanced_init(HDC hdc)
 	enhstate.res_scale = GetDeviceCaps(hdc, LOGPIXELSY) / 96.;
 	SetTextAlign(hdc, TA_LEFT | TA_BASELINE);
 }
+#endif // USE_WINGDI
 
 
-/* enhanced text functions shared with wgdiplus.cpp */
+/* enhanced text functions shared with wgdiplus.cpp/wd2d.cpp */
+
+LPWSTR
+UnicodeTextWithEscapes(LPCSTR str, enum set_encoding_id encoding)
+{
+	LPWSTR p;
+	LPWSTR textw;
+
+	textw = UnicodeText(str, encoding);
+	if (encoding == S_ENC_UTF8)
+		return textw;  // Escapes already handled in core gnuplot
+
+	p = wcsstr(textw, L"\\");
+	if (p != NULL) {
+		LPWSTR q, r;
+
+		// make a copy of the string
+		LPWSTR w = (LPWSTR) malloc(wcslen(textw) * sizeof(WCHAR));
+		wcsncpy(w, textw, (p - textw));
+
+		// q points at end of new string
+		q = w + (p - textw);
+		// r is the remaining string to copy
+		r = p;
+
+		*q = 0;
+		do {
+			uint32_t codepoint;
+			size_t length = 0;
+			WCHAR wstr[3];
+
+			// copy intermediate characters
+			if (p > r) {
+				size_t n = (p - r);
+				wcsncat(w, r, n);
+				r += n;
+				q += n;
+			}
+			// Handle Unicode escapes
+			if (p[1] == L'U' && p[2] == L'+') {
+				swscanf(&(p[3]), L"%5x", &codepoint);
+				// Windows does not offer an API for direct conversion from UTF-32 to UTF-16.
+				// So we convert "by hand".
+				if ((codepoint <= 0xD7FF) || (codepoint >= 0xE000 && codepoint <= 0xFFFF)) {
+					wstr[0] = codepoint;
+					length = 1;
+				} else if (codepoint <= 0x10FFFF) {
+					codepoint -= 0x10000;
+					wstr[0] = 0xD800 + (codepoint >> 10);
+					wstr[1] = 0xDC00 + (codepoint & 0x3FF);
+					length = 2;
+				}
+			}
+			if (length > 0) {
+				int i;
+
+				p += (codepoint > 0xFFFF) ? 8 : 7;
+				for (i = 0; i < length; i++, q++)
+					*q = wstr[i];
+			} else if (p[1] == '\\') {
+				p++;
+			} else {
+				*q = L'\\';
+				q++;
+			}
+			*q = 0;
+			r = p;
+			p++;
+			p = wcsstr(p, L"\\U+");
+		} while (p != NULL);
+		if (r != NULL)
+			wcscat(w, r);
+		free(textw);
+		return w;
+	}
+	return textw;
+}
 
 void
 GraphEnhancedOpen(char *fontname, double fontsize, double base,
@@ -1549,6 +1697,7 @@ draw_get_enhanced_text_extend(PRECT extend)
 }
 
 
+#ifdef USE_WINGDI
 static void
 draw_text_justify(HDC hdc, int justify)
 {
@@ -1568,7 +1717,7 @@ draw_text_justify(HDC hdc, int justify)
 
 
 static void
-draw_put_text(LPGW lpgw, HDC hdc, int x, int y, char * str)
+draw_put_text(LPGW lpgw, HDC hdc, int x, int y, char * str, TBOOLEAN escapes)
 {
 	SetBkMode(hdc, TRANSPARENT);
 
@@ -1576,7 +1725,12 @@ draw_put_text(LPGW lpgw, HDC hdc, int x, int y, char * str)
 	if ((lpgw->encoding == S_ENC_DEFAULT) || (lpgw->encoding == S_ENC_INVALID)) {
 		TextOutA(hdc, x, y, str, strlen(str));
 	} else {
-		LPWSTR textw = UnicodeText(str, lpgw->encoding);
+		LPWSTR textw;
+
+		if (escapes)
+			textw = UnicodeTextWithEscapes(str, lpgw->encoding);
+		else
+			textw = UnicodeText(str, lpgw->encoding);
 		if (textw) {
 			TextOutW(hdc, x, y, textw, wcslen(textw));
 			free(textw);
@@ -1633,6 +1787,7 @@ draw_new_brush(LPGW lpgw, HDC hdc, COLORREF color)
 		DeleteObject(lpgw->hcolorbrush);
 	lpgw->hcolorbrush = new_brush;
 }
+#endif // USE_WINGDI
 
 
 void
@@ -1661,6 +1816,7 @@ draw_update_keybox(LPGW lpgw, unsigned plotno, unsigned x, unsigned y)
 }
 
 
+#ifdef USE_WINGDI
 static void
 draw_grey_out_key_box(LPGW lpgw, HDC hdc, int plotno)
 {
@@ -1692,7 +1848,7 @@ draw_grey_out_key_box(LPGW lpgw, HDC hdc, int plotno)
 }
 
 
-void
+static void
 draw_image(LPGW lpgw, HDC hdc, char *image, POINT corners[4], unsigned int width, unsigned int height, int color_mode)
 {
 	BITMAPINFO bmi;
@@ -1864,7 +2020,7 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 	int seq = 0;				/* sequence counter for W_image and W_boxedtext */
 	int i;
 
-	if (lpgw->locked) 
+	if (lpgw->locked)
 		return;
 
 	/* clear hypertexts only in display sessions */
@@ -1921,8 +2077,8 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 	rt = rect->top;
 	rb = rect->bottom;
 
-	htic = (lpgw->org_pointsize * MulDiv(lpgw->htic, rr - rl, lpgw->xmax) + 1);
-	vtic = (lpgw->org_pointsize * MulDiv(lpgw->vtic, rb - rt, lpgw->ymax) + 1);
+	htic = MulDiv(lpgw->org_pointsize * lpgw->htic, rr - rl, lpgw->xmax) + 1;
+	vtic = MulDiv(lpgw->org_pointsize * lpgw->vtic, rb - rt, lpgw->ymax) + 1;
 
 	/* (re-)init GDI fonts */
 	GraphChangeFont(lpgw, lpgw->deffontname, lpgw->deffontsize, hdc, *rect);
@@ -2047,6 +2203,7 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 
 		case W_polyline: {
 			POINTL * poly = (POINTL *) LocalLock(curptr->htext);
+			if (poly == NULL) break; // memory allocation failed
 			polyi = curptr->x;
 			if (polyi >= polymax) {
 				const int step = 200;
@@ -2141,13 +2298,13 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 				int slen, vsize;
 
 				/* shift correctly for rotated text */
-				draw_put_text(lpgw, hdc, xdash + hshift, ydash + vshift, str);
+				draw_put_text(lpgw, hdc, xdash + hshift, ydash + vshift, str, FALSE);
 #ifndef EAM_BOXED_TEXT
 				if (keysample) {
 #else
 				if (keysample || boxedtext.boxing) {
 #endif
-					slen  = GraphGetTextLength(lpgw, hdc, str);
+					slen  = GraphGetTextLength(lpgw, hdc, str, FALSE);
 					vsize = MulDiv(lpgw->vchar, rb - rt, 2 * lpgw->ymax);
 					if (lpgw->justify == LEFT) {
 						dxl = 0;
@@ -2767,6 +2924,7 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 				char * image = (char *) LocalLock(curptr->htext);
 				unsigned int width = curptr->x;
 				unsigned int height = curptr->y;
+				if (image == NULL) break; // memory allocation failed
 				draw_image(lpgw, hdc, image, corners, width, height, color_mode);
 				LocalUnlock(curptr->htext);
 			}
@@ -2967,6 +3125,7 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 	}
 	LocalFreePtr(ppt);
 }
+#endif // USE_WINGDI
 
 /* ================================== */
 
@@ -2980,20 +3139,25 @@ SaveAsEMF(LPGW lpgw)
 	static TCHAR lpstrCustomFilter[256] = { '\0' };
 	static TCHAR lpstrFileName[MAX_PATH] = { '\0' };
 	static TCHAR lpstrFileTitle[MAX_PATH] = { '\0' };
-	HWND hwnd = lpgw->hWndGraph;
 
 	Ofn.lStructSize = sizeof(OPENFILENAME);
-	Ofn.hwndOwner = hwnd;
+	Ofn.hwndOwner = lpgw->hWndGraph;
 	Ofn.lpstrInitialDir = NULL;
-#ifdef HAVE_GDIPLUS
+#if defined(HAVE_GDIPLUS) && defined(USE_WINGDI)
 	Ofn.lpstrFilter = TEXT("Enhanced Metafile (*.emf)\0*.emf\0Enhanced Metafile+ (*.emf)\0*.emf\0");
-#else
+#elif defined (USE_WINGDI)
 	Ofn.lpstrFilter = TEXT("Enhanced Metafile (*.emf)\0*.emf\0");
+#elif defined(HAVE_GDIPLUS)
+	Ofn.lpstrFilter = TEXT("Enhanced Metafile+ (*.emf)\0*.emf\0");
 #endif
 	Ofn.lpstrCustomFilter = lpstrCustomFilter;
 	Ofn.nMaxCustFilter = 255;
+#if defined(HAVE_GDIPLUS) && defined(USE_WINGDI)
 	/* Direct2D cannot do EMF. Fall back to GDI+ instead. */
 	Ofn.nFilterIndex = (lpgw->gdiplus || lpgw->d2d ? 2 : 1);
+#else
+	Ofn.nFilterIndex = 1;
+#endif
 	Ofn.lpstrFile = lpstrFileName;
 	Ofn.nMaxFile = MAX_PATH;
 	Ofn.lpstrFileTitle = lpstrFileTitle;
@@ -3004,26 +3168,31 @@ SaveAsEMF(LPGW lpgw)
 	Ofn.lpstrDefExt = TEXT("emf");
 
 	if (GetSaveFileName(&Ofn) != 0) {
-		RECT rect, mfrect;
+		HWND hwnd = lpgw->hGraph;
+		RECT rect;
 		HDC hdc;
-		HENHMETAFILE hemf;
-		HDC hmf;
 
 		/* get the context */
 		hdc = GetDC(hwnd);
 		GetPlotRect(lpgw, &rect);
-		rect.right -= rect.left;
-		rect.bottom -= rect.top;
-		rect.left = rect.top = 0;
-		GetPlotRectInMM(lpgw, &mfrect, hdc);
 
 		switch (Ofn.nFilterIndex) {
-		case 1:  /* GDI Enhanced Metafile (EMF) */
+#ifdef USE_WINGDI
+		case 1: { /* GDI Enhanced Metafile (EMF) */
+			HENHMETAFILE hemf;
+			HDC hmf;
+			RECT mfrect;
+
+			GetPlotRectInMM(lpgw, &mfrect, hdc);
 			hmf = CreateEnhMetaFile(hdc, Ofn.lpstrFile, &mfrect, NULL);
 			drawgraph(lpgw, hmf, &rect);
 			hemf = CloseEnhMetaFile(hmf);
 			DeleteEnhMetaFile(hemf);
 			break;
+		}
+#else
+		case 1:
+#endif
 #ifdef HAVE_GDIPLUS
 		case 2: {/* GDI+ Enhanced Metafile (EMF+) */
 #ifndef UNICODE
@@ -3036,6 +3205,9 @@ SaveAsEMF(LPGW lpgw)
 			break;
 		}
 #endif
+		default:
+			MessageBox(lpgw->hWndGraph, TEXT("Unable to save EMF data."), TEXT("gnuplot: save as EMF"), MB_OK | MB_ICONERROR);
+			break;
 		}
 		ReleaseDC(hwnd, hdc);
 	}
@@ -3044,55 +3216,73 @@ SaveAsEMF(LPGW lpgw)
 
 /* ================================== */
 
+
+HBITMAP
+GraphGetBitmap(LPGW lpgw)
+{
+	RECT rect;
+	HDC hdc;
+	HDC mem;
+	HBITMAP bitmap;
+
+	hdc = GetDC(lpgw->hGraph);
+	GetPlotRect(lpgw, &rect);
+
+	/* make a bitmap and copy it there */
+	mem = CreateCompatibleDC(hdc);
+	bitmap = CreateCompatibleBitmap(hdc, rect.right - rect.left, rect.bottom - rect.top);
+	if (bitmap) {
+		/* there is enough memory and the bitmap is available */
+		HBITMAP oldbmp = (HBITMAP) SelectObject(mem, bitmap);
+		/* copy from screen */
+		BitBlt(mem, 0, 0, rect.right - rect.left,
+			rect.bottom - rect.top, hdc, rect.left,
+			rect.top, SRCCOPY);
+		SelectObject(mem, oldbmp);
+	}
+	DeleteDC(mem);
+
+	ReleaseDC(lpgw->hGraph, hdc);
+
+	return bitmap;
+}
+
+
 /* copy graph window to clipboard --- note that the Metafile is drawn at the full
  * virtual resolution of the Windows terminal driver (24000 x 18000 pixels), to
  * preserve as much accuracy as remotely possible */
 static void
 CopyClip(LPGW lpgw)
 {
-	RECT rect, mfrect;
-	HDC mem, hmf;
+	RECT rect;
 	HBITMAP bitmap;
-	HENHMETAFILE hemf;
+	HENHMETAFILE hemf = 0;
 	HWND hwnd;
 	HDC hdc;
 
-	hwnd = lpgw->hWndGraph;
-
 	/* view the window */
+	hwnd = lpgw->hWndGraph;
 	if (IsIconic(hwnd))
 		ShowWindow(hwnd, SW_SHOWNORMAL);
 	BringWindowToTop(hwnd);
 	UpdateWindow(hwnd);
 
-	/* get the context */
-	hdc = GetDC(hwnd);
-	GetPlotRect(lpgw, &rect);
-
-	/* make a bitmap and copy it there */
-	mem = CreateCompatibleDC(hdc);
-	bitmap = CreateCompatibleBitmap(hdc, rect.right - rect.left,
-			rect.bottom - rect.top);
-	if (bitmap) {
-		/* there is enough memory and the bitmap is available */
-		HBITMAP oldbmp = (HBITMAP) SelectObject(mem, bitmap);
-		BitBlt(mem, 0, 0, rect.right - rect.left,
-			rect.bottom - rect.top, hdc, rect.left,
-			rect.top, SRCCOPY);
-		SelectObject(mem, oldbmp);
-	} else {
+	/* get a bitmap copy of the window */
+	bitmap = GraphGetBitmap(lpgw);
+	if (bitmap == NULL) {
 		MessageBeep(MB_ICONHAND);
-		MessageBox(hwnd, TEXT("Insufficient memory to copy to clipboard"),
+		MessageBox(lpgw->hWndGraph, TEXT("Insufficient memory to copy to clipboard"),
 			lpgw->Title, MB_ICONHAND | MB_OK);
 	}
-	DeleteDC(mem);
+
+	/* get the context */
+	hwnd = lpgw->hGraph;
+	hdc = GetDC(hwnd);
+	GetPlotRect(lpgw, &rect);
 
 	/* OK, bitmap done, now create an enhanced Metafile context
 	 * and redraw the whole plot into that.
 	 */
-	rect.right -= rect.left;
-	rect.bottom -= rect.top;
-	rect.left = rect.top = 0;
 #ifdef HAVE_GDIPLUS
 	if (lpgw->gdiplus) {
 		hemf = clipboard_gdiplus(lpgw, hdc, &rect);
@@ -3105,6 +3295,9 @@ CopyClip(LPGW lpgw)
 	} else
 #endif
 	{
+#ifdef USE_WINGDI
+		HDC hmf;
+		RECT mfrect;
 		/* make copy of window's main status struct for modification */
 		GW gwclip = *lpgw;
 
@@ -3120,12 +3313,15 @@ CopyClip(LPGW lpgw)
 
 		DestroyFonts(&gwclip);
 		DestroyPens(&gwclip);
+#endif
 	}
+	ReleaseDC(hwnd, hdc);
 
 	/* Now we have the Metafile and Bitmap prepared, post their contents to
 	 * the Clipboard */
-	OpenClipboard(hwnd);
+	OpenClipboard(lpgw->hWndGraph);
 	EmptyClipboard();
+	// Note that handles are owned by the system after calls to SetClipboardData()
 	if (hemf)
 		SetClipboardData(CF_ENHMETAFILE, hemf);
 	else
@@ -3135,7 +3331,6 @@ CopyClip(LPGW lpgw)
 	else
 		fprintf(stderr, "Error: no bitmap data available.\n");
 	CloseClipboard();
-	ReleaseDC(hwnd, hdc);
 	DeleteEnhMetaFile(hemf);
 }
 
@@ -3145,7 +3340,7 @@ static void
 CopyPrint(LPGW lpgw)
 {
 	DOCINFO docInfo;
-	HDC printer;
+	HDC printer = NULL;
 	HANDLE printerHandle;
 	PRINTDLGEX pd;
 	DEVNAMES * pDevNames;
@@ -3157,6 +3352,7 @@ CopyPrint(LPGW lpgw)
 	PROPSHEETPAGE psp;
 	HPROPSHEETPAGE hpsp;
 	HDC hdc;
+	unsigned dpiX, dpiY;
 
 	/* Print Property Sheet Dialog */
 	memset(&pr, 0, sizeof(pr));
@@ -3207,36 +3403,37 @@ CopyPrint(LPGW lpgw)
 	if (pd.dwResultAction != PD_RESULT_PRINT)
 		return;
 
-	/* See http://support.microsoft.com/kb/240082 */
-	pDevNames = (DEVNAMES *) GlobalLock(pd.hDevNames);
-	pDevMode = (DEVMODE *) GlobalLock(pd.hDevMode);
-	szDriver = (LPCTSTR) pDevNames + pDevNames->wDriverOffset;
-	szDevice = (LPCTSTR) pDevNames + pDevNames->wDeviceOffset;
-	szOutput = (LPCTSTR) pDevNames + pDevNames->wOutputOffset;
-	printer = CreateDC(szDriver, szDevice, szOutput, pDevMode);
-
-	GlobalUnlock(pd.hDevMode);
-	GlobalUnlock(pd.hDevNames);
-	/* We no longer free these but preserve them for the next time
-	GlobalFree(pd.hDevMode);
-	GlobalFree(pd.hDevNames);
-	*/
-	hDevNames = pd.hDevNames;
-	hDevMode = pd.hDevMode;
-
-	if (printer == NULL)
-		return;	/* abort */
-
 	/* Print Size Dialog results */
 	if (pr.psize.x < 0) {
 		/* apply default values */
 		pr.psize.x = pr.pdef.x;
 		pr.psize.y = pr.pdef.y;
 	}
-	rect.left = MulDiv(pr.poff.x * 10, GetDeviceCaps(printer, LOGPIXELSX), 254);
-	rect.top = MulDiv(pr.poff.y * 10, GetDeviceCaps(printer, LOGPIXELSY), 254);
-	rect.right = rect.left + MulDiv(pr.psize.x * 10, GetDeviceCaps(printer, LOGPIXELSX), 254);
-	rect.bottom = rect.top + MulDiv(pr.psize.y * 10, GetDeviceCaps(printer, LOGPIXELSY), 254);
+
+	/* See http://support.microsoft.com/kb/240082 */
+	pDevNames = (DEVNAMES *) GlobalLock(pd.hDevNames);
+	pDevMode = (DEVMODE *) GlobalLock(pd.hDevMode);
+	szDriver = (LPCTSTR) pDevNames + pDevNames->wDriverOffset;
+	szDevice = (LPCTSTR) pDevNames + pDevNames->wDeviceOffset;
+	szOutput = (LPCTSTR) pDevNames + pDevNames->wOutputOffset;
+
+#if defined(HAVE_D2D11) && !defined(DCRENDERER)
+	if (lpgw->d2d) {
+		dpiX = dpiY = 96;  // DIPS
+	} else
+#endif
+	{
+		printer = CreateDC(szDriver, szDevice, szOutput, pDevMode);
+		if (printer == NULL)
+			goto cleanup;	/* abort */
+		dpiX = GetDeviceCaps(printer, LOGPIXELSX);
+		dpiY = GetDeviceCaps(printer, LOGPIXELSY);
+	}
+
+	rect.left = MulDiv(pr.poff.x * 10, dpiX, 254);
+	rect.top = MulDiv(pr.poff.y * 10, dpiY, 254);
+	rect.right = rect.left + MulDiv(pr.psize.x * 10, dpiX, 254);
+	rect.bottom = rect.top + MulDiv(pr.psize.y * 10, dpiY, 254);
 
 	pr.hdcPrn = printer;
 	PrintRegister(&pr);
@@ -3249,6 +3446,13 @@ CopyPrint(LPGW lpgw)
 	SetAbortProc(printer, PrintAbortProc);
 	SetWindowLongPtr(GetDlgItem(pr.hDlgPrint, CANCEL_PROGRESS), GWL_STYLE, WS_CHILD | WS_VISIBLE | PBS_MARQUEE);
 	SendMessage(GetDlgItem(pr.hDlgPrint, CANCEL_PROGRESS), PBM_SETMARQUEE, 1, 0);
+
+#if defined(HAVE_D2D11) && !defined(DCRENDERER)
+	if (lpgw->d2d) {
+	    // handle the rest in C++
+	    print_d2d(lpgw, pDevMode, szDevice, &rect);
+	} else {
+#endif
 
 #ifdef HAVE_GDIPLUS
 #ifndef HAVE_D2D11
@@ -3272,9 +3476,10 @@ CopyPrint(LPGW lpgw)
 #endif
 			/* Print using GDI+ */
 			print_gdiplus(lpgw, printer, printerHandle, &rect);
-		} else 
+		} else
 #endif
 		{
+#ifdef USE_WINGDI
 			SetMapMode(printer, MM_TEXT);
 			SetBkMode(printer, OPAQUE);
 			DestroyFonts(lpgw);
@@ -3286,6 +3491,7 @@ CopyPrint(LPGW lpgw)
 			DestroyFonts(lpgw);
 			MakeFonts(lpgw, &rect, hdc);
 			ReleaseDC(hwnd, hdc);
+#endif // USE_WINGDI
 		}
 		if (EndPage(printer) <= 0) {
 			fputs("Error when finalising the print page. Aborting.\n", stderr);
@@ -3296,6 +3502,11 @@ CopyPrint(LPGW lpgw)
 	} else {
 		fputs("Error: Unable to start printer document.\n", stderr);
 	}
+
+#if defined(HAVE_D2D11) && !defined(DCRENDERER)
+	}
+#endif
+
 	if (!pr.bUserAbort) {
 		EnableWindow(hwnd, TRUE);
 		DestroyWindow(pr.hDlgPrint);
@@ -3308,8 +3519,19 @@ CopyPrint(LPGW lpgw)
 		DeleteDC(printer);
 
 	PrintUnregister(&pr);
+
+cleanup:
+	GlobalUnlock(pd.hDevMode);
+	GlobalUnlock(pd.hDevNames);
+	/* We no longer free these but preserve them for the next time
+	GlobalFree(pd.hDevMode);
+	GlobalFree(pd.hDevNames);
+	*/
+	hDevNames = pd.hDevNames;
+	hDevMode = pd.hDevMode;
+
 	/* make certain that the screen pen set is restored */
-	SendMessage(lpgw->hWndGraph, WM_COMMAND, M_REBUILDTOOLS, 0L);
+	SendMessage(lpgw->hGraph, WM_COMMAND, M_REBUILDTOOLS, 0L);
 }
 
 
@@ -3356,16 +3578,10 @@ WriteGraphIni(LPGW lpgw)
 	WritePrivateProfileString(section, TEXT("GraphToTop"), profile, file);
 	wsprintf(profile, TEXT("%d"), lpgw->oversample);
 	WritePrivateProfileString(section, TEXT("GraphGDI+Oversampling"), profile, file);
-	// FIXME: Do not default to Direct2D just yet.
-#if 1
-	wsprintf(profile, TEXT("%d"), lpgw->gdiplus || lpgw->d2d);
-	WritePrivateProfileString(section, TEXT("GraphGDI+"), profile, file);
-#else
 	wsprintf(profile, TEXT("%d"), lpgw->gdiplus);
 	WritePrivateProfileString(section, TEXT("GraphGDI+"), profile, file);
 	wsprintf(profile, TEXT("%d"), lpgw->d2d);
 	WritePrivateProfileString(section, TEXT("GraphD2D"), profile, file);
-#endif
 	wsprintf(profile, TEXT("%d"), lpgw->antialiasing);
 	WritePrivateProfileString(section, TEXT("GraphAntialiasing"), profile, file);
 	wsprintf(profile, TEXT("%d"), lpgw->polyaa);
@@ -3455,6 +3671,8 @@ ReadGraphIni(LPGW lpgw)
 	if ((lpgw->Size.x != CW_USEDEFAULT) && (lpgw->Size.y != CW_USEDEFAULT)) {
 		lpgw->Canvas.x = lpgw->Size.x;
 		lpgw->Canvas.y = lpgw->Size.y;
+	} else { /* 2020-10-07 shige: Initialize of Canvas.{x,y} */
+		lpgw->Canvas.x = lpgw->Canvas.y = 0;
 	}
 
 	if (bOKINI)
@@ -3503,9 +3721,9 @@ ReadGraphIni(LPGW lpgw)
 #ifdef HAVE_D2D
 	if (bOKINI)
 		GetPrivateProfileString(section, TEXT("GraphD2D"), TEXT(""), profile, 80, file);
-	// FIXME: Do not default to Direct2D for now
 	if ((p = GetInt(profile, (LPINT)&lpgw->d2d)) == NULL)
-		lpgw->d2d = FALSE;
+		lpgw->d2d = TRUE;
+	// D2D setting overrides the GDI+ setting
 	if (lpgw->d2d)
 		lpgw->gdiplus = FALSE;
 #endif
@@ -3523,7 +3741,7 @@ ReadGraphIni(LPGW lpgw)
 	if (bOKINI)
 		GetPrivateProfileString(section, TEXT("GraphFastRotation"), TEXT(""), profile, 80, file);
 	if ((p = GetInt(profile, (LPINT)&lpgw->fastrotation)) == NULL)
-		lpgw->fastrotation = TRUE;
+		lpgw->fastrotation = FALSE;
 
 	lpgw->background = RGB(255,255,255);
 	if (bOKINI)
@@ -3590,8 +3808,6 @@ add_tooltip(LPGW lpgw, PRECT rect, LPWSTR text)
 		lpgw->tooltips = (struct tooltips *) realloc(lpgw->tooltips, lpgw->maxtooltips * sizeof(struct tooltips));
 	}
 
-	rect->top += lpgw->ToolbarHeight;
-	rect->bottom += lpgw->ToolbarHeight;
 	lpgw->tooltips[idx].rect = *rect;
 	lpgw->tooltips[idx].text = text;
 	lpgw->numtooltips++;
@@ -3603,13 +3819,13 @@ add_tooltip(LPGW lpgw, PRECT rect, LPWSTR text)
 		HWND hwnd = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL,
 									 WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
 									 CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-									 lpgw->hWndGraph, NULL, lpgw->hInstance, NULL);
+									 lpgw->hGraph, NULL, lpgw->hInstance, NULL);
 		lpgw->hTooltip = hwnd;
 
 		/* Associate the tooltip with the rect area.*/
 		ti.cbSize   = sizeof(TOOLINFO);
 		ti.uFlags   = TTF_SUBCLASS;
-		ti.hwnd     = lpgw->hWndGraph;
+		ti.hwnd     = lpgw->hGraph;
 		ti.hinst    = lpgw->hInstance;
 		ti.uId      = 0;
 		ti.rect     = * rect;
@@ -3653,7 +3869,7 @@ track_tooltip(LPGW lpgw, int x, int y)
 			int width;
 
 			ti.cbSize   = sizeof(TOOLINFO);
-			ti.hwnd     = lpgw->hWndGraph;
+			ti.hwnd     = lpgw->hGraph;
 			ti.hinst    = lpgw->hInstance;
 			ti.rect     = lpgw->tooltips[i].rect;
 			ti.lpszText = (LPTSTR) lpgw->tooltips[i].text;
@@ -4042,15 +4258,219 @@ GraphUpdateMenu(LPGW lpgw)
 	EnableMenuItem(lpgw->hPopMenu, M_FASTROTATE, MF_BYCOMMAND | (lpgw->gdiplus ? MF_ENABLED : MF_DISABLED));
 	CheckMenuItem(lpgw->hPopMenu, M_ANTIALIASING, MF_BYCOMMAND |
 					((lpgw->gdiplus || lpgw->d2d) && lpgw->antialiasing ? MF_CHECKED : MF_UNCHECKED));
-	CheckMenuItem(lpgw->hPopMenu, M_OVERSAMPLE, MF_BYCOMMAND | 
+	CheckMenuItem(lpgw->hPopMenu, M_OVERSAMPLE, MF_BYCOMMAND |
 					((lpgw->gdiplus || lpgw->d2d) && lpgw->oversample ? MF_CHECKED : MF_UNCHECKED));
 	CheckMenuItem(lpgw->hPopMenu, M_FASTROTATE, MF_BYCOMMAND |
 					(lpgw->gdiplus && lpgw->fastrotation ? MF_CHECKED : MF_UNCHECKED));
-	CheckMenuItem(lpgw->hPopMenu, M_POLYAA, MF_BYCOMMAND | 
+	CheckMenuItem(lpgw->hPopMenu, M_POLYAA, MF_BYCOMMAND |
 					((lpgw->gdiplus || lpgw->d2d) && lpgw->polyaa ? MF_CHECKED : MF_UNCHECKED));
 #endif
 	CheckMenuItem(lpgw->hPopMenu, M_GRAPH_TO_TOP, MF_BYCOMMAND |
 				(lpgw->graphtotop ? MF_CHECKED : MF_UNCHECKED));
+}
+
+
+LRESULT CALLBACK
+WndGraphParentProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LPGW lpgw;
+	HDC hdc;
+	RECT rect;
+
+	lpgw = (LPGW)GetWindowLongPtr(hwnd, 0);
+	switch (message) {
+		case WM_CREATE:
+			lpgw = (LPGW) ((CREATESTRUCT *)lParam)->lpCreateParams;
+			SetWindowLongPtr(hwnd, 0, (LONG_PTR)lpgw);
+			if (lpgw->lptw && (lpgw->lptw->DragPre != NULL) && (lpgw->lptw->DragPost != NULL))
+				DragAcceptFiles(hwnd, TRUE);
+			return 0;
+		case WM_ERASEBKGND:
+			return 1; /* we erase the background ourselves */
+		case WM_SIZE: {
+			BOOL rebuild = FALSE;
+
+			if (lpgw->hStatusbar)
+				SendMessage(lpgw->hStatusbar, WM_SIZE, wParam, lParam);
+			if (lpgw->hToolbar) {
+				SendMessage(lpgw->hToolbar, WM_SIZE, wParam, lParam);
+				/* make room */
+				GetWindowRect(lpgw->hToolbar, &rect);
+				lpgw->ToolbarHeight = rect.bottom - rect.top;
+			}
+			if ((wParam == SIZE_MAXIMIZED) || (wParam == SIZE_RESTORED)) {
+				unsigned width, height;
+
+				GetWindowRect(hwnd, &rect);
+				width = rect.right - rect.left;
+				height = rect.bottom - rect.top;
+				/* Ignore minimize / de-minimize */
+				if ((lpgw->Size.x != width) || (lpgw->Size.y != height)) {
+					lpgw->Size.x = width;
+					lpgw->Size.y = height;
+					rebuild = TRUE;
+				}
+			}
+			// update the actual graph window
+			{
+				GetClientRect(hwnd, &rect);
+				SetWindowPos(lpgw->hGraph, NULL,
+					     0, lpgw->ToolbarHeight,
+					     rect.right - rect.left, rect.bottom - rect.top - lpgw->ToolbarHeight - lpgw->StatusHeight,
+					     SWP_NOACTIVATE | SWP_NOZORDER);
+			}
+			if (rebuild) {
+				/* remake fonts */
+				lpgw->buffervalid = FALSE;
+				DestroyFonts(lpgw);
+				GetPlotRect(lpgw, &rect);
+				hdc = GetDC(lpgw->hGraph);
+				MakeFonts(lpgw, &rect, hdc);
+				ReleaseDC(lpgw->hGraph, hdc);
+
+				InvalidateRect(lpgw->hGraph, &rect, 1);
+				UpdateWindow(lpgw->hGraph);
+			}
+			// update internal variables
+			if (lpgw->Size.x == CW_USEDEFAULT) {
+				lpgw->Size.x = LOWORD(lParam);
+				lpgw->Size.y = HIWORD(lParam);
+			}
+			break;
+		}
+		case WM_MOVE: {
+			GetWindowRect(hwnd, &rect);
+			lpgw->Origin.x = rect.left;
+			lpgw->Origin.y = rect.top;
+			break;
+		}
+		case WM_SYSCOMMAND:
+			switch (LOWORD(wParam)) {
+				case M_GRAPH_TO_TOP:
+				case M_COLOR:
+				case M_OVERSAMPLE:
+				case M_GDI:
+				case M_GDIPLUS:
+				case M_D2D:
+				case M_ANTIALIASING:
+				case M_POLYAA:
+				case M_FASTROTATE:
+				case M_CHOOSE_FONT:
+				case M_COPY_CLIP:
+				case M_SAVE_AS_EMF:
+				case M_SAVE_AS_BITMAP:
+				case M_LINESTYLE:
+				case M_BACKGROUND:
+				case M_PRINT:
+				case M_WRITEINI:
+				case M_REBUILDTOOLS:
+					SendMessage(lpgw->hGraph, WM_COMMAND, wParam, lParam);
+					break;
+#ifndef WGP_CONSOLE
+				case M_ABOUT:
+					if (lpgw->lptw)
+						AboutBox(hwnd, lpgw->lptw->AboutText);
+					return 0;
+#endif
+				case M_COMMANDLINE: {
+					HMENU sysmenu;
+					int i;
+
+					sysmenu = GetSystemMenu(lpgw->hWndGraph, 0);
+					i = GetMenuItemCount (sysmenu);
+					DeleteMenu (sysmenu, --i, MF_BYPOSITION);
+					DeleteMenu (sysmenu, --i, MF_BYPOSITION);
+					if (lpgw->lptw)
+						ShowWindow(lpgw->lptw->hWndParent, SW_SHOWNORMAL);
+					break;
+				}
+			}
+			break;
+		case WM_COMMAND:
+		case WM_CHAR:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+			// forward to graph window
+			SendMessage(lpgw->hGraph, message, wParam, lParam);
+			return 0;
+		case WM_NOTIFY:
+			switch (((LPNMHDR)lParam)->code) {
+				case TBN_DROPDOWN: {
+					RECT rc;
+					TPMPARAMS tpm;
+					LPNMTOOLBAR lpnmTB = (LPNMTOOLBAR)lParam;
+
+					SendMessage(lpnmTB->hdr.hwndFrom, TB_GETRECT, (WPARAM)lpnmTB->iItem, (LPARAM)&rc);
+					MapWindowPoints(lpnmTB->hdr.hwndFrom, HWND_DESKTOP, (LPPOINT)&rc, 2);
+					tpm.cbSize    = sizeof(TPMPARAMS);
+					tpm.rcExclude = rc;
+					TrackPopupMenuEx(lpgw->hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_VERTICAL,
+						rc.left, rc.bottom, lpgw->hWndGraph, &tpm);
+					return TBDDRET_DEFAULT;
+				}
+				case TTN_GETDISPINFO: {
+					LPTOOLTIPTEXT lpttt = (LPTOOLTIPTEXT)lParam;
+					UINT_PTR idButton = lpttt->hdr.idFrom;
+
+					lpttt->hinst = 0;
+					switch (idButton) {
+						case M_COPY_CLIP:
+							_tcscpy(lpttt->szText, TEXT("Copy graph to clipboard"));
+							break;
+						case M_PRINT:
+							_tcscpy(lpttt->szText, TEXT("Print graph"));
+							break;
+						case M_SAVE_AS_EMF:
+							_tcscpy(lpttt->szText, TEXT("Save graph as EMF"));
+							break;
+						case M_HIDEGRID:
+							_tcscpy(lpttt->szText, TEXT("Do not draw grid lines"));
+							break;
+					}
+					if ((idButton >= M_HIDEPLOT) && (idButton < (M_HIDEPLOT + MAXPLOTSHIDE))) {
+						unsigned index = (unsigned)idButton - (M_HIDEPLOT) + 1;
+						wsprintf(lpttt->szText, TEXT("Hide graph #%i"), index);
+					}
+					lpttt->uFlags |= TTF_DI_SETITEM;
+					return TRUE;
+				}
+			}
+			return FALSE;
+		case WM_PARENTNOTIFY:
+			/* Message from status bar (or another child window): */
+#ifdef USE_MOUSE
+			/* Cycle through mouse-mode on button 1 click */
+			if (LOWORD(wParam) == WM_LBUTTONDOWN) {
+				int y = HIWORD(lParam);
+				RECT rect;
+				GetClientRect(hwnd, &rect);
+				if (y > rect.bottom - lpgw->StatusHeight)
+					/* simulate keyboard event '1' */
+					Wnd_exec_event(lpgw, lParam, GE_keypress, (TCHAR)'1');
+				return 0;
+			}
+#endif
+			/* Context menu is handled below, everything else is not */
+			if (LOWORD(wParam) != WM_CONTEXTMENU)
+				return 1;
+			/* intentionally fall through */
+		case WM_CONTEXTMENU: {
+			/* Note that this only works via mouse in `unset mouse`
+			 * mode. You can access the popup via the System menu,
+			 * status bar or keyboard (Shift-F10, Menu-Key) instead. */
+			POINT pt;
+			pt.x = GET_X_LPARAM(lParam);
+			pt.y = GET_Y_LPARAM(lParam);
+			if (pt.x == -1) { /* keyboard activation */
+				pt.x = pt.y = 0;
+				ClientToScreen(hwnd, &pt);
+			}
+			TrackPopupMenu(lpgw->hPopMenu, TPM_LEFTALIGN,
+				pt.x, pt.y, 0, hwnd, NULL);
+			return 0;
+		}
+	}
+	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 
@@ -4062,8 +4482,6 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	RECT rect;
 	LPGW lpgw;
-	HMENU sysmenu;
-	int i;
 #ifdef USE_MOUSE
 	static unsigned int last_modifier_mask = -99;
 #endif
@@ -4090,7 +4508,7 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case WM_LBUTTONDOWN: {
 				int i;
 				int x = GET_X_LPARAM(lParam);
-				int y = GET_Y_LPARAM(lParam) - lpgw->ToolbarHeight;
+				int y = GET_Y_LPARAM(lParam);
 
 				/* need to set input focus to current graph */
 				if (lpgw->bDocked)
@@ -4184,44 +4602,6 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 #endif
-		case WM_SYSCOMMAND:
-			switch (LOWORD(wParam)) {
-				case M_GRAPH_TO_TOP:
-				case M_COLOR:
-				case M_OVERSAMPLE:
-				case M_GDI:
-				case M_GDIPLUS:
-				case M_D2D:
-				case M_ANTIALIASING:
-				case M_POLYAA:
-				case M_FASTROTATE:
-				case M_CHOOSE_FONT:
-				case M_COPY_CLIP:
-				case M_SAVE_AS_EMF:
-				case M_SAVE_AS_BITMAP:
-				case M_LINESTYLE:
-				case M_BACKGROUND:
-				case M_PRINT:
-				case M_WRITEINI:
-				case M_REBUILDTOOLS:
-					SendMessage(hwnd, WM_COMMAND, wParam, lParam);
-					break;
-#ifndef WGP_CONSOLE
-				case M_ABOUT:
-					if (lpgw->lptw)
-						AboutBox(hwnd, lpgw->lptw->AboutText);
-					return 0;
-#endif
-				case M_COMMANDLINE:
-					sysmenu = GetSystemMenu(lpgw->hWndGraph, 0);
-					i = GetMenuItemCount (sysmenu);
-					DeleteMenu (sysmenu, --i, MF_BYPOSITION);
-					DeleteMenu (sysmenu, --i, MF_BYPOSITION);
-					if (lpgw->lptw)
-						ShowWindow(lpgw->lptw->hWndParent, SW_SHOWNORMAL);
-					break;
-			}
-			break;
 		case WM_CHAR:
 			/* All 'normal' keys (letters, digits and the likes) end up
 			 * here... */
@@ -4396,7 +4776,7 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return 0L;
 #endif /* USE_MOUSE */
 		case WM_COMMAND:
-			switch(LOWORD(wParam)) {
+			switch (LOWORD(wParam)) {
 				case M_GRAPH_TO_TOP:
 					lpgw->graphtotop = !lpgw->graphtotop;
 					SendMessage(hwnd, WM_COMMAND, M_REBUILDTOOLS, 0L);
@@ -4424,6 +4804,14 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case M_D2D:
 					lpgw->d2d = TRUE;
 					lpgw->gdiplus = FALSE;
+#ifndef DCRENDRER
+					// Only the DC renderer will use the memory bitmap
+					if (lpgw->hBitmap != NULL) {
+						DeleteObject(lpgw->hBitmap);
+						lpgw->hBitmap = NULL;
+					}
+#endif
+					// FIXME: Need more initialisation on backend change
 					SendMessage(hwnd, WM_COMMAND, M_REBUILDTOOLS, 0L);
 					return 0;
 				case M_ANTIALIASING:
@@ -4510,31 +4898,8 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				return 0;
 			}
 			return 0;
-		case WM_PARENTNOTIFY:
-			/* Message from status bar (or another child window): */
-#ifdef USE_MOUSE
-			/* Cycle through mouse-mode on button 1 click */
-			if (LOWORD(wParam) == WM_LBUTTONDOWN) {
-				int y = HIWORD(lParam);
-				RECT rect;
-				GetClientRect(hwnd, &rect);
-				if (y > rect.bottom - lpgw->StatusHeight)
-					/* simulate keyboard event '1' */
-					Wnd_exec_event(lpgw, lParam, GE_keypress, (TCHAR)'1');
-				return 0;
-			}
-#endif
-			/* Context menu is handled below, everything else is not */
-			if (LOWORD(wParam) != WM_CONTEXTMENU)
-				return 1;
-			/* intentionally fall through */
-		case WM_LBUTTONDOWN:
-			/* need to set input focus to current graph */
-			if (lpgw->bDocked)
-				SetFocus(hwnd);
-			break;
-		case WM_CONTEXTMENU:
-		{	/* Note that this only works via mouse in `unset mouse`
+		case WM_CONTEXTMENU: {
+			/* Note that this only works via mouse in `unset mouse`
 			 * mode. You can access the popup via the System menu,
 			 * status bar or keyboard (Shift-F10, Menu-Key) instead. */
 			POINT pt;
@@ -4548,53 +4913,14 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				pt.x, pt.y, 0, hwnd, NULL);
 			return 0;
 		}
-		case WM_NOTIFY:
-			switch (((LPNMHDR)lParam)->code) {
-				case TBN_DROPDOWN: {
-					RECT rc;
-					TPMPARAMS tpm;
-					LPNMTOOLBAR lpnmTB = (LPNMTOOLBAR)lParam;
-
-					SendMessage(lpnmTB->hdr.hwndFrom, TB_GETRECT, (WPARAM)lpnmTB->iItem, (LPARAM)&rc);
-					MapWindowPoints(lpnmTB->hdr.hwndFrom, HWND_DESKTOP, (LPPOINT)&rc, 2);
-					tpm.cbSize    = sizeof(TPMPARAMS);
-					tpm.rcExclude = rc;
-					TrackPopupMenuEx(lpgw->hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_VERTICAL,
-						rc.left, rc.bottom, lpgw->hWndGraph, &tpm);
-					return TBDDRET_DEFAULT;
-				}
-				case TTN_GETDISPINFO: {
-					LPTOOLTIPTEXT lpttt = (LPTOOLTIPTEXT)lParam;
-					UINT_PTR idButton = lpttt->hdr.idFrom;
-
-					lpttt->hinst = 0;
-					switch (idButton) {
-						case M_COPY_CLIP:
-							_tcscpy(lpttt->szText, TEXT("Copy graph to clipboard"));
-							break;
-						case M_PRINT:
-							_tcscpy(lpttt->szText, TEXT("Print graph"));
-							break;
-						case M_SAVE_AS_EMF:
-							_tcscpy(lpttt->szText, TEXT("Save graph as EMF"));
-							break;
-						case M_HIDEGRID:
-							_tcscpy(lpttt->szText, TEXT("Do not draw grid lines"));
-							break;
-					}
-					if ((idButton >= M_HIDEPLOT) && (idButton < (M_HIDEPLOT + MAXPLOTSHIDE))) {
-						unsigned index = (unsigned)idButton - (M_HIDEPLOT) + 1;
-						wsprintf(lpttt->szText, TEXT("Hide graph #%i"), index);
-					}
-					lpttt->uFlags |= TTF_DI_SETITEM;
-					return TRUE;
-				}
-			}
-			return FALSE;
+		case WM_LBUTTONDOWN:
+			/* need to set input focus to current graph */
+			if (lpgw->bDocked)
+				SetFocus(lpgw->hWndGraph);
+			break;
 		case WM_CREATE:
 			lpgw = (LPGW) ((CREATESTRUCT *)lParam)->lpCreateParams;
 			SetWindowLongPtr(hwnd, 0, (LONG_PTR)lpgw);
-			lpgw->hWndGraph = hwnd;
 #ifdef USE_MOUSE
 			LoadCursors(lpgw);
 #endif
@@ -4614,8 +4940,9 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			GetPlotRect(lpgw, &rect);
 #if defined(HAVE_D2D) && !defined(DCRENDERER)
 			if (lpgw->d2d) {
+				BeginPaint(hwnd, &ps);
 				drawgraph_d2d(lpgw, hwnd, &rect);
-				ValidateRect(hwnd, NULL);
+				EndPaint(hwnd, &ps);
 			} else {
 #endif
 				hdc = BeginPaint(hwnd, &ps);
@@ -4624,7 +4951,7 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				SetViewportExtEx(hdc, rect.right, rect.bottom, NULL);
 
 				/* Was the window resized? */
-				GetWindowRect(hwnd, &wrect);
+				GetWindowRect(lpgw->hWndGraph, &wrect);
 				wwidth =  wrect.right - wrect.left;
 				wheight = wrect.bottom - wrect.top;
 				if ((lpgw->Size.x != wwidth) || (lpgw->Size.y != wheight)) {
@@ -4655,12 +4982,17 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					/* Temporarily switch off antialiasing during rotation (GDI+) */
 					save_aa = lpgw->antialiasing;
-					if (lpgw->rotating && lpgw->fastrotation)
+#ifndef FASTROT_WITH_GDI
+					if (lpgw->gdiplus && lpgw->rotating && lpgw->fastrotation)
 						lpgw->antialiasing = FALSE;
-
+#endif
 					/* draw into memdc, then copy to hdc */
 #ifdef HAVE_GDIPLUS
+#ifdef FASTROT_WITH_GDI
 					if (lpgw->gdiplus && !(lpgw->rotating && lpgw->fastrotation)) {
+#else
+					if (lpgw->gdiplus) {
+#endif
 						drawgraph_gdiplus(lpgw, memdc, &memrect);
 					} else {
 #endif
@@ -4669,7 +5001,9 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 							drawgraph_d2d(lpgw, memdc, &memrect);
 						} else {
 #endif
+#ifdef USE_WINGDI
 							drawgraph(lpgw, memdc, &memrect);
+#endif
 #if defined(HAVE_D2D) && defined(DCRENDERER)
 						}
 #endif
@@ -4716,49 +5050,15 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 		case WM_SIZE:
-			SendMessage(lpgw->hStatusbar, WM_SIZE, wParam, lParam);
-			if (lpgw->hToolbar) {
-				RECT rect;
-
-				SendMessage(lpgw->hToolbar, WM_SIZE, wParam, lParam);
-				/* make room */
-				GetWindowRect(lpgw->hToolbar, &rect);
-				lpgw->ToolbarHeight = rect.bottom - rect.top;
-			}
-			if ((wParam == SIZE_MAXIMIZED) || (wParam == SIZE_RESTORED)) {
-				RECT rect;
-				unsigned width, height;
-
-				GetWindowRect(hwnd, &rect);
-				width = rect.right - rect.left;
-				height = rect.bottom - rect.top;
-				/* Ignore minimize / de-minize */
-				if ((lpgw->Size.x != width) || (lpgw->Size.y != height)) {
-					lpgw->Size.x = width;
-					lpgw->Size.y = height;
-
-					/* remake fonts */
-					lpgw->buffervalid = FALSE;
-					DestroyFonts(lpgw);
-					GetPlotRect(lpgw, &rect);
-					hdc = GetDC(hwnd);
-					MakeFonts(lpgw, &rect, hdc);
-					ReleaseDC(hwnd, hdc);
-
-					GetPlotRect(lpgw, &rect);
-					InvalidateRect(hwnd, &rect, 1);
-					UpdateWindow(hwnd);
+			if (GetPlotRect(lpgw, &rect)) {
+				if (lpgw->Canvas.x != 0) {
+					lpgw->Canvas.x = rect.right - rect.left;
+					lpgw->Canvas.y = rect.bottom - rect.top;
 				}
-			}
-			// update internal variables
-			if (lpgw->Size.x == CW_USEDEFAULT) {
-				lpgw->Size.x = LOWORD(lParam);
-				lpgw->Size.y = HIWORD(lParam);
-			}
-			if (lpgw->Canvas.x != 0) {
-				GetPlotRect(lpgw, &rect);
-				lpgw->Canvas.x = rect.right - rect.left;
-				lpgw->Canvas.y = rect.bottom - rect.top;
+#ifdef HAVE_D2D
+				if (lpgw->d2d)
+					d2dResize(lpgw, rect);
+#endif
 			}
 			break;
 #ifndef WGP_CONSOLE
@@ -4768,6 +5068,9 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 #endif
 		case WM_DESTROY:
+			/* close graph: we may not have received a WM_CLOSE message */
+			if (lpgw->hWndGraph != NULL)
+				GraphClose(lpgw);
 			lpgw->buffervalid = FALSE;
 			DeleteObject(lpgw->hBitmap);
 			lpgw->hBitmap = NULL;
@@ -4793,6 +5096,7 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
+#ifdef USE_WINGDI
 static void
 GraphChangeFont(LPGW lpgw, LPCTSTR font, int fontsize, HDC hdc, RECT rect)
 {
@@ -4817,6 +5121,7 @@ GraphChangeFont(LPGW lpgw, LPCTSTR font, int fontsize, HDC hdc, RECT rect)
 		MakeFonts(lpgw, &rect, hdc);
 	}
 }
+#endif
 
 
 /* close the terminal window */
@@ -4862,19 +5167,18 @@ Graph_set_cursor(LPGW lpgw, int c, int x, int y)
 		ruler_lineto.on = TRUE;
 		DrawRulerLineTo(lpgw);
 		break;
-	case -2:
-		{ /* move mouse to the given point */
-			RECT rc;
-			POINT pt;
+	case -2: { /* move mouse to the given point */
+		RECT rc;
+		POINT pt;
 
-			GetPlotRect(lpgw, &rc);
-			pt.x = MulDiv(x, rc.right - rc.left, lpgw->xmax);
-			pt.y = rc.bottom - MulDiv(y, rc.bottom - rc.top, lpgw->ymax);
+		GetPlotRect(lpgw, &rc);
+		pt.x = MulDiv(x, rc.right - rc.left, lpgw->xmax);
+		pt.y = rc.bottom - MulDiv(y, rc.bottom - rc.top, lpgw->ymax);
 
-			MapWindowPoints(lpgw->hWndGraph, HWND_DESKTOP, &pt, 1);
-			SetCursorPos(pt.x, pt.y);
-		}
+		MapWindowPoints(lpgw->hGraph, HWND_DESKTOP, &pt, 1);
+		SetCursorPos(pt.x, pt.y);
 		break;
+	}
 	case -1: /* start zooming; zooming cursor */
 		zoombox.on = TRUE;
 		zoombox.from.x = zoombox.to.x = x;
@@ -4882,10 +5186,13 @@ Graph_set_cursor(LPGW lpgw, int c, int x, int y)
 		break;
 	case 0:  /* standard cross-hair cursor */
 		SetCursor((hptrCurrent = mouse_setting.on ? hptrCrossHair : hptrDefault));
-		/* Once done with rotation we have to redraw with aa once more. */
-		if (lpgw->rotating && lpgw->fastrotation && lpgw->antialiasing) {
+		/* Once done with rotation we have to redraw with aa once more. (GDI+ only) */
+		if (lpgw->gdiplus && lpgw->rotating && lpgw->fastrotation) {
 			lpgw->rotating = FALSE;
-			GraphRedraw(lpgw);
+			if (lpgw->antialiasing)
+				GraphRedraw(lpgw);
+		} else {
+			lpgw->rotating = FALSE;
 		}
 		break;
 	case 1:  /* cursor during rotation */
@@ -5010,7 +5317,7 @@ GetMousePosViewport(LPGW lpgw, int *mx, int *my)
 	/* HBB: has to be done this way. The simpler method by taking apart LPARM
 	 * only works for mouse, but not for keypress events. */
 	GetCursorPos(&pt);
-	ScreenToClient(lpgw->hWndGraph, &pt);
+	ScreenToClient(lpgw->hGraph, &pt);
 
 	/* px=px(mx); mouse=>gnuplot driver coordinates */
 	/* FIXME: classically, this would use MulDiv() call, and no floating point */
@@ -5039,7 +5346,7 @@ Draw_XOR_Text(LPGW lpgw, const char *text, size_t length, int x, int y)
 	if (!text || !text[0])
 		return; /* no text to be displayed */
 
-	hdc = GetDC(lpgw->hWndGraph);
+	hdc = GetDC(lpgw->hGraph);
 
 	/* Prepare background image buffer of the necessary size */
 	Wnd_GetTextSize(hdc, text, length, &cx, &cy);
@@ -5060,7 +5367,7 @@ Draw_XOR_Text(LPGW lpgw, const char *text, size_t length, int x, int y)
 	/* Clean up behind ourselves */
 	DeleteDC(tempDC);
 	DeleteObject(bitmap);
-	ReleaseDC(lpgw->hWndGraph, hdc);
+	ReleaseDC(lpgw->hGraph, hdc);
 }
 
 #endif
@@ -5162,10 +5469,10 @@ GraphModifyPlots(LPGW lpgw, unsigned int ops, int plotno)
 		RECT rect;
 
 		lpgw->buffervalid = FALSE;
-		GetClientRect(lpgw->hWndGraph, &rect);
-		InvalidateRect(lpgw->hWndGraph, &rect, 1);
+		GetClientRect(lpgw->hGraph, &rect);
+		InvalidateRect(lpgw->hGraph, &rect, 1);
 		UpdateToolbar(lpgw);
-		UpdateWindow(lpgw->hWndGraph);
+		UpdateWindow(lpgw->hGraph);
 	}
 }
 
@@ -5185,7 +5492,7 @@ DrawRuler(LPGW lpgw)
 	if (!ruler.on || ruler.x < 0)
 		return;
 
-	hdc = GetDC(lpgw->hWndGraph);
+	hdc = GetDC(lpgw->hGraph);
 	GetPlotRect(lpgw, &rc);
 
 	rx = MulDiv(ruler.x, rc.right - rc.left, lpgw->xmax);
@@ -5197,7 +5504,7 @@ DrawRuler(LPGW lpgw)
 	MoveTo(hdc, rx, rc.top);
 	LineTo(hdc, rx, rc.bottom);
 	SetROP2(hdc, iOldRop);
-	ReleaseDC(lpgw->hWndGraph, hdc);
+	ReleaseDC(lpgw->hGraph, hdc);
 }
 
 
@@ -5214,7 +5521,7 @@ DrawRulerLineTo(LPGW lpgw)
 	if (!ruler.on || !ruler_lineto.on || ruler.x < 0 || ruler_lineto.x < 0)
 		return;
 
-	hdc = GetDC(lpgw->hWndGraph);
+	hdc = GetDC(lpgw->hGraph);
 	GetPlotRect(lpgw, &rc);
 
 	rx  = MulDiv(ruler.x, rc.right - rc.left, lpgw->xmax);
@@ -5226,7 +5533,7 @@ DrawRulerLineTo(LPGW lpgw)
 	MoveTo(hdc, rx, ry);
 	LineTo(hdc, rlx, rly);
 	SetROP2(hdc, iOldRop);
-	ReleaseDC(lpgw->hWndGraph, hdc);
+	ReleaseDC(lpgw->hGraph, hdc);
 }
 
 
@@ -5244,7 +5551,7 @@ DrawZoomBox(LPGW lpgw)
 	if (!zoombox.on)
 		return;
 
-	hdc = GetDC(lpgw->hWndGraph);
+	hdc = GetDC(lpgw->hGraph);
 	GetPlotRect(lpgw, &rc);
 
 	fx = MulDiv(zoombox.from.x, rc.right - rc.left, lpgw->xmax);
@@ -5260,7 +5567,7 @@ DrawZoomBox(LPGW lpgw)
 	DeleteObject(SelectObject(hdc, OldPen));
 	SetROP2(hdc, OldROP2);
 
-	ReleaseDC(lpgw->hWndGraph, hdc);
+	ReleaseDC(lpgw->hGraph, hdc);
 
 	if (zoombox.text1) {
 		char *separator = strchr(zoombox.text1, '\r');
@@ -5293,12 +5600,12 @@ DrawFocusIndicator(LPGW lpgw)
 		RECT rect;
 
 		GetPlotRect(lpgw, &rect);
-		hdc = GetDC(lpgw->hWndGraph);
+		hdc = GetDC(lpgw->hGraph);
 		SelectObject(hdc, GetStockObject(DC_PEN));
 		SelectObject(hdc, GetStockObject(NULL_BRUSH));
 		SetDCPenColor(hdc, RGB(0, 0, 128));
 		Rectangle(hdc, rect.left + 1, rect.top + 1, rect.right - 1, rect.bottom - 1);
-		ReleaseDC(lpgw->hWndGraph, hdc);
+		ReleaseDC(lpgw->hGraph, hdc);
 	}
 }
 

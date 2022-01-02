@@ -1,7 +1,3 @@
-/*
- * $Id: gp_types.h,v 1.73 2016/11/05 21:21:07 sfeam Exp $
- */
-
 /* GNUPLOT - gp_types.h */
 
 /*[
@@ -51,9 +47,11 @@ enum DATA_TYPES {
 	STRING,
 	DATABLOCK,
 	ARRAY,
+	VOXELGRID,
 	NOTDEFINED,	/* exists, but value is currently undefined */
 	INVALID_VALUE,	/* used only for error return by external functions */
 	INVALID_NAME	/* used only to trap errors in linked axis function definition */
+			/* or a format specifier that does not match a variable type */
 };
 
 enum MODE_PLOT_TYPE {
@@ -61,7 +59,7 @@ enum MODE_PLOT_TYPE {
 };
 
 enum PLOT_TYPE {
-	FUNC, DATA, FUNC3D, DATA3D, NODATA, KEYENTRY
+	FUNC, DATA, FUNC3D, DATA3D, NODATA, KEYENTRY, VOXELDATA
 };
 
 /* we explicitly assign values to the types, such that we can
@@ -77,7 +75,9 @@ typedef enum e_PLOT_STYLE_FLAGS {
     PLOT_STYLE_HAS_POINT     = (1<<1),
     PLOT_STYLE_HAS_ERRORBAR  = (1<<2),
     PLOT_STYLE_HAS_FILL      = (1<<3),
-    PLOT_STYLE_BITS          = (1<<4)
+    PLOT_STYLE_HAS_VECTOR    = (1<<4),
+    PLOT_STYLE_HAS_PM3DBORDER= (1<<5),
+    PLOT_STYLE_BITS          = (1<<6)
 } PLOT_STYLE_FLAGS;
 
 typedef enum PLOT_STYLE {
@@ -90,20 +90,20 @@ typedef enum PLOT_STYLE {
     YERRORBARS   =  6*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_POINT | PLOT_STYLE_HAS_ERRORBAR),
     XYERRORBARS  =  7*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_POINT | PLOT_STYLE_HAS_ERRORBAR),
     BOXXYERROR   =  8*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_FILL),
-    BOXES        =  9*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_FILL),
+    BOXES        =  9*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_FILL | PLOT_STYLE_HAS_PM3DBORDER),
     BOXERROR     = 10*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_FILL),
     STEPS        = 11*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE,
     FILLSTEPS    = 11*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL,
     FSTEPS       = 12*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE,
     HISTEPS      = 13*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE,
-    VECTOR       = 14*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE,
+    VECTOR       = 14*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE + PLOT_STYLE_HAS_VECTOR,
     CANDLESTICKS = 15*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_ERRORBAR | PLOT_STYLE_HAS_FILL),
     FINANCEBARS  = 16*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE,
     XERRORLINES  = 17*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_POINT | PLOT_STYLE_HAS_ERRORBAR),
     YERRORLINES  = 18*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_POINT | PLOT_STYLE_HAS_ERRORBAR),
     XYERRORLINES = 19*PLOT_STYLE_BITS + (PLOT_STYLE_HAS_LINE | PLOT_STYLE_HAS_POINT | PLOT_STYLE_HAS_ERRORBAR),
     FILLEDCURVES = 21*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE + PLOT_STYLE_HAS_FILL,
-    PM3DSURFACE  = 22*PLOT_STYLE_BITS + 0,
+    PM3DSURFACE  = 22*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL,
     LABELPOINTS  = 23*PLOT_STYLE_BITS + 0,
     HISTOGRAMS   = 24*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL,
     IMAGE        = 25*PLOT_STYLE_BITS + 0,
@@ -116,6 +116,10 @@ typedef enum PLOT_STYLE {
     PARALLELPLOT = 32*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE,
     TABLESTYLE   = 33*PLOT_STYLE_BITS,
     ZERRORFILL   = 34*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL,
+    ARROWS       = 35*PLOT_STYLE_BITS + PLOT_STYLE_HAS_LINE + PLOT_STYLE_HAS_VECTOR,
+    ISOSURFACE   = 36*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL + PLOT_STYLE_HAS_PM3DBORDER,
+    SPIDERPLOT   = 37*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL + PLOT_STYLE_HAS_POINT,
+    POLYGONS     = 38*PLOT_STYLE_BITS + PLOT_STYLE_HAS_FILL,
     PLOT_STYLE_NONE = -1
 } PLOT_STYLE;
 
@@ -133,12 +137,9 @@ typedef enum PLOT_SMOOTH {
     SMOOTH_CUMULATIVE_NORMALISED,
     SMOOTH_MONOTONE_CSPLINE,
     SMOOTH_BINS,
-    SMOOTH_FREQUENCY_NORMALISED
+    SMOOTH_FREQUENCY_NORMALISED,
+    SMOOTH_ZSORT
 } PLOT_SMOOTH;
-
-/* FIXME HBB 20000521: 'struct value' and its part, 'cmplx', should go
- * into one of scanner/internal/standard/util .h, but I've yet to
- * decide which of them */
 
 struct cmplx {
 	double real, imag;
@@ -147,11 +148,12 @@ struct cmplx {
 typedef struct value {
     enum DATA_TYPES type;
     union {
-	int int_val;
+	intgr_t int_val;
 	struct cmplx cmplx_val;
 	char *string_val;
 	char **data_array;
 	struct value *value_array;
+	struct vgrid *vgrid;
     } v;
 } t_value;
 
@@ -166,21 +168,26 @@ typedef enum coord_type {
 } coord_type;
 
 
-/* These fields of 'struct coordinate' hold extra properties of 3D data points */
-/* Used by splot styles RGBIMAGE and RGBA_IMAGE */
-#define CRD_R yhigh
-#define CRD_G xlow
-#define CRD_B xhigh
-#define CRD_A ylow
-/* Used by all splot style with variable line/point color */
-#define CRD_COLOR yhigh
-/* Used by splot styles POINTSTYLE and LINESPOINTS with variable point size */
-#define CRD_PTSIZE xlow
-/* Used by splot styles POINTSTYLE and LINESPOINTS with variable point type */
-#define CRD_PTTYPE xhigh
-/* Used by splot style ZERRORFILL */
-#define CRD_ZLOW xlow
-#define CRD_ZHIGH xhigh
+/* These are aliases of fields in 'struct coordinate' used to hold
+ * extra properties of 3D data points (i.e. anything other than x/y/z)
+ * or of specific plot types.
+ * The aliases are needed because the total number of data slots is limited
+ * to 7: x y z xlow ylow xhigh yhigh
+ * At some point we may need to expand struct coordinate.
+ */
+#define CRD_R yhigh        /* Used by splot styles RGBIMAGE and RGBA_IMAGE */
+#define CRD_G xlow         /* Used by splot styles RGBIMAGE and RGBA_IMAGE */
+#define CRD_B xhigh        /* Used by splot styles RGBIMAGE and RGBA_IMAGE */
+#define CRD_A ylow         /* Used by splot styles RGBIMAGE and RGBA_IMAGE */
+#define CRD_COLOR yhigh    /* Used by all splot styles with variable color */
+#define CRD_ROTATE ylow    /* Used by "with labels" */
+#define CRD_PTSIZE xlow    /* Used by "with points|linespoints|labels" */
+#define CRD_PTTYPE xhigh   /* Used by "with points|linespoints|labels" */
+#define CRD_PTCHAR ylow    /* Used by "with points pt variable */
+#define CRD_ZLOW xlow      /* Used by splot style ZERRORFILL */
+#define CRD_ZHIGH xhigh    /* Used by splot style ZERRORFILL */
+#define CRD_XJITTER xlow   /* Used to hold jitter offset on x */
+#define CRD_YJITTER yhigh  /* Used to hold jitter offset on y */
 
 
 typedef struct coordinate {

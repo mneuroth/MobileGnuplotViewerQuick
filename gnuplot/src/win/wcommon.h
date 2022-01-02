@@ -1,7 +1,3 @@
-/*
- * $Id: wcommon.h,v 1.30 2017/01/06 16:07:19 markisch Exp $
- */
-
 /* GNUPLOT - wcommon.h */
 
 /*[
@@ -62,7 +58,7 @@ extern "C" {
 extern DWORD GetDllVersion(LPCTSTR lpszDllName);
 extern BOOL IsWindowsXPorLater(void);
 extern char *appdata_directory(void);
-extern FILE *open_printer();
+extern FILE *open_printer(void);
 extern void close_printer(FILE *outfile);
 extern BOOL cp_changed;
 extern UINT cp_input;
@@ -75,7 +71,6 @@ extern LPWSTR szTextClass;
 extern LPWSTR szToolbarClass;
 extern LPWSTR szSeparatorClass;
 extern LPWSTR szPauseClass;
-extern LPTSTR szGraphClass;
 extern LPTSTR szAboutClass;
 
 void * LocalAllocPtr(UINT flags, UINT size);
@@ -121,6 +116,7 @@ void clear_tooltips(LPGW lpgw);
 void draw_update_keybox(LPGW lpgw, unsigned plotno, unsigned x, unsigned y);
 int draw_enhanced_text(LPGW lpgw, LPRECT rect, int x, int y, const char * str);
 void draw_get_enhanced_text_extend(PRECT extend);
+HBITMAP GraphGetBitmap(LPGW lpgw);
 
 #ifdef __cplusplus
 }

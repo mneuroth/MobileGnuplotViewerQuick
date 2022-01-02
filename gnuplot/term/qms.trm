@@ -1,7 +1,5 @@
-/* Hello, Emacs, this is -*-C-*-
- * $Id: qms.trm,v 1.11 2006/07/07 03:51:23 sfeam Exp $
- *
- */
+/* Hello, Emacs, this is -*-C-*- */
+
 
 /* GNUPLOT - qms.trm */
 
@@ -59,14 +57,14 @@ register_term(qms)
 #endif
 
 #ifdef TERM_PROTO
-TERM_PUBLIC void QMS_init __PROTO((void));
-TERM_PUBLIC void QMS_graphics __PROTO((void));
-TERM_PUBLIC void QMS_text __PROTO((void));
-TERM_PUBLIC void QMS_linetype __PROTO((int linetype));
-TERM_PUBLIC void QMS_move __PROTO((unsigned int x, unsigned int y));
-TERM_PUBLIC void QMS_vector __PROTO((unsigned int x2, unsigned int y2));
-TERM_PUBLIC void QMS_put_text __PROTO((unsigned int x, unsigned int y, const char str[]));
-TERM_PUBLIC void QMS_reset __PROTO((void));
+TERM_PUBLIC void QMS_init(void);
+TERM_PUBLIC void QMS_graphics(void);
+TERM_PUBLIC void QMS_text(void);
+TERM_PUBLIC void QMS_linetype(int linetype);
+TERM_PUBLIC void QMS_move(unsigned int x, unsigned int y);
+TERM_PUBLIC void QMS_vector(unsigned int x2, unsigned int y2);
+TERM_PUBLIC void QMS_put_text(unsigned int x, unsigned int y, const char str[]);
+TERM_PUBLIC void QMS_reset(void);
 
 #define QMS_XMAX 9000
 #define QMS_YMAX 6000
@@ -89,7 +87,7 @@ QMS_init()
 {
     /* This was just ^IOL, but at Rutgers at least we need some more stuff */
     fputs("^PY^-\n^IOL\n^ISYNTAX00000^F^IB11000^IJ00000^IT00000\n", gpoutfile);
-    /*     ^ QUIC on    ^set defaults  ^ set botttom,top,left margins
+    /*     ^ QUIC on    ^set defaults  ^ set bottom,top,left margins
      *            ^landscape         ^free format
      */
 

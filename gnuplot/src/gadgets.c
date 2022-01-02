@@ -68,7 +68,7 @@ BoundingBox canvas;
 /* The bounding box against which clipping is to be done */
 BoundingBox *clip_area = &plot_bounds;
 
-/* 'set size', 'set origin' setttings */
+/* 'set size', 'set origin' settings */
 float xsize = 1.0;		/* scale factor for size */
 float ysize = 1.0;		/* scale factor for size */
 float zsize = 1.0;		/* scale factor for size */
@@ -83,9 +83,9 @@ int aspect_ratio_3D = 0;	/* 2 will put x and y on same scale, 3 for z also */
 t_position lmargin = DEFAULT_MARGIN_POSITION;
 /* space between bottom and plot_bounds.ybot in chars (-1: computed) */
 t_position bmargin = DEFAULT_MARGIN_POSITION;
-/* space between right egde and plot_bounds.xright in chars (-1: computed) */
+/* space between right edge and plot_bounds.xright in chars (-1: computed) */
 t_position rmargin = DEFAULT_MARGIN_POSITION;
-/* space between top egde and plot_bounds.ytop in chars (-1: computed) */
+/* space between top edge and plot_bounds.ytop in chars (-1: computed) */
 t_position tmargin = DEFAULT_MARGIN_POSITION;
 
 /* Pointer to first 'set dashtype' definition in linked list */
@@ -102,16 +102,22 @@ struct linestyle_def *first_mono_linestyle = NULL;
 /* Pointer to first 'set style arrow' definition in linked list */
 struct arrowstyle_def *first_arrowstyle = NULL;
 
+/* Listhead for pixmaps */
+t_pixmap *pixmap_listhead = NULL;
+
 /* Holds the properties from 'set style parallelaxis' */
 struct pa_style parallel_axis_style = DEFAULT_PARALLEL_AXIS_STYLE;
+
+/* Holds properties for 'set style spiderplot' */
+struct spider_web spiderplot_style = DEFAULT_SPIDERPLOT_STYLE;
 
 /* set arrow */
 struct arrow_def *first_arrow = NULL;
 
-#ifdef EAM_OBJECTS
 /* Pointer to first object instance in linked list */
 struct object *first_object = NULL;
-#endif
+/* Pointer to array of grid walls */
+struct object grid_wall[5] = {WALL_Y0, WALL_X0, WALL_Y1, WALL_X1, WALL_Z0};
 
 /* 'set title' status */
 text_label title = EMPTY_LABELSTRUCT;
@@ -124,6 +130,9 @@ int timelabel_bottom = TRUE;
 TBOOLEAN polar = FALSE;
 TBOOLEAN inverted_raxis = FALSE;
 
+/* toggle spiderplot mode on/off */
+TBOOLEAN spiderplot = FALSE;
+
 /* zero threshold, may _not_ be 0! */
 double zero = ZERO;
 
@@ -133,6 +142,11 @@ double pointintervalbox = 1.0;
 
 /* used for filled points */
 t_colorspec background_fill = BACKGROUND_COLORSPEC;
+
+/* box width (automatic) for plot style "with boxes" */
+double   boxwidth              = -1.0;
+/* whether box width is absolute (default) or relative */
+TBOOLEAN boxwidth_is_absolute  = TRUE;
 
 /* set border */
 int draw_border = 31;	/* The current settings */
@@ -147,8 +161,9 @@ const struct lp_style_type background_lp = {0, LT_BACKGROUND, 0, DASHTYPE_SOLID,
 TBOOLEAN clip_lines1 = TRUE;
 TBOOLEAN clip_lines2 = FALSE;
 TBOOLEAN clip_points = FALSE;
+TBOOLEAN clip_radial = FALSE;
 
-static int clip_line __PROTO((int *, int *, int *, int *));
+static int clip_line(int *, int *, int *, int *);
 
 /* set samples */
 int samples_1 = SAMPLES;
@@ -175,21 +190,17 @@ TBOOLEAN volatile_data = FALSE;
 
 fill_style_type default_fillstyle = { FS_EMPTY, 100, 0, DEFAULT_COLORSPEC } ;
 
-#ifdef EAM_OBJECTS
 /* Default rectangle style - background fill, black border */
 struct object default_rectangle = DEFAULT_RECTANGLE_STYLE;
 struct object default_circle = DEFAULT_CIRCLE_STYLE;
 struct object default_ellipse = DEFAULT_ELLIPSE_STYLE;
-#endif
 
 /* filledcurves style options */
 filledcurves_opts filledcurves_opts_data = EMPTY_FILLEDCURVES_OPTS;
 filledcurves_opts filledcurves_opts_func = EMPTY_FILLEDCURVES_OPTS;
 
-#if TRUE || defined(BACKWARDS_COMPATIBLE)
 /* Prefer line styles over plain line types */
 TBOOLEAN prefer_line_styles = FALSE;
-#endif
 
 /* If current terminal claims to be monochrome, don't try to send it colors */
 #define monochrome_terminal ((t->flags & TERM_MONOCHROME) != 0)
@@ -201,9 +212,7 @@ boxplot_style boxplot_opts = DEFAULT_BOXPLOT_STYLE;
 /* WINDOWID to be filled by terminals running on X11 (x11, wxt, qt, ...) */
 int current_x11_windowid = 0;
 
-#ifdef EAM_BOXED_TEXT
-textbox_style textbox_opts = DEFAULT_TEXTBOX_STYLE;
-#endif
+textbox_style textbox_opts[NUM_TEXTBOX_STYLES];
 
 /*****************************************************************/
 /* Routines that deal with global objects defined in this module */
@@ -220,7 +229,7 @@ textbox_style textbox_opts = DEFAULT_TEXTBOX_STYLE;
  * 0 is returned if inside.
  */
 int
-clip_point(unsigned int x, unsigned int y)
+clip_point(int x, int y)
 {
     int ret_val = 0;
 
@@ -305,8 +314,6 @@ draw_clip_polygon(int points, gpiPoint *p)
 	/* The end point and the line do not necessarily have the same
 	 * status. The end point can be 'inside', but the whole line is
 	 * 'outside'. Do not update pos1 in this case.  Bug #1268.
-	 * FIXME: This is papering over an inconsistency in coordinate
-	 * calculation somewhere else!
 	 */
 	if (!(clip_ret == 0 && pos2 == 0))
 	    pos1 = pos2;
@@ -318,10 +325,21 @@ draw_clip_polygon(int points, gpiPoint *p)
 	closepath();
 }
 
+/*
+ * arrow is specified in terminal coordinates
+ * but we use double rather than int so that the precision is sufficient
+ * to orient and draw the arrow head correctly even for very short vectors.
+ */
 void
-draw_clip_arrow( int sx, int sy, int ex, int ey, int head)
+draw_clip_arrow( double dsx, double dsy, double dex, double dey, t_arrow_head head)
 {
     struct termentry *t = term;
+
+    int sx = axis_map_toint(dsx);
+    int sy = axis_map_toint(dsy);
+    int ex = axis_map_toint(dex);
+    int ey = axis_map_toint(dey);
+    int dx, dy;
 
     /* Don't draw head if the arrow itself is clipped */
     if (clip_point(sx,sy))
@@ -330,9 +348,54 @@ draw_clip_arrow( int sx, int sy, int ex, int ey, int head)
 	head &= ~END_HEAD;
 
     /* clip_line returns 0 if the whole thing is out of range */
-    if (clip_line(&sx, &sy, &ex, &ey))
-	(*t->arrow)((unsigned int)sx, (unsigned int)sy,
-		    (unsigned int)ex, (unsigned int)ey, head);
+    if (!clip_line(&sx, &sy, &ex, &ey))
+	return;
+
+    /* Special case code for short vectors */
+    /* Most terminals are OK with using this code for long vectors also.	*/
+    /* However some terminals (e.g. tikz) look terrible because the shaft of a	*/
+    /* long vector overruns the head when the head is drawn with HEADS_ONLY.	*/
+    /* FIXME:  this is a very ad hoc definition of "short".			*/
+    dx = abs(ex-sx);
+    dy = abs(ey-sy);
+    if (dx < 25 && dy < 25) {
+
+	/* draw the body of the vector (rounding errors are a problem) */
+	if (dx > 1 || dy > 1)
+	    if (!((t->flags & TERM_IS_LATEX)))
+		(*t->arrow)(sx, sy, ex, ey, SHAFT_ONLY | head);
+
+	/* if we're not supposed to be drawing any heads, we're done */
+	if ((head & BOTH_HEADS) == NOHEAD)
+	    return;
+
+	/* If this is truly a 0-vector, then we CAN'T draw the head */
+	/* because the orientation of the head is indeterminate     */
+	if (dsx == dex && dsy == dey)
+	    return;
+
+	/* If the head size is fixed we are free to change the length of */
+	/* very short vectors so that the orientation is accurate.	 */
+	if (curr_arrow_headfixedsize) {
+	    /* Direction vector in (dex,dey). I need to convert this to integers
+	     * with a scale that's large-enough to give me good angular resolution,
+	     * but small-enough to not overflow the data type.
+	     */
+	    double rescale = 1000. / GPMAX( fabs(dex-dsx), fabs(dey-dsy) );
+	    int newlenx = (dex - dsx) * rescale;
+	    int newleny = (dey - dsy) * rescale;
+
+	    if (head & END_HEAD)
+		(*t->arrow)(ex - newlenx, ey - newleny, ex, ey, END_HEAD|HEADS_ONLY);
+	    if (head & BACKHEAD)
+		(*t->arrow)(sx, sy, sx + newlenx, sy + newleny, BACKHEAD|HEADS_ONLY);
+	} else {
+	    (*t->arrow)(sx, sy, ex, ey, head|HEADS_ONLY);
+	}
+    } else {
+	/* The normal case, draw the whole thing at once */
+	(*t->arrow)(sx, sy, ex, ey, head);
+    }
 }
 
 /* Clip the given line to drawing coords defined by BoundingBox.
@@ -545,12 +608,12 @@ clip_polygon(gpiPoint *in, gpiPoint *out, int in_length, int *out_length)
     gpiPoint clip_boundary[5];
     static gpiPoint *tmp_corners = NULL;
 
-    if (!clip_area) {
+    if (!clip_area || in_length < 3) {
 	memcpy(out, in, in_length * sizeof(gpiPoint));
 	*out_length = in_length;
 	return;
     }
-    tmp_corners = gp_realloc(tmp_corners, 2 * in_length * sizeof(gpiPoint), "clip_polygon");
+    tmp_corners = gp_realloc(tmp_corners, 4 * in_length * sizeof(gpiPoint), "clip_polygon");
 
     /* vertices of the rectangular clipping window starting from
        top-left in counterclockwise direction */
@@ -573,21 +636,112 @@ clip_polygon(gpiPoint *in, gpiPoint *out, int in_length, int *out_length)
 }
 
 /* Two routines to emulate move/vector sequence using line drawing routine. */
-static unsigned int move_pos_x, move_pos_y;
+static int move_pos_x, move_pos_y;
 
 void
-clip_move(unsigned int x, unsigned int y)
+clip_move(int x, int y)
 {
     move_pos_x = x;
     move_pos_y = y;
 }
 
 void
-clip_vector(unsigned int x, unsigned int y)
+clip_vector(int x, int y)
 {
     draw_clip_line(move_pos_x, move_pos_y, x, y);
     move_pos_x = x;
     move_pos_y = y;
+}
+
+/*
+ * draw_polar_clip_line() assumes that the endpoints have already
+ * been categorized as INRANGE/OUTRANGE, and that "set clip radial"
+ * is in effect.
+ */
+void
+draw_polar_clip_line( double xbeg, double ybeg, double xend, double yend)
+{
+    double R;			/* radius of limiting circle */
+    double a, b;		/* line expressed as y = a*x + b */
+    double x1, y1, x2, y2;	/* Intersections of line and circle */
+    double Q, Q2;		/* sqrt term of quadratic equation */
+    TBOOLEAN vertical = FALSE;	/* flag for degenerate case */
+    TBOOLEAN beg_inrange, end_inrange;
+
+    if (R_AXIS.set_max == -VERYLARGE)
+	goto outside;
+    R = R_AXIS.set_max - R_AXIS.set_min;
+
+    /* If both endpoints are inside the limiting circle, draw_clip_line suffices */
+    beg_inrange = (xbeg*xbeg + ybeg*ybeg) <= R*R;
+    end_inrange = (xend*xend + yend*yend) <= R*R;
+    if (beg_inrange && end_inrange) {
+	draw_clip_line(map_x(xbeg), map_y(ybeg), map_x(xend), map_y(yend));
+	return;
+    }
+
+    /* FIXME:  logscale and other odd cases are not covered by this equation */
+    if (fabs(xbeg - xend) > ZERO) {
+	/* Recast line in the form y = a*x + b */
+	a = (yend - ybeg) / (xend - xbeg);
+	b = ybeg - xbeg * a;
+	/* the line may intersect a circle of radius R in two places */
+	Q2 = 4*a*a*b*b - 4 * (1 + a*a) * (b*b - R*R);
+	if (Q2 < 0)
+	    goto outside;
+	Q = sqrt(Q2);
+	x1 = (-2*a*b + Q) / ( 2*(1+a*a));
+	x2 = (-2*a*b - Q) / ( 2*(1+a*a));
+	y1 = a * x1 + b;
+	y2 = a * x2 + b;
+    } else {
+	/* degenerate case (vertical line) */
+	x1 = x2 = xbeg;
+	if (fabs(x1) > R)
+	    goto outside;
+	vertical = TRUE;
+	y1 = sqrt(R*R - x1*x1);
+	y2 = -y1;
+	if (!inrange(y1,ybeg,yend) && !inrange(y2,ybeg,yend))
+	    goto outside;
+    }
+
+    /* If one of the original endpoints was INRANGE then use it */
+    /* rather than the second intersection point.               */
+    if (vertical) {
+	y1 = GPMIN(y1, GPMAX(ybeg, yend));
+	y2 = GPMAX(y2, GPMIN(ybeg, yend));
+    } else if (beg_inrange) {
+	if (!inrange(x1, xbeg, xend)) {
+	    x1 = xbeg;
+	    y1 = ybeg;
+	} else {
+	    x2 = xbeg;
+	    y2 = ybeg;
+	}
+    } else if (end_inrange) {
+	if (!inrange(x1, xbeg, xend)) {
+	    x1 = xend;
+	    y1 = yend;
+	} else {
+	    x2 = xend;
+	    y2 = yend;
+	}
+    } else {
+	/* Both OUTRANGE. Are they on the same side of the circle? */
+	if (!inrange(x1, xbeg, xend))
+	    goto outside;
+    }
+
+    /* Draw the part of the line inside the bounding circle */
+    (term->move)(map_x(x1), map_y(y1));
+    (term->vector)(map_x(x2), map_y(y2));
+    /* fall through */
+
+outside:
+    /* Leave current position at unclipped endpoint */
+    (term->move)(map_x(xend), map_y(yend));
+    return;
 }
 
 /* Common routines for setting text or line color from t_colorspec */
@@ -641,11 +795,11 @@ apply_pm3dcolor(struct t_colorspec *tc)
 
     switch (tc->type) {
 	case TC_Z:
-		set_color(cb2gray(z2cb(tc->value)));
+		set_color(cb2gray(tc->value));
 		break;
 	case TC_CB:
 		if (CB_AXIS.log)
-		    cbval = (tc->value <= 0) ? CB_AXIS.min : axis_do_log((&CB_AXIS),tc->value);
+		    cbval = (tc->value <= 0) ? CB_AXIS.min : tc->value;
 		else
 		    cbval = tc->value;
 		set_color(cb2gray(cbval));
@@ -653,6 +807,8 @@ apply_pm3dcolor(struct t_colorspec *tc)
 	case TC_FRAC:
 		set_color(sm_palette.positive == SMPAL_POSITIVE ?  tc->value : 1-tc->value);
 		break;
+	default:
+		break; /* cannot happen */
     }
 }
 
@@ -758,35 +914,37 @@ get_offsets(
  * This routine is used for both 2D and 3D plots.
  */
 void
-write_label(unsigned int x, unsigned int y, struct text_label *this_label)
+write_label(int x, int y, struct text_label *this_label)
 {
 	int htic, vtic;
 	int justify = JUST_TOP;	/* This was the 2D default; 3D had CENTRE */
+	textbox_style *textbox = NULL;
 
 	apply_pm3dcolor(&(this_label->textcolor));
 	ignore_enhanced(this_label->noenhanced);
 
 	/* The text itself */
 	if (this_label->hypertext) {
-	    /* Treat text as hypertext */
-	    char *font = this_label->font;
-	    if (font)
-		term->set_font(font);
-	    if (term->hypertext)
-	        term->hypertext(TERM_HYPERTEXT_TOOLTIP, this_label->text);
-	    if (font)
-		term->set_font("");
+	    if (this_label->text && *(this_label->text)) {
+		/* Treat text as hypertext */
+		char *font = this_label->font;
+		if (font)
+		    term->set_font(font);
+		if (term->hypertext)
+		    term->hypertext(TERM_HYPERTEXT_TOOLTIP, this_label->text);
+		if (font)
+		    term->set_font("");
+	    }
 	} else {
 	    /* A normal label (always print text) */
 	    get_offsets(this_label, &htic, &vtic);
-#ifdef EAM_BOXED_TEXT
+	    if (this_label->boxed < 0)
+		textbox = &textbox_opts[0];
+	    else if (this_label->boxed > 0)
+		textbox = &textbox_opts[this_label->boxed];
 	    /* Initialize the bounding box accounting */
-	    if ((this_label->boxed && term->boxed_text)
-	    &&  (textbox_opts.opaque || !textbox_opts.noborder))
-	    {
+	    if (textbox && term->boxed_text && (textbox->opaque || !textbox->noborder))
 		(*term->boxed_text)(x + htic, y + vtic, TEXTBOX_INIT);
-	    }
-#endif
 	    if (this_label->rotate && (*term->text_angle) (this_label->rotate)) {
 		write_multiline(x + htic, y + vtic, this_label->text,
 				this_label->pos, justify, this_label->rotate,
@@ -797,22 +955,20 @@ write_label(unsigned int x, unsigned int y, struct text_label *this_label)
 				this_label->pos, justify, 0, this_label->font);
 	    }
 	}
-#ifdef EAM_BOXED_TEXT
-	if ((this_label->boxed && term->boxed_text)
-	&&  (textbox_opts.opaque || !textbox_opts.noborder))
+	if (textbox && term->boxed_text && (textbox->opaque || !textbox->noborder))
 	{
 
 	    /* Adjust the bounding box margins */
-	    (*term->boxed_text)((int)(textbox_opts.xmargin * 100.),
-		(int)(textbox_opts.ymargin * 100.), TEXTBOX_MARGINS);
+	    (*term->boxed_text)((int)(textbox->xmargin * 100.),
+		(int)(textbox->ymargin * 100.), TEXTBOX_MARGINS);
 
 	    /* Blank out the box and reprint the label */
-	    if (textbox_opts.opaque) {
-		apply_pm3dcolor(&textbox_opts.fillcolor);
+	    if (textbox->opaque) {
+		apply_pm3dcolor(&textbox->fillcolor);
 		(*term->boxed_text)(0,0, TEXTBOX_BACKGROUNDFILL);
 		apply_pm3dcolor(&(this_label->textcolor));
 		/* Init for each of fill and border */
-		if (!textbox_opts.noborder)
+		if (!textbox->noborder)
 		    (*term->boxed_text)(x + htic, y + vtic, TEXTBOX_INIT);
 		if (this_label->rotate && (*term->text_angle) (this_label->rotate)) {
 		    write_multiline(x + htic, y + vtic, this_label->text,
@@ -826,15 +982,14 @@ write_label(unsigned int x, unsigned int y, struct text_label *this_label)
 	    }
 
 	    /* Draw the bounding box */
-	    if (!textbox_opts.noborder) {
-		(*term->linewidth)(textbox_opts.linewidth);
-		apply_pm3dcolor(&textbox_opts.border_color);
+	    if (!textbox->noborder) {
+		(*term->linewidth)(textbox->linewidth);
+		apply_pm3dcolor(&textbox->border_color);
 		(*term->boxed_text)(0,0, TEXTBOX_OUTLINE);
 	    }
 
 	    (*term->boxed_text)(0,0, TEXTBOX_FINISH);
 	}
-#endif
 
 	/* The associated point, if any */
 	/* write_multiline() clips text to on_page; do the same for any point */
@@ -872,7 +1027,7 @@ label_width(const char *str, int *lines)
     s = lab;
     while ((e = (char *) strchr(s, '\n')) != NULL) {
 	*e = '\0';
-	len = estimate_strlen(s);	/* = e-s ? */
+	len = estimate_strlen(s, NULL);	/* = e-s ? */
 	if (len > mlen)
 	    mlen = len;
 	if (len || l || *str == '\n')
@@ -891,7 +1046,7 @@ label_width(const char *str, int *lines)
  * Here so that it can be shared by the 2D and 3D code
  */
 void
-do_timelabel(unsigned int x, unsigned int y)
+do_timelabel(int x, int y)
 {
     struct text_label temp = timelabel;
     char str[MAX_LINE_LEN+1];
@@ -905,4 +1060,61 @@ do_timelabel(unsigned int x, unsigned int y)
     temp.text = str;
 
     write_label(x, y, &temp);
+}
+
+void
+init_gadgets()
+{
+   int i;
+   static t_position y0_wall_corners[5] = WALL_Y0_CORNERS;
+   static t_position x0_wall_corners[5] = WALL_X0_CORNERS;
+   static t_position y1_wall_corners[5] = WALL_Y1_CORNERS;
+   static t_position x1_wall_corners[5] = WALL_X1_CORNERS;
+   static t_position z0_wall_corners[5] = WALL_Z0_CORNERS;
+   for (i=0; i<4; i++)
+       grid_wall[i].next = &grid_wall[i+1];
+
+   grid_wall[WALL_Y0_TAG].o.polygon.vertex = y0_wall_corners;
+   grid_wall[WALL_X0_TAG].o.polygon.vertex = x0_wall_corners;
+   grid_wall[WALL_Y1_TAG].o.polygon.vertex = y1_wall_corners;
+   grid_wall[WALL_X1_TAG].o.polygon.vertex = x1_wall_corners;
+   grid_wall[WALL_Z0_TAG].o.polygon.vertex = z0_wall_corners;
+   grid_wall[WALL_Y0_TAG].lp_properties.pm3d_color.type = TC_RGB;
+   grid_wall[WALL_X0_TAG].lp_properties.pm3d_color.type = TC_RGB;
+   grid_wall[WALL_Y1_TAG].lp_properties.pm3d_color.type = TC_RGB;
+   grid_wall[WALL_X1_TAG].lp_properties.pm3d_color.type = TC_RGB;
+   grid_wall[WALL_Z0_TAG].lp_properties.pm3d_color.type = TC_RGB;
+   grid_wall[WALL_Y0_TAG].lp_properties.pm3d_color.lt = WALL_Y_COLOR;
+   grid_wall[WALL_X0_TAG].lp_properties.pm3d_color.lt = WALL_X_COLOR;
+   grid_wall[WALL_Y1_TAG].lp_properties.pm3d_color.lt = WALL_Y_COLOR;
+   grid_wall[WALL_X1_TAG].lp_properties.pm3d_color.lt = WALL_X_COLOR;
+   grid_wall[WALL_Z0_TAG].lp_properties.pm3d_color.lt = WALL_Z_COLOR;
+}
+
+/*
+ * walk through the list of objects to see if any require pm3d processing
+ */
+TBOOLEAN
+pm3d_objects(void)
+{
+    struct object *obj = first_object;
+    while (obj) {
+	if (obj->layer == LAYER_DEPTHORDER)
+	    return TRUE;
+	obj = obj->next;
+    }
+    return FALSE;
+}
+
+/*
+ * Place overall title on the canvas (shared by plot and splot).
+ */
+void
+place_title(int title_x, int title_y)
+{
+    if (title.text) {
+	/* NB: write_label applies text color but does not reset it */
+	write_label(title_x, title_y, &title);
+	reset_textcolor(&(title.textcolor));
+    }
 }
