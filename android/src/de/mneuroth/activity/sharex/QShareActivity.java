@@ -15,9 +15,9 @@
 
 package de.mneuroth.activity.sharex;
 
-import org.qtproject.qt5.android.QtNative;
+import org.qtproject.qt5.android.QtNative;  // PATCH
 
-import org.qtproject.qt5.android.bindings.QtActivity;
+import org.qtproject.qt5.android.bindings.QtActivity;  // PATCH
 import android.os.*;
 import android.content.*;
 import android.app.*;

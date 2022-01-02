@@ -12,7 +12,7 @@
 
 package de.mneuroth.utils;
 
-import org.qtproject.qt5.android.QtNative;
+import org.qtproject.qt5.android.QtNative;  // PATCH
 
 import java.lang.String;
 import android.content.Intent;

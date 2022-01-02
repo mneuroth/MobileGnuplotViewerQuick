@@ -10,7 +10,8 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
+//import QtQuick.Dialogs 1.2 as Dialog
+import Qt.labs.platform 1.1 as Dialog
 
 MobileFileDialogForm {
     id: root
@@ -180,8 +181,8 @@ MobileFileDialogForm {
             property bool isFile: !fileIsDir
             height: 40
             color: "transparent"
-            anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.left: parent != null ? parent.left : fileDelegate.left
+            anchors.right: parent != null ? parent.right : fileDelegate.right
             Keys.onPressed: {
                  if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                     if( fileIsDir )
@@ -317,7 +318,7 @@ MobileFileDialogForm {
     Menu {
         id: menuSDCard
         Repeater {
-                model: applicationData !== null ? applicationData.getSDCardPaths() : []
+                model: applicationData != null ? applicationData.getSDCardPaths() : []
                 MenuItem {
                     text: modelData
                     onTriggered: {
@@ -355,12 +356,13 @@ MobileFileDialogForm {
         }
     }
 
-    MessageDialog {
+    Dialog.MessageDialog {
         id: infoSDCardAccess
         visible: false
         title: qsTr("Information")
         text: qsTr("Reading files from SD card should work, but writing and deleting files might not work on some Android versions!")
-        standardButtons: StandardButton.Ok
+        //standardButtons: StandardButton.Ok
+        buttons: Dialog.MessageDialog.Ok
         onAccepted: showSDCardMenu()
     }
 }

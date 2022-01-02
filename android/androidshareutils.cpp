@@ -8,7 +8,15 @@
 #include <QFileInfo>
 #include <QDateTime>
 
+#if QT_VERSION < 0x060000
 #include <QtAndroidExtras/QAndroidJniObject>
+#else
+#include <QJniObject>
+#include <QtCore/6.2.2/QtCore/private/qandroidextras_p.h>
+#define QAndroidJniObject QJniObject
+#define QAndroidJniEnvironment QJniEnvironment
+#define QtAndroid QtAndroidPrivate
+#endif
 #include <jni.h>
 
 const static int RESULT_OK = -1;
@@ -207,6 +215,7 @@ void AndroidShareUtils::sendFile(const QString &filePath, const QString &title, 
         return;
     }
 
+#if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
     QAndroidJniObject packageManager = activity.callObjectMethod("getPackageManager",
                                                                  "()Landroid/content/pm/PackageManager;");
@@ -218,6 +227,9 @@ void AndroidShareUtils::sendFile(const QString &filePath, const QString &title, 
         emit shareNoAppAvailable(requestId);
         return;
     }
+#else
+    // TODO qt6
+#endif
 
     if(requestId <= 0) {
         // we dont need a result if there's no requestId
@@ -312,6 +324,7 @@ void AndroidShareUtils::viewFile(const QString &filePath, const QString &title, 
         return;
     }
 
+#if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
     QAndroidJniObject packageManager = activity.callObjectMethod("getPackageManager",
                                                                  "()Landroid/content/pm/PackageManager;");
@@ -323,6 +336,9 @@ void AndroidShareUtils::viewFile(const QString &filePath, const QString &title, 
         emit shareNoAppAvailable(requestId);
         return;
     }
+#else
+    // TODO qt6
+#endif
 
     if(requestId <= 0) {
         // we dont need a result if there's no requestId
@@ -423,6 +439,7 @@ void AndroidShareUtils::editFile(const QString &filePath, const QString &title, 
         return;
     }
 
+#if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
     QAndroidJniObject packageManager = activity.callObjectMethod("getPackageManager",
                                                                  "()Landroid/content/pm/PackageManager;");
@@ -434,6 +451,9 @@ void AndroidShareUtils::editFile(const QString &filePath, const QString &title, 
         emit shareNoAppAvailable(requestId);
         return;
     }
+#else
+    // TODO qt6
+#endif
 
     // now all is ready to start the Activity:
     if(requestId <= 0) {
@@ -496,6 +516,7 @@ void AndroidShareUtils::processActivityResult(int requestCode, int resultCode, c
 void AndroidShareUtils::checkPendingIntents(const QString workingDirPath)
 {
 //AddToLog("*** checkPendingIntents "+workingDirPath);
+#if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
     if(activity.isValid()) {
         // create a Java String for the Working Dir Path
@@ -510,6 +531,9 @@ void AndroidShareUtils::checkPendingIntents(const QString workingDirPath)
         return;
     }
     //qDebug() << "checkPendingIntents: Activity not valid";
+#else
+    // TODO qt6
+#endif
 }
 
 void AndroidShareUtils::setFileUrlReceived(const QString &url)

@@ -10,7 +10,8 @@
 
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import QtQuick.Dialogs 1.2
+//import QtQuick.Dialogs 1.2 as Dialog      // Qt5
+import Qt.labs.platform 1.1 as Dialog
 import Qt.labs.settings 1.0
 import QtQuick.Layouts 1.3
 
@@ -482,7 +483,7 @@ ApplicationWindow {
 
             Menu {
                 id: menu
-                y: menuButton.height
+                //y: menuButton.height
 
                 Menu {
                     id: menuSend
@@ -772,7 +773,7 @@ ApplicationWindow {
                     icon.source: "coin.svg"
                     enabled: !isDialogOpen() && isAppStoreSupported
                     visible: isAppStoreSupported
-                    height: isAppStoreSupported ? aboutMenuItem.height : 0
+                    //height: isAppStoreSupported ? aboutMenuItem.height : 0
                     onTriggered: {
                         stackView.pop()
                         stackView.push(supportDialog)
@@ -1374,66 +1375,71 @@ ApplicationWindow {
         onRejected: { console.log("Rejected") }
     }
 */
-    MessageDialog {
+    Dialog.MessageDialog {
         id: infoDialog
         visible: false
         title: qsTr("Error")
-        standardButtons: StandardButton.Ok
+        //standardButtons: StandardButton.Ok
+        buttons: Dialog.MessageDialog.Ok
         onAccepted: {
             console.log("Close error msg")
         }
     }
 
-    MessageDialog {
+    Dialog.MessageDialog {
         id: myUserNotificationDialog
         visible: false
         title: qsTr("Request for support")
         text: qsTr("It seemed you like this app.\nMaybe you would like to support the development of this app with buying a support level?")
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
+        //standardButtons: StandardButton.Yes | StandardButton.No
+        buttons: Dialog.MessageDialog.Yes | Dialog.MessageDialog.No
+        onYesClicked: {
             stackView.pop()
             stackView.push(supportDialog)
         }
-        onNo: {
-            // do nothing
-        }
+        //onNoClicked: {
+        //    // do nothing
+        //}
     }
 
-    MessageDialog {
+    Dialog.MessageDialog {
         id: askForClearDialog
         visible: false
         title: qsTr("Question")
         text: qsTr("Current text is changed, really discard the changed text?")
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
+        //standardButtons: StandardButton.Yes | StandardButton.No
+        buttons: Dialog.MessageDialog.Yes | Dialog.MessageDialog.No
+        onYesClicked: {
             clearCurrentText()
         }
-        onNo: {
+        onNoClicked: {
             // do nothing
         }
     }
 
-    MessageDialog {
+    Dialog.MessageDialog {
         id: infoTextNotFound
         visible: false
         title: qsTr("Information")
         text: qsTr("Search text not found!")
-        standardButtons: StandardButton.Ok
+        //standardButtons: StandardButton.Ok
+        buttons: Dialog.MessageDialog.Ok
         onAccepted: {
         }
     }
 
     // MessageDialogs does not work for WASM platform !
-    MessageDialog {
+    Dialog.MessageDialog {
         id: askForSearchFromTop
         visible: false
         title: qsTr("Question")
         text: qsTr("Reached end of text, search again from the top?")
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
+        //standardButtons: StandardButton.Yes | StandardButton.No
+        buttons: Dialog.MessageDialog.Yes | Dialog.MessageDialog.No
+        onYesClicked: {
             toolButtonNext.clicked()
         }
-        onNo: {
+        onNoClicked: {
             // do nothing
             homePage.textArea.forceActiveFocus()
         }
@@ -1452,10 +1458,10 @@ ApplicationWindow {
     Connections {
         target: replaceDialog
 
-        onCanceled: {
+        function onCanceled() {
             stackView.pop()
         }
-        onAccepted: {
+        function onAccepted() {
             stackView.pop()
             currentSearchPos = homePage.textArea.cursorPosition
             currentSearchText = replaceDialog.findWhatInput.text
@@ -1467,7 +1473,7 @@ ApplicationWindow {
             currentIsReplace = false
             searchForCurrentSearchText(true,false,false)
         }
-        onReplace: {
+        function onReplace() {
             stackView.pop()
             currentSearchPos = homePage.textArea.cursorPosition
             currentSearchText = replaceDialog.findWhatInput.text
@@ -1479,7 +1485,7 @@ ApplicationWindow {
             currentIsReplace = true
             searchForCurrentSearchText(true,true,false)
         }
-        onReplaceAll: {
+        function onReplaceAll() {
             stackView.pop()
             currentSearchPos = homePage.textArea.cursorPosition
             currentSearchText = replaceDialog.findWhatInput.text
@@ -1501,11 +1507,11 @@ ApplicationWindow {
     Connections {
         target: findDialog
 
-        onCanceled: {
+        function onCanceled() {
             stackView.pop()
             homePage.textArea.forceActiveFocus()
         }
-        onAccepted: {
+        function onAccepted() {
             stackView.pop()
             currentSearchPos = homePage.textArea.cursorPosition
             currentSearchText = findDialog.findWhatInput.text
@@ -1522,7 +1528,7 @@ ApplicationWindow {
     Connections {
         target: settingsDialog
 
-        onRestoreDefaultSettings: {
+        function onRestoreDefaultSettings() {
             restoreDefaultSettings()
         }
     }
@@ -1530,18 +1536,18 @@ ApplicationWindow {
     Connections {
         target: applicationData
 
-        onSendDummyData: {
+        function onSendDummyData(txt, value) {
             console.log("========> Dummy Data !!! "+txt+" "+value)
         }
 
-        onShowErrorMsg: {
+        function onShowErrorMsg(message) {
             stackView.pop()
             outputPage.txtOutput.text += message + "\n"
             stackView.push(outputPage)
         }
 
         // used for WASM platform:
-        onReceiveOpenFileContent: {
+        function onReceiveOpenFileContent(fileName, fileContent) {
             setScriptName(fileName)
             setScriptText(fileContent)
         }
@@ -1550,7 +1556,7 @@ ApplicationWindow {
     Connections {
         target: gnuplotInvoker
 
-        onSigShowErrorText: {
+        function onSigShowErrorText(txt) {
             //showInOutput(txt, bShowOutputPage)
         }
     }
@@ -1558,7 +1564,7 @@ ApplicationWindow {
     Connections {
         target: storageAccess
 
-        onOpenFileContentReceived: {
+        function onOpenFileContentReceived(fileUri, decodedFileUri, content) {
             //applicationData.logText("==> onOpenFileContentReceived "+fileUri+" "+decodedFileUri)
 // TODO does not work (improve!):            window.readCurrentDoc(fileUri) --> stackView.pop() not working
             homePage.currentFileUrl = fileUri
@@ -1568,14 +1574,14 @@ ApplicationWindow {
 // TODO --> update focus ?
             stackView.pop()
         }
-        onOpenFileCanceled: {
+        function onOpenFileCanceled() {
             stackView.pop()
         }
-        onOpenFileError: {
+        function onOpenFileError(message) {
             homePage.textArea.text = message
             stackView.pop()
         }
-        onCreateFileReceived: {
+        function onCreateFileReceived(fileUri, decodedFileUri) {
             // create file is used for save as handling !
             //applicationData.logText("onCreateFileReceived "+fileUri)
             homePage.currentFileUrl = fileUri

@@ -5,8 +5,17 @@
 #ifndef ANDROIDSHAREUTILS_H
 #define ANDROIDSHAREUTILS_H
 
+#include <Qt>
+
+#if QT_VERSION < 0x060000
 #include <QtAndroid>
 #include <QAndroidActivityResultReceiver>
+#else
+#include <QJniObject>
+#include <QtCore/6.2.2/QtCore/private/qandroidextras_p.h>
+#define QAndroidJniObject QJniObject
+#define QAndroidJniEnvironment QJniEnvironment
+#endif
 
 #include "shareutils.hpp"
 

@@ -1,10 +1,7 @@
-QT += qml quick quickcontrols2 svg printsupport
-
-android {
-    QT += purchasing
-}
+QT += core qml quick quickcontrols2 svg printsupport
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
+lessThan(QT_MAJOR_VERSION, 6): QT += widgets
 
 #QT += quickdialogs
 
@@ -97,7 +94,8 @@ android {
     # see: http://community.kde.org/Necessitas/Assets
     # see: https://groups.google.com/forum/#!msg/android-qt/zmtqbUz7KmI/3jLoaK84fd4J
 
-    QT += androidextras
+    lessThan(QT_MAJOR_VERSION, 6): QT += androidextras purchasing
+    greaterThan(QT_MAJOR_VERSION, 5): QT += core-private
 
     #LIBS += -liconv
 

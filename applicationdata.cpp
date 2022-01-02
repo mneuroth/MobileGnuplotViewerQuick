@@ -16,7 +16,14 @@
 
 #if defined(Q_OS_ANDROID)
 #include "android/androidshareutils.hpp"
+#if QT_VERSION < 0x060000
 #include <QtAndroidExtras>
+#else
+#include <QJniObject>
+#include <QCoreApplication>
+#define QAndroidJniObject QJniObject
+#define QAndroidJniEnvironment QJniEnvironment
+#endif
 #endif
 
 #include <QDir>
@@ -426,7 +433,11 @@ static QStringList GetOriginalExternalFilesDirs(/*const char *directoryField = 0
     QStringList result;
 
 #if defined(Q_OS_ANDROID)
+#if QT_VERSION < 0x060000
     QAndroidJniObject appCtx = QtAndroid::androidContext();
+#else
+    QAndroidJniObject appCtx = QNativeInterface::QAndroidApplication::context();
+#endif
     if (!appCtx.isValid())
         return QStringList();
 
@@ -639,7 +650,11 @@ void ApplicationData::writePdfFile(const QString & filename, const QString & tex
 #else
     QPrinter printer(QPrinter::PrinterResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
+#if QT_VERSION < 0x060000
     printer.setPaperSize(QPrinter::A4);
+#else
+    //TODO Qt6
+#endif
     printer.setOutputFileName(filename);
     printer.setPageMargins(QMarginsF(30, 30, 30, 30));
 
@@ -656,7 +671,11 @@ void ApplicationData::writePdfFile(const QString & filename, const QString & tex
     QTextCharFormat txtformat = QTextCharFormat();
 
     QTextDocument doc;
+#if QT_VERSION < 0x060000
     doc.setPageSize(printer.pageRect().size());
+#else
+    //TODO Qt6
+#endif
 
     QTextCursor* cursor = new QTextCursor(&doc);
 

@@ -101,9 +101,6 @@ Page {
                 id: rowSyncXAndYResolution
                 spacing: 5
 
-                anchors.top: chbSyncXAndYResolution.bottom
-                anchors.topMargin: 10
-
                 TextField {
                     id: txtGraphicsResolutionX
                     validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
@@ -123,9 +120,6 @@ Page {
             Row {
                 id: rowResolutionY
                 spacing: 5
-
-                anchors.top: rowSyncXAndYResolution.bottom
-                anchors.topMargin: 10
 
                 TextField {
                     id: txtGraphicsResolutionY
@@ -147,9 +141,6 @@ Page {
                 id: rowGraphicsFontSize
                 spacing: 5
 
-                anchors.top: rowResolutionY.bottom
-                anchors.topMargin: 10
-
                 TextField {
                     id: txtGraphicsFontSize
                     validator: IntValidator { bottom: minFontSize; top: maxFontSize }
@@ -168,9 +159,6 @@ Page {
             Row {
                 id: rowTextFontSize
                 spacing: 5
-
-                anchors.top: rowGraphicsFontSize.bottom
-                anchors.topMargin: 10
 
                 TextField {
                     id: txtTextFontSize
@@ -203,9 +191,6 @@ Page {
                 id: rowSupportLevel
                 spacing: 5
 
-                anchors.top: rowTextFontSize.bottom
-                anchors.topMargin: 10
-
                 TextField {
                     id: txtSupportLevel
                     readOnly: true
@@ -232,9 +217,6 @@ Page {
                 spacing: 5
                 height: btnSelectFont.visible ? implicitHeight : 0
 
-                anchors.top: rowSupportLevel.bottom
-                anchors.topMargin: 10
-
                 Button {
                     id: btnSelectFont
                     height: btnSelectFont.visible ? implicitHeight : 0
@@ -251,9 +233,6 @@ Page {
 
             Row {
                 spacing: 10
-
-                anchors.top: rowSelectFont.bottom
-                anchors.topMargin: 10
 
                 Button {
                     id: btnOk

@@ -172,7 +172,7 @@ PageHomeForm {
     Connections {
         target: textArea
 
-        onTextChanged: {
+        function onTextChanged() {
             var linesInText = count_lines(textArea.text)
             var linesInLineNumbers = count_lines(textLineNumbers.text)
             if(linesInText != linesInLineNumbers) {

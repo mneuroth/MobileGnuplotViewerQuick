@@ -14,7 +14,10 @@
 //#include <QDebug>
 
 #if defined(Q_OS_ANDROID)
+#if QT_VERSION < 0x060000
 #include <QtAndroid>
+#else
+#endif
 #endif
 
 const QString IMAGE_DATA_FILE = "/qt-logo.png";
@@ -418,6 +421,7 @@ void ApplicationUI::onSaveStateRequest(QSessionManager & sessionManager)
 // we don't need permissions if we only share files to other apps using FileProvider
 // but we need permissions if other apps share their files with out app and we must access those files
 bool ApplicationUI::checkPermission() {
+#if QT_VERSION < 0x060000
     QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
     if(r == QtAndroid::PermissionResult::Denied) {
         QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE" );
@@ -428,6 +432,9 @@ bool ApplicationUI::checkPermission() {
             return false;
         }
    }
+#else
+   // TODO qt6 !
+#endif
    //qDebug() << "YEP: Permission OK";
    return true;
 }

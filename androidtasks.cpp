@@ -14,7 +14,13 @@
 #include <QDir>
 #include <QDateTime>
 #if defined(Q_OS_ANDROID)
+#if QT_VERSION < 0x060000
 #include <QtAndroid>
+#else
+// see: https://www.qt.io/blog/qt-extras-modules-in-qt-6
+#include <QCoreApplication>
+#include <QtCore/6.2.2/QtCore/private/qandroidextras_p.h>
+#endif
 #include <QMessageBox>
 #endif
 
@@ -29,8 +35,13 @@ QDateTime g_aCurrentReleaseDate( QDate(2021,1,11), QTime(7,00,00) );        // s
 bool HasAccessToSDCardPath()
 {
 #if defined(Q_OS_ANDROID)
+#if QT_VERSION < 0x060000
     QtAndroid::PermissionResult result = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
     return result == QtAndroid::PermissionResult::Granted;
+#else
+    QFuture<QtAndroidPrivate::PermissionResult> result = QtAndroidPrivate::checkPermission(QtAndroidPrivate::PermissionType::Storage);
+    return result.result() == QtAndroidPrivate::PermissionResult::Authorized;
+#endif
 #else
     return true;
 #endif
@@ -42,8 +53,13 @@ bool GrantAccessToSDCardPath(QObject * parent)
     Q_UNUSED(parent)
     QStringList permissions;
     permissions.append("android.permission.WRITE_EXTERNAL_STORAGE");
+#if QT_VERSION < 0x060000
     QtAndroid::PermissionResultMap result = QtAndroid::requestPermissionsSync(permissions);
     if( result.count()!=1 && result["android.permission.WRITE_EXTERNAL_STORAGE"]!=QtAndroid::PermissionResult::Granted )
+#else
+    QFuture<QtAndroidPrivate::PermissionResult> result = QtAndroidPrivate::requestPermission(QtAndroidPrivate::PermissionType::Storage);
+    if( result.result()!=QtAndroidPrivate::PermissionResult::Authorized )
+#endif
     {
         //QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
         return false;
@@ -99,7 +115,7 @@ bool extractAssetFile(const QString & sAssetFileName, const QString & sOutputFil
             }
             else
             {
-                qDebug() << "Error overwriting file " << sOutputFileName << endl;
+                qDebug() << "Error overwriting file " << sOutputFileName << Qt::endl;
                 return false;
             }
         }

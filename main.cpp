@@ -9,6 +9,7 @@
  ***************************************************************************/
 
 #include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 
 #include <QQuickTextDocument>
@@ -91,7 +92,7 @@ int main(int argc, char *argv[])
 
     //QQuickStyle::setStyle("Default");  // Material Universal Fusion Imagine /Light Dark System --> C:\Qt\5.14.2\msvc2017_64\qml\QtQuick\Controls.2
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setOrganizationName("mneuroth.de");     // Computer/HKEY_CURRENT_USER/Software/mneuroth.de
     app.setOrganizationDomain("mneuroth.de");
     app.setApplicationName("MobileGnuplotViewerQuick");
