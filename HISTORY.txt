@@ -1,0 +1,11 @@
+Change history of the Mobile Gnuplot Viewer Quick
+-------------------------------------------------
+
+Version 2.0.15
+
+  * Added support for 'Material Dark' theme
+  * Added support to select from different application styles
+  * Improved handling of text modified flag
+  * Improved mobile file dialog: added sort subjects and reverse order
+  * Updated to gnuplot version 5.4.2
+  * Some bugfixes
