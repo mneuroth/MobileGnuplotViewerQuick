@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
 
     QSettings aSettings;
     QString sStyle = aSettings.value("appStyle", "Default").toString();
+    if( sStyle == "Material Dark" )
+    {
+        sStyle = "Material";
+    }
     QQuickStyle::setStyle(sStyle); // Default, Basic, Fusion, Imagine, macOS, Material, Universal, Windows
 
 // TODO DEBUGGING: AddToLog("Starting APP");

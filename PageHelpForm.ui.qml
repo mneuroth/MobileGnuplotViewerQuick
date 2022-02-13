@@ -52,6 +52,7 @@ Page {
 
         TextEdit/*Area*/ {
             id: txtHelp
+            color: settings.isDarkStyle ? "white" : "black"
             anchors.fill: parent
             font.family: fontName
             text: qsTr("help # enter any help command here and press the run button")

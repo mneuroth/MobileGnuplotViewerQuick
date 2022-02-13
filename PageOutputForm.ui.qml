@@ -65,6 +65,7 @@ Page {
 
         TextEdit/*Area*/ {
             id: txtOutput
+            color: settings.isDarkStyle ? "white" : "black"
             text: "   "
             focus: true
             onCursorRectangleChanged: scrollView.ensureVisible(cursorRectangle)

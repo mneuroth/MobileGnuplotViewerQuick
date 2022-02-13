@@ -104,7 +104,7 @@ Page {
 
                 ComboBox {
                     id: cbxAppStyle
-                    model: ['Default', 'Basic', 'Fusion', 'Imagine', 'Material', 'Universal'] // optional: macOS, Windows
+                    model: ['Default', 'Basic', 'Fusion', 'Imagine', 'Universal', 'Material', 'Material Dark', 'Android'] // optional: macOS, Windows
                     validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
                     width: editFieldWidth*2
                     height: 40

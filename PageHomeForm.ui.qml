@@ -77,7 +77,7 @@ Page {
 
             Rectangle {
                 id: lineNumbersBackground
-                color: "light grey"
+                color: settings.isDarkStyle ? "#202020" : "light grey"  // dark theme backgroudn color: "#303030"
                 visible: settings.showLineNumbers
                 Layout.fillHeight: true
                 Layout.minimumWidth: numberColumnWidth
@@ -87,6 +87,7 @@ Page {
 
                 TextEdit {
                     id: textLineNumbers
+                    color: settings.isDarkStyle ? "white" : "black"
                     font.family: fontName
                     horizontalAlignment: TextEdit.AlignRight
                     readOnly: true
@@ -100,6 +101,7 @@ Page {
             // TextArea problem: if switch to readonly --> cursor and view jumps to the end of the text ???
             TextEdit/*Area*/ {
                 id: textArea
+                color: settings.isDarkStyle ? "white" : "black"
                 font.family: fontName
                 //anchors.fill: parent
                 Layout.fillWidth: true

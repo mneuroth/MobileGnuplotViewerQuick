@@ -277,11 +277,11 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 #elif defined(Q_OS_WIN32)
     if( useVersionBeta )
     {
-        m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
+        m_aGnuplotProcess.start("d:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
     }
     else
     {
-        m_aGnuplotProcess.start("C:\\Users\\micha\\Downloads\\gp504-win32-mingw\\gnuplot\\bin\\gnuplot.exe");
+        m_aGnuplotProcess.start("d:\\Users\\micha\\Downloads\\gp504-win32-mingw\\gnuplot\\bin\\gnuplot.exe");
     }
     //m_aGnuplotProcess.start("C:\\usr\\neurothmi\\install\\gp460win32\\gnuplot\\bin\\gnuplot.exe");
 #elif defined(Q_OS_MACOS)
@@ -299,7 +299,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         return;
     }
 
-    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolutionX).arg(m_iResolutionY).arg(m_iFontSize)
+    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolutionX).arg(m_iResolutionY).arg(m_iFontSize)     // to change the background color add:  background rgb \"white\"
                         + sScript
                         + QString("\nexit\n");
 

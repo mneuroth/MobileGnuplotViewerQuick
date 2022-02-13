@@ -84,6 +84,11 @@ SettingsDialogForm {
             settings.showLineNumbers = chbShowLineNumbers.checked
             settings.useSyntaxHighlighter = chbUseSyntaxHighlighter.checked
             settings.appStyle = cbxAppStyle.currentValue
+            if(cbxAppStyle.currentValue === "Material Dark") {
+                settings.isDarkStyle = true
+            } else {
+                settings.isDarkStyle = false
+            }
             settingsDialog.lblExampleText.font.pixelSize = settings.textFontSize
             var aFont = settingsDialog.lblExampleText.font
             homePage.textArea.font = aFont

@@ -17,7 +17,7 @@ PageGraphicsForm {
         onWheel: {
             if (wheel.modifiers & Qt.ControlModifier) {
                 image.rotation += wheel.angleDelta.y / 120 * 5;
-                if (Math.abs(photoFrame.rotation) < 4)
+                if (Math.abs(image.rotation) < 4)
                     image.rotation = 0;
             } else {
                 image.rotation += wheel.angleDelta.x / 120;

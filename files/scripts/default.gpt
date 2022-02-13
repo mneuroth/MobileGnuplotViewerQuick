@@ -8,4 +8,10 @@
 #
 # example:
 
+# set drawing colors for dark theme;
+#set xtics textcolor rgb "white"
+#set ytics textcolor rgb "white"
+#set border linecolor rgb "white"
+#set key textcolor rgb "white"
+
 plot sin(x), cos(x)

@@ -8,8 +8,9 @@
  *
  ***************************************************************************/
 
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.12
 //import QtQuick.Dialogs 1.2 as Dialog      // Qt5
 import Qt.labs.platform 1.1 as Dialog
 import Qt.labs.settings 1.0
@@ -25,6 +26,10 @@ ApplicationWindow {
     width: 640
     height: 480
     title: qsTr("MobileGnuplotViewerQuick")
+
+    // see: https://doc.qt.io/qt-5/qtquickcontrols2-material.html#material-theme-attached-prop
+    Material.theme: settings.isDarkStyle ? Material.Dark : Material.Light   // or Material.System
+    Material.accent: Material.BlueGrey //Purple
 
     property int defaultIconSize: 40
     property int iconSize: 40
@@ -1247,8 +1252,9 @@ ApplicationWindow {
 
     Settings {
         id: settings
-        property string appStyle: "Default"
         property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : ":/default.gpt"
+        property string appStyle: "Default"
+        property bool isDarkStyle: false
         property bool useGnuplotBeta: false
         property bool useToolBar: false
         property bool useSyntaxHighlighter: true
