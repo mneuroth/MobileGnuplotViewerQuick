@@ -83,6 +83,7 @@ SettingsDialogForm {
             settings.textFontSize = parseInt(txtTextFontSize.text)
             settings.showLineNumbers = chbShowLineNumbers.checked
             settings.useSyntaxHighlighter = chbUseSyntaxHighlighter.checked
+            settings.appStyle = cbxAppStyle.currentValue
             settingsDialog.lblExampleText.font.pixelSize = settings.textFontSize
             var aFont = settingsDialog.lblExampleText.font
             homePage.textArea.font = aFont

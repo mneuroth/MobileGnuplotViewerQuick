@@ -436,6 +436,15 @@ ApplicationWindow {
         return s
     }
 
+    function findIndex(item, model) {
+        for(var elem in model) {
+            if( item === model[elem] ) {
+                return elem
+            }
+        }
+        return -1
+    }
+
     function openSettingsDialog()
     {
         settingsDialog.txtGraphicsResolutionX.text = gnuplotInvoker.resolutionX
@@ -447,6 +456,8 @@ ApplicationWindow {
         settingsDialog.chbUseToolBar.checked = settings.useToolBar
         settingsDialog.chbUseSyntaxHighlighter.checked = settings.useSyntaxHighlighter
         settingsDialog.chbShowLineNumbers.checked = settings.showLineNumbers
+        var selectedIndex = findIndex(settings.appStyle, settingsDialog.cbxAppStyle.model)
+        settingsDialog.cbxAppStyle.currentIndex = selectedIndex
         settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
         settingsDialog.lblExampleText.font = homePage.textArea.font
 
@@ -1236,6 +1247,7 @@ ApplicationWindow {
 
     Settings {
         id: settings
+        property string appStyle: "Default"
         property string currentFile: isAndroid ? "file:///data/data/de.mneuroth.gnuplotviewerquick/files/scripts/default.gpt" : ":/default.gpt"
         property bool useGnuplotBeta: false
         property bool useToolBar: false

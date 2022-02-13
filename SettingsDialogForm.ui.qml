@@ -42,6 +42,7 @@ Page {
     property alias chbShowLineNumbers: chbShowLineNumbers
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
     property alias chbSyncXAndYResolution: chbSyncXAndYResolution
+    property alias cbxAppStyle: cbxAppStyle
 
     ScrollView {
         id: scrollView
@@ -95,6 +96,26 @@ Page {
                 id: chbSyncXAndYResolution
                 checked: true
                 text: qsTr("Synchronize x and y resolution")
+            }
+
+            Row {
+                id: rowAppStyle
+                spacing: 5
+
+                ComboBox {
+                    id: cbxAppStyle
+                    model: ['Default', 'Basic', 'Fusion', 'Imagine', 'Material', 'Universal'] // optional: macOS, Windows
+                    validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
+                    width: editFieldWidth*2
+                    height: 40
+                }
+
+                Label {
+                    id: lblAppStyle
+                    text: qsTr("App style (restart needed!)")
+                    anchors.verticalCenter: cbxAppStyle.verticalCenter
+                }
+
             }
 
             Row {

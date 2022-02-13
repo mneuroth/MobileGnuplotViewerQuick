@@ -28,6 +28,8 @@
 #include <QtGlobal>
 #include <QDir>
 #include <QFile>
+#include <QSettings>
+#include <QQuickStyle>
 
 #include <QTranslator>
 //#include <QQuickStyle>
@@ -97,6 +99,10 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain("mneuroth.de");
     app.setApplicationName("MobileGnuplotViewerQuick");
     app.setWindowIcon(QIcon(":/gnuplotviewer_flat_512x512.png"));
+
+    QSettings aSettings;
+    QString sStyle = aSettings.value("appStyle", "Default").toString();
+    QQuickStyle::setStyle(sStyle); // Default, Basic, Fusion, Imagine, macOS, Material, Universal, Windows
 
 // TODO DEBUGGING: AddToLog("Starting APP");
 
