@@ -34,6 +34,15 @@ PageHomeForm {
         }
     }
 
+    function isModifiedFlagSet() {
+        var name = lblFileName.text
+        if( name.endsWith(modifiedFlag))
+        {
+            return true
+        }
+        return false
+    }
+
     function do_save_file() {
         if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
         {

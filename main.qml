@@ -72,10 +72,11 @@ ApplicationWindow {
             readCurrentDoc(homePage.currentFileUrl)
         }
 
-        Qt.callLater( function () { applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter) } )
+        // after changing the syntax highlighter the document is not changed !
+        Qt.callLater( function () { applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter); homePage.removeModifiedFlag() } )    // Fires also a text change !
     }
 
-    onClosing: {
+    onClosing: (close) => {
         // handle navigation back to home page if some other page is visible and back button is activated
         if( stackView.currentItem !== homePage )
         {
@@ -219,6 +220,7 @@ ApplicationWindow {
         // then read new document
         var urlFileName = buildValidUrl(url)
         homePage.currentFileUrl = urlFileName
+        settings.currentFile = urlFileName          // immediately update current file in settings
         // do not update content of edit control in the case of an error !
         var content = applicationData.readFileContent(urlFileName)
         if( content !== applicationData.errorContent)
@@ -229,6 +231,8 @@ ApplicationWindow {
             homePage.textArea.forceActiveFocus()
             // update the current directory after starting the application...
             mobileFileDialog.currentDirectory = applicationData.getLocalPathWithoutFileName(urlFileName)
+            // we just read a file from disk -> the document is not modified yet !
+            homePage.removeModifiedFlag()
         }
         else
         {
@@ -471,11 +475,12 @@ ApplicationWindow {
 
     header: ToolBar {
         contentHeight: toolButton.implicitHeight
+        id: firstToolBar
 
         ToolButton {
             id: menuButton
             //text: "\u22EE"
-            icon.source: "menu.svg"
+            icon.source: "/menu.svg"
             font.pixelSize: Qt.application.font.pixelSize * 1.6
             anchors.right: parent.right
             anchors.leftMargin: 5
@@ -494,7 +499,7 @@ ApplicationWindow {
 
                     MenuItem {
                         text: qsTr("Send")
-                        icon.source: "share.svg"
+                        icon.source: "/share.svg"
                         enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                         //visible: isShareSupported
                         //height: isShareSupported ? aboutMenuItem.height : 0
@@ -507,7 +512,7 @@ ApplicationWindow {
                     MenuItem {
                         id: shareText
                         text: qsTr("Send as text")
-                        icon.source: "share.svg"
+                        icon.source: "/share.svg"
                         enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
                         //visible: isShareSupported
                         //height: isShareSupported ? aboutMenuItem.height : 0
@@ -519,7 +524,7 @@ ApplicationWindow {
                     MenuItem {
                         id: sharePng
                         text: qsTr("Send as PDF/PNG")
-                        icon.source: "share.svg"
+                        icon.source: "/share.svg"
                         enabled: !isDialogOpen() && isCurrentUserSupporter()
                         //visible: isShareSupported
                         //height: isShareSupported ? aboutMenuItem.height : 0
@@ -540,7 +545,7 @@ ApplicationWindow {
                     }
                     MenuItem {
                         text: qsTr("View as PDF/PNG")
-                        icon.source: "share.svg"
+                        icon.source: "/share.svg"
                         enabled: !isDialogOpen()
                         //visible: isShareSupported
                         //height: isShareSupported ? aboutMenuItem.height : 0
@@ -566,7 +571,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("Writable")
-                    icon.source: "edit.svg"
+                    icon.source: "/edit.svg"
                     checkable: true
                     checked: writableIcon.checked
                     enabled: !isDialogOpen() && (stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage)
@@ -577,7 +582,7 @@ ApplicationWindow {
                 MenuItem {
                     id: menuClear
                     text: qsTr("Clear/New")
-                    icon.source: "close.svg"
+                    icon.source: "/close.svg"
                     enabled: !isDialogOpen()
                     onTriggered: {
                         if( isGraphicsPage(stackView.currentItem) )
@@ -664,28 +669,28 @@ ApplicationWindow {
                     MenuItem {
                         id: findMenu
                         text: qsTr("Find")
-                        icon.source: "search.svg"
+                        icon.source: "/search.svg"
                         enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                         onTriggered: toolButtonSearch.clicked()
                     }
                     MenuItem {
                         id: replaceMenu
                         text: qsTr("Replace")                        
-                        icon.source: "replace.svg"
+                        icon.source: "/replace.svg"
                         enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
                         onTriggered: toolButtonReplace.clicked()
                     }
                     MenuItem {
                         id: previousFindMenu
                         text: qsTr("Previous")
-                        icon.source: "left-arrow.svg"
+                        icon.source: "/left-arrow.svg"
                         enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                         onTriggered: toolButtonPrevious.clicked()
                     }
                     MenuItem {
                         id: nextFindMenu
                         text: qsTr("Next")
-                        icon.source: "right-arrow.svg"
+                        icon.source: "/right-arrow.svg"
                         enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
                         onTriggered: toolButtonNext.clicked()
                     }
@@ -695,7 +700,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     id: menuUndo
-                    icon.source: "back-arrow.svg"
+                    icon.source: "/back-arrow.svg"
                     text: qsTr("Undo")
                     enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canUndo))
                     onTriggered: {
@@ -708,7 +713,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     id: menuRedo
-                    icon.source: "redo-arrow.svg"
+                    icon.source: "/redo-arrow.svg"
                     text: qsTr("Redo")
                     enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo))
                     onTriggered: {
@@ -761,7 +766,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: qsTr("Settings")
-                    icon.source: "settings.svg"
+                    icon.source: "/settings.svg"
                     enabled: !isDialogOpen()
                     onTriggered: {
                         openSettingsDialog()
@@ -770,7 +775,7 @@ ApplicationWindow {
                 MenuItem {
                     id: supportMenuItem
                     text: qsTr("Support")
-                    icon.source: "coin.svg"
+                    icon.source: "/coin.svg"
                     enabled: !isDialogOpen() && isAppStoreSupported
                     visible: isAppStoreSupported
                     //height: isAppStoreSupported ? aboutMenuItem.height : 0
@@ -843,7 +848,7 @@ ApplicationWindow {
         ToolButton {
             id: toolButton
             //text: stackView.depth > 1 ? "\u25C0" : "\u2261"  // original: "\u2630" for second entry, does not work on Android
-            icon.source: stackView.depth > 1 ? "back" : "menu_bars"
+            icon.source: stackView.depth > 1 ? "/back.svg" : "/menu_bars.svg"
             font.pixelSize: Qt.application.font.pixelSize * 1.6
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -859,7 +864,7 @@ ApplicationWindow {
 
         ToolButton {
             id: undoIcon
-            icon.source: "back-arrow.svg"
+            icon.source: "/back-arrow.svg"
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
             enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canUndo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canUndo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canUndo))
             anchors.right: redoIcon.left
@@ -871,7 +876,7 @@ ApplicationWindow {
 
         ToolButton {
             id: redoIcon
-            icon.source: "redo-arrow.svg"
+            icon.source: "/redo-arrow.svg"
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
             enabled: writableIcon.checked && ((stackView.currentItem === homePage && homePage.textArea.canRedo) || (stackView.currentItem === outputPage && outputPage.txtOutput.canRedo) || (stackView.currentItem === helpPage && helpPage.txtHelp.canRedo))
             anchors.right: writableIcon.left
@@ -883,7 +888,7 @@ ApplicationWindow {
 
         ToolButton {
             id: writableIcon
-            icon.source: "edit.svg"
+            icon.source: "/edit.svg"
             checkable: true
             checked: (stackView.currentItem === homePage && !homePage.textArea.readOnly) || (stackView.currentItem === outputPage && !outputPage.txtOutput.readOnly) || (stackView.currentItem === helpPage && !helpPage.txtHelp.readOnly)
             visible: stackView.currentItem === homePage || stackView.currentItem === outputPage || stackView.currentItem === helpPage
@@ -901,7 +906,7 @@ ApplicationWindow {
 
         ToolButton {
             id: supportIcon
-            icon.source: "high-five.svg"
+            icon.source: "/high-five.svg"
             visible: isAppStoreSupported && isCurrentUserSupporter()
             anchors.left: toolButton.right
             anchors.leftMargin: 1
@@ -949,7 +954,7 @@ ApplicationWindow {
 
             ToolButton {
                 id: toolButtonOpen
-                icon.source: "open-folder-with-document.svg"
+                icon.source: "/open-folder-with-document.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
@@ -960,7 +965,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonSave
-                icon.source: "floppy-disk.svg"
+                icon.source: "/floppy-disk.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
@@ -971,7 +976,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonClear
-                icon.source: "close.svg"
+                icon.source: "/close.svg"
                 height: iconSize
                 width: height
                 enabled: menuClear.enabled
@@ -982,7 +987,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonRun
-                icon.source: "play-button-arrowhead.svg"
+                icon.source: "/play-button-arrowhead.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage || stackView.currentItem === helpPage) && !isDialogOpen()
@@ -1000,7 +1005,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonSearch
-                icon.source: "search.svg"
+                icon.source: "/search.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
@@ -1021,7 +1026,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonReplace
-                icon.source: "replace.svg"
+                icon.source: "/replace.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter()
@@ -1043,7 +1048,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonPrevious
-                icon.source: "left-arrow.svg"
+                icon.source: "/left-arrow.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
@@ -1054,7 +1059,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonNext
-                icon.source: "right-arrow.svg"
+                icon.source: "/right-arrow.svg"
                 height: iconSize
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen() && isCurrentUserSupporter() && currentSearchText.length>0
@@ -1068,7 +1073,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonSettings
-                icon.source: "settings.svg"
+                icon.source: "/settings.svg"
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
@@ -1079,7 +1084,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonSettingsSupport
-                icon.source: "coin.svg"
+                icon.source: "/coin.svg"
                 height: iconSize
                 width: height
                 visible: isAppStoreSupported
@@ -1094,7 +1099,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonShare
-                icon.source: "share.svg"
+                icon.source: "/share.svg"
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
@@ -1114,7 +1119,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonInput
-                icon.source: "document.svg"
+                icon.source: "/document.svg"
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
@@ -1129,7 +1134,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonOutput
-                icon.source: "log-format.svg"
+                icon.source: "/log-format.svg"
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
@@ -1144,7 +1149,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonGraphics
-                icon.source: "line-chart.svg"
+                icon.source: "/line-chart.svg"
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()
@@ -1158,7 +1163,7 @@ ApplicationWindow {
             }
             ToolButton {
                 id: toolButtonHelp
-                icon.source: "information.svg"
+                icon.source: "/information.svg"
                 height: iconSize
                 width: height
                 enabled: !isDialogOpen()

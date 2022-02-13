@@ -19,7 +19,7 @@
 #else
 // see: https://www.qt.io/blog/qt-extras-modules-in-qt-6
 #include <QCoreApplication>
-#include <QtCore/6.2.2/QtCore/private/qandroidextras_p.h>
+#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
 #endif
 #include <QMessageBox>
 #endif

@@ -206,7 +206,7 @@ MobileFileDialogForm {
 
                 Image {
                     id: itemIcon
-                    source: fileIsDir ? "directory.svg" : "file.svg"
+                    source: fileIsDir ? "/directory.svg" : "/file.svg"
 
                     Layout.row: 0
                     Layout.column: 0

@@ -56,7 +56,7 @@ Page {
                 //height: 40
                 //width: height
                 //fillMode: Image.PreserveAspectFit
-                source: "gnuplotviewer_flat_512x512.png"
+                source: "/gnuplotviewer_flat_512x512.png"
                 Layout.alignment: Qt.AlignCenter
                 Layout.maximumWidth: 100
                 Layout.maximumHeight: 100

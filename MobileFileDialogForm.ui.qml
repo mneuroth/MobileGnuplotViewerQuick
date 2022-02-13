@@ -117,7 +117,7 @@ Page {
         id: listView
         orientation: ListView.Vertical
         clip: true
-        keyNavigationEnabled: true
+        //keyNavigationEnabled: true
         anchors.bottom: chbExtendedInfos.top
         anchors.bottomMargin: 10
         anchors.left: parent.left
@@ -152,7 +152,18 @@ Page {
         onClicked: isExtendedInfos = chbExtendedInfos.checked
         anchors.left: parent.left
         anchors.leftMargin: 5
-        anchors.bottom: lblMFDInput.top
+        anchors.bottom: rbnOrder.top
+        anchors.bottomMargin: 5
+    }
+
+    CheckBox {
+        id: chbRevertOrder
+        text: qsTr("Revert order")
+        checked: isReverseOrder
+        onClicked: isReverseOrder = chbRevertOrder.checked
+        anchors.left: chbExtendedInfos.right
+        anchors.leftMargin: 15
+        anchors.bottom: rbnOrder.top
         anchors.bottomMargin: 5
     }
 
@@ -165,13 +176,13 @@ Page {
     RowLayout {
         id: rbnOrder
 
-        anchors.left: chbExtendedInfos.right
+        anchors.left: parent.left
         anchors.leftMargin: 15
         anchors.bottom: lblMFDInput.top
         anchors.bottomMargin: 5
 
         Label {
-                text: qsTr("Sort after:")
+                text: qsTr("Sort")+":"
             }
         RadioButton {
             id: rbnUnsorted
@@ -199,18 +210,6 @@ Page {
         }
     }
 //    }
-
-    CheckBox {
-        id: chbRevertOrder
-        text: qsTr("Revert order")
-        checked: isReverseOrder
-        onClicked: isReverseOrder = chbRevertOrder.checked
-        anchors.left: rbnOrder.right
-        anchors.leftMargin: 15
-        anchors.bottom: lblMFDInput.top
-        anchors.bottomMargin: 5
-    }
-
 
     Label {
         id: lblMFDInput

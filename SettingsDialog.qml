@@ -72,6 +72,7 @@ SettingsDialogForm {
 
     btnOk {
         onClicked:  {
+            var isAlreadyModified = homePage.isModifiedFlagSet()
             gnuplotInvoker.resolutionX = parseInt(txtGraphicsResolutionX.text)
             gnuplotInvoker.resolutionY = parseInt(txtGraphicsResolutionY.text)
             gnuplotInvoker.syncXandYResolution = chbSyncXAndYResolution.checked
@@ -94,6 +95,10 @@ SettingsDialogForm {
                 //var txt = homePage.textArea.text
                 //homePage.textArea.text = ""
                 //homePage.textArea.text = txt
+            }
+            // after changing the syntax highlighter the document is not changed !
+            if( !isAlreadyModified ) {
+                homePage.removeModifiedFlag()
             }
         }
     }
