@@ -8,4 +8,5 @@ Version 2.0.15
   * Improved handling of text modified flag
   * Improved mobile file dialog: added sort subjects and reverse order
   * Updated to gnuplot version 5.4.2
+  * Android: updated to billing library v4.0
   * Some bugfixes
