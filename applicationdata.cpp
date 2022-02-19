@@ -91,7 +91,7 @@ bool ApplicationData::isAppStoreSupported() const
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     return true;
 #else
-    return false;
+    return true;    // PATCH for testing with desktop platforms
 #endif
 }
 

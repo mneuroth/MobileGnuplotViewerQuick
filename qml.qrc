@@ -48,7 +48,7 @@
         <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
         <file>SupportDialog.qml</file>
         <file>SupportDialogForm.ui.qml</file>
-        <file>ApplicationStore.qml</file>
+        <!-- <file>ApplicationStore.qml</file> -->
         <file alias="default.gpt">files/scripts/default.gpt</file>
     </qresource>
     <qresource prefix="/translations">

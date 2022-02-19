@@ -18,12 +18,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += purchasing/qmltypes \
+    purchasing/inapp \
+    $$PWD
+
+CONFIG += qmltypes
+QML_IMPORT_PATH = $$PWD/qmfunctions.h
+QML_IMPORT_NAME = PicoTemplateApp
+QML_IMPORT_MAJOR_VERSION = 1
+
+include($$PWD/purchasing/purchasing.pri)
+
 SOURCES += \
         androidtasks.cpp \
         applicationdata.cpp \
         applicationui.cpp \
         gnuplotinvoker.cpp \
         gnuplotsyntaxhighlighter.cpp \
+        qmlfunctions.cpp \
         main.cpp \
         shareutils.cpp \
         storageaccess.cpp
@@ -56,6 +68,7 @@ HEADERS += \
     applicationui.hpp \
     gnuplotinvoker.h \
     gnuplotsyntaxhighlighter.h \
+    qmlfunctions.h \
     shareutils.hpp \
     storageaccess.h
 
@@ -207,7 +220,11 @@ DISTFILES += \
     android/src/de/mneuroth/utils/QSharePathResolver.java \
     android/src/de/mneuroth/utils/QShareUtils.java \
     android/src/de/mneuroth/utils/QStorageAccess.java \
-    android/src/de/mneuroth/utils/Tuple.java
+    android/src/de/mneuroth/utils/Tuple.java \
+    android/src/org/qtproject/qt/android/purchasing/Security.java \
+    android/src/org/qtproject/qt/android/purchasing/InAppPurchase.java \
+    android/src/org/qtproject/qt/android/purchasing/Base64.java \
+    android/src/org/qtproject/qt/android/purchasing/Base64DecoderException.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
