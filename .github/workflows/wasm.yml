@@ -42,7 +42,7 @@ jobs:
         name: release_url
         path: release_url.txt        
 
-  linux_wasm_6_9_3:
+  linux_wasm_6_7_3:
   
     runs-on: ubuntu-latest
     needs: create_release
@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         qtarch: [wasm_singlethread]
-        qtversion: ['6.9.3']
+        qtversion: ['6.7.3']
         include:
           - qtarch: wasm_singlethread
             qttarget: 'wasm'
@@ -70,7 +70,7 @@ jobs:
         # Directory to install Qt
         dir: # optional
         # Version of Qt to install
-        version: '6.9.3'
+        version: '6.7.3'
         # Host platform
         host: 'linux' # optional
         # Target platform for build
@@ -98,8 +98,8 @@ jobs:
         echo $PATH
         #emsdk install sdk-fastcomp-1.39.8-64bit
         #emsdk activate sdk-fastcomp-1.39.8-64bit
-        emsdk install 3.1.70
-        emsdk activate --embedded 3.1.70
+        emsdk install 3.1.50
+        emsdk activate --embedded 3.1.50
         echo $PATH
         echo $EMSDK
         . $EMSDK/emsdk_env.sh
@@ -114,9 +114,9 @@ jobs:
         ls -lrt
         make
         ls -lrt
-        zip gnuplotviewerquick_wasm_6_9_3.zip GnuplotViewerQuick.js GnuplotViewerQuick.wasm GnuplotViewerQuick.html qtlogo.svg qtloader.js
+        zip gnuplotviewerquick_wasm_6_7_3.zip GnuplotViewerQuick.js GnuplotViewerQuick.wasm GnuplotViewerQuick.html qtlogo.svg qtloader.js
         ls -lrt
-        unzip -v gnuplotviewerquick_wasm_6_9_3.zip
+        unzip -v gnuplotviewerquick_wasm_6_7_3.zip
         pwd
     # this step is added for the release    
     - name: Upload Release Asset
@@ -127,6 +127,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: gnuplotviewerquick_wasm_6_9_3.zip
-        asset_name: gnuplotviewerquick_wasm_6_9_3.zip
+        asset_path: gnuplotviewerquick_wasm_6_7_3.zip
+        asset_name: gnuplotviewerquick_wasm_6_7_3.zip
         asset_content_type: application/zip
