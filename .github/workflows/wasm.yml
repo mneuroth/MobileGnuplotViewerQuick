@@ -76,7 +76,7 @@ jobs:
         # Target platform for build
         target: 'desktop'
         # Architecture for Windows/Android
-        arch: linux_gcc_64 #'wasm_32' # optional
+        arch: wasm_32 #'wasm_32' # optional
         # Whether or not to install Qt dependencies on Linux
         install-deps: 'true'
         # Additional Qt modules to install
