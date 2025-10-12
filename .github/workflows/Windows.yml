@@ -56,3 +56,5 @@ jobs:
         dir
         cmake --build ./build --target all_build --config Release
         dir
+        dir ./build
+
