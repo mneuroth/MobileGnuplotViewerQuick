@@ -1,26 +1,22 @@
-/***************************************************************************
- *
- * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
- *
- * Copyright (C) 2020 by Michael Neuroth
- *
- * License: GPL
- *
- ***************************************************************************/
+#include <Qt>
 
 #include "applicationdata.h"
-#include "androidtasks.h"
+//#include "androidtasks.h"
+#ifdef _WITH_SHARING
 #include "shareutils.hpp"
+#endif
+#ifdef _WITH_STORAGE_ACCESS
 #include "storageaccess.h"
-#include "gnuplotsyntaxhighlighter.h"
+#endif
 
 #if defined(Q_OS_ANDROID)
-#include "android/androidshareutils.hpp"
+//#include "android/androidshareutils.hpp"
 #if QT_VERSION < 0x060000
 #include <QtAndroidExtras>
 #else
 #include <QJniObject>
 #include <QCoreApplication>
+//#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
 #define QAndroidJniObject QJniObject
 #define QAndroidJniEnvironment QJniEnvironment
 #endif
@@ -44,6 +40,52 @@
 #include <QQuickTextDocument>
 #include <QTextDocument>
 
+//#include <QDebug>
+
+bool HasAccessToSDCardPath()
+{
+#if defined(Q_OS_ANDROID)
+#if QT_VERSION < 0x060000
+    QtAndroid::PermissionResult result = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+    return result == QtAndroid::PermissionResult::Granted;
+#else
+#ifdef _WITH_STORAGE_ACCESS
+    QFuture<QtAndroidPrivate::PermissionResult> result = QtAndroidPrivate::checkPermission(QtAndroidPrivate::PermissionType::Storage);
+    return result.result() == QtAndroidPrivate::PermissionResult::Authorized;
+#endif
+#endif
+    return false;
+#else
+    return true;
+#endif
+}
+
+bool GrantAccessToSDCardPath(/*QObject * parent*/)
+{
+#if defined(Q_OS_ANDROID)
+    //Q_UNUSED(parent)
+    QStringList permissions;
+    permissions.append("android.permission.WRITE_EXTERNAL_STORAGE");
+#if QT_VERSION < 0x060000
+    QtAndroid::PermissionResultMap result = QtAndroid::requestPermissionsSync(permissions);
+    if( result.count()!=1 && result["android.permission.WRITE_EXTERNAL_STORAGE"]!=QtAndroid::PermissionResult::Granted )
+#else
+#ifdef _WITH_STORAGE_ACCESS
+    QFuture<QtAndroidPrivate::PermissionResult> result = QtAndroidPrivate::requestPermission(QtAndroidPrivate::PermissionType::Storage);
+    if( result.result()!=QtAndroidPrivate::PermissionResult::Authorized )
+#endif
+#endif
+    {
+        //QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
+        return false;
+    }
+#else
+    //Q_UNUSED(parent)
+#endif
+    return true;
+}
+
+
 ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, StorageAccess & aStorageAccess, QQmlApplicationEngine & aEngine)
     : QObject(parent),
       m_aStorageAccess(aStorageAccess),
@@ -52,10 +94,12 @@ ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, Stor
       m_pSyntaxHighlighter(0),
       m_aEngine(aEngine),
       m_bUseLocalFileDialog(false),
-      m_bIsAdmin(false)
+      m_bIsAdmin(false),
+      m_bIsMobileUI(false)
 {
     m_pShareUtils = pShareUtils;
 #if defined(Q_OS_ANDROID)
+#ifdef _WITH_SHARING
     QMetaObject::Connection result;
     result = connect(m_pShareUtils, SIGNAL(fileUrlReceived(QString)), this, SLOT(sltFileUrlReceived(QString)));
     result = connect(m_pShareUtils, SIGNAL(fileReceivedAndSaved(QString)), this, SLOT(sltFileReceivedAndSaved(QString)));
@@ -65,11 +109,14 @@ ApplicationData::ApplicationData(QObject *parent, ShareUtils * pShareUtils, Stor
     connect(m_pShareUtils, SIGNAL(shareEditDone(int, QString)), this, SLOT(sltShareEditDone(int, QString)));
     connect(m_pShareUtils, SIGNAL(shareNoAppAvailable(int)), this, SLOT(sltShareNoAppAvailable(int)));
 #endif
+#endif
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    m_bIsMobileUI = true;
+#endif
 }
 
 ApplicationData::~ApplicationData()
 {
-    delete m_pSyntaxHighlighter;
 }
 
 QString ApplicationData::getAppInfos() const
@@ -91,7 +138,7 @@ bool ApplicationData::isAppStoreSupported() const
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     return true;
 #else
-    return true;    // PATCH for testing with desktop platforms
+    return false;
 #endif
 }
 
@@ -124,9 +171,22 @@ bool ApplicationData::isWASM() const
 
 bool ApplicationData::isMobileGnuplotViewerInstalled() const
 {
-    return m_pShareUtils != 0 ? m_pShareUtils->isMobileGnuplotViewerInstalled() : false;
+    return false; // PATCH m_pShareUtils != 0 ? m_pShareUtils->isMobileGnuplotViewerInstalled() : false;
 }
 
+bool ApplicationData::isMobileUI() const
+{
+    return m_bIsMobileUI;
+}
+
+void ApplicationData::setMobileUI(bool value)
+{
+    if( m_bIsMobileUI != value )
+    {
+        m_bIsMobileUI = value;
+        emit isMobileUIChanged();
+    }
+}
 
 bool ApplicationData::isUseLocalFileDialog() const
 {
@@ -158,7 +218,7 @@ void ApplicationData::setAdmin(bool value)
 
 bool ApplicationData::isAppInstalled(const QString & sAppName) const
 {
-    return m_pShareUtils != 0 ? m_pShareUtils->isAppInstalled(sAppName) : false;
+    return false; // PATCH m_pShareUtils != 0 ? m_pShareUtils->isAppInstalled(sAppName) : false;
 }
 
 bool ApplicationData::setSyntaxHighlighting(bool enable)
@@ -201,6 +261,7 @@ bool ApplicationData::setSyntaxHighlighting(bool enable)
         }
     }
 
+    return false;
 }
 
 int ApplicationData::findText(const QString & searchText, int iSearchStartPos, bool bForward, bool bMatchWholeWord, bool bCaseSensitive, bool bRegExpr)
@@ -318,20 +379,24 @@ QString ApplicationData::readFileContent(const QString & fileName) const
 {
     QString translatedFileName = GetTranslatedFileName(fileName);
 
-    if( IsAndroidStorageFileUrl(translatedFileName) )
-    {
-        QByteArray data;
-        bool ok = m_aStorageAccess.readFile(translatedFileName, data);
-        if( ok )
-        {
-            return QString(data);
-        }
-        else
-        {
-            return QString(READ_ERROR_OUTPUT);
-        }
-    }
-    else
+    qDebug() << "READ file Content: " << fileName << Qt::endl;
+//     if( IsAndroidStorageFileUrl(translatedFileName) )
+//     {
+// #ifdef _WITH_STORAGE_ACCESS
+//         QByteArray data;
+//         bool ok = m_aStorageAccess.readFile(translatedFileName, data);
+//         if( ok )
+//         {
+//             return QString(data);
+//         }
+//         else
+// #endif
+//         {
+//             qDebug() << "READ file Content: ERROR 1" << Qt::endl;
+//             return QString(READ_ERROR_OUTPUT);
+//         }
+//     }
+//     else
     {
         QString content;
         bool ok = simpleReadFileContent(translatedFileName, content);
@@ -341,6 +406,7 @@ QString ApplicationData::readFileContent(const QString & fileName) const
         }
         else
         {
+            qDebug() << "READ file Content: ERROR 2" << Qt::endl;
             return QString(READ_ERROR_OUTPUT);
         }
     }
@@ -350,12 +416,16 @@ bool ApplicationData::writeFileContent(const QString & fileName, const QString &
 {
     QString translatedFileName = GetTranslatedFileName(fileName);
 
-    if( IsAndroidStorageFileUrl(translatedFileName) )
-    {
-        bool ok = m_aStorageAccess.updateFile(translatedFileName, content.toUtf8());
-        return ok;
-    }
-    else
+//     if( IsAndroidStorageFileUrl(translatedFileName) )
+//     {
+// #ifdef _WITH_STORAGE_ACCESS
+//         bool ok = m_aStorageAccess.updateFile(translatedFileName, content.toUtf8());
+//         return ok;
+// #else
+//         return false;
+// #endif
+//     }
+//     else
     {
         return simpleWriteFileContent(translatedFileName, content);
     }
@@ -363,8 +433,14 @@ bool ApplicationData::writeFileContent(const QString & fileName, const QString &
 
 bool ApplicationData::deleteFile(const QString & fileName)
 {
-    QFile aDir(fileName);
-    bool ok = aDir.remove();
+    QString sFileName = fileName;
+    QUrl aUrl(fileName);
+    if( aUrl.isValid() )
+    {
+        sFileName = aUrl.toLocalFile();
+    }
+    QFile aDir(sFileName);
+    bool ok = aDir.exists() && aDir.remove();
     return ok;
 }
 
@@ -373,9 +449,14 @@ bool ApplicationData::hasAccessToSDCardPath() const
     return ::HasAccessToSDCardPath();
 }
 
-bool ApplicationData::grantAccessToSDCardPath(QObject * parent)
+bool ApplicationData::grantAccessToSDCardPath(/*QObject * parent*/)
 {
-    return ::GrantAccessToSDCardPath(parent);
+    return ::GrantAccessToSDCardPath(/*parent*/);
+}
+
+QString ApplicationData::getErrorContent() const
+{
+    return READ_ERROR_OUTPUT;
 }
 
 QString ApplicationData::getFilesPath() const
@@ -394,13 +475,22 @@ QString ApplicationData::getFilesPath() const
 QString ApplicationData::getHomePath() const
 {
 #if defined(Q_OS_ANDROID)
-    return SCRIPTS_DIR;
+    return DEFAULT_DIRECTORY;   // not SCRIPTS_DIR
 #elif defined(Q_OS_WINDOWS)
-    return "..\\gnuplotviewerquick\\files\\scripts";
+    return DEFAULT_DIRECTORY;
 #elif defined(Q_OS_MACOS)
-    return "../gnuplotviewerquick/files/scripts";
+    return DEFAULT_DIRECTORY;
 #else
     return ".";
+#endif
+}
+
+QString ApplicationData::getScriptsPath() const
+{
+#if defined(Q_OS_ANDROID)
+    return SCRIPTS_DIR;
+#else
+    return getFilesPath() + "/scripts"; //SCRIPTS_DIR;
 #endif
 }
 
@@ -410,7 +500,7 @@ QString ApplicationData::getSDCardPath() const
 // TODO: list of sdcards returning: internal & external SD Card
     return "/sdcard"; // FILES_DIR;
 #elif defined(Q_OS_WIN)
-    return "g:\\";
+    return "d:\\";
 #else
     return "/sdcard";
 #endif
@@ -544,34 +634,16 @@ QStringList ApplicationData::getSDCardPaths() const
     {
         allPaths.append(path);
     }
-#if defined(Q_OS_ANDROID)
-    if( QDir(OLD_GNUPLOTVIEWER_SCRIPTS_DIR).exists() )
-    {
-        allPaths.append(OLD_GNUPLOTVIEWER_SCRIPTS_DIR);
-    }
-    if( QDir(OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR).exists() )
-    {
-        allPaths.append(OLD_GNUPLOTVIEWERFREE_SCRIPTS_DIR);
-    }
-#endif
     return allPaths;
-}
-
-QString ApplicationData::getDefaultScript() const
-{
-    return DEFAULT_SCRIPT;
-}
-
-QString ApplicationData::getErrorContent() const
-{
-    return READ_ERROR_OUTPUT;
 }
 
 bool ApplicationData::shareSimpleText(const QString & text)
 {
     if( m_pShareUtils != 0 )
     {
+#ifdef _WITH_SHARING
         m_pShareUtils->share(text, QUrl());
+#endif
         return true;
     }
     return false;
@@ -584,7 +656,7 @@ bool ApplicationData::shareText(const QString & tempFileName, const QString & te
 
 bool ApplicationData::shareImage(const QImage & image)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [image](QString name) -> bool
+    return writeAndSendSharedFile("picoapp_image.png", "", "image/png", [image](QString name) -> bool
     {
         return image.save(name);
     });
@@ -609,7 +681,11 @@ bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QBy
         QBuffer aBuffer(&aArr);
         aBuffer.open(QIODevice::WriteOnly);
         aImg.save(&aBuffer, "PNG");
+#ifdef _WITH_STORAGE_ACCESS
         return m_aStorageAccess.updateFile(translatedFileName, aArr);
+#else
+        return false;
+#endif
     }
     else
     {
@@ -626,7 +702,7 @@ bool ApplicationData::saveDataAsPngImage(const QString & sUrlFileName, const QBy
 
 bool ApplicationData::shareSvgData(const QVariant & data, int resolutionX, int resolutionY)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data, resolutionX, resolutionY](QString name) -> bool
+    return writeAndSendSharedFile("picoapp_image.png", "", "image/png", [this, data, resolutionX, resolutionY](QString name) -> bool
     {
         QByteArray arrData = qvariant_cast<QByteArray>(data);
         return saveDataAsPngImage(name, arrData, resolutionX, resolutionY);
@@ -635,7 +711,7 @@ bool ApplicationData::shareSvgData(const QVariant & data, int resolutionX, int r
 
 bool ApplicationData::shareViewSvgData(const QVariant & data, int resolutionX, int resolutionY)
 {
-    return writeAndSendSharedFile("gnuplot_image.png", "", "image/png", [this, data, resolutionX, resolutionY](QString name) -> bool
+    return writeAndSendSharedFile("picoapp_image.png", "", "image/png", [this, data, resolutionX, resolutionY](QString name) -> bool
     {
         QByteArray arrData = qvariant_cast<QByteArray>(data);
         return saveDataAsPngImage(name, arrData, resolutionX, resolutionY);
@@ -643,7 +719,7 @@ bool ApplicationData::shareViewSvgData(const QVariant & data, int resolutionX, i
 }
 
 // https://stackoverflow.com/questions/33654060/create-pdf-document-for-printing-in-qt-from-template
-// other possibility: QPdfWriter aPdfWriter("gnuplot_print.pdf");
+// other possibility: QPdfWriter aPdfWriter("picoapp_print.pdf");
 void ApplicationData::writePdfFile(const QString & filename, const QString & text)
 {
 #if defined(Q_OS_IOS)
@@ -652,8 +728,6 @@ void ApplicationData::writePdfFile(const QString & filename, const QString & tex
     printer.setOutputFormat(QPrinter::PdfFormat);
 #if QT_VERSION < 0x060000
     printer.setPaperSize(QPrinter::A4);
-#else
-    //TODO Qt6
 #endif
     printer.setOutputFileName(filename);
     printer.setPageMargins(QMarginsF(30, 30, 30, 30));
@@ -673,8 +747,6 @@ void ApplicationData::writePdfFile(const QString & filename, const QString & tex
     QTextDocument doc;
 #if QT_VERSION < 0x060000
     doc.setPageSize(printer.pageRect().size());
-#else
-    //TODO Qt6
 #endif
 
     QTextCursor* cursor = new QTextCursor(&doc);
@@ -691,7 +763,7 @@ void ApplicationData::writePdfFile(const QString & filename, const QString & tex
 
 bool ApplicationData::shareTextAsPdf(const QString & text, bool bSendFile)
 {
-    return writeAndSendSharedFile("gnuplot_text.pdf", "", "application/pdf", [this, text](QString name) -> bool
+    return writeAndSendSharedFile("picoapp_text.pdf", "", "application/pdf", [this, text](QString name) -> bool
     {
         writePdfFile(name, text);
         return true;
@@ -714,12 +786,20 @@ void ApplicationData::getOpenFileContentAsync(const QString & nameFilter)
          }
      };
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+    // ignore
+#else
     QFileDialog::getOpenFileContent(nameFilter, fileContentReady);
+#endif
 }
 
 void ApplicationData::saveFileContentAsync(const QByteArray &fileContent, const QString &fileNameHint)
 {
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+    // ignore
+#else
     QFileDialog::saveFileContent(fileContent, fileNameHint);
+#endif
 }
 
 bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QString & fileExtension, const QString & fileMimeType, std::function<bool(QString)> saveFunc, bool bSendFile)
@@ -728,11 +808,11 @@ bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QSt
     QString fileNameIn = fileName;
     if(fileNameIn.isNull() || fileNameIn.isEmpty())
     {
-        fileNameIn = "default.gpt";
+        fileNameIn = "default.txt";
     }
     QStringList paths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
     QString targetPath = paths[0]+QDir::separator()+"temp_shared_files";
-    QString targetPathX = paths[0]+QDir::separator()+"gnuplotviewer_shared_files";
+    QString targetPathX = paths[0]+QDir::separator()+"picoapp_shared_files";
     QString tempTarget = targetPath+QDir::separator()+fileNameIn+fileExtension;
     QString tempTargetX = targetPathX+QDir::separator()+fileNameIn+fileExtension;
     if( !QDir(targetPath).exists() )
@@ -761,6 +841,7 @@ bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QSt
     /*bool permissionsSet =*/ QFile(tempTargetX).setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
     int requestId = 24;
     bool altImpl = false;
+#ifdef _WITH_SHARING
     if( bSendFile )
     {
         m_pShareUtils->sendFile(tempTargetX, tr("Send file"), fileMimeType, requestId, altImpl);
@@ -769,6 +850,7 @@ bool ApplicationData::writeAndSendSharedFile(const QString & fileName, const QSt
     {
         m_pShareUtils->viewFile(tempTargetX, tr("View file"), fileMimeType, requestId, altImpl);
     }
+#endif
 
     // remark: remove temporary files in slot:  sltShareFinished() / sltShareError()
     return true;
@@ -803,8 +885,8 @@ void ApplicationData::sltFileUrlReceived(const QString & sUrl)
     // --> /storage/emulated/0/Texte/xyz.txt    --> internal Memory
 
     // output:
-    // /data/user/0/de.mneuroth.gnuplotviewerquick/files
-    // /storage/emulated/0/Android/data/de.mneuroth.gnuplotviewerquick/files
+    // /data/user/0/de.mneuroth.picoapp/files
+    // /storage/emulated/0/Android/data/de.mneuroth.picoapp/files
 
 //TODO DEBUGGING:    AddToLog("URL received "+sUrl);
 
@@ -814,7 +896,7 @@ void ApplicationData::sltFileUrlReceived(const QString & sUrl)
 void ApplicationData::sltFileReceivedAndSaved(const QString & sUrl)
 {
     // <== share from google documents
-    // --> /data/user/0/de.mneuroth.gnuplotviewerquick/files/gnuplotviewer_shared_files/Test.txt.txt
+    // --> /data/user/0/de.mneuroth.picoapp/files/picoapp_shared_files/Test.txt.txt
 
 //TODO DEBUGGING:    AddToLog("URL file received "+sUrl);
 
@@ -832,7 +914,7 @@ void ApplicationData::sltShareError(int requestCode, const QString & message)
     Q_UNUSED(requestCode);
     Q_UNUSED(message);
 
-    sltErrorText("Error sharing: received "+message);
+    emit sendErrorText(tr("Error sharing: received ")+message);
 
     removeAllFilesForShare();
 }
@@ -841,7 +923,7 @@ void ApplicationData::sltShareNoAppAvailable(int requestCode)
 {
     Q_UNUSED(requestCode);
 
-    sltErrorText("Error sharing: no app available");
+    emit sendErrorText(tr("Error sharing: no app available"));
 
     removeAllFilesForShare();
 }
@@ -859,11 +941,6 @@ void ApplicationData::sltShareFinished(int requestCode)
     Q_UNUSED(requestCode);
 
     removeAllFilesForShare();
-}
-
-void ApplicationData::sltErrorText(const QString & msg)
-{
-    setOutputText(msg);
 }
 
 #if defined(Q_OS_ANDROID)
@@ -895,19 +972,16 @@ bool ApplicationData::loadAndShowFileContent(const QString & sFileName)
         ok = loadTextFile(sFileName, sScript);
         if( !ok )
         {
-            sltErrorText(tr("Can not load file %1").arg(sFileName));
+            emit sendErrorText(tr("Can not load file %1").arg(sFileName));
         }
         else
         {
-// TODO hier ggf. direkt signale an QML senden anstatt JavaScript methode aufrufen !!!???
-// TODO: improve !!!
-            setScriptText(sScript);
-            setScriptName(sFileName);
+            emit receiveOpenFileContent(sFileName, sScript);
         }
     }
     else
     {
-        sltErrorText(tr("File name is empty!"));
+        emit sendErrorText(tr("File name is empty!"));
     }
 
     return ok;
@@ -925,7 +999,7 @@ bool ApplicationData::saveTextFile(const QString & sFileName, const QString & sT
     }
     if( !ok )
     {
-        sltErrorText(tr("Error writing file: ")+sFileName);
+        emit sendErrorText(tr("Error writing file: ")+sFileName);
     }
     return ok;
 }
@@ -944,39 +1018,6 @@ bool ApplicationData::loadTextFile(const QString & sFileName, QString & sText)
         ok = sText.length()>0;
     }
     return ok;
-}
-
-void ApplicationData::setScriptText(const QString & sScript)
-{
-    QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");
-    if( homePage!=0 )
-    {
-        QMetaObject::invokeMethod(homePage, "setScriptText",
-                QGenericReturnArgument(),
-                Q_ARG(QVariant, sScript));
-    }
-}
-
-void ApplicationData::setScriptName(const QString & sName)
-{
-    QObject* homePage = childObject<QObject*>(m_aEngine, "homePage", "");
-    if( homePage!=0 )
-    {
-        QMetaObject::invokeMethod(homePage, "setScriptName",
-                QGenericReturnArgument(),
-                Q_ARG(QVariant, sName));
-    }
-}
-
-void ApplicationData::setOutputText(const QString & sText)
-{
-    QObject* homePage = childObject<QObject*>(m_aEngine, "outputPage", "");
-    if( homePage!=0 )
-    {
-        QMetaObject::invokeMethod(homePage, "setOutputText",
-                QGenericReturnArgument(),
-                Q_ARG(QVariant, sText));
-    }
 }
 
 void ApplicationData::setTextDocument(QQuickTextDocument * pDoc)

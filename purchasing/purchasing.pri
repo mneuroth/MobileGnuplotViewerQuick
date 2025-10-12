@@ -5,7 +5,6 @@ SOURCES += \
     $$PWD/qmltypes/inappstoreqmltype.cpp \
     $$PWD/inapp/inappproduct.cpp \
     $$PWD/inapp/inapppurchasebackend.cpp \
-    $$PWD/inapp/dummyinapppurchasebackend.cpp \
     $$PWD/inapp/inappstore.cpp \
     $$PWD/inapp/inapptransaction.cpp
 
@@ -14,7 +13,6 @@ HEADERS += \
     $$PWD/qmltypes/inappstoreqmltype.h \
     $$PWD/inapp/inappproduct.h \
     $$PWD/inapp/inapppurchasebackend.h \
-    $$PWD/inapp/dummyinapppurchasebackend.h \
     $$PWD/inapp/inappstore.h \
     $$PWD/inapp/inapptransaction.h
 
@@ -36,12 +34,12 @@ android {
     JAVA_CLASS_PATH = $$ANDROID_PACKAGE_SOURCE_DIR/src/org/qtproject/qt/android/purchasing/
 
     OTHER_FILES += \
-#PATCH        $$PWD/android/AndroidManifest.xml \
-#PATCH        $$PWD/android/build.gradle \
-#PATCH        $$JAVA_CLASS_PATH/Security.java \
-#PATCH        $$JAVA_CLASS_PATH/InAppPurchase.java \
-#PATCH        $$JAVA_CLASS_PATH/Base64.java \
-#PATCH        $$JAVA_CLASS_PATH/Base64DecoderException.java
+        $$PWD/android/AndroidManifest.xml \
+        $$PWD/android/build.gradle \
+        $$JAVA_CLASS_PATH/Security.java \
+        $$JAVA_CLASS_PATH/InAppPurchase.java \
+        $$JAVA_CLASS_PATH/Base64.java \
+        $$JAVA_CLASS_PATH/Base64DecoderException.java
 }
 
 ios {

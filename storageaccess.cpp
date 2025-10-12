@@ -1,3 +1,7 @@
+#include "applicationdata.h"
+
+#ifdef _WITH_STORAGE_ACCESS
+
 #include "storageaccess.h"
 
 #if defined(Q_OS_ANDROID)
@@ -67,7 +71,6 @@ void StorageAccess::onFileCreateActivityResult(int resultCode, const QString & f
 void StorageAccess::openFile()
 {
 #if defined(Q_OS_ANDROID)
-    // see: https://doc-snapshots.qt.io/qt6-dev/extras-changes-qt6.html
     jboolean ok = QAndroidJniObject::callStaticMethod<jboolean>("de/mneuroth/utils/QStorageAccess",
                                               "openFile",
                                               "()Z");
@@ -105,6 +108,7 @@ inline QByteArray jbyteArray2QByteArray(jbyteArray buf)
     return array;
 }
 */
+
 /*
 QJNIObjectPrivate QJNIObjectPrivate::fromString(const QString &string)
 {
@@ -320,6 +324,8 @@ JNIEXPORT void JNICALL
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

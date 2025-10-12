@@ -7,9 +7,9 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: page
@@ -26,6 +26,8 @@ Page {
     property alias txtHelp: txtHelp
 
     property string fontName: "Courier"
+
+    property int buttonWidth: 100
 
     Label {
         id: lblHelp
@@ -52,7 +54,6 @@ Page {
 
         TextEdit/*Area*/ {
             id: txtHelp
-            color: settings.isDarkStyle ? "white" : "black"
             anchors.fill: parent
             font.family: fontName
             text: qsTr("help # enter any help command here and press the run button")
@@ -82,6 +83,7 @@ Page {
             text: qsTr("Input")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -89,6 +91,7 @@ Page {
             text: qsTr("Output")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -96,6 +99,7 @@ Page {
             text: qsTr("Run help")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
     }
 }

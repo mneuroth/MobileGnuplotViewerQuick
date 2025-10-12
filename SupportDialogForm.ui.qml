@@ -8,9 +8,9 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.3
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     property alias btnSupportLevel0: btnSupportLevel0
@@ -33,7 +33,7 @@ Page {
         id: scrollView
 
         anchors.fill: parent
-        anchors.margins: 10
+        anchors.margins: defaultMargins
 
         contentWidth: lblSupportInfo.contentWidth // btnSupportLevel1.width //availableWidth
         //contentHeight: 600
@@ -47,7 +47,6 @@ Page {
 
             Text {
                 id: lblSupportInfo
-                color: settings.isDarkStyle ? "white" : "black"
                 text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play (see link below)</li><li>giving feedback on the github project page (see link below)</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>sharing as PDF/PNG is enabled</li><li>enable replace, previous and next menu items</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
                 //text: qsTr("<body>The development of this app can be supported in various ways:<br><ul><li>giving feedback and rating via the store enty in Google Play</li><li>purchasing a support level item via in app purchase (see buttons below)</li></ul><br>Purchasing any support level will give you some more features:<br><ul><li>usage of the latest Gnuplot (beta) version is enabled</li><li>sharing as PDF/PNG is enabled</li><li>nice support icon is visible in title bar of the application</li></ul></body>")
                 wrapMode: Text.WordWrap
@@ -123,7 +122,7 @@ Page {
             Text {
                 id: lblSupporterOfClassicVersion
                 text: qsTr("You already supported the predecessor of this application !")
-                visible: applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false
+                visible: false //applicationData !== null ? applicationData.isMobileGnuplotViewerInstalled : false
                 wrapMode: Text.WordWrap
                 horizontalAlignment: Text.AlignHCenter
                 Layout.topMargin: 15

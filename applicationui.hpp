@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QSessionManager>
 
+#include "applicationdata.h"
 #include "shareutils.hpp"
 
 class ApplicationUI : public QObject
@@ -17,8 +18,6 @@ class ApplicationUI : public QObject
 public:
      ApplicationUI(QObject *parent = 0);
      ~ApplicationUI();
-
-//     void addContextProperty(QQmlContext* context);
 
      Q_INVOKABLE
      void copyAssetsToAPPData();

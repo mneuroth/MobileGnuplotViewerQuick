@@ -1,20 +1,20 @@
-/***************************************************************************
- *
- * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
- *
- * Copyright (C) 2020 by Michael Neuroth
- *
- * License: GPL
- *
- ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.1
-import QtQuick.Layouts 1.3
-//import QtQuick.Dialogs 1.2 as Dialog
-import Qt.labs.platform 1.1 as Dialog
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 MobileFileDialogForm {
     id: root
+
+    /*
+        This component needs an object with name applicationData which has this methods:
+          - string getNormalizedPath(string fileName)
+          - bool hasAccessToSDCardPath()
+          - void grantAccessToSDCardPath()
+    */
+
+// TODO: allow sorting for: name, date, size -> radio button
+
+    property string urlPrefix: "file://"
 
     property bool isSaveAsModus: false
     property bool isSaveACopyModus: false
@@ -22,10 +22,22 @@ MobileFileDialogForm {
     property bool isDirectoryModus: false
     property bool isSaveAsImage: false
     property bool isExtendedInfos: false
-    property bool isSDCardInfoShown: false
-    property bool isWASM: false
-    property bool isMobilePlatform: applicationData !== null ? applicationData.isAndroid : false
+    property bool isStorageSupported: true     // TODO PATCH
+    property bool isMobilePlatform: false
+    property bool isAdminModus: false
+    property string homePath: "."
     property var textControl: null
+    property var pathsSDCard: []
+
+    signal openSelectedFile(string fileName)
+    signal saveSelectedFile(string fileName)
+    signal deleteSelectedFile(string fileName)
+
+    signal storageOpenFile()
+    signal storageCreateFile(string fileName)
+
+    signal accepted()
+    signal rejected()
 
     listView {
         // https://stackoverflow.com/questions/9400002/qml-listview-selected-item-highlight-on-click
@@ -54,6 +66,7 @@ MobileFileDialogForm {
 
     function setAdminModus(value) {
         root.bIsAdminModus = value
+        isAdminModus = value
     }
 
     function setSaveAsModus(bAsImage) {
@@ -63,8 +76,9 @@ MobileFileDialogForm {
         root.isDeleteModus = false
         root.isDirectoryModus = false
         root.bShowFiles = true
+        root.bIsAdminModus = isAdminModus
         root.lblMFDInput.text = qsTr("new file name:")
-        root.txtMFDInput.text = bAsImage ? qsTr("unknown.png") : qsTr("unknown.gpt")
+        root.txtMFDInput.text = bAsImage ? qsTr("unknown.png") : qsTr("unknown.txt")
         root.txtMFDInput.readOnly = false
         root.btnOpen.text = qsTr("Save as")
         root.btnOpen.enabled = true
@@ -78,6 +92,7 @@ MobileFileDialogForm {
         root.isDeleteModus = false
         root.isDirectoryModus = false
         root.bShowFiles = true
+        root.bIsAdminModus = isAdminModus
         root.lblMFDInput.text = qsTr("open name:")
         root.txtMFDInput.readOnly = true
         root.btnOpen.text = qsTr("Open")
@@ -92,6 +107,7 @@ MobileFileDialogForm {
         root.isDeleteModus = true
         root.isDirectoryModus = false
         root.bShowFiles = true
+        root.bIsAdminModus = isAdminModus
         root.lblMFDInput.text = qsTr("current file name:")
         root.txtMFDInput.text = ""
         root.txtMFDInput.readOnly = true
@@ -115,37 +131,25 @@ MobileFileDialogForm {
 
     function deleteCurrentFileNow() {
         var fullPath = currentDirectory + "/" + currentFileName
-        var ok = applicationData.deleteFile(fullPath)
-        stackView.pop()
-        if( !ok )
-        {
-            outputPage.txtOutput.text += qsTr("can not delete file ") + fullPath
-            stackView.push(outputPage)
-        }
+        deleteSelectedFile(fullPath)
+        accepted()
     }
 
     function openCurrentFileNow() {
         var fullPath = currentDirectory + "/" + currentFileName
-        window.readCurrentDoc(buildValidUrl(fullPath))
-        stackView.pop()
+        openSelectedFile(fullPath)
+        accepted()
     }
 
     function saveAsCurrentFileNow(fullPath) {
-        if( root.isSaveAsImage )
-        {
-            window.saveAsImage(buildValidUrl(fullPath))
-        }
-        else
-        {
-            window.saveAsCurrentDoc(buildValidUrl(fullPath), textControl)
-        }
-        stackView.pop()
+        saveSelectedFile(fullPath)
+        accepted()
     }
 
     function navigateToDirectory(sdCardPath) {
         if( !applicationData.hasAccessToSDCardPath() )
         {
-            applicationData.grantAccessToSDCardPath(window)
+            applicationData.grantAccessToSDCardPath(/*window*/)
         }
 
         if( applicationData.hasAccessToSDCardPath() )
@@ -153,6 +157,28 @@ MobileFileDialogForm {
             root.setDirectory(sdCardPath)
             root.setCurrentName("")
         }
+    }
+
+    function buildValidUrl(path) {
+        // ignore call, if we already have a file:// url
+        if( path.startsWith(urlPrefix) )
+        {
+            return path
+        }
+        // ignore call, if we try to access resouces from qrc --> path starting with :
+        if( path.startsWith(":") )
+        {
+            return path
+        }
+        // ignore call, if we already have a content:// url (android storage framework)
+        if( path.startsWith("content://") )
+        {
+            return path
+        }
+
+        var sAdd = path.startsWith("/") ? "" : "/"
+        var sUrl = urlPrefix + sAdd + path
+        return sUrl
     }
 
     function formatSize(fileSize) {
@@ -167,12 +193,6 @@ MobileFileDialogForm {
         }
     }
 
-    function showSDCardMenu() {
-        menuSDCard.x = btnSDCard.x
-        menuSDCard.y = btnSDCard.height
-        menuSDCard.open()
-    }
-
     Component {
         id: fileDelegate
 
@@ -181,8 +201,8 @@ MobileFileDialogForm {
             property bool isFile: !fileIsDir
             height: 40
             color: "transparent"
-            anchors.left: parent != null ? parent.left : fileDelegate.left
-            anchors.right: parent != null ? parent.right : fileDelegate.right
+            anchors.left: parent.left
+            anchors.right: parent.right
             Keys.onPressed: {
                  if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                     if( fileIsDir )
@@ -206,7 +226,7 @@ MobileFileDialogForm {
 
                 Image {
                     id: itemIcon
-                    source: fileIsDir ? "/directory.svg" : "/file.svg"
+                    source: fileIsDir ? "files/file96.svg" : "files/new104.svg"
 
                     Layout.row: 0
                     Layout.column: 0
@@ -229,7 +249,7 @@ MobileFileDialogForm {
                     font.pointSize: isMobilePlatform ? itemLabel.font.pointSize*0.75 : itemLabel.font.pointSize
 
                     verticalAlignment: Text.AlignVCenter
-                    text: fileModified.toLocaleString(Qt.locale(),Locale.ShortFormat)
+                    text: fileModified //fileModified.toLocaleString(Qt.locale(),Locale.ShortFormat)
 
                     Layout.row: 0
                     Layout.column: 2
@@ -271,6 +291,7 @@ MobileFileDialogForm {
 
     btnOpen  {
         onClicked: {
+            console.log("open")
             if( root.isDeleteModus )
             {
                 root.deleteCurrentFileNow()
@@ -292,13 +313,13 @@ MobileFileDialogForm {
     }
 
     btnCancel {
-        onClicked: stackView.pop()
+        onClicked: rejected()
     }
 
     btnUp {
         onClicked: {
             // stop with moving up when home directory is reached
-            if( root.bIsAdminModus || (applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(applicationData.homePath)) )
+            if( root.bIsAdminModus || (applicationData.getNormalizedPath(currentDirectory) !== applicationData.getNormalizedPath(homePath)) )
             {
                 root.setDirectory(currentDirectory + "/..")
                 root.setCurrentName("")
@@ -309,7 +330,15 @@ MobileFileDialogForm {
 
     btnHome {
         onClicked: {
-            root.setDirectory(applicationData.homePath)
+            root.setDirectory(homePath)
+            root.setCurrentName("")
+            root.listView.currentIndex = -1
+        }
+    }
+
+    btnMySd {
+        onClicked: {
+            root.setDirectory("/sdcard")
             root.setCurrentName("")
             root.listView.currentIndex = -1
         }
@@ -318,7 +347,7 @@ MobileFileDialogForm {
     Menu {
         id: menuSDCard
         Repeater {
-                model: applicationData != null ? applicationData.getSDCardPaths() : []
+                model: pathsSDCard
                 MenuItem {
                     text: modelData
                     onTriggered: {
@@ -329,40 +358,25 @@ MobileFileDialogForm {
     }
 
     btnSDCard {
+        enabled: pathsSDCard !== null && pathsSDCard.length>0
         onClicked: {
-            if( !isSDCardInfoShown && !isWASM )
-            {
-                isSDCardInfoShown = true
-                infoSDCardAccess.open()
-            }
-            else
-            {
-                showSDCardMenu()
-            }
+            menuSDCard.x = btnSDCard.x
+            menuSDCard.y = btnSDCard.height
+            menuSDCard.open()            
         }
     }
 
     btnStorage {
-        visible: applicationData !== null ? applicationData.isShareSupported : false
+        visible: isStorageSupported
         onClicked: {
             if( root.isSaveAsModus )
             {
-                storageAccess.createFile(root.txtMFDInput.text)
+                storageCreateFile(root.txtMFDInput.text)
             }
             else
             {
-                storageAccess.openFile()
+                storageOpenFile()
             }
         }
-    }
-
-    Dialog.MessageDialog {
-        id: infoSDCardAccess
-        visible: false
-        title: qsTr("Information")
-        text: qsTr("Reading files from SD card should work, but writing and deleting files might not work on some Android versions!")
-        //standardButtons: StandardButton.Ok
-        buttons: Dialog.MessageDialog.Ok
-        onAccepted: showSDCardMenu()
     }
 }

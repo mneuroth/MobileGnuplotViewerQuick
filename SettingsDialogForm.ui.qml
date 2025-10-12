@@ -7,13 +7,16 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.3
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: root
     anchors.fill: parent
+
+    focusPolicy: Qt.StrongFocus
+    focus: true
 
     title: qsTr("Gnuplot Settings")
 
@@ -42,40 +45,44 @@ Page {
     property alias chbShowLineNumbers: chbShowLineNumbers
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
     property alias chbSyncXAndYResolution: chbSyncXAndYResolution
-    property alias cbxAppStyle: cbxAppStyle
+    property alias txtAppStyle: txtAppStyle
 
     ScrollView {
         id: scrollView
 
         anchors.fill: parent
-        anchors.margins: 10
+        anchors.margins: defaultMargins
 
         //contentWidth: lblSupportInfo.contentWidth // btnSupportLevel1.width //availableWidth
         contentHeight: layout.implicitHeight + 50
-        clip: true
+        //clip: true
 
         ScrollBar.horizontal.policy: ScrollBar.AsNeeded
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
         ColumnLayout {
             id: layout
+            Layout.preferredHeight: 50
 
             CheckBox {
                 id: chbUseGnuplotBeta
                 enabled: /*not available for embedded gnuplot*/false && settings.supportLevel>=0
                 text: qsTr("Use latest Gnuplot (beta) version")
+                Layout.preferredHeight: defaultButtonHeight
             }
 
             CheckBox {
                 id: chbShowLineNumbers
                 enabled: true
                 text: qsTr("Show line numbers")
+                Layout.preferredHeight: defaultButtonHeight
             }
 
             CheckBox {
                 id: chbUseToolBar
                 enabled: true
                 text: qsTr("Show toolbar")
+                Layout.preferredHeight: defaultButtonHeight
             }
 
 
@@ -83,6 +90,7 @@ Page {
                 id: chbUseSyntaxHighlighter
                 enabled: true
                 text: qsTr("Use syntax highlighting")
+                Layout.preferredHeight: defaultButtonHeight
             }
 
             CheckBox {
@@ -90,32 +98,14 @@ Page {
                 text: qsTr("Use local filedialog")
                 visible: applicationData !== null ? applicationData.isWASM : false
                 height: applicationData !== null ? (applicationData.isWASM ? chbUseGnuplotBeta.height : 0) : 0
+                Layout.preferredHeight: defaultButtonHeight
             }
 
             CheckBox {
                 id: chbSyncXAndYResolution
                 checked: true
                 text: qsTr("Synchronize x and y resolution")
-            }
-
-            Row {
-                id: rowAppStyle
-                spacing: 5
-
-                ComboBox {
-                    id: cbxAppStyle
-                    model: ['Default', 'Basic', 'Fusion', 'Imagine', 'Universal', 'Material', 'Material Dark', 'Android'] // optional: macOS, Windows
-                    validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
-                    width: editFieldWidth*2
-                    height: 40
-                }
-
-                Label {
-                    id: lblAppStyle
-                    text: qsTr("App style (restart needed!)")
-                    anchors.verticalCenter: cbxAppStyle.verticalCenter
-                }
-
+                Layout.preferredHeight: defaultButtonHeight
             }
 
             Row {
@@ -124,14 +114,18 @@ Page {
 
                 TextField {
                     id: txtGraphicsResolutionX
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
                     width: editFieldWidth
-                    height: 40
+                    height: defaultButtonHeight
                     placeholderText: qsTr("")
                 }
 
                 Label {
                     id: lblGraphicsResolutionX
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     text: qsTr("x resolution for graphic area")
                     anchors.verticalCenter: txtGraphicsResolutionX.verticalCenter
                 }
@@ -144,15 +138,19 @@ Page {
 
                 TextField {
                     id: txtGraphicsResolutionY
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     enabled: !chbSyncXAndYResolution.checked
                     validator: IntValidator {bottom: minGraphicSize; top: maxGraphicSize}
                     width: editFieldWidth
-                    height: 40
+                    height: defaultButtonHeight
                     placeholderText: qsTr("")
                 }
 
                 Label {
                     id: lblGraphicsResolutionY
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     text: qsTr("y resolution for graphic area")
                     anchors.verticalCenter: txtGraphicsResolutionY.verticalCenter
                 }
@@ -164,16 +162,47 @@ Page {
 
                 TextField {
                     id: txtGraphicsFontSize
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     validator: IntValidator { bottom: minFontSize; top: maxFontSize }
                     width: editFieldWidth
-                    height: 40
+                    height: defaultButtonHeight
                     placeholderText: qsTr("")
                 }
 
                 Label {
                     id: lblGraphicsFontSize
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     text: qsTr("Font size for graphic area")
                     anchors.verticalCenter: txtGraphicsFontSize.verticalCenter
+                }
+            }
+
+            Row {
+                id: rowAppStyle
+                spacing: 5
+
+                ComboBox {
+                     model: ['Default', 'Basic', 'Fusion', 'Imagine', 'Universal', 'Material', 'Material Dark', 'Android'] // optional: macOS, Windows
+                     height: defaultButtonHeight
+                }
+
+                TextField {
+                    id: txtAppStyle
+                    width: editFieldWidth
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    height: defaultButtonHeight
+                    placeholderText: qsTr("")
+                }
+
+                Label {
+                    id: lblAppStyle
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: qsTr("Application style")
+                    anchors.verticalCenter: txtAppStyle.verticalCenter
                 }
             }
 
@@ -183,28 +212,35 @@ Page {
 
                 TextField {
                     id: txtTextFontSize
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     validator: IntValidator { bottom: minFontSize; top: maxFontSize }
                     width: editFieldWidth
-                    height: 40
+                    height: defaultButtonHeight
                     placeholderText: qsTr("")
                 }
 
                 Button {
                     id: btnIncTextFontSize
                     text: "+"
-                    width: 40
+                    height: defaultButtonHeight
+                    width: defaultButtonHeight
                 }
 
                 Button {
                     id: btnDecTextFontSize
                     text: "-"
-                    width: 40
+                    height: defaultButtonHeight
+                    width: defaultButtonHeight
                 }
 
                 Label {
                     id: lblTextFontSize
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     text: qsTr("Font size for text area")
                     anchors.verticalCenter: txtTextFontSize.verticalCenter
+                    height: defaultButtonHeight
                 }
             }
 
@@ -214,10 +250,12 @@ Page {
 
                 TextField {
                     id: txtSupportLevel
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     readOnly: true
                     visible: isAppStoreSupported
                     width: editFieldWidth
-                    //height: 40
+                    //height: buttonHeight
                     //height: isAppStoreSupported ? implicitHeight : 0
                     height: isAppStoreSupported ? txtGraphicsFontSize.height : 0
                     placeholderText: qsTr("")
@@ -226,6 +264,8 @@ Page {
 
                 Label {
                     id: lblSupportLevel
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
                     visible: isAppStoreSupported
                     text: qsTr("SupportLevel")
                     height: isAppStoreSupported ? lblGraphicsFontSize.height : 0
@@ -252,22 +292,37 @@ Page {
                 }
             }
 
-            Row {
+            RowLayout {
                 spacing: 10
+                width: parent.width
 
                 Button {
                     id: btnOk
                     text: qsTr("Accept")
+                    //Layout.fillHeight: true
+                    //Layout.fillWidth: true
+                    Layout.preferredWidth: defaultButtonWidth
+                    Layout.preferredHeight: defaultButtonHeight
                 }
 
                 Button {
                     id: btnCancel
                     text: qsTr("Cancel")
+                    //height: defaultButtonHeight
+                    //Layout.fillHeight: true
+                    //Layout.fillWidth: true
+                    Layout.preferredWidth: defaultButtonWidth
+                    Layout.preferredHeight: defaultButtonHeight
                 }
 
                 Button {
                     id: btnRestoreDefaultSettings
                     text: qsTr("Default Values")
+                    //height: defaultButtonHeight
+                    //Layout.fillHeight: true
+                    //Layout.fillWidth: true
+                    Layout.preferredWidth: defaultButtonWidth
+                    Layout.preferredHeight: defaultButtonHeight
                 }
             }
         }

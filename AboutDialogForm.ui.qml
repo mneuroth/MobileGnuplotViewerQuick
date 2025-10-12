@@ -7,13 +7,16 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.3
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: root
     anchors.fill: parent
+
+    focusPolicy: Qt.StrongFocus
+    focus: true
 
     title: qsTr("About")
 
@@ -30,7 +33,7 @@ Page {
         id: scrollView
 
         anchors.fill: parent
-        //anchors.margins: 10
+        //anchors.margins: defaultMargins
 
         clip: true
 
@@ -56,7 +59,7 @@ Page {
                 //height: 40
                 //width: height
                 //fillMode: Image.PreserveAspectFit
-                source: "/gnuplotviewer_flat_512x512.png"
+                source: "images/gnuplotviewer_flat_512x512.png"
                 Layout.alignment: Qt.AlignCenter
                 Layout.maximumWidth: 100
                 Layout.maximumHeight: 100
@@ -64,13 +67,13 @@ Page {
 
             Text {
                 id: lblAppVersion
-                text: qsTr("Version: 2.0.15")
+                text: qsTr("Version: 2.1.4")
                 Layout.alignment: Qt.AlignCenter
             }
 
             Text {
                 id: lblAppDate
-                text: qsTr("from: 2.1.2022")
+                text: qsTr("from: 12.10.2025")
                 Layout.alignment: Qt.AlignCenter
                 Layout.bottomMargin: 15
             }
@@ -106,6 +109,8 @@ Page {
                 id: btnClose
                 text: qsTr("Close")
                 Layout.alignment: Qt.AlignCenter
+                Layout.preferredWidth: defaultButtonWidth
+                Layout.preferredHeight: defaultButtonHeight
             }
         }
     }

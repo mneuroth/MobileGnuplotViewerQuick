@@ -7,8 +7,8 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.1
+import QtQuick
+import QtQuick.Controls
 
 AboutDialogForm {
 
@@ -31,6 +31,14 @@ AboutDialogForm {
     btnClose {
         onClicked:  {
             stackView.pop()
+        }
+    }
+
+    Keys.onReleased: (event) => {
+        console.log("ABOUT Key "+event.key)
+        if (event.key === Qt.Key_Escape || event.key === Qt.Key_Back) {
+            event.accepted = true
+            bntClose.clicked()
         }
     }
 }

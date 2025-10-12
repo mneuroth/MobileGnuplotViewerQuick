@@ -8,9 +8,9 @@
  *
  ***************************************************************************/
 
-import QtQuick 2.4
-import QtQuick.Controls 2.3
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: root
@@ -68,8 +68,6 @@ Page {
                 Layout.column: 1
 
                 //font.pixelSize: 12
-                Keys.onEscapePressed: cancelButton.clicked()
-                Keys.onBackPressed: cancelButton.clicked()
             }
 
             Button {
@@ -90,8 +88,6 @@ Page {
                 Layout.row: 1
                 Layout.column: 0
                 text: qsTr("Match whole word only")
-                Keys.onEscapePressed: cancelButton.clicked()
-                Keys.onBackPressed: cancelButton.clicked()
             }
 
             // ***** row 2
@@ -102,8 +98,6 @@ Page {
                 Layout.row: 2
                 Layout.column: 0
                 text: qsTr("Case sensitive")
-                Keys.onEscapePressed: cancelButton.clicked()
-                Keys.onBackPressed: cancelButton.clicked()
             }
 
             // ***** row 3
@@ -115,8 +109,6 @@ Page {
                 Layout.row: 3
                 Layout.column: 0
                 text: qsTr("Regular expression")
-                Keys.onEscapePressed: cancelButton.clicked()
-                Keys.onBackPressed: cancelButton.clicked()
             }
 
             // ***** row 4
@@ -127,8 +119,6 @@ Page {
                 Layout.row: 4
                 Layout.column: 0
                 text: qsTr("Search backward")
-                Keys.onEscapePressed: cancelButton.clicked()
-                Keys.onBackPressed: cancelButton.clicked()
             }
 
             // ***** row 5
@@ -150,9 +140,8 @@ Page {
                     //Layout.column: 0
                     text: qsTr("Find Next")
                     //highlighted: true
-                    Keys.onEscapePressed: cancelButton.clicked()
-                    Keys.onBackPressed: cancelButton.clicked()
-                }
+                    Layout.preferredWidth: defaultButtonWidth
+                    Layout.preferredHeight: defaultButtonHeight                }
 
                 Button {
                     id: cancelButton
@@ -161,10 +150,9 @@ Page {
                     //Layout.row: 6
                     //Layout.column: 2
                     text: qsTr("Cancel")
-                    Keys.onEscapePressed: cancelButton.clicked()
-                    Keys.onBackPressed: cancelButton.clicked()
+                    Layout.preferredWidth: defaultButtonWidth
+                    Layout.preferredHeight: defaultButtonHeight
                 }
-
             }
         }
     }

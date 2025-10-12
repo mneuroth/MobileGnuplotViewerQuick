@@ -12,7 +12,7 @@
 #include <QAndroidActivityResultReceiver>
 #else
 #include <QJniObject>
-#include <QtCore/6.2.2/QtCore/private/qandroidextras_p.h>
+//#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
 #define QAndroidJniObject QJniObject
 #define QAndroidJniEnvironment QJniEnvironment
 #endif
@@ -35,9 +35,6 @@ public:
     void onActivityResult(int requestCode, int resultCode, const QString & urlTxt);
 
     virtual void checkPendingIntents(const QString workingDirPath) override;
-
-    virtual bool isMobileGnuplotViewerInstalled() override;
-    virtual bool isAppInstalled(const QString &packageName) override;
 
     static AndroidShareUtils* getInstance();
 

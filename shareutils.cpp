@@ -4,13 +4,19 @@
 
 #include "shareutils.hpp"
 
+#define _DISABLE_ANDROID_SHAREUTILS
+
 #ifdef Q_OS_IOS
 #include "ios/iosshareutils.hpp"
 #endif
 
 #ifdef Q_OS_ANDROID
+#ifndef _DISABLE_ANDROID_SHAREUTILS
 #include "android/androidshareutils.hpp"
 #endif
+#endif
+
+#ifdef _WITH_SHARING
 
 ShareUtils::ShareUtils(QObject *parent)
     : QObject(parent)
@@ -18,7 +24,11 @@ ShareUtils::ShareUtils(QObject *parent)
 #if defined(Q_OS_IOS)
     mPlatformShareUtils = new IosShareUtils(this);
 #elif defined(Q_OS_ANDROID)
+#ifndef _DISABLE_ANDROID_SHAREUTILS
     mPlatformShareUtils = new AndroidShareUtils(this);
+#else
+    mPlatformShareUtils = new PlatformShareUtils(this);
+#endif
 #else
     mPlatformShareUtils = new PlatformShareUtils(this);
 #endif
@@ -87,15 +97,6 @@ void ShareUtils::checkPendingIntents(const QString workingDirPath)
     mPlatformShareUtils->checkPendingIntents(workingDirPath);
 }
 
-bool ShareUtils::isMobileGnuplotViewerInstalled()
-{
-    return mPlatformShareUtils->isMobileGnuplotViewerInstalled();
-}
-
-bool ShareUtils::isAppInstalled(const QString &packageName)
-{
-    return mPlatformShareUtils->isAppInstalled(packageName);
-}
 /*
 void ShareUtils::openFile(const int &requestId)
 {
@@ -119,22 +120,16 @@ void ShareUtils::onShareNoAppAvailable(int requestCode)
 
 void ShareUtils::onShareError(int requestCode, QString message)
 {
-//AddToLog(QString("==> ShareUtils this=").arg((unsigned long)this));
-//AddToLog(QString("==> onShareError emit ")+message);
     emit shareError(requestCode, message);
 }
 
 void ShareUtils::onFileUrlReceived(QString url)
 {
-//AddToLog(QString("==> ShareUtils this=").arg((unsigned long)this));
-//AddToLog(QString("==> onFileUrlReceived emit ")+url);
     emit fileUrlReceived(url);
 }
 
 void ShareUtils::onFileReceivedAndSaved(QString url)
 {
-//AddToLog(QString("==> ShareUtils this=").arg((unsigned long)this));
-//AddToLog(QString("==> onFileReceivedAndSaved emit ")+url);
     emit fileReceivedAndSaved(url);
 }
 
@@ -142,3 +137,5 @@ void ShareUtils::onTextReceived(QString text)
 {
     emit textReceived(text);
 }
+
+#endif

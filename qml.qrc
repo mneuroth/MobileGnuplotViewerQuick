@@ -1,55 +1,31 @@
-<RCC>
-    <qresource prefix="/">
-        <file>main.qml</file>
-        <file>PageHomeForm.ui.qml</file>
-        <file>PageHome.qml</file>
-        <file>PageGraphicsForm.ui.qml</file>
-        <file>PageGraphics.qml</file>
-        <file>PageHelpForm.ui.qml</file>
-        <file>PageHelp.qml</file>
-        <file>MobileFileDialogForm.ui.qml</file>
-        <file>MobileFileDialog.qml</file>
-        <file>PageOutputForm.ui.qml</file>
-        <file>PageOutput.qml</file>
-        <file>AboutDialogForm.ui.qml</file>
-        <file>AboutDialog.qml</file>
-        <file>SettingsDialogForm.ui.qml</file>
-        <file>SettingsDialog.qml</file>
-        <file>FindDialogForm.ui.qml</file>
-        <file>FindDialog.qml</file>
-        <file>ReplaceDialogForm.ui.qml</file>
-        <file>ReplaceDialog.qml</file>
-        <file>qtquickcontrols2.conf</file>
-        <file alias="empty.svg">files/empty.svg</file>
-        <file alias="share.svg">files/share.svg</file>
-        <file alias="menu.svg">files/menu.svg</file>
-        <file alias="menu_bars.svg">files/menu_bars.svg</file>
-        <file alias="back.svg">files/back.svg</file>
-        <file alias="directory.svg">files/file96.svg</file>
-        <file alias="file.svg">files/new104.svg</file>
-        <file alias="edit.svg">files/edit.svg</file>
-        <file alias="redo-arrow.svg">files/redo-arrow.svg</file>
-        <file alias="back-arrow.svg">files/back-arrow.svg</file>
-        <file alias="high-five.svg">files/high-five.svg</file>
-        <file alias="document.svg">files/document.svg</file>
-        <file alias="floppy-disk.svg">files/floppy-disk.svg</file>
-        <file alias="information.svg">files/information.svg</file>
-        <file alias="line-chart.svg">files/line-chart.svg</file>
-        <file alias="play-button-arrowhead.svg">files/play-button-arrowhead.svg</file>
-        <file alias="open-folder-with-document.svg">files/open-folder-with-document.svg</file>
-        <file alias="log-format.svg">files/log-format.svg</file>
-        <file alias="search.svg">files/search.svg</file>
-        <file alias="replace.svg">files/replace.svg</file>
-        <file alias="left-arrow.svg">files/left-arrow.svg</file>
-        <file alias="right-arrow.svg">files/right-arrow.svg</file>
-        <file alias="settings.svg">files/settings.svg</file>
-        <file alias="close.svg">files/close.svg</file>
-        <file alias="coin.svg">files/coin.svg</file>
-        <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
-        <file>SupportDialog.qml</file>
-        <file>SupportDialogForm.ui.qml</file>
-        <!-- <file>ApplicationStore.qml</file> -->
-        <file alias="default.gpt">files/scripts/default.gpt</file>
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource>
+    <file alias="empty.svg">files/empty.svg</file>
+    <file alias="share.svg">files/share.svg</file>
+    <file alias="menu.svg">files/menu.svg</file>
+    <file alias="menu_bars.svg">files/menu_bars.svg</file>
+    <file alias="back.svg">files/back.svg</file>
+    <file alias="directory.svg">files/file96.svg</file>
+    <file alias="file.svg">files/new104.svg</file>
+    <file alias="edit.svg">files/edit.svg</file>
+    <file alias="redo-arrow.svg">files/redo-arrow.svg</file>
+    <file alias="back-arrow.svg">files/back-arrow.svg</file>
+    <file alias="high-five.svg">files/high-five.svg</file>
+    <file alias="document.svg">files/document.svg</file>
+    <file alias="floppy-disk.svg">files/floppy-disk.svg</file>
+    <file alias="information.svg">files/information.svg</file>
+    <file alias="line-chart.svg">files/line-chart.svg</file>
+    <file alias="play-button-arrowhead.svg">files/play-button-arrowhead.svg</file>
+    <file alias="open-folder-with-document.svg">files/open-folder-with-document.svg</file>
+    <file alias="log-format.svg">files/log-format.svg</file>
+    <file alias="search.svg">files/search.svg</file>
+    <file alias="replace.svg">files/replace.svg</file>
+    <file alias="left-arrow.svg">files/left-arrow.svg</file>
+    <file alias="right-arrow.svg">files/right-arrow.svg</file>
+    <file alias="settings.svg">files/settings.svg</file>
+    <file alias="close.svg">files/close.svg</file>
+    <file alias="coin.svg">files/coin.svg</file>
+    <file alias="gnuplotviewer_flat_512x512.png">images/gnuplotviewer_flat_512x512.png</file>
     </qresource>
     <qresource prefix="/translations">
         <file>GnuplotViewerQuick_de_DE.qm</file>

@@ -1,158 +1,157 @@
-/***************************************************************************
- *
- * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
- *
- * Copyright (C) 2020 by Michael Neuroth
- *
- * License: GPL
- *
- ***************************************************************************/
-
 #include <QGuiApplication>
-#include <QApplication>
 #include <QQmlApplicationEngine>
-
-#include <QQuickTextDocument>
 #include <QQmlContext>
 
-#include <QDateTime>
+#include <QLocale>
+#include <QTranslator>
 #include <QIcon>
-
-#include "gnuplotinvoker.h"
-#include "gnuplotsyntaxhighlighter.h"
-#include "applicationdata.h"
-#include "storageaccess.h"
-#include "androidtasks.h"
-#include "applicationui.hpp"
-
 #include <QtGlobal>
 #include <QDir>
 #include <QFile>
-#include <QSettings>
+#include <QDateTime>
 #include <QQuickStyle>
+#include <QQuickTextDocument>
+#include <QSettings>
 
-#include <QTranslator>
-//#include <QQuickStyle>
+#include "applicationdata.h"
+#include "gnuplotinvoker.h"
 
-#undef _WITH_QDEBUG_REDIRECT
-#undef _WITH_ADD_TO_LOG
+#ifdef _WITH_STORAGE_ACCESS
+#include "storageaccess.h"
+#endif
+#ifdef _WITH_SHARING
+#include "shareutils.hpp"
+#endif
+#if defined(Q_OS_ANDROID)
+#include "applicationui.hpp"
+#endif
+
+#define _WITH_QDEBUG_REDIRECT
+#define _WITH_ADD_TO_LOG
 
 static qint64 g_iLastTimeStamp = 0;
 
 void AddToLog(const QString & msg)
 {
 #ifdef _WITH_ADD_TO_LOG
-    QString sFileName("/sdcard/Texte/mgv_qdebug.log");
+    QString sFileName("/sdcard/Texte/picoapptpl_qdebug.log");
     if( !QDir("/sdcard/Texte").exists() )
     {
-        sFileName = "mgv_qdebug.log";
+        sFileName = "D:\\Users\\micha\\Documents\\git_projects\\build-pico-Desktop_Qt_6_2_2_MinGW_64_bit-Debug\\picoapp_qdebug.log";
+        sFileName = "picoapptpl_qdebug.log";
     }
     QFile outFile(sFileName);
-    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+    bool ok = outFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Unbuffered);
     QTextStream ts(&outFile);
     qint64 now = QDateTime::currentMSecsSinceEpoch();
     qint64 delta = now - g_iLastTimeStamp;
     g_iLastTimeStamp = now;
     ts << delta << " ";
-    ts << msg << endl;
-    qDebug() << delta << " " << msg << endl;
+    ts << msg << Qt::endl;
+    //qDebug() << delta << " " << msg << Qt::endl;
+    outFile.close();
 #else
     Q_UNUSED(msg)
 #endif
 }
 
-#ifdef _WITH_QDEBUG_REDIRECT
+#include <QFile>
+#include <QDir>
+#include <QStandardPaths>
 #include <QDebug>
-void PrivateMessageHandler(QtMsgType type, const QMessageLogContext & context, const QString & msg)
-{
-    QString txt;
-    switch (type) {
-    case QtDebugMsg:
-        txt = QString("Debug: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
-        break;
-    case QtWarningMsg:
-        txt = QString("Warning: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
-        break;
-    case QtCriticalMsg:
-        txt = QString("Critical: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
-        break;
-    case QtFatalMsg:
-        txt = QString("Fatal: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
-        break;
-    case QtInfoMsg:
-        txt = QString("Info: %1 (%2:%3, %4)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
-        break;
+
+void copyResourceToFileSystem(const QString &resourcePath, const QString &targetFileName) {
+    QFile resourceFile(resourcePath); // z. B. ":/data/template.txt"
+    if (!resourceFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Konnte Resource nicht öffnen:" << resourcePath;
+        return;
     }
-    AddToLog(txt);
+
+    QString targetDir = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    QDir().mkpath(targetDir); // Verzeichnis erstellen, falls nicht vorhanden
+
+    QString targetPath = targetDir + QDir::separator() + targetFileName;
+    QFile targetFile(targetPath);
+    if (!targetFile.exists())
+    {
+        if (!targetFile.open(QIODevice::WriteOnly))
+        {
+            qWarning() << "Konnte Zieldatei nicht schreiben:" << targetPath;
+            return;
+        }
+        targetFile.write(resourceFile.readAll());
+        targetFile.close();
+    }
+    resourceFile.close();
+
+    qDebug() << "Datei erfolgreich kopiert nach:" << targetPath;
 }
-#endif
+
+void ensureDirectoryExists(const QString &path)
+{
+    QDir dir(path);
+    if (!dir.exists()) {
+        if (!dir.mkpath(".")) {
+            qWarning("Verzeichnis konnte nicht erstellt werden: %s", qUtf8Printable(path));
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
-// TODO DEBUGGING: AddToLog(QString("###> RESTART main()"));
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
-    //QQuickStyle::setStyle("Default");  // Material Universal Fusion Imagine /Light Dark System --> C:\Qt\5.14.2\msvc2017_64\qml\QtQuick\Controls.2
-
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     app.setOrganizationName("mneuroth.de");     // Computer/HKEY_CURRENT_USER/Software/mneuroth.de
     app.setOrganizationDomain("mneuroth.de");
     app.setApplicationName("MobileGnuplotViewerQuick");
-    app.setWindowIcon(QIcon(":/gnuplotviewer_flat_512x512.png"));
+    app.setWindowIcon(QIcon(":/qt/qml/GnuplotViewerQuick/images/gnuplotviewer_flat_512x512.png"));
 
     QSettings aSettings;
-    QString sStyle = aSettings.value("appStyle", "Default").toString();
-    if( sStyle == "Material Dark" )
-    {
-        sStyle = "Material";
-    }
-    QQuickStyle::setStyle(sStyle); // Default, Basic, Fusion, Imagine, macOS, Material, Universal, Windows
-
-// TODO DEBUGGING: AddToLog("Starting APP");
-
-#ifdef _WITH_QDEBUG_REDIRECT
-    qInstallMessageHandler(PrivateMessageHandler);
-#endif
-
+    QString sStyle = aSettings.value("appStyle", "Basic").toString();
+    sStyle = "Default";
 #if defined(Q_OS_ANDROID)
-    //AddToLog("Starting ApplicationUI");
-
-    ApplicationUI appui;
+    sStyle = "Basic";
 #endif
+    qDebug() << "STYLE: " << sStyle << Qt::endl;
+    QQuickStyle::setStyle(sStyle); // Basic, Fusion, Imagine, macOS, Material, Universal, Windows
+    //QStringList allStyles = QQuickStyle::availableStyles();
+    //qDebug() << allStyles << Qt::endl;
 
-    qmlRegisterType<GnuplotInvoker>("de.mneuroth.gnuplotinvoker", 1, 0, "GnuplotInvoker");
-    //qmlRegisterType<StorageAccess>("de.mneuroth.storageaccess", 1, 0, "StorageAccess");
+    QTranslator translator;
+    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    for (const QString &locale : uiLanguages) {
+        const QString baseName = "GnuplotViewerQuick_" + QLocale(locale).name();
+        if (translator.load(":/" + baseName)) {     // translations/
+            app.installTranslator(&translator);
+            break;
+        }
+    }
 
-    AndroidTasks aAndroidTasks;
-    aAndroidTasks.Init();
-
-    StorageAccess aStorageAccess;
-
-    QTranslator qtTranslator;
-    // WASM --> returns "c"
-    QString sLanguage = QLocale::system().name().mid(0,2).toLower();
-    // for testing languages:
-    //sLanguage = "nl";
-    //sLanguage = "fr";
-    //sLanguage = "es";
-    QString sResource = ":/translations/GnuplotViewerQuick_" + sLanguage + "_" + sLanguage.toUpper() + ".qm";
-    /*bool ok1 =*/ qtTranslator.load(sResource);
-//#if defined(Q_OS_ANDROID)
-//    // see: https://stackoverflow.com/questions/31725995/how-to-translate-default-qstr-fields-e-g-messagedialog-yes-no-buttons/55248632#55248632
-//    /*bool ok2 =*/ qtTranslator.load("assets:/files/qt_"+sLanguage.toLower()+".qm");
-//#else
-//    /*bool ok2 =*/ qtTranslator.load("qt_"+sLanguage.toLower()+".qm");
-//#endif
-    /*bool ok3 =*/ app.installTranslator(&qtTranslator);
-
+    QString targetDir = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    QDir().mkpath(targetDir); // Verzeichnis erstellen, falls nicht vorhanden
+    QString targetPath = targetDir + "/scripts";
+    ensureDirectoryExists(targetPath);
+    copyResourceToFileSystem(":files/scripts/default.gpt", "scripts/default.gpt");
+    copyResourceToFileSystem(":files/scripts/simple.gpt", "scripts/simple.gpt");
+    copyResourceToFileSystem(":files/scripts/splot.gpt", "scripts/splot.gpt");
+    copyResourceToFileSystem(":files/scripts/fitdata.gpt", "scripts/fitdata.gpt");
+    copyResourceToFileSystem(":files/scripts/multiplot.gpt", "scripts/multiplot.gpt");
+    copyResourceToFileSystem(":files/scripts/butterfly.gpt", "scripts/butterfly.gpt");
+    copyResourceToFileSystem(":files/scripts/data.dat", "scripts/data.dat");
 
     QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    const QUrl url(u"qrc:/qt/qml/GnuplotViewerQuick/main.qml"_qs);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
+#if defined(Q_OS_ANDROID)
+    ApplicationUI appui;
+#endif
+    StorageAccess aStorageAccess;
+    qmlRegisterType<GnuplotInvoker>("de.mneuroth.gnuplotinvoker", 1, 0, "GnuplotInvoker");
+
 #if defined(Q_OS_ANDROID)
     QObject::connect(&app, SIGNAL(applicationStateChanged(Qt::ApplicationState)), &appui, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
     QObject::connect(&app, SIGNAL(saveStateRequest(QSessionManager &)), &appui, SLOT(onSaveStateRequest(QSessionManager &)), Qt::DirectConnection);
@@ -165,8 +164,11 @@ int main(int argc, char *argv[])
 #else
     ApplicationData data(0, new ShareUtils(), aStorageAccess, engine);
 #endif
+
     engine.rootContext()->setContextProperty("applicationData", &data);
+#ifdef _WITH_STORAGE_ACCESS
     engine.rootContext()->setContextProperty("storageAccess", &aStorageAccess);
+#endif
 
     engine.load(url);
 
@@ -175,9 +177,5 @@ int main(int argc, char *argv[])
 
     data.initDone();
 
-    int result = app.exec();
-
-// TODO DEBUGGING: AddToLog(QString("###> SHUTDOWN result=%1").arg(result));
-
-    return result;
+    return app.exec();
 }

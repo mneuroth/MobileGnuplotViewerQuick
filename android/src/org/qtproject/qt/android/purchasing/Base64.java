@@ -16,19 +16,6 @@
 
 package org.qtproject.qt.android.purchasing;
 
-// used from https://github.com/google/play-licensing/blob/master/lvl_library/src/main/java/com/google/android/vending/licensing/util/Base64DecoderException.java
-class Base64DecoderException extends Exception {
-  public Base64DecoderException() {
-    super();
-  }
-
-  public Base64DecoderException(String s) {
-    super(s);
-  }
-
-  private static final long serialVersionUID = 1L;
-}
-
 // This code was converted from code at http://iharder.sourceforge.net/base64/
 // Lots of extraneous features were removed.
 /* The original code said:

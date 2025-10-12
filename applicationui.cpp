@@ -11,12 +11,11 @@
 #include <QFile>
 #include <QDir>
 
-//#include <QDebug>
-
 #if defined(Q_OS_ANDROID)
 #if QT_VERSION < 0x060000
 #include <QtAndroid>
 #else
+//#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
 #endif
 #endif
 
@@ -54,7 +53,11 @@ const static int SEND_FILE_DOCX = 13;
 
 ApplicationUI::ApplicationUI(QObject *parent)
     : QObject(parent),
+#ifdef _WITH_SHARING
       mShareUtils(new ShareUtils(this)),
+#else
+      mShareUtils(0),
+#endif
       mPendingIntentsChecked(false)
 {
     // this is a demo application where we deal with an Image and a PDF as example
@@ -71,30 +74,21 @@ ApplicationUI::~ApplicationUI()
     delete mShareUtils;
 }
 
-/*
-void ApplicationUI::addContextProperty(QQmlContext *context)
-{
-    context->setContextProperty("shareUtils", mShareUtils);
-}
-*/
 void ApplicationUI::copyAssetsToAPPData() {
     // Android: HomeLocation works, iOS: not writable - so I'm using always QStandardPaths::AppDataLocation
     // Android: AppDataLocation works out of the box, iOS you must create the DIR first !!
     QString appDataRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
     // QString appDataRoot = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).value(0);
-    //qDebug() << "QStandardPaths::AppDataLocation: " << appDataRoot;
 #if defined (Q_OS_IOS)
     if (!QDir(appDataRoot).exists()) {
         if (QDir("").mkpath(appDataRoot)) {
-            //qDebug() << "Created app data directory. " << appDataRoot;
         } else {
-            //qWarning() << "Failed to create app data directory. " << appDataRoot;
             return;
         }
     }
 #endif
     // as next we create a /my_share_files subdirectory to store our example files from assets
-    mAppDataFilesPath = appDataRoot.append("/gnuplotviewer_shared_files");
+    mAppDataFilesPath = appDataRoot.append("/picoapp_shared_files");
     if (!QDir(mAppDataFilesPath).exists()) {
         if (QDir("").mkpath(mAppDataFilesPath)) {
             //qDebug() << "Created app data /files directory. " << mAppDataFilesPath;
@@ -103,73 +97,27 @@ void ApplicationUI::copyAssetsToAPPData() {
             return;
         }
     }
-#ifdef gulp
-    // now copy files from assets to APP DATA /my_share_files
-    // if not existing
-    // in real-world app you would download files from a server or so
-    if(!QFile::exists(mAppDataFilesPath+IMAGE_DATA_FILE)) {
-        bool copied = copyAssetFile(IMAGE_ASSETS_FILE_PATH, mAppDataFilesPath+IMAGE_DATA_FILE);
-        if(!copied) {
-            return;
-        }
-        //qDebug() << "copied the Image (PNG) from Assets to APP DATA";
-    }
-    if(!QFile::exists(mAppDataFilesPath+JPEG_DATA_FILE)) {
-        bool copied = copyAssetFile(JPEG_ASSETS_FILE_PATH, mAppDataFilesPath+JPEG_DATA_FILE);
-        if(!copied) {
-            return;
-        }
-        //qDebug() << "copied the Image (JPEG) from Assets to APP DATA";
-    }
-    if(!QFile::exists(mAppDataFilesPath+DOCX_DATA_FILE)) {
-        bool copied = copyAssetFile(DOCX_ASSETS_FILE_PATH, mAppDataFilesPath+DOCX_DATA_FILE);
-        if(!copied) {
-            return;
-        }
-        //qDebug() << "copied the Document (DOCX) from Assets to APP DATA";
-    }
-    if(!QFile::exists(mAppDataFilesPath+PDF_DATA_FILE)) {
-        bool copied = copyAssetFile(PDF_ASSETS_FILE_PATH, mAppDataFilesPath+PDF_DATA_FILE);
-        if(!copied) {
-            return;
-        }
-        //qDebug() << "copied the PDF from Assets to APP DATA";
-    }
-    // to provide files to other apps we're using a specific folder
-    // version 1 of this example used QStandardPaths::DocumentsLocation on Android and iOS
-    // iOS: QStandardPaths::DocumentsLocation points to: <APPROOT>/Documents - so it's inside the sandbox
-    // Android: QStandardPaths::DocumentsLocation points to: <USER>/Documents outside the app sandbox
-    // this worked while using FileUrl (SDK 23)
-    // Android > SDK 23 needs a FileProvider providing a contentUrl
-    // FileProvider uses Paths (see android/res/xml/filepaths.xml) stored at QStandardPaths::AppDataLocation
-#endif
 
     // now create the working dir if not exists
 #if defined (Q_OS_IOS)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).value(0);
-    //qDebug() << "iOS: QStandardPaths::DocumentsLocation: " << docLocationRoot;
 #endif
 #if defined(Q_OS_ANDROID)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
-    //qDebug() << "Android: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
 #if defined(Q_OS_WIN)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
-    //qDebug() << "Windows: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
-    //qDebug() << "Windows: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
-    //qDebug() << "Windows: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
 #if defined(Q_OS_WASM)
     QString docLocationRoot = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).value(0);
-    //qDebug() << "Windows: QStandardPaths::AppDataLocation: " << docLocationRoot;
 #endif
-    mDocumentsWorkPath = docLocationRoot.append("/gnuplotviewer_shared_files");
+    mDocumentsWorkPath = docLocationRoot.append("/picoapp_shared_files");
     if (!QDir(mDocumentsWorkPath).exists()) {
         if (QDir("").mkpath(mDocumentsWorkPath)) {
             //qDebug() << "Created Documents Location work directory. " << mDocumentsWorkPath;
@@ -178,7 +126,6 @@ void ApplicationUI::copyAssetsToAPPData() {
             return;
         }
     }
-    //qDebug() << "Documents Location work directory exists: " << mDocumentsWorkPath;
 }
 
 bool ApplicationUI::copyAssetFile(const QString sourceFilePath, const QString destinationFilePath) {
@@ -186,19 +133,16 @@ bool ApplicationUI::copyAssetFile(const QString sourceFilePath, const QString de
     {
         bool removed = QFile::remove(destinationFilePath);
         if(!removed) {
-            //qWarning() << "Failed to remove " << destinationFilePath;
             return false;
         }
     }
     bool copied = QFile::copy(sourceFilePath, destinationFilePath);
     if(!copied) {
-        //qWarning() << "Failed to copy " << sourceFilePath << " to " << destinationFilePath;
         return false;
     }
     // because files are copied from assets it's a good idea to set r/w permissions
     bool permissionsSet = QFile(destinationFilePath).setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
     if(!permissionsSet) {
-        //qDebug() << "cannot set Permissions to read / write settings for " << destinationFilePath;
         return false;
     }
     return true;
@@ -241,12 +185,6 @@ QString ApplicationUI::filePathDocumentsLocation(const int requestId) {
         break;
     }
 //    if(requestId == SEND_FILE_IMAGE || requestId == VIEW_FILE_IMAGE || requestId == EDIT_FILE_IMAGE || requestId == NO_RESPONSE_IMAGE) {
-//        sourceFilePath = mAppDataFilesPath+IMAGE_DATA_FILE;
-//        destinationFilePath = mDocumentsWorkPath+IMAGE_DATA_FILE;
-//    } else {
-//        sourceFilePath = mAppDataFilesPath+PDF_DATA_FILE;
-//        destinationFilePath = mDocumentsWorkPath+PDF_DATA_FILE;
-//    }
     if (QFile::exists(destinationFilePath))
     {
         bool removed = QFile::remove(destinationFilePath);
@@ -257,7 +195,6 @@ QString ApplicationUI::filePathDocumentsLocation(const int requestId) {
     }
     bool copied = QFile::copy(sourceFilePath, destinationFilePath);
     if(!copied) {
-        //qWarning() << "Failed to copy " << sourceFilePath << " to " << destinationFilePath;
 //#if defined(Q_OS_ANDROID)
 //        emit noDocumentsWorkLocation();
 //#endif
@@ -290,22 +227,14 @@ bool ApplicationUI::deleteFromDocumentsLocation(const int requestId) {
         filePath = mDocumentsWorkPath+PDF_DATA_FILE;
         break;
     }
-//    if(requestId == SEND_FILE_IMAGE || requestId == VIEW_FILE_IMAGE || requestId == EDIT_FILE_IMAGE || requestId == NO_RESPONSE_IMAGE) {
-//        filePath = mDocumentsWorkPath+IMAGE_DATA_FILE;
-//    } else {
-//        filePath = mDocumentsWorkPath+PDF_DATA_FILE;
-//    }
     if (QFile::exists(filePath)) {
         bool removed = QFile::remove(filePath);
         if(!removed) {
-            //qWarning() << "Failed to remove " << filePath;
             return false;
         }
     } else {
-        //qWarning() << "No file to delete found: " << filePath;
         return false;
     }
-    //qDebug() << "File removed from Documents Location: " << filePath;
     return true;
 }
 
@@ -339,13 +268,6 @@ bool ApplicationUI::updateFileFromDocumentsLocation(const int requestId) {
         appDataFilePath = mAppDataFilesPath+PDF_DATA_FILE;
         break;
     }
-//    if(requestId == SEND_FILE_IMAGE || requestId == VIEW_FILE_IMAGE || requestId == EDIT_FILE_IMAGE || requestId == NO_RESPONSE_IMAGE) {
-//        docLocationFilePath = mDocumentsWorkPath+IMAGE_DATA_FILE;
-//        appDataFilePath = mAppDataFilesPath+IMAGE_DATA_FILE;
-//    } else {
-//        docLocationFilePath = mDocumentsWorkPath+PDF_DATA_FILE;
-//        appDataFilePath = mAppDataFilesPath+PDF_DATA_FILE;
-//    }
     if (QFile::exists(docLocationFilePath)) {
         // delete appDataFilePath should exist
         if(QFile::exists(appDataFilePath)) {
@@ -360,10 +282,8 @@ bool ApplicationUI::updateFileFromDocumentsLocation(const int requestId) {
         // now copy the file from doc location to app data location
         bool copied = QFile::copy(docLocationFilePath, appDataFilePath);
         if(!copied) {
-            //qWarning() << "Failed to copy " << docLocationFilePath << " to " << appDataFilePath;
             return false;
         } else {
-            //qDebug() << "successfully replaced " << appDataFilePath << " from " << docLocationFilePath;
             // now delete from Documents location
             bool removed = QFile::remove(docLocationFilePath);
             if(!removed) {
@@ -374,7 +294,6 @@ bool ApplicationUI::updateFileFromDocumentsLocation(const int requestId) {
             }
         }
     } else {
-        //qWarning() << "No file to update from found: " << docLocationFilePath;
         return false;
     }
     return true;
@@ -383,39 +302,32 @@ bool ApplicationUI::updateFileFromDocumentsLocation(const int requestId) {
 #if defined(Q_OS_ANDROID)
 void ApplicationUI::onApplicationStateChanged(Qt::ApplicationState applicationState)
 {
-    //ui->txtErrors->appendPlainText(QString("App state changed state=%1).arg(applicationState));
-//AddToLog(QString("+++> onApplicationStateChanged %1").arg(applicationState));
-
-    //qDebug() << "S T A T E changed into: " << applicationState;
     if(applicationState == Qt::ApplicationState::ApplicationSuspended) {
         // nothing to do
 
         // 31.5.2020 --> always exit application in suspend mode --> fixes problem whith sharing data from other application if this application is still running !
         //QCoreApplication::quit();
         //emit requestApplicationQuit();
-        // ==> nicht gut, verhindert nadch O Button ein erneutes startn !!!
+        // ==> nicht gut, verhindert nach O Button ein erneutes starten !!!
 
         return;
     }
     if(applicationState == Qt::ApplicationState::ApplicationActive) {
-//AddToLog(QString("+++> Try check intent"));
         // if App was launched from VIEW or SEND Intent
         // there's a race collision: the event will be lost,
         // because App and UI wasn't completely initialized
         // workaround: QShareActivity remembers that an Intent is pending
-        //qDebug() << "==> check pending intents " << mPendingIntentsChecked;
         if(!mPendingIntentsChecked) {
-//AddToLog(QString("+++> checking"));
             mPendingIntentsChecked = true;
+#ifdef _WITH_SHARING
             mShareUtils->checkPendingIntents(mAppDataFilesPath);
+#endif
         }
-//AddToLog(QString("+++> done."));
     }
 }
 
 void ApplicationUI::onSaveStateRequest(QSessionManager & sessionManager)
 {
-//AddToLog(QString("+++> onSaveStateRequest() %1").arg(sessionManager.restartHint()));
 }
 
 // we don't need permissions if we only share files to other apps using FileProvider
@@ -427,15 +339,25 @@ bool ApplicationUI::checkPermission() {
         QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE" );
         r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
         if(r == QtAndroid::PermissionResult::Denied) {
-            //qDebug() << "Permission denied";
             emit noDocumentsWorkLocation();
             return false;
         }
    }
 #else
-   // TODO qt6 !
+#ifdef _WITH_STORAGE_ACCESS
+    QFuture<QtAndroidPrivate::PermissionResult> result = QtAndroidPrivate::checkPermission(QtAndroidPrivate::PermissionType::Storage);
+    if( result.result() == QtAndroidPrivate::PermissionResult::Denied )
+    {
+        QFuture<QtAndroidPrivate::PermissionResult> result2 = QtAndroidPrivate::requestPermission(QtAndroidPrivate::PermissionType::Storage);
+        if( result2.result() == QtAndroidPrivate::PermissionResult::Denied )
+        {
+            //qDebug() << "Permission denied";
+            emit noDocumentsWorkLocation();
+            return false;
+        }
+    }
 #endif
-   //qDebug() << "YEP: Permission OK";
+#endif
    return true;
 }
 #endif

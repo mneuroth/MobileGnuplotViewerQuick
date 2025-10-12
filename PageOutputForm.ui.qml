@@ -7,9 +7,9 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: root
@@ -26,6 +26,8 @@ Page {
     property alias txtOutput: txtOutput
 
     property string fontName: "Courier"
+
+    property int buttonWidth: 100
 
     Label {
         id: lblOutput
@@ -65,7 +67,6 @@ Page {
 
         TextEdit/*Area*/ {
             id: txtOutput
-            color: settings.isDarkStyle ? "white" : "black"
             text: "   "
             focus: true
             onCursorRectangleChanged: scrollView.ensureVisible(cursorRectangle)
@@ -108,6 +109,7 @@ Page {
             text: qsTr("Input")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -115,6 +117,7 @@ Page {
             text: qsTr("Help")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -122,6 +125,7 @@ Page {
             text: qsTr("Graphics")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
     }
 }

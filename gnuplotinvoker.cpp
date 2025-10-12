@@ -204,6 +204,8 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     m_iInvokeCount++;
 
 #ifdef _USE_BUILTIN_GNUPLOT
+    try
+    {
     // see: http://gnuplot.respawned.com/
     // see: https://github.com/YasasviPeruvemba/gnuplot.js
     // see: https://www.it.iitb.ac.in/frg/wiki/images/c/ca/P1ProjectReport.pdf
@@ -261,6 +263,15 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
     QFile::remove(TEMP_GNUPLOT_SCRIPT);
     QFile::remove(TEMP_STDERR);
     QFile::remove(TEMP_STDOUT);
+    }
+    catch (const std::exception& exc)
+    {
+        sltErrorText(QString(tr("Exception in executing built-in gnuplot -> %1\n")).arg(exc.what()));
+    }
+    catch (...)
+    {
+        sltErrorText(QString(tr("Unknown exception in executing built-in gnuplot!\n")));
+    }
 #else
     bool useVersionBeta = getUseBeta();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -271,17 +282,54 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
 #if defined(Q_OS_ANDROID)
     // ggf. GNUTERM setzen...
     // start gnuplot process
+//    mode_t currentMask = umask(0777);
+//qDebug() << "UMASK=" << currentMask << endl;
+//    currentMask = umask(0777);
+//qDebug() << "UMASK (2) =" << currentMask << endl;
+
     QString sCpuArchitecture(QSysInfo::buildCpuArchitecture());
     QString sGnuplotFile = QString(FILES_DIR)+sCpuArchitecture+QDir::separator()+QString(useVersionBeta ? GNUPLOT_BETA_EXE : GNUPLOT_EXE);
+
+//    sGnuplotFile = useVersionBeta ?
+//                        "/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libgnuplot_android_beta.so" :
+//                        "/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libgnuplot_android.so";
+//    qDebug() << "run permissions: " << QFile::permissions(sGnuplotFile) << endl;
+//    qDebug() << "existing gnuplot " << QFile::exists(sGnuplotFile) << endl;
+//    QFileInfo aDir("/data/data/de.mneuroth.gnuplotviewerquick/files/arm64");
+//    qDebug() << "dir = " << aDir.absoluteFilePath() << endl;
+//    qDebug() << "DIR access arm64: dir=" << aDir.isDir() << " exec=" << aDir.isExecutable() << " read=" << aDir.isReadable() << " write=" << aDir.isWritable() << endl;
+
     m_aGnuplotProcess.start(sGnuplotFile);
+
+//    QString sCmd = sGnuplotFile;
+//    sCmd += " -e \"set term dumb; plot x\" >/data/data/de.mneuroth.gnuplotviewerquick/files/scripts/out.txt";
+//qDebug() << "RUN Gnuplot cmd=" << sCmd << endl;
+//    auto ret = system(sCmd.toStdString().c_str());
+//qDebug() << "result = " << ret << endl;
+//
+//    QLibrary aTestLib("/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libgnuplot_android.so");
+//    bool bLoadOk = aTestLib.load();
+//    qDebug() << "try load gnuplot as so: " << bLoadOk << " error=" << aTestLib.errorString() << endl;
+//    qDebug() << "load gnuplot bin?" << QLibrary::isLibrary("/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libgnuplot_android.so") << endl;
+//
+//    QLibrary aTestLib2("/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libc++_shared.so");
+//    bool bLoadOk2 = aTestLib2.load();
+//    qDebug() << "try load c++lib as so: " << bLoadOk2 << " error=" << aTestLib2.errorString() << endl;
+//    qDebug() << "load c++lib bin?" << QLibrary::isLibrary("/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libc++_shared.so") << endl;
+//
+//    QLibrary aTestLib3("/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libc++_shared.so");
+//    bool bLoadOk3 = aTestLib3.load();
+//    qDebug() << "try load dummy as so: " << bLoadOk3 << " error=" << aTestLib3.errorString() << endl;
+//    qDebug() << "load dummy bin?" << QLibrary::isLibrary("/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libdummy.so") << endl;
+
 #elif defined(Q_OS_WIN32)
     if( useVersionBeta )
     {
-        m_aGnuplotProcess.start("d:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
+        m_aGnuplotProcess.start("D:\\Users\\micha\\Downloads\\gnuplot52\\gnuplot\\bin\\gnuplot.exe");
     }
     else
     {
-        m_aGnuplotProcess.start("d:\\Users\\micha\\Downloads\\gp504-win32-mingw\\gnuplot\\bin\\gnuplot.exe");
+        m_aGnuplotProcess.start("D:\\Users\\micha\\Downloads\\gp504-win32-mingw\\gnuplot\\bin\\gnuplot.exe");
     }
     //m_aGnuplotProcess.start("C:\\usr\\neurothmi\\install\\gp460win32\\gnuplot\\bin\\gnuplot.exe");
 #elif defined(Q_OS_MACOS)
@@ -299,7 +347,7 @@ void GnuplotInvoker::runGnuplot(const QString & sScript)
         return;
     }
 
-    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolutionX).arg(m_iResolutionY).arg(m_iFontSize)     // to change the background color add:  background rgb \"white\"
+    QString sInput = QString("set term svg size %1,%2 dynamic font \"Mono,%3\"\n").arg(m_iResolutionX).arg(m_iResolutionY).arg(m_iFontSize)
                         + sScript
                         + QString("\nexit\n");
 

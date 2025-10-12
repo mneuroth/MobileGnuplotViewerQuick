@@ -1,16 +1,7 @@
-/***************************************************************************
- *
- * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
- *
- * Copyright (C) 2020 by Michael Neuroth
- *
- * License: GPL
- *
- ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.1
-import QtQuick.Layouts 1.3
-import Qt.labs.folderlistmodel 2.1
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt.labs.folderlistmodel
 
 Page {
     id: root
@@ -25,6 +16,7 @@ Page {
     property alias btnStorage: btnStorage
     property alias btnSDCard: btnSDCard
     property alias btnHome: btnHome
+    property alias btnMySd: btnMySd
     property alias btnUp: btnUp
     property alias rbnName: rbnName
     property alias rbnSize: rbnSize
@@ -37,7 +29,7 @@ Page {
     property string currentDirectory: "."
     property string currentFileName: ""
     property bool bShowFiles: true
-    property bool bIsAdminModus: applicationData!==null ? applicationData.isAdmin : false
+    property bool bIsAdminModus: false
     property int iSortField: FolderListModel.Unsorted
     property bool isReverseOrder: false
 
@@ -69,6 +61,17 @@ Page {
         Button {
             id: btnHome
             text: qsTr("⌂")
+            Layout.rightMargin: 0
+            Layout.leftMargin: 0
+            Layout.bottomMargin: 0
+            Layout.topMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+
+        Button {
+            id: btnMySd
+            text: qsTr("MySD")
             Layout.rightMargin: 0
             Layout.leftMargin: 0
             Layout.bottomMargin: 0
@@ -117,7 +120,7 @@ Page {
         id: listView
         orientation: ListView.Vertical
         clip: true
-        //keyNavigationEnabled: true
+        keyNavigationEnabled: true
         anchors.bottom: chbExtendedInfos.top
         anchors.bottomMargin: 10
         anchors.left: parent.left
@@ -210,6 +213,7 @@ Page {
         }
     }
 //    }
+
 
     Label {
         id: lblMFDInput

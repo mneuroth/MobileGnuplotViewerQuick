@@ -7,9 +7,9 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: page
@@ -25,6 +25,8 @@ Page {
     anchors.fill: parent
     title: qsTr("Gnuplot Graphics")
 
+    property int buttonWidth: 100
+
     Image {
         id: image
         x: 5
@@ -33,7 +35,7 @@ Page {
         height: parent.height - 15 - gridButtons.height - lblShowGraphicsInfo.height
         objectName: "imageArea"
         // TODO: see: https://stackoverflow.com/questions/51059963/qml-how-to-load-svg-dom-into-an-image
-        source: "/empty.svg"
+        source: "files/empty.svg"
         fillMode: Image.PreserveAspectFit
         // TODO: https://forum.qt.io/topic/112192/zooming-an-svg-image
     }
@@ -96,6 +98,7 @@ Page {
             text: qsTr("Input")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -103,6 +106,7 @@ Page {
             text: qsTr("Help")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -110,6 +114,7 @@ Page {
             text: qsTr("Output")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
     }
 }

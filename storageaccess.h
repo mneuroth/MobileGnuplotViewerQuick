@@ -1,7 +1,11 @@
 #ifndef STORAGEACCESS_H
 #define STORAGEACCESS_H
 
+#include "applicationdata.h"
+
 #include <QObject>
+
+#ifdef _WITH_STORAGE_ACCESS
 
 class StorageAccess : public QObject
 {
@@ -37,5 +41,7 @@ public:
 private:
     static StorageAccess * m_pInstance;
 };
+
+#endif
 
 #endif // STORAGEACCESS_H

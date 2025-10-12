@@ -22,7 +22,10 @@
 #define LAST_HELP_INPUT             "LAST_HELP_INPUT"
 #define LAST_RELEASE_DATE           "LAST_RELEASE_DATE"
 #if defined(Q_OS_ANDROID)
-#define DEFAULT_DIRECTORY           "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts"
+//#define DEFAULT_DIRECTORY           "/data/data/de.mneuroth.picotemplateappqt6/files/scripts"       // TODO PATCH
+//#define FILES_DIR                   "/data/data/de.mneuroth.picotemplateappqt6/files/"
+//#define SCRIPTS_DIR                 "/data/data/de.mneuroth.picotemplateappqt6/files/scripts/"
+#define DEFAULT_DIRECTORY           "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts"       // TODO PATCH
 #define FILES_DIR                   "/data/data/de.mneuroth.gnuplotviewerquick/files/"
 #define SCRIPTS_DIR                 "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts/"
 #define SDCARD_DIRECTORY            "/sdcard"

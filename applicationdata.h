@@ -1,21 +1,24 @@
-/***************************************************************************
- *
- * MobileGnuplotViewer(Quick) - a simple frontend for gnuplot
- *
- * Copyright (C) 2020 by Michael Neuroth
- *
- * License: GPL
- *
- ***************************************************************************/
-
 #ifndef APPLICATIONDATA_H
 #define APPLICATIONDATA_H
+
+#undef _WITH_SHARING
+#undef _WITH_STORAGE_ACCESS
 
 #include <QObject>
 #include <QQmlApplicationEngine>
 
+#include "gnuplotsyntaxhighlighter.h"
+
+#ifdef _WITH_SHARING
 class ShareUtils;
+#else
+class ShareUtils {};
+#endif
+#ifdef _WITH_STORAGE_ACCESS
 class StorageAccess;
+#else
+class StorageAccess {};
+#endif
 
 class QQuickTextDocument;
 
@@ -24,6 +27,41 @@ class GnuplotSyntaxHighlighter;
 void AddToLog(const QString & msg);
 
 #define READ_ERROR_OUTPUT "<#READ_ERROR#>"
+
+#if defined(Q_OS_ANDROID)
+#include "androidtasks.h"
+#define DEFAULT_DIRECTORY           "/data/data/de.mneuroth.gnuplotviewerquick/files"
+#define FILES_DIR                   "/data/data/de.mneuroth.gnuplotviewerquick/files"
+#define SCRIPTS_DIR                 "/data/data/de.mneuroth.gnuplotviewerquick/files/scripts"
+#define SDCARD_DIRECTORY            "/sdcard"
+#elif defined(Q_OS_WASM)
+#define DEFAULT_DIRECTORY           "/"
+#define FILES_DIR                   "/"
+#define SCRIPTS_DIR                 "/"
+#define SDCARD_DIRECTORY            "/"
+#elif defined(Q_OS_WIN)
+#define DEFAULT_DIRECTORY           "D:/Users/micha/Documents/git_projects/GnuplotViewerQuickQt6/files" //"C:/tmp"
+#define SDCARD_DIRECTORY            "C:/tmp"
+#define FILES_DIR                   "D:/Users/micha/Documents/git_projects/GnuplotViewerQuickQt6/files" //"C:/tmp"
+#define SCRIPTS_DIR                 "D:/Users/micha/Documents/git_projects/GnuplotViewerQuickQt6/files/scripts" //"C:/tmp/scripts"
+#elif defined(Q_OS_LINUX)
+#define DEFAULT_DIRECTORY           "./scripts"
+#define FILES_DIR                   "."
+#define SCRIPTS_DIR                 "./scripts/"
+#define SDCARD_DIRECTORY            "/sdcard"
+#elif defined(Q_OS_MACOS)
+#define DEFAULT_DIRECTORY           "./scripts"
+#define FILES_DIR                   "."
+#define SCRIPTS_DIR                 "./scripts/"
+#define SDCARD_DIRECTORY            "/sdcard"
+#elif defined(Q_OS_IOS)
+#define DEFAULT_DIRECTORY           "./scripts"
+#define FILES_DIR                   "."
+#define SCRIPTS_DIR                 "./scripts/"
+#define SDCARD_DIRECTORY            "/sdcard"
+#else
+#error unsupported platform !
+#endif
 
 // **************************************************************************
 
@@ -61,10 +99,11 @@ template <class T> T childObject(QQmlApplicationEngine& engine,
 class ApplicationData : public QObject
 {
     Q_OBJECT
+
     Q_PROPERTY(QString filesPath READ getFilesPath)
     Q_PROPERTY(QString homePath READ getHomePath)
+    Q_PROPERTY(QString scriptsPath READ getScriptsPath)
     Q_PROPERTY(QString sdCardPath READ getSDCardPath)
-    Q_PROPERTY(QString defaultScript READ getDefaultScript)
     Q_PROPERTY(QString appInfos READ getAppInfos)
     Q_PROPERTY(QString errorContent READ getErrorContent)
     Q_PROPERTY(bool isAppStoreSupported READ isAppStoreSupported NOTIFY isAppStoreSupportedChanged)
@@ -72,6 +111,7 @@ class ApplicationData : public QObject
     Q_PROPERTY(bool isAndroid READ isAndroid NOTIFY isAndroidChanged)
     Q_PROPERTY(bool isWASM READ isWASM NOTIFY isWASMChanged)
     Q_PROPERTY(bool isMobileGnuplotViewerInstalled READ isMobileGnuplotViewerInstalled NOTIFY isMobileGnuplotViewerInstalledChanged)
+    Q_PROPERTY(bool isMobileUI READ isMobileUI WRITE setMobileUI NOTIFY isMobileUIChanged)
     Q_PROPERTY(bool isUseLocalFileDialog READ isUseLocalFileDialog WRITE setUseLocalFileDialog NOTIFY isUseLocalFileDialogChanged)
     Q_PROPERTY(bool isAdmin READ isAdmin WRITE setAdmin NOTIFY isAdminChanged)
 
@@ -81,7 +121,7 @@ public:
 
     Q_INVOKABLE QString getAppInfos() const;
 
-    Q_INVOKABLE void initDone();       
+    Q_INVOKABLE void initDone();
 
     Q_INVOKABLE QString getOnlyFileName(const QString & url) const;
     Q_INVOKABLE QString getNormalizedPath(const QString & path) const;
@@ -93,7 +133,7 @@ public:
     Q_INVOKABLE bool deleteFile(const QString & fileName);
 
     Q_INVOKABLE bool hasAccessToSDCardPath() const;
-    Q_INVOKABLE bool grantAccessToSDCardPath(QObject * parent);
+    Q_INVOKABLE bool grantAccessToSDCardPath(/*QObject * parent*/);
 
     Q_INVOKABLE bool shareSimpleText(const QString & text);
     Q_INVOKABLE bool shareText(const QString & tempFileName, const QString & text);
@@ -119,16 +159,12 @@ public:
     Q_INVOKABLE void saveFileContentAsync(const QByteArray &fileContent, const QString &fileNameHint = QString());
 
     Q_INVOKABLE QStringList getSDCardPaths() const;
-    QString getSDCardPath() const;
-    QString getFilesPath() const;
-    QString getHomePath() const;
+    Q_INVOKABLE QString getSDCardPath() const;
+    Q_INVOKABLE QString getFilesPath() const;
+    Q_INVOKABLE QString getHomePath() const;
+    Q_INVOKABLE QString getScriptsPath() const;
 
-    QString getDefaultScript() const;
     QString getErrorContent() const;
-
-    void setScriptText(const QString & sScript);
-    void setScriptName(const QString & sName);
-    void setOutputText(const QString & sText);
 
     void setTextDocument(QQuickTextDocument * pDoc);
 
@@ -142,6 +178,8 @@ public:
 
     bool isMobileGnuplotViewerInstalled() const;
 
+    bool isMobileUI() const;
+    void setMobileUI(bool value);
     bool isUseLocalFileDialog() const;
     void setUseLocalFileDialog(bool value);
     bool isAdmin() const;
@@ -150,17 +188,19 @@ public:
 signals:
     // for testing only
     void sendDummyData(const QString & txt, int value);
+    void showErrorMsg(const QString & txt);
 
     void isAppStoreSupportedChanged();
     void isShareSupportedChanged();
     void isAndroidChanged();
     void isWASMChanged();
     void isMobileGnuplotViewerInstalledChanged();
+    void isMobileUIChanged();
     void isUseLocalFileDialogChanged();
     void isAdminChanged();
 
     void receiveOpenFileContent(const QString & fileName, const QString & fileContent);
-    void showErrorMsg(const QString & message) const;
+    void sendErrorText(const QString & msg) const;
 
 public slots:
     void sltFileUrlReceived(const QString & sUrl);
@@ -170,8 +210,6 @@ public slots:
     void sltShareEditDone(int requestCode, const QString & urlTxt);
     void sltShareFinished(int requestCode);
     void sltShareNoAppAvailable(int requestCode);
-
-    void sltErrorText(const QString & msg);
 
 #if defined(Q_OS_ANDROID)
      void sltApplicationStateChanged(Qt::ApplicationState applicationState);
@@ -198,6 +236,7 @@ private:
 
     bool                        m_bUseLocalFileDialog;
     bool                        m_bIsAdmin;
+    bool                        m_bIsMobileUI;
 };
 
 #endif // APPLICATIONDATA_H

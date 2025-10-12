@@ -7,8 +7,8 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.1
+import QtQuick
+import QtQuick.Controls
 
 SupportDialogForm {
     id: supportDialog
@@ -17,21 +17,21 @@ SupportDialogForm {
     btnSupportLevel0 {
         enabled: settings.supportLevel < 0
         onClicked: {
-            supportLevel0.purchase()
+            /*storeLoader.item.*/supportLevel0.purchase()
         }
     }
 
     btnSupportLevel1 {
         enabled: settings.supportLevel < 1
         onClicked: {
-            supportLevel1.purchase()
+            /*storeLoader.item.*/supportLevel1.purchase()
         }
     }
 
     btnSupportLevel2 {
         enabled: settings.supportLevel < 2
         onClicked: {
-            supportLevel2.purchase()
+            /*storeLoader.item.*/supportLevel2.purchase()
         }
     }
 
@@ -50,11 +50,12 @@ SupportDialogForm {
     }
 
     onVisibleChanged: {
-        //var store = store !== null ? store.item : null
+        //var store = storeLoader !== null ? storeLoader.item : null
+        var store = myStoreId
         if(store!==null) {
-            lblLevel0.text = qsTr("Price: ") + supportLevel0.price
-            lblLevel1.text = qsTr("Price: ") + supportLevel1.price
-            lblLevel2.text = qsTr("Price: ") + supportLevel2.price
+            lblLevel0.text = qsTr("Price: ") + /*store.*/supportLevel0.price
+            lblLevel1.text = qsTr("Price: ") + /*store.*/supportLevel1.price
+            lblLevel2.text = qsTr("Price: ") + /*store.*/supportLevel2.price
             //lblLevel0.text = qsTr("Status=") + store.supportLevel0.status + qsTr(" price: ") + store.supportLevel0.price
             //lblLevel1.text = qsTr("Status=") + store.supportLevel1.status + qsTr(" price: ") + store.supportLevel1.price
             //lblLevel2.text = qsTr("Status=") + store.supportLevel2.status + qsTr(" price: ") + store.supportLevel2.price

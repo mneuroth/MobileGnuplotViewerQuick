@@ -8,18 +8,18 @@ on:
 
 jobs:
             
-  macos_5_15_2_build:
+  macos_6_9_3_build:
 
     runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
-    - uses: jurplel/install-qt-action@v2
+    - uses: jurplel/install-qt-action@v4
       with:
         # Directory to install Qt
         dir: # optional
         # Version of Qt to install
-        version: '5.15.2'
+        version: '6.9.3'
         # Host platform
         host: 'mac'
         # Target platform for build
@@ -31,7 +31,7 @@ jobs:
         # Additional Qt modules to install
         modules: #'qtscript qtscripttools'
         # Force a Qt mirror in case the default is not working
-        mirror: # optional
+        #mirror: # optional
         # Whether or not to actually download Qt
         cached: # optional, default is false
         # Version of aqtinstall to use in case of issues
@@ -42,13 +42,17 @@ jobs:
         extra: # optional
     - name: Install Qt and compile
       run: |
-        which qmake
-        qmake -r GnuplotViewerQuick.pro
+        mkdir build
+        ls -lrt
+        ls -lrt ./build
+        cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Release
+        ls -lrt
+        cd ./build
         ls -lrt
         make
         ls -lrt
 
-        which macdeployqt
-        macdeployqt GnuplotViewerQuick.app -dmg -qmldir=. -verbose=2
-        ls -lrt        
+        #which macdeployqt
+        #macdeployqt GnuplotViewerQuickQt6.app -dmg -qmldir=. -verbose=2
+        #ls -lrt        
 

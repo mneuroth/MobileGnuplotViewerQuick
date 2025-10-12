@@ -19,7 +19,7 @@
 #else
 // see: https://www.qt.io/blog/qt-extras-modules-in-qt-6
 #include <QCoreApplication>
-#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
+//#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
 #endif
 #include <QMessageBox>
 #endif
@@ -31,7 +31,7 @@
 QDateTime g_aCurrentReleaseDate( QDate(2021,1,11), QTime(7,00,00) );        // should be short date in future, to give some time for google play release
 
 //*************************************************************************
-
+/*
 bool HasAccessToSDCardPath()
 {
 #if defined(Q_OS_ANDROID)
@@ -46,7 +46,7 @@ bool HasAccessToSDCardPath()
     return true;
 #endif
 }
-
+*/
 bool GrantAccessToSDCardPath(QObject * parent)
 {
 #if defined(Q_OS_ANDROID)
@@ -57,8 +57,10 @@ bool GrantAccessToSDCardPath(QObject * parent)
     QtAndroid::PermissionResultMap result = QtAndroid::requestPermissionsSync(permissions);
     if( result.count()!=1 && result["android.permission.WRITE_EXTERNAL_STORAGE"]!=QtAndroid::PermissionResult::Granted )
 #else
+#ifdef _WITH_STORAGE_ACCESS
     QFuture<QtAndroidPrivate::PermissionResult> result = QtAndroidPrivate::requestPermission(QtAndroidPrivate::PermissionType::Storage);
     if( result.result()!=QtAndroidPrivate::PermissionResult::Authorized )
+#endif
 #endif
     {
         //QMessageBox::warning(parent, QObject::tr("Access rights problem"), QObject::tr("Can not access the path to the external storage, please enable rights in settings for this application!"));
@@ -206,6 +208,25 @@ void UnpackFiles(QObject * /*pProgress*/)
     sAsset = QString(ASSETS_SCRIPTS_DIR)+QString(DATA2_DAT);
     sOutput = QString(SCRIPTS_DIR)+QString(DATA2_DAT);
     extractAssetFile(sAsset,sOutput,false);
+/*
+    QString sOutputFileName = "/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libgnuplot_android.so";
+    QString sOutputFileName2 = "/data/data/de.mneuroth.gnuplotviewerquick/lib/arm64-v8a/libgnuplot_android_beta.so";
+
+    bool copyok1 = QFile::copy(sGnuplot, sOutputFileName);
+    bool copyok2 = QFile::copy(sGnuplot_beta, sOutputFileName2);
+qDebug() << "COPY: " << copyok1 << " " << copyok2 << endl;
+qDebug() << "src: " << sGnuplot << endl;
+qDebug() << "tag: " << sOutputFileName << endl;
+qDebug() << "src: " << sGnuplot_beta << endl;
+qDebug() << "tag: " << sOutputFileName2 << endl;
+
+    bool ok1 = QFile::setPermissions(sOutputFileName, QFile::ExeGroup|QFile::ExeOther|QFile::ExeOwner|QFile::ExeUser|QFile::permissions(sOutputFileName));
+    bool ok2 = QFile::setPermissions(sOutputFileName2, QFile::ExeGroup|QFile::ExeOther|QFile::ExeOwner|QFile::ExeUser|QFile::permissions(sOutputFileName2));
+    qDebug() << "XTRACTING gnuplot " << ok1 << " " << ok2 << endl;
+
+    qDebug() << "existing target gnuplot " << QFile::exists(sOutputFileName) << " " << QFile::exists(sOutputFileName2) << endl;
+    qDebug() << "existing source gnuplot " << QFile::exists(sGnuplot) << " " << QFile::exists(sGnuplot_beta) << endl;
+*/
 }
 
 UnpackFilesThread::UnpackFilesThread(QObject * pTarget)

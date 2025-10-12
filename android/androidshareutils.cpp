@@ -12,7 +12,7 @@
 #include <QtAndroidExtras/QAndroidJniObject>
 #else
 #include <QJniObject>
-#include <QtCore/6.2.2/QtCore/private/qandroidextras_p.h>
+#include <QtCore/6.2.3/QtCore/private/qandroidextras_p.h>
 #define QAndroidJniObject QJniObject
 #define QAndroidJniEnvironment QJniEnvironment
 #define QtAndroid QtAndroidPrivate
@@ -38,24 +38,6 @@ AndroidShareUtils* AndroidShareUtils::getInstance()
     }
 
     return mInstance;
-}
-
-bool AndroidShareUtils::isMobileGnuplotViewerInstalled()
-{
-    jboolean value = QAndroidJniObject::callStaticMethod<jboolean>("de/mneuroth/utils/QShareUtils",
-                                              "isMobileGnuplotViewerInstalled",
-                                              "()Z");
-    return value;
-}
-
-bool AndroidShareUtils::isAppInstalled(const QString &packageName)
-{
-    QAndroidJniObject jsPackageName = QAndroidJniObject::fromString(packageName);
-    jboolean value = QAndroidJniObject::callStaticMethod<jboolean>("de/mneuroth/utils/QShareUtils",
-                                              "isAppInstalled",
-                                              "(Ljava/lang/String;)Z",
-                                              jsPackageName.object<jstring>());
-    return value;
 }
 
 bool AndroidShareUtils::checkMimeTypeView(const QString &mimeType)
@@ -217,6 +199,9 @@ void AndroidShareUtils::sendFile(const QString &filePath, const QString &title, 
 
 #if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
+#else
+    QAndroidJniObject activity = QNativeInterface::QAndroidApplication::context();
+#endif
     QAndroidJniObject packageManager = activity.callObjectMethod("getPackageManager",
                                                                  "()Landroid/content/pm/PackageManager;");
     QAndroidJniObject componentName = jniIntent.callObjectMethod("resolveActivity",
@@ -227,9 +212,6 @@ void AndroidShareUtils::sendFile(const QString &filePath, const QString &title, 
         emit shareNoAppAvailable(requestId);
         return;
     }
-#else
-    // TODO qt6
-#endif
 
     if(requestId <= 0) {
         // we dont need a result if there's no requestId
@@ -326,6 +308,9 @@ void AndroidShareUtils::viewFile(const QString &filePath, const QString &title, 
 
 #if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
+#else
+    QAndroidJniObject activity = QNativeInterface::QAndroidApplication::context();
+#endif
     QAndroidJniObject packageManager = activity.callObjectMethod("getPackageManager",
                                                                  "()Landroid/content/pm/PackageManager;");
     QAndroidJniObject componentName = jniIntent.callObjectMethod("resolveActivity",
@@ -336,9 +321,6 @@ void AndroidShareUtils::viewFile(const QString &filePath, const QString &title, 
         emit shareNoAppAvailable(requestId);
         return;
     }
-#else
-    // TODO qt6
-#endif
 
     if(requestId <= 0) {
         // we dont need a result if there's no requestId
@@ -441,6 +423,9 @@ void AndroidShareUtils::editFile(const QString &filePath, const QString &title, 
 
 #if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
+#else
+    QAndroidJniObject activity = QNativeInterface::QAndroidApplication::context();
+#endif
     QAndroidJniObject packageManager = activity.callObjectMethod("getPackageManager",
                                                                  "()Landroid/content/pm/PackageManager;");
     QAndroidJniObject componentName = jniIntent.callObjectMethod("resolveActivity",
@@ -451,9 +436,6 @@ void AndroidShareUtils::editFile(const QString &filePath, const QString &title, 
         emit shareNoAppAvailable(requestId);
         return;
     }
-#else
-    // TODO qt6
-#endif
 
     // now all is ready to start the Activity:
     if(requestId <= 0) {
@@ -518,6 +500,9 @@ void AndroidShareUtils::checkPendingIntents(const QString workingDirPath)
 //AddToLog("*** checkPendingIntents "+workingDirPath);
 #if QT_VERSION < 0x060000
     QAndroidJniObject activity = QtAndroid::androidActivity();
+#else
+    QAndroidJniObject activity = QNativeInterface::QAndroidApplication::context();
+#endif
     if(activity.isValid()) {
         // create a Java String for the Working Dir Path
         QAndroidJniObject jniWorkingDir = QAndroidJniObject::fromString(workingDirPath);
@@ -531,9 +516,6 @@ void AndroidShareUtils::checkPendingIntents(const QString workingDirPath)
         return;
     }
     //qDebug() << "checkPendingIntents: Activity not valid";
-#else
-    // TODO qt6
-#endif
 }
 
 void AndroidShareUtils::setFileUrlReceived(const QString &url)

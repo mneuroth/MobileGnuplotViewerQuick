@@ -7,8 +7,8 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.1
+import QtQuick
+import QtQuick.Controls
 
 SettingsDialogForm {
 
@@ -80,15 +80,11 @@ SettingsDialogForm {
             gnuplotInvoker.fontSize = parseInt(txtGraphicsFontSize.text)
             applicationData.isUseLocalFileDialog = chbUseLocalFiledialog.checked
             settings.useToolBar = chbUseToolBar.checked
+            useToolBar = chbUseToolBar.checked
             settings.textFontSize = parseInt(txtTextFontSize.text)
             settings.showLineNumbers = chbShowLineNumbers.checked
             settings.useSyntaxHighlighter = chbUseSyntaxHighlighter.checked
-            settings.appStyle = cbxAppStyle.currentValue
-            if(cbxAppStyle.currentValue === "Material Dark") {
-                settings.isDarkStyle = true
-            } else {
-                settings.isDarkStyle = false
-            }
+            settings.appStyle = txtAppStyle.text
             settingsDialog.lblExampleText.font.pixelSize = settings.textFontSize
             var aFont = settingsDialog.lblExampleText.font
             homePage.textArea.font = aFont
@@ -112,6 +108,14 @@ SettingsDialogForm {
     btnRestoreDefaultSettings {
         onClicked: {
             restoreDefaultSettings()
+        }
+    }
+
+    Keys.onReleased: (event) => {
+                         console.log("Key "+event.key)
+        if (event.key === Qt.Key_Escape || event.key === Qt.Key_Back) {
+            event.accepted = true
+            btnCancel.clicked()
         }
     }
 }

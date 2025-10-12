@@ -85,19 +85,11 @@ public:
         //qDebug() << "checkPendingIntents " << workingDirPath;
     }
 
-    virtual bool isMobileGnuplotViewerInstalled(){
-        return false;
-    }
-
-    virtual bool isAppInstalled(const QString &packageName){
-        Q_UNUSED(packageName);
-        return false;
-    }
-
 //    virtual void openFile(const int &requestId){
 //        qDebug() << "openFile " << requestId; }
 };
 
+#ifdef _WITH_SHARING
 class ShareUtils : public QObject
 {
     Q_OBJECT
@@ -133,14 +125,12 @@ public:
     Q_INVOKABLE void editFile(const QString &filePath, const QString &title, const QString &mimeType, const int &requestId, const bool &altImpl);
     Q_INVOKABLE void checkPendingIntents(const QString workingDirPath);
 
-    Q_INVOKABLE bool isMobileGnuplotViewerInstalled();
-    Q_INVOKABLE bool isAppInstalled(const QString &packageName);
-
 //    Q_INVOKABLE void openFile(const int &requestId);
 
 private:
     PlatformShareUtils* mPlatformShareUtils;
 
 };
+#endif
 
 #endif //SHAREUTILS_H

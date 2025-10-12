@@ -8,9 +8,9 @@
  *
  ***************************************************************************/
 
-import QtQuick 2.4
-import QtQuick.Controls 2.1
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 ReplaceDialogForm {
     id: root
@@ -54,5 +54,12 @@ ReplaceDialogForm {
 
     replaceAllButton {
         onClicked: replaceAll()
+    }
+
+    Keys.onReleased: (event) => {
+        if (event.key === Qt.Key_Escape || event.key === Qt.Key_Back) {
+            event.accepted = true
+            cancelButton.clicked()
+        }
     }
 }

@@ -7,9 +7,9 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Page {
     id: root
@@ -33,7 +33,9 @@ Page {
 
     property string fontName: "Courier"
 
-    property int numberColumnWidth: 50
+    property int numberColumnWidth: 35  //org: 50
+
+    property int buttonWidth: 100
 
     Label {
         id: lblFileName
@@ -77,7 +79,7 @@ Page {
 
             Rectangle {
                 id: lineNumbersBackground
-                color: settings.isDarkStyle ? "#202020" : "light grey"  // dark theme backgroudn color: "#303030"
+                color: "light grey"
                 visible: settings.showLineNumbers
                 Layout.fillHeight: true
                 Layout.minimumWidth: numberColumnWidth
@@ -87,7 +89,6 @@ Page {
 
                 TextEdit {
                     id: textLineNumbers
-                    color: settings.isDarkStyle ? "white" : "black"
                     font.family: fontName
                     horizontalAlignment: TextEdit.AlignRight
                     readOnly: true
@@ -101,7 +102,6 @@ Page {
             // TextArea problem: if switch to readonly --> cursor and view jumps to the end of the text ???
             TextEdit/*Area*/ {
                 id: textArea
-                color: settings.isDarkStyle ? "white" : "black"
                 font.family: fontName
                 //anchors.fill: parent
                 Layout.fillWidth: true
@@ -119,6 +119,8 @@ Page {
 
     GridLayout {
         id: gridButtons
+        x: 44
+        y: 5
         height: !settings.useToolBar ? 95 : 0
         visible: !settings.useToolBar
         anchors.rightMargin: 5
@@ -135,6 +137,7 @@ Page {
             text: qsTr("Open")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -142,6 +145,7 @@ Page {
             text: qsTr("Save")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -149,6 +153,7 @@ Page {
             text: qsTr("Run")
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -156,6 +161,7 @@ Page {
             text: qsTr("Graphics")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -163,6 +169,7 @@ Page {
             text: qsTr("Help")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
 
         Button {
@@ -170,6 +177,7 @@ Page {
             text: qsTr("Output")
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.preferredWidth: buttonWidth
         }
     }
     states: [

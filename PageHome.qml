@@ -7,8 +7,8 @@
  * License: GPL
  *
  ***************************************************************************/
-import QtQuick 2.0
-import QtQuick.Controls 2.2
+import QtQuick
+import QtQuick.Controls
 
 PageHomeForm {
 
@@ -54,23 +54,31 @@ PageHomeForm {
         }
     }
 
-    function do_open_file() {
+    function do_open_file(_useMobileFileDialog) {
         if( applicationData.isWASM && !applicationData.isUseLocalFileDialog )
         {
             applicationData.getOpenFileContentAsync("*.gpt")
         }
         else
         {
-            //fileDialog.open()
-            //mobileFileDialog.open()
-            mobileFileDialog.setOpenModus()
-            if( mobileFileDialog.currentDirectory == "" )
+            if( _useMobileFileDialog )
             {
-                mobileFileDialog.currentDirectory = applicationData.homePath
+                //fileDialog.open()
+                //mobileFileDialog.open()
+                mobileFileDialog.setOpenModus()
+                if( mobileFileDialog.currentDirectory == "" )
+                {
+                    mobileFileDialog.currentDirectory = applicationData.homePath
+                }
+                mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
+                stackView.pop()
+                stackView.push(mobileFileDialog)
             }
-            mobileFileDialog.setDirectory(mobileFileDialog.currentDirectory)
-            stackView.pop()
-            stackView.push(mobileFileDialog)
+            else
+            {
+                stackView.pop()
+                stackView.push(simpleFileListDialog)
+            }
         }
     }
 
@@ -141,7 +149,7 @@ PageHomeForm {
 
     btnOpen  {
         onClicked:  {
-            do_open_file()
+            do_open_file(useMobileFileDialog)
         }
     }
 
