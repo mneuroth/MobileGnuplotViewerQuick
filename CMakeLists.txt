@@ -81,7 +81,6 @@ qt_add_qml_module(GnuplotViewerQuickQt6
 		shareutils.cpp
 
     RESOURCES
-                pico.png
                 files/empty.svg
                 files/line-chart.svg
                 files/information.svg
@@ -134,7 +133,7 @@ endif()
 qt_add_resources(GnuplotViewerQuickQt6 "app_images"
     PREFIX "/"
     FILES
-        pico.png
+        images/gnuplotviewer_flat_512x512.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
