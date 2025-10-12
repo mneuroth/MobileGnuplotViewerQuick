@@ -37,7 +37,7 @@ jobs:
       run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
     - name: Save Release URL File for publish
       if: contains(github.ref, 'release')
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: release_url
         path: release_url.txt        
@@ -107,7 +107,7 @@ jobs:
     - name: Upload Release Asset
       if: contains(github.ref, 'release')
       id: upload-release-asset
-      uses: actions/upload-release-asset@v4
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
