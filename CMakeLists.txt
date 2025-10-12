@@ -121,7 +121,6 @@ if (NOT EMSCRIPTEN)
         files/scripts/multiplot.gpt
         files/scripts/simple.gpt
         files/scripts/splot.gpt
-        files/scripts/test.gpt
         files/scripts/data.dat
         GnuplotViewerQuick_de_DE.qm
         GnuplotViewerQuick_nl_NL.qm
