@@ -158,6 +158,19 @@ if(ANDROID)
         purchasing/android/androidinapppurchasebackend.cpp purchasing/android/androidinapppurchasebackend.h
         purchasing/android/androidinapptransaction.cpp purchasing/android/androidinapptransaction.h
         purchasing/android/androidjni.cpp
+    )
+endif()
+
+if(ANDROID OR EMSCRIPTEN)
+    #set_property(TARGET QtQuickMemoApp APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    #    ${CMAKE_CURRENT_SOURCE_DIR}/purchasing/android
+    #)
+
+    target_sources(GnuplotViewerQuickQt6 PRIVATE
+#        purchasing/android/androidinappproduct.cpp purchasing/android/androidinappproduct.h
+#        purchasing/android/androidinapppurchasebackend.cpp purchasing/android/androidinapppurchasebackend.h
+#        purchasing/android/androidinapptransaction.cpp purchasing/android/androidinapptransaction.h
+#        purchasing/android/androidjni.cpp
 
 gnuplot/config.h
 gnuplot/src/alloc.h

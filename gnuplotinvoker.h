@@ -15,6 +15,8 @@
 
 #if defined(Q_OS_ANDROID)
 #define _USE_BUILTIN_GNUPLOT
+#elif defined(Q_OS_WASM)
+#define _USE_BUILTIN_GNUPLOT
 #else
 #undef _USE_BUILTIN_GNUPLOT
 #endif
