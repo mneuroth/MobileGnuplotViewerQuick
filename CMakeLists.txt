@@ -8,7 +8,7 @@ set(USE_ANDROID_TOOLS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Svg Core5Compat Widgets PrintSupport)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Svg Core5Compat Widgets PrintSupport LinguistTools)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -38,30 +38,29 @@ target_include_directories(GnuplotViewerQuickQt6 PRIVATE
 qt_add_qml_module(GnuplotViewerQuickQt6
     URI GnuplotViewerQuick
     VERSION 1.0
-    QML_FILES
-        main.qml
+        QML_FILES main.qml
         QML_FILES AboutDialog.qml
-		QML_FILES AboutDialogForm.ui.qml
-                QML_FILES MobileFileDialog.qml
-		QML_FILES MobileFileDialogForm.ui.qml
-		QML_FILES SettingsDialog.qml
-		QML_FILES SettingsDialogForm.ui.qml
-		QML_FILES SupportDialogForm.ui.qml
-		QML_FILES SupportDialog.qml
-		QML_FILES PageGraphics.qml
-		QML_FILES PageGraphicsForm.ui.qml
-		QML_FILES PageHelp.qml
-		QML_FILES PageHelpForm.ui.qml
-		QML_FILES PageHome.qml
-		QML_FILES PageHomeForm.ui.qml
-		QML_FILES PageOutput.qml
-		QML_FILES PageOutputForm.ui.qml
-		QML_FILES ReplaceDialog.qml
-		QML_FILES ReplaceDialogForm.ui.qml
-		QML_FILES FindDialog.qml
-		QML_FILES FindDialogForm.ui.qml
-                QML_FILES SaveAsDialog.qml
-                QML_FILES SaveAsDialogForm.ui.qml
+        QML_FILES AboutDialogForm.ui.qml
+        QML_FILES MobileFileDialog.qml
+        QML_FILES MobileFileDialogForm.ui.qml
+        QML_FILES SettingsDialog.qml
+        QML_FILES SettingsDialogForm.ui.qml
+        QML_FILES SupportDialogForm.ui.qml
+        QML_FILES SupportDialog.qml
+        QML_FILES PageGraphics.qml
+        QML_FILES PageGraphicsForm.ui.qml
+        QML_FILES PageHelp.qml
+        QML_FILES PageHelpForm.ui.qml
+        QML_FILES PageHome.qml
+        QML_FILES PageHomeForm.ui.qml
+        QML_FILES PageOutput.qml
+        QML_FILES PageOutputForm.ui.qml
+        QML_FILES ReplaceDialog.qml
+        QML_FILES ReplaceDialogForm.ui.qml
+        QML_FILES FindDialog.qml
+        QML_FILES FindDialogForm.ui.qml
+        QML_FILES SaveAsDialog.qml
+        QML_FILES SaveAsDialogForm.ui.qml
     SOURCES
 		applicationdata.h
 		applicationdata.cpp
@@ -111,6 +110,19 @@ qt_add_qml_module(GnuplotViewerQuickQt6
         #RESOURCES android/AndroidManifest.xml android/build.gradle android/res/values/libs.xml android/res/xml/qtprovider_paths.xml android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.properties android/gradle.properties android/gradlew android/gradlew.bat
 )
 
+# set(TS_FILES
+#     GnuplotViewerQuick_de_DE.ts
+#     GnuplotViewerQuick_es_ES.ts
+#     GnuplotViewerQuick_fr_FR.ts
+#     GnuplotViewerQuick_nl_NL.ts
+# )
+
+# qt_add_lupdate(GnuplotViewerQuickQt6
+#     TS_FILES ${TS_FILES}
+#     SOURCES main.cpp qml.qrc
+#     TARGET_NAME GnuplotViewerQuickQt6_lupdate
+# )
+
 if (NOT EMSCRIPTEN)
     qt6_add_resources(GnuplotViewerQuickQt6 "resources"
         PREFIX "/"
@@ -122,6 +134,9 @@ if (NOT EMSCRIPTEN)
         files/scripts/simple.gpt
         files/scripts/splot.gpt
         files/scripts/data.dat
+        files/faq.txt
+        files/gnuplotviewer_license.txt
+        files/gnuplot_copyright
         GnuplotViewerQuick_de_DE.qm
         GnuplotViewerQuick_nl_NL.qm
         GnuplotViewerQuick_es_ES.qm

@@ -291,7 +291,7 @@ MobileFileDialogForm {
 
     btnOpen  {
         onClicked: {
-            console.log("open")
+            //console.log("open")
             if( root.isDeleteModus )
             {
                 root.deleteCurrentFileNow()

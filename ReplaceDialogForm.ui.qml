@@ -183,7 +183,7 @@ Page {
 
                 Button {
                     id: cancelButton
-                    text: qsTr("Close")
+                    text: qsTr("Cancel")
                     Layout.preferredWidth: defaultButtonWidth
                     Layout.preferredHeight: defaultButtonHeight
                 }

@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
         }
     }
 
+#if defined(Q_OS_ANDROID)
     QString targetDir = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
     QDir().mkpath(targetDir); // Verzeichnis erstellen, falls nicht vorhanden
     QString targetPath = targetDir + "/scripts";
@@ -137,6 +138,10 @@ int main(int argc, char *argv[])
     copyResourceToFileSystem(":files/scripts/multiplot.gpt", "scripts/multiplot.gpt");
     copyResourceToFileSystem(":files/scripts/butterfly.gpt", "scripts/butterfly.gpt");
     copyResourceToFileSystem(":files/scripts/data.dat", "scripts/data.dat");
+    copyResourceToFileSystem(":files/faq.txt", "faq.txt");
+    copyResourceToFileSystem(":files/gnuplotviewer_license.txt", "gnuplotviewer_license.txt");
+    copyResourceToFileSystem(":files/gnuplot_copyright", "gnuplot_copyright");
+#endif
 
     QQmlApplicationEngine engine;
     const QUrl url(u"qrc:/qt/qml/GnuplotViewerQuick/main.qml"_qs);

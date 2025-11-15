@@ -62,7 +62,7 @@ ApplicationWindow {
 
     Component.onDestruction: {
 // TODO PATCH -> wird diese funktion in Qt 6 Android aufgerufen?
-        console.log("DESTRUCTION: "+homePage.currentFileUrl)
+        //console.log("DESTRUCTION: "+homePage.currentFileUrl)
         settings.currentFile = homePage.currentFileUrl
         settings.useGnuplotBeta = gnuplotInvoker.useBeta
         settings.syncXandYResolution = gnuplotInvoker.syncXandYResolution
@@ -81,8 +81,8 @@ ApplicationWindow {
 
     Component.onCompleted: {
         homePage.currentFileUrl = settings.currentFile
-        addToOutput("loading: "+settings.currentFile+"\n")
-        console.log("loading: "+settings.currentFile+"\n")
+        //addToOutput("loading: "+settings.currentFile+"\n")
+        //console.log("loading: "+settings.currentFile+"\n")
         if( settings.currentFont !== null )
         {
             homePage.textArea.font = settings.currentFont
@@ -98,24 +98,23 @@ ApplicationWindow {
 
         if(homePage.currentFileUrl.length>0)
         {
-            console.log("URL: "+homePage.currentFileUrl)
+            //console.log("URL: "+homePage.currentFileUrl)
             readCurrentDoc(homePage.currentFileUrl)
         }
 
         // after changing the syntax highlighter the document is not changed !
         Qt.callLater( function () { applicationData.setSyntaxHighlighting(settings.useSyntaxHighlighter); homePage.removeModifiedFlag() } )    // Fires also a text change !
 
-        console.log("use tooblar:"+settings.useToolBar)
+        //console.log("use tooblar:"+settings.useToolBar)
         useToolBar = settings.useToolBar
 
-        myStoreId.restorePurchases()
-        console.log("tried to restore purchases from store ... "+myStoreId)
+        Qt.callLater( function () { myStoreId.restorePurchases() /*; console.log("tried to restore purchases from store ... "+myStoreId)*/ } )
 
         if (Qt.platform.os === "android") {
-            addToLog("\nComponent.onCompleted... "+QtAndroidTools+" "+QtAndroidSharing+" activity:"+QtAndroidTools.activityAction)
-            addToLog("\nSEND="+QtAndroidTools.ACTION_SEND+" PICK="+QtAndroidTools.ACTION_PICK+" NONE="+QtAndroidTools.ACTION_NONE)
-            addToLog("\nMimeTyp: "+QtAndroidTools.activityMimeType)
-            addToLog("\nrecv TXT: "+QtAndroidSharing.getReceivedSharedText())
+            //addToLog("\nComponent.onCompleted... "+QtAndroidTools+" "+QtAndroidSharing+" activity:"+QtAndroidTools.activityAction)
+            //addToLog("\nSEND="+QtAndroidTools.ACTION_SEND+" PICK="+QtAndroidTools.ACTION_PICK+" NONE="+QtAndroidTools.ACTION_NONE)
+            //addToLog("\nMimeTyp: "+QtAndroidTools.activityMimeType)
+            //addToLog("\nrecv TXT: "+QtAndroidSharing.getReceivedSharedText())
 
             if(QtAndroidTools.activityAction !== QtAndroidTools.ACTION_NONE)
             {
@@ -124,19 +123,19 @@ ApplicationWindow {
                     if(QtAndroidTools.activityMimeType === "text/plain")
                     {
                         //addToLog("STARTING editing with received text")
-                        Qt.callLater( function () { /*cancelTextEdit();*/ setScriptText(QtAndroidSharing.getReceivedSharedText()) } )
+                        Qt.callLater( function () { /*cancelTextEdit();*/ setScriptText(QtAndroidSharing.getReceivedSharedText()); setScriptName("received_file.txt") } )
                     }
                 }
                 //addToLog("Android Acitivty Started... "+QtAndroidTools.activityAction)
                 //addToLog("TEXT received: "+QtAndroidSharing.getReceivedSharedText())
             }
         }
-        console.log("HOME_PATH: "+applicationData.homePath)
-        console.log("SCRIPTS_PATH: "+applicationData.scriptsPath)
-        console.log("FolderModel Path: "+folderModel.folder)
-        addToOutput("HOME_PATH: "+applicationData.homePath+"\n")
-        addToOutput("SCRIPTS_PATH: "+applicationData.scriptsPath+"\n")
-        addToOutput("FolderModel Path: "+folderModel.folder+"\n")
+        //console.log("HOME_PATH: "+applicationData.homePath)
+        //console.log("SCRIPTS_PATH: "+applicationData.scriptsPath)
+        //console.log("FolderModel Path: "+folderModel.folder)
+        //addToOutput("HOME_PATH: "+applicationData.homePath+"\n")
+        //addToOutput("SCRIPTS_PATH: "+applicationData.scriptsPath+"\n")
+        //addToOutput("FolderModel Path: "+folderModel.folder+"\n")
     }
 
     onClosing: (close) => {
@@ -162,7 +161,7 @@ ApplicationWindow {
     }
 
     function setFileName(fileUri, decodedFileUri) {
-        console.log("*** setFileName: "+fileUri+ " "+ decodedFileUri)
+        //console.log("*** setFileName: "+fileUri+ " "+ decodedFileUri)
         homePage.currentFileUrl = fileUri       // PATCH
         homePage.lblFileName.text = applicationData.getOnlyFileName(fileUri)    // PATCH
         currentFileName = fileUri
@@ -253,6 +252,7 @@ ApplicationWindow {
                stackView.currentItem === settingsDialog ||
                stackView.currentItem === findDialog ||
                stackView.currentItem === replaceDialog ||
+               stackView.currentItem === simpleFileListDialog ||
                otherChecks
     }
 
@@ -328,11 +328,11 @@ ApplicationWindow {
         checkForModified()
         // then read new document
         var urlFileName = buildValidUrl(url)
-        console.log("*** ReadCurrentDoc: "+url+ " "+urlFileName)
+        //console.log("*** ReadCurrentDoc: "+url+ " "+urlFileName)
         homePage.currentFileUrl = urlFileName
         settings.currentFile = urlFileName          // PATCH
-        addToOutput("readCurrentDoc="+urlFileName)
-        console.log("readCurrentDoc="+urlFileName+" url: "+url)
+        //addToOutput("readCurrentDoc="+urlFileName)
+        //console.log("readCurrentDoc="+urlFileName+" url: "+url)
         // do not update content of edit control in the case of an error !
         var content = applicationData.readFileContent(urlFileName)
         if( content !== applicationData.errorContent)
@@ -364,7 +364,8 @@ ApplicationWindow {
 
     function showFileContentInOutput(sOnlyFileName) {
         var sFileName = applicationData.filesPath + sOnlyFileName
-        var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
+        //var sContent = applicationData.readFileContent(buildValidUrl(sFileName))
+        var sContent = applicationData.readFileContent((sFileName))
         if( sContent !== applicationData.errorContent)
         {
             showInOutput(sContent, true)
@@ -555,13 +556,13 @@ ApplicationWindow {
         settingsDialog.chbSyncXAndYResolution.checked = gnuplotInvoker.syncXandYResolution
         settingsDialog.txtGraphicsFontSize.text = gnuplotInvoker.fontSize
         settingsDialog.txtTextFontSize.text = settings.textFontSize
-        settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
+        //settingsDialog.chbUseGnuplotBeta.checked = gnuplotInvoker.useBeta
         settingsDialog.chbUseToolBar.checked = settings.useToolBar
         settingsDialog.chbUseSyntaxHighlighter.checked = settings.useSyntaxHighlighter
         settingsDialog.chbShowLineNumbers.checked = settings.showLineNumbers
         settingsDialog.chbUseLocalFiledialog.checked = applicationData.isUseLocalFileDialog
         settingsDialog.lblExampleText.font = homePage.textArea.font
-        settingsDialog.txtAppStyle.text = settings.appStyle
+        //settingsDialog.txtAppStyle.text = settings.appStyle
 
         stackView.pop()
         stackView.push(settingsDialog)
@@ -574,7 +575,7 @@ ApplicationWindow {
         settingsDialog.chbSyncXAndYResolution.checked = true
         settingsDialog.txtGraphicsFontSize.text = 28
         settingsDialog.txtTextFontSize.text = 14
-        settingsDialog.chbUseGnuplotBeta.checked = false
+        //settingsDialog.chbUseGnuplotBeta.checked = false
         settingsDialog.chbUseToolBar.checked = false
         settingsDialog.chbUseSyntaxHighlighter.checked = true
         settingsDialog.chbShowLineNumbers.checked = true
@@ -609,87 +610,6 @@ ApplicationWindow {
                 id: menu
                 //y: menuButton.height
 
-                Menu {
-                    id: menuSend
-                    title: qsTr("Send")
-                    enabled: isShareSupported
-                    //visible: isShareSupported
-                    //height: isShareSupported ? aboutMenuItem.height : 0
-
-                    MenuItem {
-                        text: qsTr("Send")
-                        icon.source: "files/share.svg"
-                        enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
-                        //visible: isShareSupported
-                        //height: isShareSupported ? aboutMenuItem.height : 0
-                        onTriggered: {
-                            var s = getCurrentText(stackView.currentItem)
-                            startShareText(s)
-                            //var tempFileName = getTempFileNameForCurrent(stackView.currentItem)
-                            //applicationData.shareText(tempFileName, s)
-                        }
-                    }
-                    MenuItem {
-                        id: shareText
-                        text: qsTr("Send as text")
-                        icon.source: "files/share.svg"
-                        enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
-                        //visible: isShareSupported
-                        //height: isShareSupported ? aboutMenuItem.height : 0
-                        onTriggered: {
-                            var s = getCurrentText(stackView.currentItem)
-                            startShareText(s)
-                            //applicationData.shareSimpleText(s);
-                        }
-                    }
-                    MenuItem {
-                        id: sharePng
-                        text: qsTr("Send as PDF/PNG")
-                        icon.source: "files/share.svg"
-                        enabled: !isDialogOpen() /*&& isCurrentUserSupporter()*/
-                        //visible: isShareSupported
-                        //height: isShareSupported ? aboutMenuItem.height : 0
-                        onTriggered: {
-                            if( isGraphicsPage(stackView.currentItem) )
-                            {
-                                var ok = applicationData.shareSvgData(graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
-                            }
-                            else
-                            {
-                                var s = getCurrentText(stackView.currentItem)
-                                if( s.length > 0 )
-                                {
-                                    applicationData.shareTextAsPdf(s, true)
-                                }
-                            }
-                        }
-                    }
-                    MenuItem {
-                        text: qsTr("View as PDF/PNG")
-                        icon.source: "files/share.svg"
-                        enabled: !isDialogOpen()
-                        //visible: isShareSupported
-                        //height: isShareSupported ? aboutMenuItem.height : 0
-                        onTriggered: {
-                            if( isGraphicsPage(stackView.currentItem) )
-                            {
-                                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
-                            }
-                            else
-                            {
-                                var s = getCurrentText(stackView.currentItem)
-                                if( s.length > 0 )
-                                {
-                                    applicationData.shareTextAsPdf(s, false)
-                                }
-                            }
-                        }
-                    }
-                }
-                MenuSeparator {
-                    //visible: isShareSupported
-                    //height: isShareSupported ? menuSeparator.height : 0
-                }
                 MenuItem {
                     text: qsTr("Writable")
                     icon.source: "files/edit.svg"
@@ -751,8 +671,11 @@ ApplicationWindow {
                     text: qsTr("Export file")
                     enabled: !isDialogOpen()
                     onTriggered: {
+                        console.log("EXPORT")
                         fileDialog.fileMode = FileDialog.SaveFile
                         fileDialog.open()
+                        fileDialog.currentFile = "export.txt"
+                        //fileDialog.file = "xyz.txt"
                     }
                 }
                 MenuItem {
@@ -841,6 +764,83 @@ ApplicationWindow {
                         onTriggered: toolButtonNext.clicked()
                     }
                 }
+                Menu {
+                    id: menuSend
+                    title: qsTr("Send")
+                    enabled: isShareSupported
+                    //visible: isShareSupported
+                    //height: isShareSupported ? aboutMenuItem.height : 0
+
+                    MenuItem {
+                        text: qsTr("Send")
+                        icon.source: "files/share.svg"
+                        enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            var s = getCurrentText(stackView.currentItem)
+                            startShareText(s)
+                            //var tempFileName = getTempFileNameForCurrent(stackView.currentItem)
+                            //applicationData.shareText(tempFileName, s)
+                        }
+                    }
+                    MenuItem {
+                        id: shareText
+                        text: qsTr("Send as text")
+                        icon.source: "files/share.svg"
+                        enabled: stackView.currentItem !== graphicsPage && !isDialogOpen()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            var s = getCurrentText(stackView.currentItem)
+                            startShareText(s)
+                            //applicationData.shareSimpleText(s);
+                        }
+                    }
+                    MenuItem {
+                        id: sharePng
+                        text: qsTr("Send as PDF/PNG")
+                        icon.source: "files/share.svg"
+                        enabled: !isDialogOpen() /*&& isCurrentUserSupporter()*/
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            if( isGraphicsPage(stackView.currentItem) )
+                            {
+                                var ok = applicationData.shareSvgData(graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
+                            }
+                            else
+                            {
+                                var s = getCurrentText(stackView.currentItem)
+                                if( s.length > 0 )
+                                {
+                                    applicationData.shareTextAsPdf(s, true)
+                                }
+                            }
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("View as PDF/PNG")
+                        icon.source: "files/share.svg"
+                        enabled: !isDialogOpen()
+                        //visible: isShareSupported
+                        //height: isShareSupported ? aboutMenuItem.height : 0
+                        onTriggered: {
+                            if( isGraphicsPage(stackView.currentItem) )
+                            {
+                                var ok = applicationData.shareViewSvgData(graphicsPage.svgdata, gnuplotInvoker.resolutionX, gnuplotInvoker.resolutionY)
+                            }
+                            else
+                            {
+                                var s = getCurrentText(stackView.currentItem)
+                                if( s.length > 0 )
+                                {
+                                    applicationData.shareTextAsPdf(s, false)
+                                }
+                            }
+                        }
+                    }
+                }
                 MenuSeparator {
                     id: menuSeparator
                 }
@@ -880,19 +880,19 @@ ApplicationWindow {
                     MenuItem {
                         text: qsTr("FAQ")
                         onTriggered: {
-                            showFileContentInOutput("faq.txt")
+                            showFileContentInOutput("/faq.txt")
                         }
                     }
                     MenuItem {
                         text: qsTr("License")
                         onTriggered: {
-                            showFileContentInOutput("gnuplotviewer_license.txt")
+                            showFileContentInOutput("/gnuplotviewer_license.txt")
                         }
                     }
                     MenuItem {
                         text: qsTr("Gnuplot license")
                         onTriggered: {
-                            showFileContentInOutput("gnuplot_copyright")
+                            showFileContentInOutput("/gnuplot_copyright")
                         }
                     }
                     MenuItem {
@@ -939,6 +939,7 @@ ApplicationWindow {
                         stackView.push(aboutDialog)                        
                     }
                 }
+                /*
                 MenuItem {
                     id: toggleAdminMenuItem
                     text: qsTr("Admin Modus")
@@ -949,18 +950,27 @@ ApplicationWindow {
                         console.log("admin mode:"+toggleAdminMenuItem.checked)
                     }
                 }
-
+                */
+                /*
                 MenuItem {
                     id: testMenuItem
                     text: qsTr("TEST")
                     enabled: !isDialogOpen()
                     onTriggered: {
-                        homePage.do_open_file(/*useMobileFileDialog*/true)
+                        homePage.do_open_file(true)  // useMobileFileDialog=
                         //stackView.pop()
                         //stackView.push(simpleFileListDialog)
                     }
                 }
-
+                */
+                MenuItem {
+                    id: testMenuItem
+                    text: qsTr("Restore Purchase")
+                    enabled: !isDialogOpen()
+                    onTriggered: {
+                        myStoreId.restorePurchases()
+                    }
+                }
                 /* for testing...
                 MenuItem {
                     text: qsTr("WASM Open")
@@ -1119,8 +1129,30 @@ ApplicationWindow {
                 width: height
                 enabled: (stackView.currentItem === homePage) && !isDialogOpen()
                 //text: "Open"
+
+                // Timer zur Verzögerung des einfachen Klicks
+                Timer {
+                    id: clickTimer
+                    interval: 250 // Zeitfenster für DoubleClick-Erkennung (ms)
+                    repeat: false
+                    onTriggered: {
+                        homePage.do_open_file(useMobileFileDialog)
+                        clickTimer.stop()
+                    }
+                }
+
+                onDoubleClicked: {
+                    //console.log("DOUBLE!")
+                    if (clickTimer.running) {
+                        clickTimer.stop()
+                    }
+
+                    homePage.do_open_file(true)
+                }
                 onClicked: {
-                    homePage.do_open_file(useMobileFileDialog)
+                    console.log("SINGLE!")
+                    clickTimer.start()
+                    //homePage.do_open_file(useMobileFileDialog)
                 }
             }
             ToolButton {
@@ -1139,7 +1171,7 @@ ApplicationWindow {
                 icon.source: "files/close.svg"
                 height: iconSize
                 width: height
-                enabled: menuClear.enabled
+                enabled: (stackView.currentItem === homePage) && menuClear.enabled
                 //text: "Clear"
                 onClicked: {
                     menuClear.clicked()
@@ -1505,8 +1537,6 @@ ApplicationWindow {
                     MouseArea {
                          anchors.fill: parent
                          onClicked: {
-                             console.log("Geklickt:", fileURL)
-                             // Optional: Signal auslösen oder Funktion aufrufen
                              processOpenFileCallback(fileURL)
                              stackView.pop()
                          }
@@ -1520,7 +1550,7 @@ ApplicationWindow {
                     onClicked: {
                         fileToDelete = fileURL
                         askForDeleteFile.open()
-                        console.log("folder: "+folderModel.folder)
+                        //console.log("folder: "+folderModel.folder)
                     }
                 }
                 Button {
@@ -1529,7 +1559,7 @@ ApplicationWindow {
                     Layout.maximumWidth: 20
                     width: 20
                     onClicked: {
-                        console.log("EXPORT Geklickt:", fileURL)
+                        //console.log("EXPORT Geklickt:", fileURL)
                         fileDialog.fileMode = FileDialog.SaveFile
                         fileDialog.open()
                     }
@@ -1652,7 +1682,7 @@ ApplicationWindow {
         //standardButtons: StandardButton.Ok
         buttons: DialogP.MessageDialog.Ok
         onAccepted: {
-            console.log("Close error msg")
+            //console.log("Close error msg")
         }
     }
 
@@ -1724,7 +1754,7 @@ ApplicationWindow {
         buttons: DialogP.MessageDialog.Yes | DialogP.MessageDialog.No
         onYesClicked: {
             var ok = applicationData.deleteFile(fileToDelete)
-            console.log("ok? -> "+ok)
+            //console.log("ok? -> "+ok)
         }
         onNoClicked: {
             // do nothing
@@ -1742,11 +1772,9 @@ ApplicationWindow {
             } else {
                 processSaveFileCallback(fileName)
             }
-
-
         }
         onRejected: {
-            console.log("File selection canceled")
+            //console.log("File selection canceled")
         }
     }
 
@@ -1961,7 +1989,7 @@ ApplicationWindow {
         function onAccepted() {
             stackView.pop()
             var fileName = applicationData.scriptsPath + "/" + saveAsPage.saveAsInput.text
-            console.log("SAVE AS: "+fileName)
+            //console.log("SAVE AS: "+fileName)
             processSaveFileCallback(fileName)
         }
     }
@@ -1978,7 +2006,7 @@ ApplicationWindow {
         target: applicationData
 
         function onSendDummyData(txt, value) {
-            console.log("========> Dummy Data !!! "+txt+" "+value)
+            //console.log("========> Dummy Data !!! "+txt+" "+value)
         }
 
         function onShowErrorMsg(message) {
@@ -2055,7 +2083,7 @@ ApplicationWindow {
         }
         function onOpenSelectedFile(fileName) {
             //addToOutput("openSelectedFile="+fileName)
-            console.log("*** openSelectedFile="+fileName)
+            //console.log("*** openSelectedFile="+fileName)
             processOpenFileCallback(fileName)
         }
         function onDeleteSelectedFile(fileName) {

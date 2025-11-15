@@ -39,13 +39,13 @@ Page {
     property alias txtSupportLevel: txtSupportLevel
     property alias lblSupportLevel: lblSupportLevel
     property alias btnSelectFont: btnSelectFont
-    property alias chbUseGnuplotBeta: chbUseGnuplotBeta
+    //property alias chbUseGnuplotBeta: chbUseGnuplotBeta
     property alias chbUseToolBar: chbUseToolBar
     property alias chbUseSyntaxHighlighter: chbUseSyntaxHighlighter
     property alias chbShowLineNumbers: chbShowLineNumbers
     property alias chbUseLocalFiledialog: chbUseLocalFiledialog
     property alias chbSyncXAndYResolution: chbSyncXAndYResolution
-    property alias txtAppStyle: txtAppStyle
+    //property alias txtAppStyle: txtAppStyle
 
     ScrollView {
         id: scrollView
@@ -64,12 +64,12 @@ Page {
             id: layout
             Layout.preferredHeight: 50
 
-            CheckBox {
-                id: chbUseGnuplotBeta
-                enabled: /*not available for embedded gnuplot*/false && settings.supportLevel>=0
-                text: qsTr("Use latest Gnuplot (beta) version")
-                Layout.preferredHeight: defaultButtonHeight
-            }
+            //CheckBox {
+            //    id: chbUseGnuplotBeta
+            //    enabled: /*not available for embedded gnuplot*/false && settings.supportLevel>=0
+            //    text: qsTr("Use latest Gnuplot (beta) version")
+            //    Layout.preferredHeight: defaultButtonHeight
+            //}
 
             CheckBox {
                 id: chbShowLineNumbers
@@ -178,7 +178,7 @@ Page {
                     anchors.verticalCenter: txtGraphicsFontSize.verticalCenter
                 }
             }
-
+            /*
             Row {
                 id: rowAppStyle
                 spacing: 5
@@ -205,7 +205,7 @@ Page {
                     anchors.verticalCenter: txtAppStyle.verticalCenter
                 }
             }
-
+            */
             Row {
                 id: rowTextFontSize
                 spacing: 5

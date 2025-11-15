@@ -35,7 +35,7 @@ AboutDialogForm {
     }
 
     Keys.onReleased: (event) => {
-        console.log("ABOUT Key "+event.key)
+        //console.log("ABOUT Key "+event.key)
         if (event.key === Qt.Key_Escape || event.key === Qt.Key_Back) {
             event.accepted = true
             bntClose.clicked()

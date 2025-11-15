@@ -112,7 +112,7 @@ SettingsDialogForm {
     }
 
     Keys.onReleased: (event) => {
-                         console.log("Key "+event.key)
+        //console.log("Key "+event.key)
         if (event.key === Qt.Key_Escape || event.key === Qt.Key_Back) {
             event.accepted = true
             btnCancel.clicked()
